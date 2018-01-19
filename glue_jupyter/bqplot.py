@@ -6,6 +6,11 @@ from IPython.display import display
 import ipywidgets as widgets
 import numpy as np
 
+import ipywidgets.widgets.trait_types as tt
+# FIXME: monkey patch ipywidget to accept anything
+tt.Color.validate = lambda self, obj, value: value
+
+
 from . import IPyWidgetView
 
 def _is_traitlet(link):
@@ -39,10 +44,10 @@ class link(object):
         if sync_directly:
             sync()
 
-def convert_color(color):
-    #if color == 'green':
-    #    return color
-    return '#777'
+# def convert_color(color):
+#     #if color == 'green':
+#     #    return color
+#     return '#777'
 
 class BqplotScatterLayerArtist(LayerArtistBase):
     _layer_state_cls = ScatterLayerState
@@ -58,7 +63,7 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self.scatter = bqplot.Scatter(
             scales=self.view.scales, x=[0, 1], y=[0, 1])
         self.view.figure.marks = list(self.view.figure.marks) + [self.scatter]
-        link((self.scatter, 'colors'), (self.state, 'color'), lambda x: x[0], lambda x: [convert_color(x)])
+        link((self.scatter, 'colors'), (self.state, 'color'), lambda x: x[0], lambda x: [x])
         link((self.scatter, 'default_opacities'), (self.state, 'alpha'), lambda x: x[0], lambda x: [x])
         link((self.scatter, 'default_size'), (self.state, 'size'))
 
