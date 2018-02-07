@@ -70,6 +70,7 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         link((self.scatter, 'colors'), (self.state, 'color'), lambda x: x[0], lambda x: [x])
         link((self.scatter, 'default_opacities'), (self.state, 'alpha'), lambda x: x[0], lambda x: [x])
         link((self.scatter, 'default_size'), (self.state, 'size'))
+        self.scatter.observe(self._workaround_unselected_style, 'colors')
 
         viewer_state.add_callback('x_att', self._update_xy_att)
         viewer_state.add_callback('y_att', self._update_xy_att)
@@ -85,6 +86,12 @@ class BqplotScatterLayerArtist(LayerArtistBase):
 
     def clear(self):
         pass
+
+    def _workaround_unselected_style(self, change):
+        # see https://github.com/bloomberg/bqplot/issues/606
+        if hasattr(self.layer, 'to_mask'):  # TODO: what is the best way to test if it is Data or Subset?
+            self.scatter.unselected_style = {'fill': 'white', 'stroke': 'none'}
+            self.scatter.unselected_style = {'fill': 'none', 'stroke': 'none'}
 
     def update(self):
         self.scatter.x = self.layer.data[self._viewer_state.x_att]
