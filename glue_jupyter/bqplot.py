@@ -121,7 +121,7 @@ class BqplotScatterView(IPyWidgetView):
         self.interact_map['brush'] = self.brush
         self.brush.observe(self.update_brush, "brushing")
 
-        self.button_action = widgets.ToggleButtons(description='', options=[(action, action) for action in actions],
+        self.button_action = widgets.ToggleButtons(description='Mode: ', options=[(action, action) for action in actions],
                                                    icons=["arrows", "pencil-square-o"])
         self.button_action.observe(self.change_action, "value")
         self.change_action()  # 'fire' manually for intial value

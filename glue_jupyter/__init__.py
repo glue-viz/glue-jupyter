@@ -1,6 +1,10 @@
 from glue.core import message as msg
 from glue.core.application_base import ViewerBase
 from glue.core.layer_artist import LayerArtistContainer
+from glue.core.edit_subset_mode import (EditSubsetMode, OrMode, AndNotMode,
+                                        AndMode, XorMode, ReplaceMode)
+from IPython.display import display
+import ipywidgets as widgets
 # from glue.core.session import Session
 # from glue.viewers.scatter.layer_artist import ScatterLayerArtist
 
@@ -30,6 +34,19 @@ class JupyterApplication(Application):
 
     def __init__(self, data_collection=None, session=None):
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
+        self.selection_modes = [('replace', ReplaceMode), ('add', OrMode), ('and', AndMode), ('xor', XorMode), ('remove', AndNotMode)]
+        self.widget_selection_mode = widgets.ToggleButtons(
+            options=[label for label, mode in self.selection_modes],
+            description='Selection mode:',
+            disabled=False,
+            tooltips=[label for label, mode in self.selection_modes],
+        )
+        self.widget = widgets.VBox(children=[self.widget_selection_mode])
+        self.widget_selection_mode.observe(self._set_selection_mode, 'index')
+        display(self.widget)
+
+    def _set_selection_mode(self, change):
+        EditSubsetMode().mode = self.selection_modes[change.new][1]
 
     def add_widget(self, widget, label=None, tab=None):
         pass
@@ -56,6 +73,9 @@ class JupyterApplication(Application):
 
     def subset(self, name, state):
         return self.data_collection.new_subset_group(name, state)
+
+    def _update_undo_redo_enabled(self):
+        pass  # TODO: if we want a gui for this, we need to update it here
 
 
 class IPyWidgetLayerArtistContainer(LayerArtistContainer):
