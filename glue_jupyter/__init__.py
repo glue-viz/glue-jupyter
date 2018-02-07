@@ -92,6 +92,7 @@ class IPyWidgetView(ViewerBase):
     def __init__(self, session):
         super(IPyWidgetView, self).__init__(session)
 
+    # TODO: a lot of this comes from DataViewerWithState
     def register_to_hub(self, hub):
         super(IPyWidgetView, self).register_to_hub(hub)
 
@@ -107,16 +108,16 @@ class IPyWidgetView(ViewerBase):
                       handler=self._remove_subset,
                       filter=self._has_data_or_subset)
 
-        # hub.subscribe(self, msg.NumericalDataChangedMessage,
-        #               handler=self._update_data,
-        #               filter=self._has_data_or_subset)
+        hub.subscribe(self, msg.NumericalDataChangedMessage,
+                      handler=self._update_data,
+                      filter=self._has_data_or_subset)
 
         # hub.subscribe(self, msg.DataCollectionDeleteMessage,
         #               handler=self._remove_data)
 
-        # hub.subscribe(self, msg.ComponentsChangedMessage,
-        #               handler=self._update_data,
-        #               filter=self._has_data_or_subset)
+        hub.subscribe(self, msg.ComponentsChangedMessage,
+                      handler=self._update_data,
+                      filter=self._has_data_or_subset)
 
         # hub.subscribe(self, msg.SettingsChangeMessage,
         #               self._update_appearance_from_settings,
@@ -149,4 +150,15 @@ class IPyWidgetView(ViewerBase):
     def get_layer_artist(self, cls, layer=None, layer_state=None):
         return cls(self, self.state, layer=layer, layer_state=layer_state)
 
+    def _update_data(self, message):
+        print('update data', message)
+        if message.data in self._layer_artist_container:
+            for layer_artist in self._layer_artist_container:
+                if isinstance(layer_artist.layer, Subset):
+                    if layer_artist.layer.data is message.data:
+                        layer_artist.update()
+                else:
+                    if layer_artist.layer is message.data:
+                        layer_artist.update()
+            self.redraw()
 
