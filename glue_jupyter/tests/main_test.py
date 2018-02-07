@@ -56,6 +56,11 @@ def test_scatter2d_subset(app, dataxyz, dataxz):
     assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
     assert s.layers[1].scatter.selected == [2]
 
+    s.state.y_att = 'z'
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
+    assert s.layers[1].scatter.selected == [2]
+
 def test_scatter2d_brush(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     # format is (x1, y1), (x2, y2)
@@ -90,8 +95,8 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.state.x_max == 3
     assert s.state.y_min == 2
     assert s.state.y_max == 4
-    # assert s.state.z_min == 5
-    # assert s.state.z_max == 7
+    assert s.state.z_min == 5
+    assert s.state.z_max == 7
 
     app.subset('test', dataxyz.id['x'] > 2)
     assert len(s.layers)
@@ -99,6 +104,16 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.layers[1].layer['y'].tolist() == [4]
     assert s.layers[1].layer['z'].tolist() == [7]
 
-    assert s.layers[1].scatter.x.tolist() == [3]
-    assert s.layers[1].scatter.y.tolist() == [4]
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.z.tolist() == [5, 6, 7]
+    assert s.layers[1].scatter.selected == [2]
+
+    s.state.x_att = 'y'
+    s.state.y_att = 'z'
+    s.state.z_att = 'x'
+    assert s.layers[1].scatter.x.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
+    assert s.layers[1].scatter.z.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.selected == [2]
 

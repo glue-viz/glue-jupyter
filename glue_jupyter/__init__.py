@@ -67,8 +67,10 @@ class JupyterApplication(Application):
         view = self.new_data_viewer(IpyvolumeScatterView, data=data)
         x = data.id[x]
         y = data.id[y]
+        z = data.id[z]
         view.state.x_att = x
         view.state.y_att = y
+        view.state.z_att = z
         return view
 
     def subset(self, name, state):
