@@ -71,6 +71,12 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         link((self.scatter, 'default_opacities'), (self.state, 'alpha'), lambda x: x[0], lambda x: [x])
         link((self.scatter, 'default_size'), (self.state, 'size'))
 
+        viewer_state.add_callback('x_att', self._update_xy_att)
+        viewer_state.add_callback('y_att', self._update_xy_att)
+
+    def _update_xy_att(self, *args):
+        self.update()
+
     def redraw(self):
         pass
         self.update()
@@ -107,13 +113,20 @@ class BqplotScatterView(IPyWidgetView):
         super(BqplotScatterView, self).__init__(session)
         # session.hub.subscribe(self, SubsetCreateMessage,
         #                       handler=self.receive_message)
+        self.state = self._state_cls()
+
         self.scale_x = bqplot.LinearScale(min=0, max=1)
         self.scale_y = bqplot.LinearScale(min=0, max=1)
         self.scales = {'x': self.scale_x, 'y': self.scale_y}
         self.axis_x = bqplot.Axis(
-            scale=self.scale_x, grid_lines='solid', label='X')
+            scale=self.scale_x, grid_lines='solid', label='x')
         self.axis_y = bqplot.Axis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
-                                  grid_lines='solid', label='Y')
+                                  grid_lines='solid', label='y')
+        def update_axes(*ignore):
+            self.axis_x.label = str(self.state.x_att)
+            self.axis_y.label = str(self.state.y_att)
+        self.state.add_callback('x_att', update_axes)
+        self.state.add_callback('y_att', update_axes)
         self.figure = bqplot.Figure(scales=self.scales, axes=[
                                     self.axis_x, self.axis_y])
         
@@ -134,7 +147,6 @@ class BqplotScatterView(IPyWidgetView):
         self.main_box = widgets.VBox(children=[self.button_box, self.figure])
         
 
-        self.state = self._state_cls()
 
 #         self.state.add_callback('y_att', self._update_axes)
 #         self.state.add_callback('x_log', self._update_axes)
