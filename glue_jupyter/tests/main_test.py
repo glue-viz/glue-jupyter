@@ -75,8 +75,8 @@ def test_scatter2d_properties(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     l1 = s.layers[0]
     l1.state.color = 'green'
-    assert l1.scatter.color == ['green']
-    l1.scatter.color = ['orange']
+    assert l1.scatter.colors == ['green']
+    l1.scatter.colors = ['orange']
     assert l1.state.color == 'orange'
 
 
