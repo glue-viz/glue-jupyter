@@ -1,14 +1,18 @@
+import numpy as np
 import bqplot
+import ipywidgets as widgets
+import ipywidgets.widgets.trait_types as tt
+from IPython.display import display
+
 from glue.core.layer_artist import LayerArtistBase
+from glue.core.roi import RectangularROI
+from glue.core.command import ApplySubsetState
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.viewers.scatter.state import ScatterViewerState
-from IPython.display import display
-import ipywidgets as widgets
-import numpy as np
 
-import ipywidgets.widgets.trait_types as tt
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
+
 
 
 from . import IPyWidgetView
@@ -30,7 +34,7 @@ class link(object):
         def sync(*ignore):
             old_value = getattr(target[0], target[1])
             new_value = f(getattr(source[0], source[1]))
-            print('old/new', old_value, new_value)
+            #print('old/new', old_value, new_value)
             if new_value != old_value:
                 setattr(target[0], target[1], new_value)
 
@@ -141,24 +145,72 @@ class BqplotScatterView(IPyWidgetView):
         self.state.add_callback('y_min', self.limits_to_scales)
         self.state.add_callback('y_max', self.limits_to_scales)
 
+    @staticmethod
+    def update_viewer_state(rec, context):
+        print('update viewer state', rec, context)
+
     def change_action(self, *ignore):
         self.figure.interaction = self.interact_map[self.button_action.value]
 
     def update_brush(self, *ignore):
-        print('update brush')
         if not self.brush.brushing:  # only select when we ended
             (x1, y1), (x2, y2) = self.brush.selected
-            # TODO: I guess this is not the right way to do the subset
-            # data = self.session.data_collection.data[0]
-            x = self.state.x_att
-            y = self.state.y_att
-            # TODO: check what glue qt does, inclusive or exclusive
-            # better: roi -> subsetstate -> editsubsetname
-            state = (x > x1) & (x < x2) & (y > y1) & (y < y2)
-            name = 'brush'
-            print(name)
-            self.session.data_collection.new_subset_group(name, state)
+            x = [x1, x2]
+            y = [y1, y2]
+            roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
+            self.apply_roi(roi)
+            self.figure.interaction = None
+            self.figure.interaction = self.brush
+            # # TODO: I guess this is not the right way to do the subset
+            # # data = self.session.data_collection.data[0]
+            # x = self.state.x_att
+            # y = self.state.y_att
+            # # TODO: check what glue qt does, inclusive or exclusive
+            # # better: roi -> subsetstate -> editsubsetname
+            # state = (x > x1) & (x < x2) & (y > y1) & (y < y2)
+            # name = 'brush'
+            # print(name)
+            # self.session.data_collection.new_subset_group(name, state)
 
+    def apply_roi(self, roi):
+        # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
+        if len(self.layers) > 0:
+            subset_state = self._roi_to_subset_state(roi)
+            cmd = ApplySubsetState(data_collection=self._data,
+                                   subset_state=subset_state)
+            self._session.command_stack.do(cmd)
+        # else:
+        #     # Make sure we force a redraw to get rid of the ROI
+        #    self.axes.figure.canvas.draw()
+
+    def apply_roi(self, roi):
+        if len(self.layers) > 0:
+            subset_state = self._roi_to_subset_state(roi)
+            cmd = ApplySubsetState(data_collection=self._data,
+                                   subset_state=subset_state)
+            self._session.command_stack.do(cmd)
+        else:
+            # Make sure we force a redraw to get rid of the ROI
+            self.axes.figure.canvas.draw()
+
+    def _roi_to_subset_state(self, roi):
+        # TODO: copy paste from glue/viewers/scatter/qt/data_viewer.py#L66
+
+        # next lines don't work.. comp has no datetime?
+        #x_date = any(comp.datetime for comp in self.state._get_x_components())
+        #y_date = any(comp.datetime for comp in self.state._get_y_components())
+
+        #if x_date or y_date:
+        #    roi = roi.transformed(xfunc=mpl_to_datetime64 if x_date else None,
+        #                          yfunc=mpl_to_datetime64 if y_date else None)
+
+        x_comp = self.state.x_att.parent.get_component(self.state.x_att)
+        y_comp = self.state.y_att.parent.get_component(self.state.y_att)
+
+        return x_comp.subset_from_roi(self.state.x_att, roi,
+                                      other_comp=y_comp,
+                                      other_att=self.state.y_att,
+                                      coord='x')
 
     def show(self):
         display(self.main_box)
