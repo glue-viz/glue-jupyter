@@ -5,7 +5,7 @@ import ipywidgets.widgets.trait_types as tt
 from IPython.display import display
 
 from glue.core.layer_artist import LayerArtistBase
-from glue.core.roi import RectangularROI
+from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.viewers.scatter.state import ScatterViewerState
@@ -108,13 +108,23 @@ class BqplotScatterView(IPyWidgetView):
         self.figure = bqplot.Figure(scales=self.scales, axes=[
                                     self.axis_x, self.axis_y])
         
-        actions = ['move', 'brush']
+        actions = ['move', 'brush', 'brush x']#, 'brush y']
         self.interact_map = {}
         self.panzoom = bqplot.PanZoom(scales={'x': [self.scale_x], 'y': [self.scale_y]})
         self.interact_map['move'] = self.panzoom
+
         self.brush = bqplot.interacts.BrushSelector(x_scale=self.scale_x, y_scale=self.scale_y, color="green")
         self.interact_map['brush'] = self.brush
         self.brush.observe(self.update_brush, "brushing")
+
+        self.brush_x = bqplot.interacts.BrushIntervalSelector(scale=self.scale_x, color="green" )
+        self.interact_map['brush x'] = self.brush_x
+        self.brush_x.observe(self.update_brush_x, "brushing")
+
+        self.brush_y = bqplot.interacts.BrushIntervalSelector(scale=self.scale_y, color="green" )
+        self.interact_map['brush y'] = self.brush_y
+        self.brush_y.observe(self.update_brush_y, "brushing")
+
 
         self.button_action = widgets.ToggleButtons(description='Mode: ', options=[(action, action) for action in actions],
                                                    icons=["arrows", "pencil-square-o"])
@@ -141,6 +151,8 @@ class BqplotScatterView(IPyWidgetView):
 
     def change_action(self, *ignore):
         self.figure.interaction = self.interact_map[self.button_action.value]
+        self.brush.selected = []
+        self.brush_x.selected = []
 
     def update_brush(self, *ignore):
         if not self.brush.brushing:  # only select when we ended
@@ -149,18 +161,20 @@ class BqplotScatterView(IPyWidgetView):
             y = [y1, y2]
             roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
             self.apply_roi(roi)
-            self.figure.interaction = None
-            self.figure.interaction = self.brush
-            # # TODO: I guess this is not the right way to do the subset
-            # # data = self.session.data_collection.data[0]
-            # x = self.state.x_att
-            # y = self.state.y_att
-            # # TODO: check what glue qt does, inclusive or exclusive
-            # # better: roi -> subsetstate -> editsubsetname
-            # state = (x > x1) & (x < x2) & (y > y1) & (y < y2)
-            # name = 'brush'
-            # print(name)
-            # self.session.data_collection.new_subset_group(name, state)
+
+    def update_brush_x(self, *ignore):
+        if not self.brush_x.brushing:  # only select when we ended
+            x = self.brush_x.selected
+            if x is not None and len(x):
+                roi = RangeROI(min=min(x), max=max(x), orientation='x')
+                self.apply_roi(roi)
+
+    def update_brush_y(self, *ignore):
+        if not self.brush_y.brushing:  # only select when we ended
+            y = self.brush_y.selected
+            if y is not None and len(y):
+                roi = RangeROI(min=min(y), max=max(y), orientation='y')
+                self.apply_roi(roi)
 
     def apply_roi(self, roi):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py

@@ -63,6 +63,37 @@ def test_scatter2d_subset(app, dataxyz, dataxz):
 
 def test_scatter2d_brush(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
+
+    # 1d x brushing
+    s.button_action.value = 'brush x'
+    s.brush_x.brushing = True
+    s.brush_x.selected = [1.5, 3.5]
+    s.brush_x.brushing = False
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [2, 3]
+    assert s.layers[1].layer['y'].tolist() == [3, 4]
+    assert s.layers[1].layer['z'].tolist() == [6, 7]
+
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.selected == [1, 2]
+
+    # 1d y brushing
+    s.button_action.value = 'brush y'
+    s.brush_y.brushing = True
+    s.brush_y.selected = [1.5, 3.5]
+    s.brush_y.brushing = False
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [1, 2]
+    assert s.layers[1].layer['y'].tolist() == [2, 3]
+    assert s.layers[1].layer['z'].tolist() == [5, 6]
+
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.selected == [0, 1]
+
+
+    # 2d brushing
     # format is (x1, y1), (x2, y2)
     s.brush.brushing = True
     s.brush.selected = [(1.5, 3.5), (3.5, 5)]
@@ -74,6 +105,12 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
 
     assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
     assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.selected == [2]
+
+    # nothing should change when we change modes
+    s.button_action.value = 'brush'
+    assert s.layers[1].scatter.selected == [2]
+    s.button_action.value = 'brush x'
     assert s.layers[1].scatter.selected == [2]
 
 def test_scatter2d_properties(app, dataxyz, dataxz):
