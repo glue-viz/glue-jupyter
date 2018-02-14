@@ -9,7 +9,7 @@ import ipywidgets as widgets
 # from glue.viewers.scatter.layer_artist import ScatterLayerArtist
 
 
-def jglue(**kwargs):
+def jglue(*args, **kwargs):
     from glue.core import DataCollection
     from glue.app.qt import GlueApplication
     from glue.qglue import parse_data, parse_links
@@ -19,12 +19,22 @@ def jglue(**kwargs):
     dc = DataCollection()
     for label, data in kwargs.items():
         dc.extend(parse_data(data, label))
+    for data in args:
+        dc.append(data)
 
     if links is not None:
         dc.add_link(parse_links(dc, links))
 
     japp = JupyterApplication(dc)
     return japp
+
+def example_data_xyz(seed=42, N=500):
+    from glue.core import Data
+    import numpy as np
+    rng = np.random.RandomState(seed)
+    x, y, z = rng.normal(size=(3, N))
+    data_xyz = Data(x=x, y=y, z=z, label="xyz data")
+    return data_xyz
 
 # not sure we need to inherit: from glue.core.application_base import Application
 # what would we gain that would be natural in the notebook?
