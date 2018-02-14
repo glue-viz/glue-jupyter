@@ -51,6 +51,15 @@ class JupyterApplication(Application):
     def add_widget(self, widget, label=None, tab=None):
         pass
 
+    def histogram1d(self, x, data=None):
+        from .bqplot import BqplotHistogramView
+        data = data or self._data[0]
+        view = self.new_data_viewer(BqplotHistogramView, data=data)
+        x = data.id[x]
+        view.state.x_att = x
+        return view
+
+
     def scatter2d(self, x, y, data=None):
         from .bqplot import BqplotScatterView
         data = data or self._data[0]

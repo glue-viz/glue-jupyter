@@ -25,6 +25,25 @@ def app(dataxyz, dataxz):
 def test_app(app, dataxyz, dataxz):
     assert app._data[0] in [dataxyz, dataxz]
 
+def test_histogram1d(app, dataxyz):
+    s = app.histogram1d('y', data=dataxyz)
+    assert s.state.x_att == 'y'
+    assert len(s.layers) == 1
+    assert s.layers[0].layer['y'].tolist() == [2, 3, 4]
+    print('updating histogram state')
+    s.state.hist_x_min = 1.5
+    s.state.hist_x_max = 4.5
+    s.state.hist_n_bin = 3
+    assert s.layers[0].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
+    assert s.layers[0].hist.tolist() == [1, 1, 1]
+
+    app.subset('test', dataxyz.id['x'] > 1)
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['y'].tolist() == [3, 4]
+    assert s.layers[1].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
+    assert s.layers[1].hist.tolist() == [0, 1, 1]
+
+
 def test_scatter2d(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     assert s.state.x_att == 'x'
