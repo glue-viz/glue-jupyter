@@ -1,7 +1,9 @@
 import numpy as np
 import ipyvolume
+import ipywidgets as widgets
 from IPython.display import display
 
+from glue.core.command import ApplySubsetState
 from glue.core.layer_artist import LayerArtistBase
 from glue.core.state_objects import StateAttributeLimitsHelper
 from glue.core.data_combo_helper import ComponentIDComboHelper
@@ -13,7 +15,7 @@ from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
 from . import IPyWidgetView
-
+from .roi3d import PolygonalProjected3dROI
 from .link import link
 
 class Scatter3dLayerState(ScatterLayerState):
@@ -120,6 +122,83 @@ class Scatter3dViewerState(ScatterViewerState):
 
         self._layers_data_cache = layers_data
 
+from glue.core.subset import SubsetState
+from glue.core.contracts import contract
+class RoiSubsetState3d(SubsetState):
+
+    @contract(xatt='isinstance(ComponentID)', yatt='isinstance(ComponentID)', zatt='isinstance(ComponentID)')
+    def __init__(self, xatt=None, yatt=None, zatt=None, roi=None):
+        super(RoiSubsetState3d, self).__init__()
+        self.xatt = xatt
+        self.yatt = yatt
+        self.zatt = zatt
+        self.roi = roi
+
+    @property
+    def attributes(self):
+        return (self.xatt, self.yatt, self.zatt)
+
+    @contract(data='isinstance(Data)', view='array_view')
+    def to_mask(self, data, view=None):
+
+        # TODO: make sure that pixel components don't actually take up much
+        #       memory and are just views
+        # import IPython
+        # IPython.embed()
+        x = data[self.xatt, view]
+        y = data[self.yatt, view]
+        z = data[self.zatt, view]
+
+        # if (x.ndim == data.ndim and
+        #     self.xatt in data.pixel_component_ids and
+        #     self.yatt in data.pixel_component_ids):
+
+        #     # This is a special case - the ROI is defined in pixel space, so we
+        #     # can apply it to a single slice and then broadcast it to all other
+        #     # dimensions. We start off by extracting a slice which takes only
+        #     # the first elements of all dimensions except the attributes in
+        #     # question, for which we take all the elements. We need to preserve
+        #     # the dimensionality of the array, hence the use of slice(0, 1).
+        #     # Note that we can only do this if the view (if present) preserved
+        #     # the dimensionality, which is why we checked that x.ndim == data.ndim
+
+        #     subset = []
+        #     for i in range(data.ndim):
+        #         if i == self.xatt.axis or i == self.yatt.axis:
+        #             subset.append(slice(None))
+        #         else:
+        #             subset.append(slice(0, 1))
+
+        #     x_slice = x[subset]
+        #     y_slice = y[subset]
+
+        #     if self.roi.defined():
+        #         result = self.roi.contains(x_slice, y_slice)
+        #     else:
+        #         result = np.zeros(x_slice.shape, dtype=bool)
+
+        #     result = broadcast_to(result, x.shape)
+
+        # else:
+        if 1:
+            if self.roi.defined():
+                result = self.roi.contains3d(x, y, z)
+            else:
+                result = np.zeros(x.shape, dtype=bool)
+
+        if result.shape != x.shape:
+            raise ValueError("Unexpected error: boolean mask has incorrect dimensions")
+
+        return result
+
+    def copy(self):
+        result = RoiSubsetState3d()
+        result.xatt = self.xatt
+        result.yatt = self.yatt
+        result.zatt = self.zatt
+        result.roi = self.roi
+        return result
+
 class IpyvolumeScatterView(IPyWidgetView):
 
     allow_duplicate_data = False
@@ -141,6 +220,7 @@ class IpyvolumeScatterView(IPyWidgetView):
         #                           grid_lines='solid', label='Y')
         self.figure = ipyvolume.Figure(animation_exponent=1.)
         self.state = self._state_cls()
+        self.figure.on_lasso(self.on_lasso)
 
 #         self.state.add_callback('y_att', self._update_axes)
 #         self.state.add_callback('x_log', self._update_axes)
@@ -151,8 +231,36 @@ class IpyvolumeScatterView(IPyWidgetView):
         self.state.add_callback('y_min', self.limits_to_scales)
         self.state.add_callback('y_max', self.limits_to_scales)
 
+        self.output_widget = widgets.Output()
+        self.main_widget = widgets.VBox(children=[self.figure, self.output_widget])
+
+
     def show(self):
-        display(self.figure)
+        display(self.main_widget)
+
+    def on_lasso(self, data, other=None):
+        with self.output_widget:
+            if data['device']:
+                #import shapely.geometry
+                W = np.matrix(self.figure.matrix_world).reshape((4,4))     .T
+                P = np.matrix(self.figure.matrix_projection).reshape((4,4)).T
+                M = np.dot(P, W)
+                region = data['device']
+                vx, vy = zip(*region)
+                roi = PolygonalProjected3dROI(vx, vy, M)
+                self.apply_roi(roi)
+
+    def apply_roi(self, roi):
+        if len(self.layers) > 0:
+            x = self.state.x_att # self.state.x_att.parent.get_component(self.state.x_att)
+            y = self.state.y_att # self.state.y_att.parent.get_component(self.state.y_att)
+            z = self.state.z_att # self.state.z_att.parent.get_component(self.state.z_att)
+            subset_state = RoiSubsetState3d(x, y, z, roi)
+            cmd = ApplySubsetState(data_collection=self._data,
+                                   subset_state=subset_state)
+            self._session.command_stack.do(cmd)
+
+
 
     def limits_to_scales(self, *args):
         if self.state.x_min is not None and self.state.x_max is not None:

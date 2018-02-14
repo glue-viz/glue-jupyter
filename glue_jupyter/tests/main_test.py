@@ -1,6 +1,9 @@
 import pytest
+import numpy as np
+
 import glue_jupyter as gj
 from glue.core import Data
+from glue_jupyter.roi3d import PolygonalProjected3dROI
 
 
 @pytest.fixture
@@ -24,6 +27,13 @@ def app(dataxyz, dataxz):
 
 def test_app(app, dataxyz, dataxz):
     assert app._data[0] in [dataxyz, dataxz]
+
+xyzw2yxzw = np.array([
+             [0, 1, 0, 0],
+             [0, 0, 1, 0],
+             [1, 0, 0, 0],
+             [0, 0, 0, 1]
+            ])
 
 def test_histogram1d(app, dataxyz):
     s = app.histogram1d('y', data=dataxyz)
@@ -173,3 +183,27 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.layers[1].scatter.z.tolist() == [1, 2, 3]
     assert s.layers[1].scatter.selected == [2]
 
+def test_roi3d(dataxyz):
+    roi = PolygonalProjected3dROI(vx=[0.5, 2.5, 2.5, 0.5], vy=[1, 1, 3.5, 3.5], projection_matrix=np.eye(4))
+    assert roi.contains(dataxyz['x'], dataxyz['y']).tolist() == [True, True, False]
+
+    # xyzw2yxzw = [[0, 0, 1, 0],
+    #              [1, 0, 0, 0],
+    #              [0, 1, 0, 0],
+    #              [0, 0, 0, 1]
+    #             ]
+    roi = PolygonalProjected3dROI(vx=[1.5, 3.5, 3.5, 1.5], vy=[4, 4, 6.5, 6.5], projection_matrix=xyzw2yxzw)
+    assert roi.contains3d(dataxyz['x'], dataxyz['y'], dataxyz['z']).tolist() == [True, True, False]
+
+def test_lasso3d(app, dataxyz):
+    s = app.scatter3d('x', 'y', 'z', data=dataxyz)
+    s.figure.matrix_world = np.eye(4).ravel().tolist()
+    s.figure.matrix_projection = np.eye(4).ravel().tolist()
+    # similar to the roi3d test above, and this is the format that ipyvolume send back
+    data = {'device': zip([0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])}
+    # fake the callback
+    s.figure._lasso_handlers(data)
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [1, 2]
+    assert s.layers[1].layer['y'].tolist() == [2, 3]
+    assert s.layers[1].layer['z'].tolist() == [5, 6]
