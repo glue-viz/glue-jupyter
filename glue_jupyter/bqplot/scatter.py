@@ -221,12 +221,12 @@ class BqplotScatterView(IPyWidgetView):
 
     def limits_to_scales(self, *args):
         if self.state.x_min is not None and self.state.x_max is not None:
-            self.scale_x.min = self.state.x_min
-            self.scale_x.max = self.state.x_max
+            self.scale_x.min = float(self.state.x_min)
+            self.scale_x.max = float(self.state.x_max)
 
         if self.state.y_min is not None and self.state.y_max is not None:
-            self.scale_y.min = self.state.y_min
-            self.scale_y.max = self.state.y_max
+            self.scale_y.min = float(self.state.y_min)
+            self.scale_y.max = float(self.state.y_max)
 
     def get_subset_layer_artist(*args, **kwargs):
         layer = DataViewerWithState.get_data_layer_artist(*args, **kwargs)
