@@ -10,14 +10,14 @@ from glue.core.command import ApplySubsetState
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.viewers.scatter.state import ScatterViewerState
 
-from .link import link
+from ..link import link
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
 
 
 
-from . import IPyWidgetView
+from .. import IPyWidgetView
 
 # def convert_color(color):
 #     #if color == 'green':
