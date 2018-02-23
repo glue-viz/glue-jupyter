@@ -1,13 +1,14 @@
 import numpy as np
 import ipyvolume
 import ipywidgets as widgets
+import traitlets
 from IPython.display import display
 
 from glue.core.command import ApplySubsetState
 from glue.core.layer_artist import LayerArtistBase
 from glue.core.state_objects import StateAttributeLimitsHelper
 from glue.core.data_combo_helper import ComponentIDComboHelper
-from glue.core.roi import PolygonalROI, Projected3dROI
+from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
 from glue.core.subset import RoiSubsetState3d
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.viewers.scatter.state import ScatterViewerState
@@ -145,8 +146,14 @@ class IpyvolumeScatterView(IPyWidgetView):
         #                           grid_lines='solid', label='Y')
         self.figure = ipyvolume.Figure(animation_exponent=1.)
         self.state = self._state_cls()
-        self.figure.on_lasso(self.on_lasso)
+        self.figure.on_selection(self.on_selection)
 
+        selectors = ['lasso', 'circle', 'rectangle']
+        self.button_action = widgets.ToggleButtons(description='Mode: ', options=[(selector, selector) for selector in selectors],
+                                                   icons=["arrows", "pencil-square-o"])
+        traitlets.link((self.figure, 'selector'), (self.button_action, 'label'))
+        self.button_box = widgets.VBox(
+            children=[self.button_action])#, self.box_state_options])
 #         self.state.add_callback('y_att', self._update_axes)
 #         self.state.add_callback('x_log', self._update_axes)
 #         self.state.add_callback('y_log', self._update_axes)
@@ -155,24 +162,36 @@ class IpyvolumeScatterView(IPyWidgetView):
         self.state.add_callback('x_max', self.limits_to_scales)
         self.state.add_callback('y_min', self.limits_to_scales)
         self.state.add_callback('y_max', self.limits_to_scales)
-
         self.output_widget = widgets.Output()
-        self.main_widget = widgets.VBox(children=[self.figure, self.output_widget])
+        self.main_widget = widgets.VBox(children=[self.button_box, self.figure, self.output_widget])
 
 
     def show(self):
         display(self.main_widget)
 
-    def on_lasso(self, data, other=None):
+    def on_selection(self, data, other=None):
         with self.output_widget:
+            W = np.matrix(self.figure.matrix_world).reshape((4,4))     .T
+            P = np.matrix(self.figure.matrix_projection).reshape((4,4)).T
+            M = np.dot(P, W)
             if data['device']:
-                #import shapely.geometry
-                W = np.matrix(self.figure.matrix_world).reshape((4,4))     .T
-                P = np.matrix(self.figure.matrix_projection).reshape((4,4)).T
-                M = np.dot(P, W)
-                region = data['device']
-                vx, vy = zip(*region)
-                roi_2d = PolygonalROI(vx=vx, vy=vy)
+                if data['type'] == 'lasso':
+                    region = data['device']
+                    vx, vy = zip(*region)
+                    roi_2d = PolygonalROI(vx=vx, vy=vy)
+                elif data['type'] == 'circle':
+                    x1, y1 = data['device']['begin']
+                    x2, y2 = data['device']['end']
+                    dx = x2 - x1
+                    dy = y2 - y1
+                    r = (dx**2 + dy**2)**0.5
+                    roi_2d = CircularROI(xc=x1, yc=y1, radius=r)
+                elif data['type'] == 'rectangle':
+                    x1, y1 = data['device']['begin']
+                    x2, y2 = data['device']['end']
+                    x = [x1, x2]
+                    y = [y1, y2]
+                    roi_2d = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
                 roi = Projected3dROI(roi_2d, M)
                 self.apply_roi(roi)
 

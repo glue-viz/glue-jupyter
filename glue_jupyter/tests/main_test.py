@@ -212,9 +212,26 @@ def test_lasso3d(app, dataxyz):
     s.figure.matrix_world = np.eye(4).ravel().tolist()
     s.figure.matrix_projection = np.eye(4).ravel().tolist()
     # similar to the roi3d test above, and this is the format that ipyvolume send back
-    data = {'device': zip([0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])}
+    data = {'type': 'lasso', 'device': zip([0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])}
     # fake the callback
-    s.figure._lasso_handlers(data)
+    s.figure._selection_handlers(data)
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [1, 2]
+    assert s.layers[1].layer['y'].tolist() == [2, 3]
+    assert s.layers[1].layer['z'].tolist() == [5, 6]
+
+    data = {'type': 'circle', 'device': {'begin': [2.5, 3.5], 'end': [3.1, 4.1]}}
+    # fake the callback
+    s.figure._selection_handlers(data)
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [2, 3]
+    assert s.layers[1].layer['y'].tolist() == [3, 4]
+    assert s.layers[1].layer['z'].tolist() == [6, 7]
+
+
+    data = {'type': 'rectangle', 'device': {'begin': [0, 0], 'end': [2.1, 3.1]}}
+    # fake the callback
+    s.figure._selection_handlers(data)
     assert len(s.layers) == 2
     assert s.layers[1].layer['x'].tolist() == [1, 2]
     assert s.layers[1].layer['y'].tolist() == [2, 3]
