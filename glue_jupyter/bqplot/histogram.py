@@ -40,6 +40,7 @@ class BqplotHistogramLayerArtist(LayerArtistBase):
 
         self._viewer_state.add_global_callback(self._update_histogram)
         self.state.add_global_callback(self._update_histogram)
+        self.bins = None
 
     def reset_cache(self):
         self._last_viewer_state = {}
@@ -91,6 +92,8 @@ class BqplotHistogramLayerArtist(LayerArtistBase):
 
     def _scale_histogram(self):
         # TODO: comes from glue/viewers/histogram/layer_artist.py
+        if self.bins is None:
+            return  # can happen when the subset is empty
 
         if self.bins.size == 0 or self.hist_unscaled.sum() == 0:
             return
