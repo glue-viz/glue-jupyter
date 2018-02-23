@@ -151,6 +151,18 @@ def test_scatter2d_properties(app, dataxyz, dataxz):
     assert l1.state.color == 'orange'
 
 
+def test_scatter2d_and_histogram(app, dataxyz):
+    s = app.scatter2d('x', 'y', data=dataxyz)
+    h = app.histogram1d('x', data=dataxyz)
+    s.brush.brushing = True
+    s.brush.selected = [(1.5, 3.5), (3.5, 5)]
+    s.brush.brushing = False
+    assert len(s.layers) == 2
+    import glue.core.subset
+    assert isinstance(s.layers[1].layer.subset_state, glue.core.subset.RoiSubsetState)
+
+
+
 def test_scatter3d(app, dataxyz, dataxz):
     s = app.scatter3d('x', 'y', 'z', data=dataxyz)
     assert s.state.x_att == 'x'
@@ -165,7 +177,7 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.state.z_max == 7
 
     app.subset('test', dataxyz.id['x'] > 2)
-    assert len(s.layers)
+    assert len(s.layers) == 2
     assert s.layers[1].layer['x'].tolist() == [3]
     assert s.layers[1].layer['y'].tolist() == [4]
     assert s.layers[1].layer['z'].tolist() == [7]
