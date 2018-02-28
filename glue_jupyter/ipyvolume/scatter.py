@@ -17,8 +17,8 @@ from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
                                            DeferredDrawCallbackProperty as DDCProperty,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
-from . import IPyWidgetView
-from .link import link
+from .. import IPyWidgetView
+from ..link import link
 
 class Scatter3dLayerState(ScatterLayerState):
     pass
