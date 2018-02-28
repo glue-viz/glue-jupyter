@@ -102,6 +102,18 @@ class JupyterApplication(Application):
         view.state.z_att = z
         return view
 
+    def volume3d(self, x="Pixel Axis 2 [x]", y="Pixel Axis 1 [y]", z="Pixel Axis 0 [z]", data=None):
+        from .ipyvolume import IpyvolumeVolumeView
+        data = data or self._data[0]
+        view = self.new_data_viewer(IpyvolumeVolumeView, data=data)
+        x = data.id[x]
+        y = data.id[y]
+        z = data.id[z]
+        view.state.x_att = x
+        view.state.y_att = y
+        view.state.z_att = z
+        return view
+
     def subset(self, name, state):
         return self.data_collection.new_subset_group(name, state)
 

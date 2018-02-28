@@ -6,24 +6,27 @@ from glue.core import Data
 from glue_jupyter.roi3d import PolygonalProjected3dROI
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def dataxyz():
     data = Data(x=[1, 2, 3], y=[2, 3, 4], z=[5, 6, 7], label="xyz data")
     return data
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def dataxz():
     ox = 0
     oy = 1
     data = Data(x=[1 + ox, 2 + ox, 3 + ox], z=[2 + oy, 3 + oy, 4 + oy], label="xy data")
     return data
 
+@pytest.fixture(scope="module")
+def data_volume():
+    return gj.example_volume()
 
 @pytest.fixture
-def app(dataxyz, dataxz):
+def app(dataxyz, dataxz, data_volume):
     link1 = ['dataxyz.x'], ['dataxz.x'], lambda x: x
     link2 = ['dataxyz.y'], ['dataxz.z'], lambda y: y+1, lambda z: z-1
-    return gj.jglue(dataxyz=dataxyz, dataxz=dataxz, links=[link1, link2])
+    return gj.jglue(dataxyz=dataxyz, dataxz=dataxz, data_volume=data_volume, links=[link1, link2])
 
 def test_app(app, dataxyz, dataxz):
     assert app._data[0] in [dataxyz, dataxz]
@@ -236,3 +239,15 @@ def test_lasso3d(app, dataxyz):
     assert s.layers[1].layer['x'].tolist() == [1, 2]
     assert s.layers[1].layer['y'].tolist() == [2, 3]
     assert s.layers[1].layer['z'].tolist() == [5, 6]
+
+def test_volume(app, data_volume):
+    assert data_volume in app.data_collection
+    v = app.volume3d(data=data_volume)
+
+    data = {'type': 'lasso', 'device': zip([0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])}
+    # fake the callback
+    v.figure._selection_handlers(data)
+    assert len(v.layers) == 2
+    # assert s.layers[1].layer['x'].tolist() == [1, 2]
+    # assert s.layers[1].layer['y'].tolist() == [2, 3]
+    # assert s.layers[1].layer['z'].tolist() == [5, 6]
