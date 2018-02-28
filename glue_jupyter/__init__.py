@@ -36,6 +36,16 @@ def example_data_xyz(seed=42, N=500):
     data_xyz = Data(x=x, y=y, z=z, label="xyz data")
     return data_xyz
 
+def example_volume(shape=64, limits=[-4, 4]):
+    """Creates a test data set containing a ball"""
+    from glue.core import Data
+    import numpy as np
+    import ipyvolume as ipv
+    ball_data = ipv.examples.ball(shape=shape, limits=limits, show=False, draw=False)
+    data = Data()
+    data.add_component(ball_data, label='intensity')
+    return data
+
 # not sure we need to inherit: from glue.core.application_base import Application
 # what would we gain that would be natural in the notebook?
 from glue.core.application_base import Application
