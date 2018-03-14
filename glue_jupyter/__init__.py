@@ -103,9 +103,9 @@ class JupyterApplication(Application):
         return view
 
     def volume3d(self, x="Pixel Axis 2 [x]", y="Pixel Axis 1 [y]", z="Pixel Axis 0 [z]", data=None):
-        from .ipyvolume import IpyvolumeVolumeView
+        from .ipyvolume import IpyvolumeView
         data = data or self._data[0]
-        view = self.new_data_viewer(IpyvolumeVolumeView, data=data)
+        view = self.new_data_viewer(IpyvolumeView, data=data)
         x = data.id[x]
         y = data.id[y]
         z = data.id[z]
