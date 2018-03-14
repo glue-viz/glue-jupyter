@@ -22,11 +22,15 @@ def dataxz():
 def data_volume():
     return gj.example_volume()
 
+@pytest.fixture()#scope="module")
+def data_image():
+    return gj.example_image()
+
 @pytest.fixture
-def app(dataxyz, dataxz, data_volume):
+def app(dataxyz, dataxz, data_volume, data_image):
     link1 = ['dataxyz.x'], ['dataxz.x'], lambda x: x
     link2 = ['dataxyz.y'], ['dataxz.z'], lambda y: y+1, lambda z: z-1
-    return gj.jglue(dataxyz=dataxyz, dataxz=dataxz, data_volume=data_volume, links=[link1, link2])
+    return gj.jglue(dataxyz=dataxyz, dataxz=dataxz, data_volume=data_volume, data_image=data_image, links=[link1, link2])
 
 def test_app(app, dataxyz, dataxz):
     assert app._data[0] in [dataxyz, dataxz]
@@ -251,3 +255,8 @@ def test_volume(app, data_volume):
     # assert s.layers[1].layer['x'].tolist() == [1, 2]
     # assert s.layers[1].layer['y'].tolist() == [2, 3]
     # assert s.layers[1].layer['z'].tolist() == [5, 6]
+
+def test_imshow(app, data_image):
+    assert data_image in app.data_collection
+    v = app.imshow(data=data_image)
+

@@ -46,6 +46,19 @@ def example_volume(shape=64, limits=[-4, 4]):
     data.add_component(ball_data, label='intensity')
     return data
 
+def example_image(shape=64, limits=[-4, 4]):
+    """Creates a test data set containing a ball"""
+    from glue.core import Data
+    import numpy as np
+    import ipyvolume as ipv
+    x = np.linspace(-3, 3, num=shape)
+    X, Y = np.meshgrid(x, x)
+    rho = 0.8
+    I = np.exp(-X**2-Y**2-2*X*Y*rho)
+    data = Data()
+    data.add_component(I, label='intensity')
+    return data
+
 # not sure we need to inherit: from glue.core.application_base import Application
 # what would we gain that would be natural in the notebook?
 from glue.core.application_base import Application
@@ -100,6 +113,16 @@ class JupyterApplication(Application):
         view.state.x_att = x
         view.state.y_att = y
         view.state.z_att = z
+        return view
+
+    def imshow(self, x="Pixel Axis 1 [x]", y="Pixel Axis 0 [y]", data=None):
+        from .bqplot import BqplotImageView
+        data = data or self._data[0]
+        view = self.new_data_viewer(BqplotImageView, data=data)
+        x = data.id[x]
+        y = data.id[y]
+        view.state.x_att = x
+        view.state.y_att = y
         return view
 
     def volume3d(self, x="Pixel Axis 2 [x]", y="Pixel Axis 1 [y]", z="Pixel Axis 0 [z]", data=None):
