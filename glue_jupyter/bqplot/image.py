@@ -310,10 +310,31 @@ class BqplotImageView(IPyWidgetView):
     def redraw(self):
         pass # print('redraw view', self.state.x_att, self.state.y_att)
 
+
+    def get_data_layer_artist(self, layer=None, layer_state=None):
+        if layer.ndim == 1:
+            cls = BqplotScatterLayerArtist
+        else:
+            cls = BqplotImageLayerArtist
+        print(layer, cls, layer.ndim)
+        #print('layer', layer, cls)
+        return self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
+
+    def get_subset_layer_artist(self, layer=None, layer_state=None):
+        if layer.ndim == 1:
+            cls = BqplotScatterLayerArtist
+        else:
+            cls = BqplotImageLayerArtist
+        #print('layer', layer, cls)
+        return self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
+
+    def redraw(self):
+        pass
+
+
+
 from glue.viewers.common.qt.data_viewer_with_state import DataViewerWithState
 BqplotImageView.add_data = DataViewerWithState.add_data
 BqplotImageView.add_subset = DataViewerWithState.add_subset
-BqplotImageView.get_data_layer_artist = DataViewerWithState.get_data_layer_artist
-#BqplotScatterView.get_subset_layer_artist = DataViewerWithState.get_data_layer_artist
 #BqplotView.get_layer_artist = DataViewerWithState.get_layer_artist
 #s = image2d(catalog.id['RAJ2000'], catalog.id['DEJ2000'], dc)
