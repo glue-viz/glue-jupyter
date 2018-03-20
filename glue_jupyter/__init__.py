@@ -48,7 +48,7 @@ def example_volume(shape=64, limits=[-4, 4]):
 
 def example_image(shape=64, limits=[-4, 4]):
     """Creates a test data set containing a ball"""
-    from glue.core import Data
+    from glue.core import Data, Coordinates
     import numpy as np
     import ipyvolume as ipv
     x = np.linspace(-3, 3, num=shape)
@@ -56,6 +56,7 @@ def example_image(shape=64, limits=[-4, 4]):
     rho = 0.8
     I = np.exp(-X**2-Y**2-2*X*Y*rho)
     data = Data()
+    data.coords = Coordinates()
     data.add_component(I, label='intensity')
     return data
 
