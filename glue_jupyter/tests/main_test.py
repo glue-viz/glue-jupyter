@@ -3,6 +3,7 @@ import numpy as np
 
 import glue_jupyter as gj
 from glue.core import Data
+from glue.core.component_link import ComponentLink
 from glue_jupyter.roi3d import PolygonalProjected3dROI
 
 
@@ -30,7 +31,11 @@ def data_image():
 def app(dataxyz, dataxz, data_volume, data_image):
     link1 = ['dataxyz.x'], ['dataxz.x'], lambda x: x
     link2 = ['dataxyz.y'], ['dataxz.z'], lambda y: y+1, lambda z: z-1
-    return gj.jglue(dataxyz=dataxyz, dataxz=dataxz, data_volume=data_volume, data_image=data_image, links=[link1, link2])
+    link3 =  ComponentLink([data_image.id['Pixel Axis 0 [y]']], dataxyz.id['y'])
+    link4 =  ComponentLink([data_image.id['Pixel Axis 1 [x]']], dataxyz.id['x'])
+    app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, data_volume=data_volume, data_image=data_image, links=[link1, link2])
+    app.data_collection.add_link([link3, link4])
+    return app
 
 def test_app(app, dataxyz, dataxz):
     assert app._data[0] in [dataxyz, dataxz]
@@ -256,7 +261,15 @@ def test_volume(app, data_volume):
     # assert s.layers[1].layer['y'].tolist() == [2, 3]
     # assert s.layers[1].layer['z'].tolist() == [5, 6]
 
-def test_imshow(app, data_image):
+def test_imshow(app, data_image, dataxyz):
     assert data_image in app.data_collection
     v = app.imshow(data=data_image)
 
+    v.add_data(dataxyz)
+
+    assert len(v.layers) == 2
+    v.brush.brushing = True
+    v.brush.selected = [(1.5, 3.5), (3.5, 5)]
+    v.brush.brushing = False
+
+    assert len(v.layers) == 4

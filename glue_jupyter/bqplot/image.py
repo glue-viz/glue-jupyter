@@ -13,10 +13,12 @@ except:
 from glue.core.layer_artist import LayerArtistBase
 from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
+from glue.core.data import Subset
 from glue.viewers.image.state import ImageLayerState
 from glue.viewers.image.state import ImageViewerState
 
 from ..link import link
+from .scatter import BqplotScatterLayerArtist
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
@@ -30,16 +32,28 @@ from .. import IPyWidgetView
 #     #    return color
 #     return '#777'
 
-def _scalar_to_png_data(I, colormap='viridis'):
-    colormap = matplotlib.cm.get_cmap(colormap)
-    data = colormap(I, bytes=True)
-    width, height = data.shape[1], data.shape[0]
+def _rgba_to_png_data(rgba):
+    width, height = rgba.shape[1], rgba.shape[0]
     f = StringIO()
-    img = PIL.Image.frombuffer("RGBA", (width, height), data, 'raw')
+    img = PIL.Image.frombuffer("RGBA", (width, height), rgba, 'raw', 'RGBA', 0, 0)
     img.save(f, "png")
     return f.getvalue()
 
+def _scalar_to_png_data(I, colormap='viridis'):
+    mask = ~np.isfinite(I)
+    I = np.ma.masked_array(I, mask)
+    colormap = matplotlib.cm.get_cmap(colormap)
+    colormap.set_bad(alpha=0)
+    data = colormap(I, bytes=True)
+    return _rgba_to_png_data(data)
 
+def _mask_to_png_data(mask, color):
+    r, g, b = matplotlib.colors.to_rgb(color)
+    rgba = np.zeros(mask.shape + (4,), dtype=np.uint8)
+    print(rgba.shape)
+    rgba[mask.astype(np.bool),3] = 0.5 * 255
+    rgba[...,0:3] = r * 255, g * 255, b * 255
+    return _rgba_to_png_data(rgba)
 
 class BqplotImageLayerArtist(LayerArtistBase):
     _layer_state_cls = ImageLayerState
@@ -56,7 +70,7 @@ class BqplotImageLayerArtist(LayerArtistBase):
         
         self.image_widget = widgets.Image(value=_scalar_to_png_data(data), format='png', width=32, height=32)
         self.image_mark = bqplot.Image(image=self.image_widget,
-            scales=self.view.scales, x=[0, 1], y=[0, 1])
+            scales=self.view.scales, x=[0, 32], y=[0, 32])
         self.view.figure.marks = list(self.view.figure.marks) + [self.image_mark]
         #link((self.image, 'colors'), (self.state, 'color'), lambda x: x[0], lambda x: [x])
         #link((self.image, 'default_opacities'), (self.state, 'alpha'), lambda x: x[0], lambda x: [x])
@@ -85,7 +99,6 @@ class BqplotImageLayerArtist(LayerArtistBase):
             self.image.unselected_style = {'fill': 'none', 'stroke': 'none'}
 
     def update(self):
-        return
         if isinstance(self.layer, Subset):
             try:
                 mask = self.layer.to_mask()
@@ -99,9 +112,28 @@ class BqplotImageLayerArtist(LayerArtistBase):
             #     data = mask.astype(np.float32)
             # else:
             data = self.layer.data[self.state.attribute].astype(np.float32)
-            data *= mask
+            data[~mask] = np.nan
+            png_data = _mask_to_png_data(mask, self.state.color)
         else:
             data = self.layer[self.state.attribute]
+            data = data - self.state.v_min
+            data /= (self.state.v_max - self.state.v_min)
+            print(np.nanmin(data), np.nanmax(data))
+            png_data = _scalar_to_png_data(data)
+        height, width = data.shape
+        with self.image_widget.hold_sync():
+            self.image_widget.value = png_data
+            self.image_widget.width = width
+            self.image_widget.height = height
+        # force the image mark to update the image data
+        self.image_mark.send_state(key='image')
+        self.image_mark.x = [0, width]
+        self.image_mark.y = [0, height]
+        # bug? this will cause a redraw for sure, but why is this needed?
+        marks = list(self.view.figure.marks)
+        self.view.figure.marks = []
+        self.view.figure.marks = marks
+
         # self.image.x = self.layer.data[self._viewer_state.x_att]
         # self.image.y = self.layer.data[self._viewer_state.y_att]
         # if hasattr(self.layer, 'to_mask'):  # TODO: what is the best way to test if it is Data or Subset?
@@ -267,7 +299,6 @@ class BqplotImageView(IPyWidgetView):
 
     def get_subset_layer_artist(*args, **kwargs):
         layer = DataViewerWithState.get_data_layer_artist(*args, **kwargs)
-        layer.image.colors = ['orange']
         return layer
 
     def receive_message(self, message):
