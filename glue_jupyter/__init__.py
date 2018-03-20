@@ -28,11 +28,11 @@ def jglue(*args, **kwargs):
     japp = JupyterApplication(dc)
     return japp
 
-def example_data_xyz(seed=42, N=500):
+def example_data_xyz(seed=42, N=500, loc=0, scale=1):
     from glue.core import Data
     import numpy as np
     rng = np.random.RandomState(seed)
-    x, y, z = rng.normal(size=(3, N))
+    x, y, z = rng.normal(loc, scale, size=(3, N))
     data_xyz = Data(x=x, y=y, z=z, label="xyz data")
     return data_xyz
 
