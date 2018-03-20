@@ -176,8 +176,9 @@ class BqplotImageView(IPyWidgetView):
         self.state.add_callback('y_att', update_axes)
         self.figure = bqplot.Figure(scales=self.scales, axes=[
                                     self.axis_x, self.axis_y])
+        self.figure.padding_y = 0
         
-        actions = ['move', 'brush', 'brush x']#, 'brush y']
+        actions = ['move', 'brush', 'brush x', 'brush y']
         self.interact_map = {}
         self.panzoom = bqplot.PanZoom(scales={'x': [self.scale_x], 'y': [self.scale_y]})
         self.interact_map['move'] = self.panzoom
@@ -190,7 +191,7 @@ class BqplotImageView(IPyWidgetView):
         self.interact_map['brush x'] = self.brush_x
         self.brush_x.observe(self.update_brush_x, "brushing")
 
-        self.brush_y = bqplot.interacts.BrushIntervalSelector(scale=self.scale_y, color="green" )
+        self.brush_y = bqplot.interacts.BrushIntervalSelector(scale=self.scale_y, color="green", orientation='vertical')
         self.interact_map['brush y'] = self.brush_y
         self.brush_y.observe(self.update_brush_y, "brushing")
 
