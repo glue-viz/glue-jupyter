@@ -31,10 +31,14 @@ def data_image():
 def app(dataxyz, dataxz, data_volume, data_image):
     link1 = ['dataxyz.x'], ['dataxz.x'], lambda x: x
     link2 = ['dataxyz.y'], ['dataxz.z'], lambda y: y+1, lambda z: z-1
-    link3 =  ComponentLink([data_image.id['Pixel Axis 0 [y]']], dataxyz.id['y'])
-    link4 =  ComponentLink([data_image.id['Pixel Axis 1 [x]']], dataxyz.id['x'])
     app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, data_volume=data_volume, data_image=data_image, links=[link1, link2])
-    app.data_collection.add_link([link3, link4])
+    link1 =  ComponentLink([data_image.id['Pixel Axis 0 [y]']], dataxyz.id['y'])
+    link2 =  ComponentLink([data_image.id['Pixel Axis 1 [x]']], dataxyz.id['x'])
+    app.data_collection.add_link([link1, link2])
+    link1 =  ComponentLink([data_volume.id['Pixel Axis 0 [z]']], dataxyz.id['z'])
+    link2 =  ComponentLink([data_volume.id['Pixel Axis 1 [y]']], dataxyz.id['y'])
+    link3 =  ComponentLink([data_volume.id['Pixel Axis 2 [x]']], dataxyz.id['x'])
+    app.data_collection.add_link([link1, link2, link3])
     return app
 
 def test_app(app, dataxyz, dataxz):
@@ -249,7 +253,7 @@ def test_lasso3d(app, dataxyz):
     assert s.layers[1].layer['y'].tolist() == [2, 3]
     assert s.layers[1].layer['z'].tolist() == [5, 6]
 
-def test_volume(app, data_volume):
+def test_volume(app, data_volume, dataxyz):
     assert data_volume in app.data_collection
     v = app.volume3d(data=data_volume)
 
@@ -257,6 +261,9 @@ def test_volume(app, data_volume):
     # fake the callback
     v.figure._selection_handlers(data)
     assert len(v.layers) == 2
+    v.add_data(dataxyz)
+    assert len(v.layers) == 4
+
     # assert s.layers[1].layer['x'].tolist() == [1, 2]
     # assert s.layers[1].layer['y'].tolist() == [2, 3]
     # assert s.layers[1].layer['z'].tolist() == [5, 6]

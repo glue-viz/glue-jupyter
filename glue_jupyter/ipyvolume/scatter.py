@@ -123,11 +123,3 @@ class Scatter3dViewerState(ScatterViewerState):
         self.z_att_helper.set_multiple_data(self.layers_data)
 
         self._layers_data_cache = layers_data
-
-
-from .view import IpyvolumeView
-class IpyvolumeScatterView(IpyvolumeView):
-
-    allow_duplicate_data = False
-    allow_duplicate_subset = False
-    _state_cls = Scatter3dViewerState
