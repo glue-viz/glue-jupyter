@@ -88,6 +88,8 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
 
 
 
+    def create_widgets(self):
+        return widgets.VBox([])
 
 #from glue_vispy_viewers.common.vispy_data_viewer import BaseVispyViewer
 

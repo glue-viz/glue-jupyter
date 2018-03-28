@@ -2,7 +2,6 @@ import numpy as np
 import ipyvolume
 import ipywidgets as widgets
 import traitlets
-from IPython.display import display
 
 from glue.core.command import ApplySubsetState
 from glue.core.layer_artist import LayerArtistBase
@@ -18,7 +17,7 @@ from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
 from .. import IPyWidgetView
-from ..link import link
+from ..link import link, calculation, link_component_id_to_select_widget, on_change
 
 class Scatter3dLayerState(ScatterLayerState):
     pass
@@ -38,9 +37,6 @@ class IpyvolumeScatterLayerArtist(LayerArtistBase):
         self.scatter = ipyvolume.Scatter(x=[0, 1], y=[0, 1], z=[0,1], color='green',
             color_selected='orange', size_selected=7, size=5, geo='sphere')
         self.view.figure.scatters = list(self.view.figure.scatters) + [self.scatter]
-        link((self.scatter, 'color'), (self.state, 'color'))
-        link((self.scatter, 'color_selected'), (self.state, 'color'))
-        self.state.add_callback('size', lambda *ignore: self.update_selection(), lambda x: x*scale, lambda x: x/scale)
 
         viewer_state.add_callback('x_att', self._update_xyz_att)
         viewer_state.add_callback('y_att', self._update_xyz_att)
@@ -60,66 +56,63 @@ class IpyvolumeScatterLayerArtist(LayerArtistBase):
         self.scatter.x = self.layer.data[self._viewer_state.x_att]
         self.scatter.y = self.layer.data[self._viewer_state.y_att]
         self.scatter.z = self.layer.data[self._viewer_state.z_att]
-        self.update_selection()
-
-    def update_selection(self):
-        size_scaling = 1./5
         if hasattr(self.layer, 'to_mask'):  # TODO: what is the best way to test if it is Data or Subset?
             self.scatter.selected = np.nonzero(self.layer.to_mask())[0]#.tolist()
+        self._update_size()
+
+    def _update_size(self):
+        size = self.state.size
+        scale = self.state.size_scaling / 5  # /5 seems to give similar sizes as the Qt Glue
+        if self.state.size_mode == 'Linear':
+            size = self.layer.data[self.state.size_att]
+            size = (size - self.state.size_vmin) / (self.state.size_vmax - self.state.size_vmin)
+            size *= 5
+        value = size * scale
+        if hasattr(self.layer, 'to_mask'):  # TODO: what is the best way to test if it is Data or Subset?
             self.scatter.size = 0
-            self.scatter.size_selected = self.state.size * size_scaling
+            self.scatter.size_selected = value
         else:
-            self.scatter.size = self.state.size * size_scaling
-            self.scatter.size_selected = self.state.size * size_scaling
+            self.scatter.size = value
+            self.scatter.size_selected = value
+
+    def create_widgets(self):
+        widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
+        link((self.state, 'visible'), (widget_visible, 'value'))
+        link((self.state, 'visible'), (self.scatter.material, 'visible'))
+
+        self.widget_size = widgets.FloatSlider(description='size', min=0, max=10, value=self.state.size)
+        link((self.state, 'size'), (self.widget_size, 'value'))
+        self.widget_scaling = widgets.FloatSlider(description='scale', min=0, max=2, value=self.state.size_scaling)
+        link((self.state, 'size_scaling'), (self.widget_scaling, 'value'))
+        #on_change([self.widget_size, self.widget_scaling])(self._update_size)
+        # def set_size(size, scaling):
+        #     self.
+        #     value = size * scaling / 5
+        #     # print('set size', value)
+        #     if self.state.size_mode == 'Fixed':
+        #         if hasattr(self.layer, 'to_mask'):  # TODO: what is the best way to test if it is Data or Subset?
+        #             self.scatter.size = 0
+        #             self.scatter.size_selected = value
+        #         else:
+        #             self.scatter.size = value
+        #             self.scatter.size_selected = value
+
+        widget_color = widgets.ColorPicker(description='color')
+        link((self.state, 'color'), (widget_color, 'value'))
+        link((widget_color, 'value'), (self.scatter, 'color'))
+        link((widget_color, 'value'), (self.scatter, 'color_selected'))
+
+        options = type(self.state).size_mode.get_choice_labels(self.state)
+        self.widget_size_mode = widgets.RadioButtons(options=options, description='size mode')
+        link((self.state, 'size_mode'), (self.widget_size_mode, 'value'))
+
+        helper = self.state.size_att_helper
+        self.widget_size_att = widgets.Dropdown(options=[k.label for k in helper.choices],
+                                       value=self.state.size_att, description='size')
+        link_component_id_to_select_widget(self.state, 'size_att', self.widget_size_att)
+        on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
 
 
-class Scatter3dViewerState(ScatterViewerState):
-    z_att = DDSCProperty(docstring='The attribute to show on the z-axis', default_index=2)
-    z_min = DDCProperty(docstring='Lower limit of the visible z range')
-    z_max = DDCProperty(docstring='Upper limit of the visible z range')
-    z_log = DDCProperty(False, docstring='Whether the z axis is logarithmic')
-
-    def __init__(self, **kwargs):
-        super(ScatterViewerState, self).__init__()
-
-        self.limits_cache = {}
-
-        self.x_lim_helper = StateAttributeLimitsHelper(self, attribute='x_att',
-                                                       lower='x_min', upper='x_max',
-                                                       log='x_log',
-                                                       limits_cache=self.limits_cache)
-
-        self.y_lim_helper = StateAttributeLimitsHelper(self, attribute='y_att',
-                                                       lower='y_min', upper='y_max',
-                                                       log='y_log',
-                                                       limits_cache=self.limits_cache)
-        self.z_lim_helper = StateAttributeLimitsHelper(self, attribute='z_att',
-                                                       lower='z_min', upper='z_max',
-                                                       log='z_log',
-                                                       limits_cache=self.limits_cache)
+        return widgets.VBox([widget_visible, self.widget_size, self.widget_scaling, widget_color, self.widget_size_mode, self.widget_size_att])
 
 
-        self.add_callback('layers', self._layers_changed)
-
-        self.x_att_helper = ComponentIDComboHelper(self, 'x_att', pixel_coord=True, world_coord=True)
-        self.y_att_helper = ComponentIDComboHelper(self, 'y_att', pixel_coord=True, world_coord=True)
-        self.z_att_helper = ComponentIDComboHelper(self, 'z_att', pixel_coord=True, world_coord=True)
-
-        self.update_from_dict(kwargs)
-
-        self.add_callback('x_log', self._reset_x_limits)
-        self.add_callback('y_log', self._reset_y_limits)
-
-    def _layers_changed(self, *args):
-
-        layers_data = self.layers_data
-        layers_data_cache = getattr(self, '_layers_data_cache', [])
-
-        if layers_data == layers_data_cache:
-            return
-
-        self.x_att_helper.set_multiple_data(self.layers_data)
-        self.y_att_helper.set_multiple_data(self.layers_data)
-        self.z_att_helper.set_multiple_data(self.layers_data)
-
-        self._layers_data_cache = layers_data
