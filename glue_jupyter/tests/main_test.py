@@ -192,8 +192,10 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.state.z_min == 5
     assert s.state.z_max == 7
 
+    assert len(s.tab.children) == 2
     app.subset('test', dataxyz.id['x'] > 2)
     assert len(s.layers) == 2
+    assert len(s.tab.children) == 3
     assert s.layers[1].layer['x'].tolist() == [3]
     assert s.layers[1].layer['y'].tolist() == [4]
     assert s.layers[1].layer['z'].tolist() == [7]
@@ -203,13 +205,31 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.layers[1].scatter.z.tolist() == [5, 6, 7]
     assert s.layers[1].scatter.selected == [2]
 
-    s.state.x_att = 'y'
-    s.state.y_att = 'z'
-    s.state.z_att = 'x'
+    s.state.x_att = dataxyz.id['y']
+    s.state.y_att = dataxyz.id['z']
+    s.state.z_att = dataxyz.id['x']
     assert s.layers[1].scatter.x.tolist() == [2, 3, 4]
     assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
     assert s.layers[1].scatter.z.tolist() == [1, 2, 3]
     assert s.layers[1].scatter.selected == [2]
+
+    assert s.widgets_axis[0].value == 'y'
+    assert s.widgets_axis[1].value == 'z'
+    assert s.widgets_axis[2].value == 'x'
+
+    size_previous = s.layers[0].scatter.size
+    s.layers[0].state.size_mode = 'Linear'
+    assert s.layers[0].scatter.size is not size_previous
+
+    # check response to size_att
+    size_previous = s.layers[0].scatter.size
+    s.layers[0].state.size_att = dataxyz.id['z']
+    assert s.layers[0].scatter.size is not size_previous
+
+    # check response to size_vmin
+    size_previous = s.layers[0].scatter.size
+    s.layers[0].state.size_vmax = s.layers[0].state.size_vmax * 2
+    assert s.layers[0].scatter.size is not size_previous
 
 def test_roi3d(dataxyz):
     roi = PolygonalProjected3dROI(vx=[0.5, 2.5, 2.5, 0.5], vy=[1, 1, 3.5, 3.5], projection_matrix=np.eye(4))
