@@ -1,18 +1,16 @@
+import uuid
+
 import numpy as np
 import bqplot
 import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
 from IPython.display import display
-import PIL.Image
 import matplotlib.cm
-try:
-    from io import BytesIO as StringIO # python3
-except:
-    from StringIO import StringIO # python2
 
 from glue.core.layer_artist import LayerArtistBase
 from glue.core.data import Subset
 from glue.viewers.image.state import ImageLayerState
+from glue.viewers.image.layer_artist import ImageLayerArtist
 
 from ..link import link
 from .scatter import BqplotScatterLayerArtist
@@ -29,20 +27,6 @@ from .. import IPyWidgetView
 #     #    return color
 #     return '#777'
 
-def _rgba_to_png_data(rgba):
-    width, height = rgba.shape[1], rgba.shape[0]
-    f = StringIO()
-    img = PIL.Image.frombuffer("RGBA", (width, height), rgba, 'raw', 'RGBA', 0, 0)
-    img.save(f, "png")
-    return f.getvalue()
-
-def _scalar_to_png_data(I, colormap='viridis'):
-    mask = ~np.isfinite(I)
-    I = np.ma.masked_array(I, mask)
-    colormap = matplotlib.cm.get_cmap(colormap)
-    colormap.set_bad(alpha=0)
-    data = colormap(I, bytes=True)
-    return _rgba_to_png_data(data)
 
 def _mask_to_png_data(mask, color):
     r, g, b = matplotlib.colors.to_rgb(color)
@@ -55,6 +39,12 @@ def _mask_to_png_data(mask, color):
 class BqplotImageLayerArtist(LayerArtistBase):
     _layer_state_cls = ImageLayerState
 
+    get_layer_color = ImageLayerArtist.get_layer_color
+    get_image_shape = ImageLayerArtist.get_image_shape
+    get_image_data  = ImageLayerArtist.get_image_data
+    _update_visual_attributes = ImageLayerArtist._update_visual_attributes
+    _update_compatibility = ImageLayerArtist._update_compatibility
+
     def __init__(self, view, viewer_state, layer, layer_state):
         super(BqplotImageLayerArtist, self).__init__(layer)
         self.view = view
@@ -63,17 +53,14 @@ class BqplotImageLayerArtist(LayerArtistBase):
         self._viewer_state = viewer_state
         if self.state not in self._viewer_state.layers:
             self._viewer_state.layers.append(self.state)
-        data = np.random.random((32, 32))
-        
-        self.image_widget = widgets.Image(value=_scalar_to_png_data(data), format='png', width=32, height=32)
-        self.image_mark = bqplot.Image(image=self.image_widget,
-            scales=self.view.scales, x=[0, 32], y=[0, 32])
-        self.view.figure.marks = list(self.view.figure.marks) + [self.image_mark]
-        #link((self.image, 'colors'), (self.state, 'color'), lambda x: x[0], lambda x: [x])
-        #link((self.image, 'default_opacities'), (self.state, 'alpha'), lambda x: x[0], lambda x: [x])
-        #link((self.image, 'default_size'), (self.state, 'size'))
-        #self.image.observe(self._workaround_unselected_style, 'colors')
 
+        self._update_compatibility()
+
+        self.uuid = str(uuid.uuid4())
+        self.composite = self.view.composite
+        self.composite.allocate(self.uuid)
+        self.composite.set(self.uuid, array=self.get_image_data,
+                           shape=self.get_image_shape)
         viewer_state.add_callback('x_att', self._update_xy_att)
         viewer_state.add_callback('y_att', self._update_xy_att)
 
@@ -81,10 +68,7 @@ class BqplotImageLayerArtist(LayerArtistBase):
         self.update()
 
     def redraw(self):
-        pass
         self.update()
-        #self.image.x = self.layer[self._viewer_state.x_att]
-        #self.image.y = self.layer[self._viewer_state.y_att]
 
     def clear(self):
         pass
@@ -96,52 +80,28 @@ class BqplotImageLayerArtist(LayerArtistBase):
             self.image.unselected_style = {'fill': 'none', 'stroke': 'none'}
 
     def update(self):
-        if isinstance(self.layer, Subset):
-            try:
-                mask = self.layer.to_mask()
-            except IncompatibleAttribute:
-                # The following includes a call to self.clear()
-                self.disable("Subset cannot be applied to this data")
-                return
-            else:
-                self._enabled = True
-            # if self.state.subset_mode == 'outline':
-            #     data = mask.astype(np.float32)
-            # else:
-            data = self.layer.data[self.state.attribute].astype(np.float32)
-            data[~mask] = np.nan
-            png_data = _mask_to_png_data(mask, self.state.color)
+        self._update_visual_attributes()
+        self.view.update_composite()
+
+    def _update_visual_attributes(self):
+        # TODO: refactor since this is almost a copy of glue.viewers.image.layer_artist
+
+        if not self.enabled:
+            return
+
+        if self._viewer_state.color_mode == 'Colormaps':
+            color = self.state.cmap
         else:
-            data = self.layer[self.state.attribute]
-            data = data - self.state.v_min
-            data /= (self.state.v_max - self.state.v_min)
-            print(np.nanmin(data), np.nanmax(data))
-            png_data = _scalar_to_png_data(data)
-        height, width = data.shape
-        with self.image_widget.hold_sync():
-            self.image_widget.value = png_data
-            self.image_widget.width = width
-            self.image_widget.height = height
-        # force the image mark to update the image data
-        self.image_mark.send_state(key='image')
-        self.image_mark.x = [0, width]
-        self.image_mark.y = [0, height]
-        # bug? this will cause a redraw for sure, but why is this needed?
-        marks = list(self.view.figure.marks)
-        self.view.figure.marks = []
-        self.view.figure.marks = marks
+            color = self.state.color
 
-        # self.image.x = self.layer.data[self._viewer_state.x_att]
-        # self.image.y = self.layer.data[self._viewer_state.y_att]
-        # if hasattr(self.layer, 'to_mask'):  # TODO: what is the best way to test if it is Data or Subset?
-        #     self.image.selected = np.nonzero(self.layer.to_mask())[0].tolist()
-        #     self.image.selected_style = {}
-        #     self.image.unselected_style = {'fill': 'none', 'stroke': 'none'}
-        # else:
-        #     self.image.selected = []
-        #     self.image.selected_style = {}
-        #     self.image.unselected_style = {}
-        #     #self.image.selected_style = {'fill': 'none', 'stroke': 'none'}
-        #     #self.image.unselected_style = {'fill': 'green', 'stroke': 'none'}
+        self.composite.set(self.uuid,
+                           clim=(self.state.v_min, self.state.v_max),
+                           visible=self.state.visible,
+                           zorder=self.state.zorder,
+                           color=color,
+                           contrast=self.state.contrast,
+                           bias=self.state.bias,
+                           alpha=self.state.alpha,
+                           stretch=self.state.stretch)
 
-
+        #self.redraw()

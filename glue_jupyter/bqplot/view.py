@@ -181,14 +181,47 @@ BqplotBaseView.get_data_layer_artist = DataViewerWithState.get_data_layer_artist
 
 from glue.viewers.image.state import ImageViewerState
 from glue.viewers.scatter.state import ScatterViewerState
+from glue.viewers.image.composite_array import CompositeArray
 
 from .image import BqplotImageLayerArtist
 from .scatter import BqplotScatterLayerArtist
+from ..utils import rgba_to_png_data
+import numpy as np
 
 class BqplotImageView(BqplotBaseView):
     allow_duplicate_data = False
     allow_duplicate_subset = False
     _state_cls = ImageViewerState
+
+    def __init__(self, session):
+        super(BqplotImageView, self).__init__(session)
+        self.composite = CompositeArray()
+        data = (np.random.random((32, 32, 4)) * 255).astype(np.uint8)
+        self.image_widget = widgets.Image(value=rgba_to_png_data(data), format='png', width=32, height=32)
+        self.image_mark = bqplot.Image(image=self.image_widget,
+            scales=self.scales, x=[0, 32], y=[0, 32])
+        self.figure.marks = list(self.figure.marks) + [self.image_mark]
+
+    def update_composite(self):
+        data = self.composite[:,:]
+        height, width = data.shape[:2]
+        data = (data * 255).astype(np.uint8)
+        png_data = rgba_to_png_data(data)
+        with self.image_widget.hold_sync():
+            self.image_widget.value = png_data
+            self.image_widget.width = width
+            self.image_widget.height = height
+        # force the image mark to update the image data
+        self.image_mark.send_state(key='image')
+        self.image_mark.x = [0, width]
+        self.image_mark.y = [0, height]
+        # bug? this will cause a redraw for sure, but why is this needed?
+        marks = list(self.figure.marks)
+        self.figure.marks = []
+        self.figure.marks = marks
+
+
+
 
     def get_data_layer_artist(self, layer=None, layer_state=None):
         if layer.ndim == 1:
