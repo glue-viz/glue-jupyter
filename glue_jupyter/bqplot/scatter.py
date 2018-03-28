@@ -36,7 +36,7 @@ class BqplotScatterLayerArtist(LayerArtistBase):
             scales=self.view.scales, x=[0, 1], y=[0, 1])
         self.view.figure.marks = list(self.view.figure.marks) + [self.scatter]
         link((self.scatter, 'colors'), (self.state, 'color'), lambda x: x[0], lambda x: [x])
-        link((self.scatter, 'default_opacities'), (self.state, 'alpha'), lambda x: x[0], lambda x: [x])
+        link((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x], lambda x: x[0])
         link((self.scatter, 'default_size'), (self.state, 'size'))
         self.scatter.observe(self._workaround_unselected_style, 'colors')
 
