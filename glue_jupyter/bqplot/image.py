@@ -12,7 +12,7 @@ from glue.core.data import Subset
 from glue.viewers.image.state import ImageLayerState
 from glue.viewers.image.layer_artist import ImageLayerArtist
 
-from ..link import link
+from ..link import link, calculation, link_component_id_to_select_widget, on_change
 from .scatter import BqplotScatterLayerArtist
 
 # FIXME: monkey patch ipywidget to accept anything
@@ -28,13 +28,14 @@ from .. import IPyWidgetView
 #     return '#777'
 
 
-def _mask_to_png_data(mask, color):
+def _mask_to_rgba_data(mask, color):
     r, g, b = matplotlib.colors.to_rgb(color)
     rgba = np.zeros(mask.shape + (4,), dtype=np.uint8)
-    print(rgba.shape)
     rgba[mask.astype(np.bool),3] = 0.5 * 255
     rgba[...,0:3] = r * 255, g * 255, b * 255
-    return _rgba_to_png_data(rgba)
+    rgba[~mask,3] = 255
+    rgba[mask,3] = 0
+    return rgba
 
 class BqplotImageLayerArtist(LayerArtistBase):
     _layer_state_cls = ImageLayerState
@@ -56,11 +57,14 @@ class BqplotImageLayerArtist(LayerArtistBase):
 
         self._update_compatibility()
 
-        self.uuid = str(uuid.uuid4())
-        self.composite = self.view.composite
-        self.composite.allocate(self.uuid)
-        self.composite.set(self.uuid, array=self.get_image_data,
-                           shape=self.get_image_shape)
+        self.scale_image = bqplot.ColorScale()
+        self.scales = {'x': self.view.scale_x, 'y': self.view.scale_y, 'image': self.scale_image}
+        self.image_mark = bqplot.Image(image=[[1, 2], [3,4]], scales=self.scales)
+        self.color_axis = bqplot.ColorAxis(side='right', scale=self.scale_image, orientation='vertical')
+        self.view.figure.axes = list(self.view.figure.axes) + [self.color_axis]
+
+        self.view.figure.marks = list(self.view.figure.marks) + [self.image_mark]
+
         viewer_state.add_callback('x_att', self._update_xy_att)
         viewer_state.add_callback('y_att', self._update_xy_att)
 
@@ -79,29 +83,83 @@ class BqplotImageLayerArtist(LayerArtistBase):
             self.image.unselected_style = {'fill': 'white', 'stroke': 'none'}
             self.image.unselected_style = {'fill': 'none', 'stroke': 'none'}
 
+
+    def _update_scale_image(self):
+        contrast = self.state.contrast
+        bias = self.state.bias
+        if not isinstance(self.layer, Subset):
+            min = self.state.v_min
+            max = self.state.v_max
+            print("from", min, max)
+            width = max - min
+            mid = (min + max) / 2.
+            min = (min - bias * width)*contrast + 0.5 * width
+            max = (max - bias * width)*contrast + 0.5 * width
+            #max = mid + contrast * width / 2
+            print("to", min, max)
+            with self.scale_image.hold_sync():
+                self.scale_image.min = min
+                self.scale_image.max = max
+
+
+
     def update(self):
-        self._update_visual_attributes()
-        self.view.update_composite()
-
-    def _update_visual_attributes(self):
-        # TODO: refactor since this is almost a copy of glue.viewers.image.layer_artist
-
-        if not self.enabled:
-            return
-
-        if self._viewer_state.color_mode == 'Colormaps':
-            color = self.state.cmap
+        if isinstance(self.layer, Subset):
+            try:
+                mask = self.layer.to_mask()
+            except IncompatibleAttribute:
+                # The following includes a call to self.clear()
+                self.disable("Subset cannot be applied to this data")
+                return
+            else:
+                self._enabled = True
+            # if self.state.subset_mode == 'outline':
+            #     data = mask.astype(np.float32)
+            # else:
+            data = self.layer.data[self.state.attribute].astype(np.float32)
+            data[~mask] = np.nan
+            rgb_data = _mask_to_rgba_data(mask, self.state.color)
+            self.image_mark.image = rgb_data
         else:
-            color = self.state.color
+            data = self.layer[self.state.attribute]
+            # data = data - self.state.v_min
+            # data /= (self.state.v_max - self.state.v_min)
+            # print(np.nanmin(data), np.nanmax(data))
+            # png_data = _scalar_to_png_data(data)
+            self.scale_image.min = self.state.v_min.item()
+            self.scale_image.max = self.state.v_max.item()
+            self.image_mark.image = data
+        # force the image mark to update the image data
+        # self.image_mark.send_state(key='image')
+        height, width = data.shape
+        self.image_mark.x = [0, width]
+        self.image_mark.y = [height, 0]
+        # bug? this will cause a redraw for sure, but why is this needed?
+        marks = list(self.view.figure.marks)
+        self.view.figure.marks = []
+        self.view.figure.marks = marks
 
-        self.composite.set(self.uuid,
-                           clim=(self.state.v_min, self.state.v_max),
-                           visible=self.state.visible,
-                           zorder=self.state.zorder,
-                           color=color,
-                           contrast=self.state.contrast,
-                           bias=self.state.bias,
-                           alpha=self.state.alpha,
-                           stretch=self.state.stretch)
+    def create_widgets(self):
+        self.widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
+        link((self.state, 'visible'), (self.widget_visible, 'value'))
+        link((self.state, 'visible'), (self.image_mark, 'visible'))
 
-        #self.redraw()
+        self.widget_contrast = widgets.FloatSlider(min=0, max=4, value=self.state.contrast, description='contrast')
+        link((self.state, 'contrast'), (self.widget_contrast, 'value'))
+
+        self.widget_bias = widgets.FloatSlider(min=0, max=1, value=self.state.bias, description='bias')
+        link((self.state, 'bias'), (self.widget_bias, 'value'))
+
+        # TODO: refactor: this is a copy from state
+        percentile_display = {100: 'Min/Max',
+                      99.5: '99.5%',
+                      99: '99%',
+                      95: '95%',
+                      90: '90%',
+                      'Custom': 'Custom'}
+
+        self.widget_percentile = widgets.Dropdown(options=[(percentile_display[k], k) for k in [100, 99.5, 99, 95, 90, 'Custom']],
+                                       value=self.state.percentile, description='limits')
+        link((self.state, 'percentile'), (self.widget_percentile, 'value'))
+        on_change([(self.state, 'bias', 'contrast', 'v_min', 'v_max')])(self._update_scale_image)
+        return widgets.VBox([self.widget_visible, self.widget_percentile, self.widget_contrast, self.widget_bias])
