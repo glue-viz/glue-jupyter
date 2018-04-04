@@ -229,3 +229,7 @@ class IPyWidgetView(ViewerBase):
                         layer_artist.update()
             self.redraw()
 
+    def _add_layer_tab(self, layer):
+        layer_tab = layer.create_widgets()
+        self.tab.children = self.tab.children + (layer_tab, )
+        self.tab.set_title(len(self.tab.children)-1, layer.layer.label)

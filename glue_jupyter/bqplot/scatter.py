@@ -75,3 +75,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
             #self.scatter.selected_style = {'fill': 'none', 'stroke': 'none'}
             #self.scatter.unselected_style = {'fill': 'green', 'stroke': 'none'}
 
+    def create_widgets(self):
+        self.widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
+        link((self.state, 'visible'), (self.widget_visible, 'value'))
+        link((self.state, 'visible'), (self.scatter, 'visible'))
+        return widgets.VBox([self.widget_visible])

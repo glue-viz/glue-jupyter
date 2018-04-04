@@ -60,11 +60,6 @@ class BqplotBaseView(IPyWidgetView):
         self.button_action.observe(self.change_action, "value")
         self.change_action()  # 'fire' manually for intial value
 
-        self.button_box = widgets.HBox(children=[self.button_action])
-        self.main_box = widgets.VBox(children=[self.button_box, self.figure])
-        
-
-
 #         self.state.add_callback('y_att', self._update_axes)
 #         self.state.add_callback('x_log', self._update_axes)
 #         self.state.add_callback('y_log', self._update_axes)
@@ -73,6 +68,25 @@ class BqplotBaseView(IPyWidgetView):
         self.state.add_callback('x_max', self.limits_to_scales)
         self.state.add_callback('y_min', self.limits_to_scales)
         self.state.add_callback('y_max', self.limits_to_scales)
+
+        self.create_tab()
+        self.output_widget = widgets.Output()
+        self.main_widget = widgets.VBox(
+            children=[self.tab, self.figure, self.output_widget])
+
+    def show(self):
+        display(self.main_widget)
+
+    def create_tab(self):
+        self.widget_show_axes = widgets.Checkbox(value=False, description="Show axes")
+        self.widgets_axis = []
+        self.tab_general = widgets.VBox([self.button_action, self.widget_show_axes] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
+        children = [self.tab_general]
+        self.tab = widgets.Tab(children)
+        self.tab.set_title(0, "General")
+        self.tab.set_title(1, "Axes")
+
+
 
     @staticmethod
     def update_viewer_state(rec, context):
@@ -145,9 +159,6 @@ class BqplotBaseView(IPyWidgetView):
                                       other_att=self.state.y_att,
                                       coord='x')
 
-    def show(self):
-        display(self.main_box)
-
     def limits_to_scales(self, *args):
         if self.state.x_min is not None and self.state.x_max is not None:
             self.scale_x.min = float(self.state.x_min)
@@ -193,49 +204,23 @@ class BqplotImageView(BqplotBaseView):
     allow_duplicate_subset = False
     _state_cls = ImageViewerState
 
-    def __init__(self, session):
-        super(BqplotImageView, self).__init__(session)
-        self.composite = CompositeArray()
-        data = (np.random.random((32, 32, 4)) * 255).astype(np.uint8)
-        self.image_widget = widgets.Image(value=rgba_to_png_data(data), format='png', width=32, height=32)
-        self.image_mark = bqplot.Image(image=self.image_widget,
-            scales=self.scales, x=[0, 32], y=[0, 32])
-        self.figure.marks = list(self.figure.marks) + [self.image_mark]
-
-    def update_composite(self):
-        data = self.composite[:,:]
-        height, width = data.shape[:2]
-        data = (data * 255).astype(np.uint8)
-        png_data = rgba_to_png_data(data)
-        with self.image_widget.hold_sync():
-            self.image_widget.value = png_data
-            self.image_widget.width = width
-            self.image_widget.height = height
-        # force the image mark to update the image data
-        self.image_mark.send_state(key='image')
-        self.image_mark.x = [0, width]
-        self.image_mark.y = [0, height]
-        # bug? this will cause a redraw for sure, but why is this needed?
-        marks = list(self.figure.marks)
-        self.figure.marks = []
-        self.figure.marks = marks
-
-
-
-
     def get_data_layer_artist(self, layer=None, layer_state=None):
         if layer.ndim == 1:
             cls = BqplotScatterLayerArtist
         else:
             cls = BqplotImageLayerArtist
-        return self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
+        layer = self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
+        self._add_layer_tab(layer)
+        return layer
 
     def get_subset_layer_artist(self, layer=None, layer_state=None):
         if layer.ndim == 1:
             cls = BqplotScatterLayerArtist
         else:
             cls = BqplotImageLayerArtist
-        return self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
+        layer = self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
+        self._add_layer_tab(layer)
+        return layer
 
 
 class BqplotScatterView(BqplotBaseView):
