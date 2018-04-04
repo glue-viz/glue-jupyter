@@ -91,16 +91,23 @@ class BqplotImageLayerArtist(LayerArtistBase):
         if not isinstance(self.layer, Subset):
             min = self.state.v_min
             max = self.state.v_max
-            print("from", min, max)
             width = max - min
             mid = (min + max) / 2.
             min = (min - bias * width)*contrast + 0.5 * width
             max = (max - bias * width)*contrast + 0.5 * width
-            #max = mid + contrast * width / 2
-            print("to", min, max)
             with self.scale_image.hold_sync():
                 self.scale_image.min = min
                 self.scale_image.max = max
+
+    def _update_cmap(self):
+        name = self.state.cmap
+        value = dict(colormaps)[name]
+        if isinstance(value, list):
+            self.scale_image.colors = value
+        else:
+            # with self.scale_image.hold_sync():
+            self.scale_image.colors = []
+            self.scale_image.scheme = value
 
 
 
@@ -134,33 +141,49 @@ class BqplotImageLayerArtist(LayerArtistBase):
         # self.image_mark.send_state(key='image')
         height, width = data.shape
         self.image_mark.x = [0, width]
-        self.image_mark.y = [height, 0]
+        self.image_mark.y = [0, height]
         # bug? this will cause a redraw for sure, but why is this needed?
         marks = list(self.view.figure.marks)
         self.view.figure.marks = []
         self.view.figure.marks = marks
 
     def create_widgets(self):
+        children = []
         self.widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
         link((self.state, 'visible'), (self.widget_visible, 'value'))
         link((self.state, 'visible'), (self.image_mark, 'visible'))
 
-        self.widget_contrast = widgets.FloatSlider(min=0, max=4, value=self.state.contrast, description='contrast')
-        link((self.state, 'contrast'), (self.widget_contrast, 'value'))
+        self.widget_opacity = widgets.FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha, description='opacity')
+        link((self.state, 'alpha'), (self.widget_opacity, 'value'))
+        link((self.state, 'alpha'), (self.image_mark, 'opacity'))
 
-        self.widget_bias = widgets.FloatSlider(min=0, max=1, value=self.state.bias, description='bias')
-        link((self.state, 'bias'), (self.widget_bias, 'value'))
+        children.extend([self.widget_visible, self.widget_opacity])
 
-        # TODO: refactor: this is a copy from state
-        percentile_display = {100: 'Min/Max',
-                      99.5: '99.5%',
-                      99: '99%',
-                      95: '95%',
-                      90: '90%',
-                      'Custom': 'Custom'}
+        if not isinstance(self.layer, Subset):
+            self.widget_contrast = widgets.FloatSlider(min=0, max=4, step=0.01, value=self.state.contrast, description='contrast')
+            link((self.state, 'contrast'), (self.widget_contrast, 'value'))
 
-        self.widget_percentile = widgets.Dropdown(options=[(percentile_display[k], k) for k in [100, 99.5, 99, 95, 90, 'Custom']],
-                                       value=self.state.percentile, description='limits')
-        link((self.state, 'percentile'), (self.widget_percentile, 'value'))
-        on_change([(self.state, 'bias', 'contrast', 'v_min', 'v_max')])(self._update_scale_image)
-        return widgets.VBox([self.widget_visible, self.widget_percentile, self.widget_contrast, self.widget_bias])
+            self.widget_bias = widgets.FloatSlider(min=0, max=1, step=0.01, value=self.state.bias, description='bias')
+            link((self.state, 'bias'), (self.widget_bias, 'value'))
+
+            # TODO: refactor: this is a copy from state
+            percentile_display = {100: 'Min/Max',
+                          99.5: '99.5%',
+                          99: '99%',
+                          95: '95%',
+                          90: '90%'}
+                          #'Custom': 'Custom'} # TODO: support custom
+
+            self.widget_percentile = widgets.Dropdown(options=[(percentile_display[k], k) for k in [100, 99.5, 99, 95, 90]],#, 'Custom']],
+                                           value=self.state.percentile, description='limits')
+            link((self.state, 'percentile'), (self.widget_percentile, 'value'))
+            on_change([(self.state, 'bias', 'contrast', 'v_min', 'v_max')])(self._update_scale_image)
+
+            self.widget_colormap = widgets.Dropdown(options=colormaps, value=colormaps[0][1], description='colormap')
+            link((self.widget_colormap, 'label'), (self.state, 'cmap'))
+            on_change([(self.state, 'cmap')])(self._update_cmap)
+            self._update_cmap()
+
+            children.extend([self.widget_percentile, self.widget_contrast, self.widget_bias, self.widget_colormap])
+
+        return widgets.VBox(children)

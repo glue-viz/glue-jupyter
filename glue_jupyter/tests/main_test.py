@@ -296,7 +296,18 @@ def test_imshow(app, data_image, dataxyz):
 
     assert len(v.layers) == 2
     v.brush.brushing = True
-    v.brush.selected = [(1.5, 3.5), (3.5, 5)]
+    v.brush.selected = [(1.5, 3.5), (300.5, 550)]
     v.brush.brushing = False
 
     assert len(v.layers) == 4
+
+    v.layers[0].state.cmap = 'Grey'
+    assert v.layers[0].widget_colormap.label == 'Grey'
+    assert isinstance(v.layers[0].widget_colormap.value, list)
+    assert v.layers[0].scale_image.scheme
+
+    v.layers[0].state.cmap = 'Jet'
+    assert v.layers[0].widget_colormap.label == 'Jet'
+    assert v.layers[0].widget_colormap.value == 'jet'
+    assert v.layers[0].scale_image.scheme == 'jet'
+    assert v.layers[0].scale_image.colors == []
