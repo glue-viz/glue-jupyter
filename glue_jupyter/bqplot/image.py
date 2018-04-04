@@ -19,6 +19,7 @@ from .scatter import BqplotScatterLayerArtist
 tt.Color.validate = lambda self, obj, value: value
 
 
+colormaps = [('Viridis', 'viridis'), ('Jet', 'jet'), ('Grey', ['black', 'grey']), ('RdYlGn', 'RdYlGn')]
 
 from .. import IPyWidgetView
 
@@ -33,8 +34,8 @@ def _mask_to_rgba_data(mask, color):
     rgba = np.zeros(mask.shape + (4,), dtype=np.uint8)
     rgba[mask.astype(np.bool),3] = 0.5 * 255
     rgba[...,0:3] = r * 255, g * 255, b * 255
-    rgba[~mask,3] = 255
-    rgba[mask,3] = 0
+    rgba[mask,3] = 255
+    rgba[~mask,3] = 0
     return rgba
 
 class BqplotImageLayerArtist(LayerArtistBase):
