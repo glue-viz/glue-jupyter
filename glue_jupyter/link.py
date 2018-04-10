@@ -34,6 +34,14 @@ class link(object):
         if sync_directly:
             sync()
 
+class dlink(link):
+    def __init__(self, source, target, f1=lambda x: x):
+        self.source = source
+        self.target = target
+
+        self._link(source, target, 'source', f1, True)
+
+
 def _assign(object, value):
     if isinstance(object, widgets.Widget):
         object, trait = object, 'value'
