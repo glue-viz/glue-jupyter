@@ -164,11 +164,6 @@ class IpyvolumeBaseView(IPyWidgetView):
         self.tab.set_title(0, "General")
         self.tab.set_title(1, "Axes")
 
-    def _add_layer_tab(self, layer):
-        layer_tab = layer.create_widgets()
-        self.tab.children = self.tab.children + (layer_tab, )
-        self.tab.set_title(len(self.tab.children)-1, layer.layer.label)
-
 IpyvolumeBaseView.add_data = DataViewerWithState.add_data
 IpyvolumeBaseView.add_subset = DataViewerWithState.add_subset
 
@@ -207,4 +202,8 @@ class IpyvolumeVolumeView(IpyvolumeBaseView):
 
     def get_subset_layer_artist(self, layer=None, layer_state=None):
         return self.get_data_layer_artist(layer, layer_state)
+
+    def create_tab(self):
+        children = []
+        self.tab = widgets.Tab(children)
 
