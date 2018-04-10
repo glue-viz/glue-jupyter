@@ -100,14 +100,17 @@ class BqplotImageLayerArtist(LayerArtistBase):
                 self.scale_image.max = max
 
     def _update_cmap(self):
-        name = self.state.cmap
-        value = dict(colormaps)[name]
-        if isinstance(value, list):
-            self.scale_image.colors = value
+        if isinstance(self.layer, Subset):
+            self.scale_image.colors = ['white', self.state.color]
         else:
-            # with self.scale_image.hold_sync():
-            self.scale_image.colors = []
-            self.scale_image.scheme = value
+            name = self.state.cmap
+            value = dict(colormaps)[name]
+            if isinstance(value, list):
+                self.scale_image.colors = value
+            else:
+                # with self.scale_image.hold_sync():
+                self.scale_image.colors = []
+                self.scale_image.scheme = value
 
 
 
@@ -124,10 +127,10 @@ class BqplotImageLayerArtist(LayerArtistBase):
             # if self.state.subset_mode == 'outline':
             #     data = mask.astype(np.float32)
             # else:
-            data = self.layer.data[self.state.attribute].astype(np.float32)
+            #data = self.layer.data[self.state.attribute].astype(np.float32)
+            data = mask.astype(np.float32)
             data[~mask] = np.nan
-            rgb_data = _mask_to_rgba_data(mask, self.state.color)
-            self.image_mark.image = rgb_data
+            self.image_mark.image = data
         else:
             data = self.layer[self.state.attribute]
             # data = data - self.state.v_min
@@ -159,7 +162,12 @@ class BqplotImageLayerArtist(LayerArtistBase):
 
         children.extend([self.widget_visible, self.widget_opacity])
 
-        if not isinstance(self.layer, Subset):
+        if isinstance(self.layer, Subset):
+            self.widget_color = widgets.ColorPicker(description='color')
+            link((self.state, 'color'), (self.widget_color, 'value'))
+            on_change([(self.state, 'color')])(self._update_cmap)
+            children.extend([self.widget_color])
+        else:
             self.widget_contrast = widgets.FloatSlider(min=0, max=4, step=0.01, value=self.state.contrast, description='contrast')
             link((self.state, 'contrast'), (self.widget_contrast, 'value'))
 
