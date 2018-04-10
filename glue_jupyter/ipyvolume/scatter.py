@@ -17,7 +17,7 @@ from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
 from .. import IPyWidgetView
-from ..link import link, calculation, link_component_id_to_select_widget, on_change
+from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 
 class Scatter3dLayerState(ScatterLayerState):
     pass
@@ -84,18 +84,6 @@ class IpyvolumeScatterLayerArtist(LayerArtistBase):
         link((self.state, 'size'), (self.widget_size, 'value'))
         self.widget_scaling = widgets.FloatSlider(description='scale', min=0, max=2, value=self.state.size_scaling)
         link((self.state, 'size_scaling'), (self.widget_scaling, 'value'))
-        #on_change([self.widget_size, self.widget_scaling])(self._update_size)
-        # def set_size(size, scaling):
-        #     self.
-        #     value = size * scaling / 5
-        #     # print('set size', value)
-        #     if self.state.size_mode == 'Fixed':
-        #         if hasattr(self.layer, 'to_mask'):  # TODO: what is the best way to test if it is Data or Subset?
-        #             self.scatter.size = 0
-        #             self.scatter.size_selected = value
-        #         else:
-        #             self.scatter.size = value
-        #             self.scatter.size_selected = value
 
         widget_color = widgets.ColorPicker(description='color')
         link((self.state, 'color'), (widget_color, 'value'))
@@ -112,7 +100,14 @@ class IpyvolumeScatterLayerArtist(LayerArtistBase):
         link_component_id_to_select_widget(self.state, 'size_att', self.widget_size_att)
         on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
 
+        self.widget_size_vmin = widgets.FloatText()
+        self.widget_size_vmax = widgets.FloatText()
+        self.widget_size_v = widgets.HBox([widgets.Label(value='limits'), self.widget_size_vmin, self.widget_size_vmax])
+        link((self.state, 'size_vmin'), (self.widget_size_vmin, 'value'))
+        link((self.state, 'size_vmax'), (self.widget_size_vmax, 'value'))
 
-        return widgets.VBox([widget_visible, self.widget_size, self.widget_scaling, widget_color, self.widget_size_mode, self.widget_size_att])
+        dlink((self.widget_size_mode, 'value'), (self.widget_size.layout, 'display'),     lambda value: None if value == options[0] else 'none')
+        dlink((self.widget_size_mode, 'value'), (self.widget_size_att.layout, 'display'), lambda value: None if value == options[1] else 'none')
+        dlink((self.widget_size_mode, 'value'), (self.widget_size_v.layout, 'display'), lambda value: None if value == options[1] else 'none')
 
-
+        return widgets.VBox([widget_visible, self.widget_size_mode, self.widget_size, self.widget_size_att, self.widget_size_v, self.widget_scaling, widget_color])
