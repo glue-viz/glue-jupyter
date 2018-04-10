@@ -205,7 +205,10 @@ class IPyWidgetView(ViewerBase):
     def _update_subset(self, message):
         if message.subset in self._layer_artist_container:
             for layer_artist in self._layer_artist_container[message.subset]:
-                layer_artist.update()
+                if isinstance(message, msg.SubsetUpdateMessage) and message.attribute not in ['subset_state']:
+                    pass
+                else:
+                    layer_artist.update()
             self.redraw()
 
     def _subset_has_data(self, x):
