@@ -168,8 +168,22 @@ class BqplotBaseView(IPyWidgetView):
             self.scale_y.min = float(self.state.y_min)
             self.scale_y.max = float(self.state.y_max)
 
-    def get_subset_layer_artist(*args, **kwargs):
-        layer = DataViewerWithState.get_data_layer_artist(*args, **kwargs)
+    def get_data_layer_artist(self, layer=None, layer_state=None):
+        if layer.ndim == 1:
+            cls = BqplotScatterLayerArtist
+        else:
+            cls = BqplotImageLayerArtist
+        layer = self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
+        self._add_layer_tab(layer)
+        return layer
+
+    def get_subset_layer_artist(self, layer=None, layer_state=None):
+        if layer.ndim == 1:
+            cls = BqplotScatterLayerArtist
+        else:
+            cls = BqplotImageLayerArtist
+        layer = self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
+        self._add_layer_tab(layer)
         return layer
 
     def receive_message(self, message):
@@ -188,7 +202,6 @@ class BqplotBaseView(IPyWidgetView):
 from glue.viewers.common.qt.data_viewer_with_state import DataViewerWithState
 BqplotBaseView.add_data = DataViewerWithState.add_data
 BqplotBaseView.add_subset = DataViewerWithState.add_subset
-BqplotBaseView.get_data_layer_artist = DataViewerWithState.get_data_layer_artist
 
 from glue.viewers.image.state import ImageViewerState
 from glue.viewers.scatter.state import ScatterViewerState
