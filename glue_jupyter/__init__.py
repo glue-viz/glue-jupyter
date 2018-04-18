@@ -33,7 +33,11 @@ def example_data_xyz(seed=42, N=500, loc=0, scale=1):
     import numpy as np
     rng = np.random.RandomState(seed)
     x, y, z = rng.normal(loc, scale, size=(3, N))
-    data_xyz = Data(x=x, y=y, z=z, label="xyz data")
+    vx = x - x.mean()
+    vy = y - y.mean()
+    vz = z - z.mean()
+    speed = np.sqrt(vx**2 + vy**2 + vz**2)
+    data_xyz = Data(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, speed=speed, label="xyz data")
     return data_xyz
 
 def example_volume(shape=64, limits=[-4, 4]):
