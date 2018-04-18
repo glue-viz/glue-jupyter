@@ -1,4 +1,5 @@
 import ipyvolume as ipv
+import ipyvolume.moviemaker
 import ipywidgets as widgets
 import traitlets
 import numpy as np
@@ -12,7 +13,7 @@ from glue.core.command import ApplySubsetState
 from glue.viewers.common.qt.data_viewer_with_state import DataViewerWithState
 
 from .. import IPyWidgetView
-from ..link import link, link_component_id_to_select_widget
+from ..link import link, dlink, link_component_id_to_select_widget
 from .scatter import IpyvolumeScatterLayerArtist
 from .volume import IpyvolumeVolumeLayerArtist
 
@@ -146,11 +147,12 @@ class IpyvolumeBaseView(IPyWidgetView):
 
         self.widgets_axis = []
         for i, axis_name in enumerate('xyz'):
-            helper = getattr(self.state, axis_name + '_att_helper')
-            widget_axis = widgets.Dropdown(options=[k.label for k in helper.choices],
-                                           value=getattr(self.state, axis_name + '_att'), description=axis_name + ' axis')
-            self.widgets_axis.append(widget_axis)
-            link_component_id_to_select_widget(self.state, axis_name + '_att', widget_axis)
+            if hasattr(self.state, axis_name + '_att_helper'):
+                helper = getattr(self.state, axis_name + '_att_helper')
+                widget_axis = widgets.Dropdown(options=[k.label for k in helper.choices],
+                                               value=getattr(self.state, axis_name + '_att'), description=axis_name + ' axis')
+                self.widgets_axis.append(widget_axis)
+                link_component_id_to_select_widget(self.state, axis_name + '_att', widget_axis)
 
         selectors = ['lasso', 'circle', 'rectangle']
         self.button_action = widgets.ToggleButtons(description='Mode: ', options=[(selector, selector) for selector in selectors],
@@ -158,7 +160,12 @@ class IpyvolumeBaseView(IPyWidgetView):
         traitlets.link((self.figure, 'selector'),
                        (self.button_action, 'label'))
 
-        self.tab_general = widgets.VBox([self.button_action, self.widget_show_axes] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
+        self.widget_show_movie_maker = widgets.ToggleButton(value=False, description="Show movie maker")
+        self.movie_maker = ipv.moviemaker.MovieMaker(self.figure, self.figure.camera)
+        dlink((self.widget_show_movie_maker, 'value'), (self.movie_maker.widget_main.layout, 'display'), lambda value: None if value else 'none')
+
+
+        self.tab_general = widgets.VBox([self.button_action, self.widget_show_axes] + self.widgets_axis + [self.widget_show_movie_maker, self.movie_maker.widget_main])#, self.widget_y_axis, self.widget_z_axis])
         children = [self.tab_general]
         self.tab = widgets.Tab(children)
         self.tab.set_title(0, "General")
@@ -202,8 +209,3 @@ class IpyvolumeVolumeView(IpyvolumeBaseView):
 
     def get_subset_layer_artist(self, layer=None, layer_state=None):
         return self.get_data_layer_artist(layer, layer_state)
-
-    def create_tab(self):
-        children = []
-        self.tab = widgets.Tab(children)
-
