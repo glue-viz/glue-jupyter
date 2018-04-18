@@ -5,6 +5,8 @@ from IPython.display import display
 import numpy as np
 
 from .scatter import IpyvolumeScatterLayerArtist
+from ..utils import reduce_size
+
 from glue_vispy_viewers.common.layer_state import VispyLayerState
 from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.external.echo import (CallbackProperty, SelectionCallbackProperty)
@@ -46,13 +48,16 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
         super(IpyvolumeVolumeLayerArtist, self).__init__(layer)
         self.layer = layer or layer_state.layer
         self.ipyvolume_viewer = ipyvolume_viewer
+        self.figure = self.ipyvolume_viewer.figure
         self._viewer_state = ipyvolume_viewer.state
         assert ipyvolume_viewer.state == state
         self.state = layer_state or IpyvolumeLayerState(layer=self.layer)
         if self.state not in self._viewer_state.layers:
             self._viewer_state.layers.append(self.state)
 
-        ipv.figure(self.ipyvolume_viewer.figure)
+        #ipv.figure(self.ipyvolume_viewer.figure)
+        self.volume = None
+        self.last_shape = None
 
     def clear(self):
         pass
@@ -84,12 +89,30 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
         data_min, data_max = np.percentile(
             data[finite_mask], 1), np.percentile(data[finite_mask], 99)
         #data_min, data_max = None, None
-        self.volume = ipv.volshow(data, data_min=data_min, data_max=data_max)
+        self.last_shape = shape = data.shape
+        data = reduce_size(data, self.widget_max_resolution.value)
+        if self.volume is None:
+            with self.figure:
+                self.volume = ipv.volshow(data, data_min=data_min, data_max=data_max, extent=[[0, shape[0]], [0, shape[1]], [0, shape[2]]])
+        else:
+            self.ipyvolume_viewer.figure.volume_data = data
 
 
 
     def create_widgets(self):
-        return widgets.VBox([])
+        self.size_options = [128, 128+64, 256, 256+128, 512]
+        options = [(str(k), k) for k in self.size_options]
+        self.widget_max_resolution = widgets.Dropdown(options=options, value=128, description='max resolution')
+
+        self.widget_reset_zoom = widgets.Button(description="Reset zoom")
+        def reset_zoom(*ignore):
+            with self.figure:
+                if self.last_shape is not None:
+                    ipv.xlim(0, self.last_shape[0])
+                    ipv.ylim(0, self.last_shape[1])
+                    ipv.zlim(0, self.last_shape[2])
+        self.widget_reset_zoom.on_click(reset_zoom)
+        return widgets.VBox([self.widget_max_resolution, self.widget_reset_zoom])
 
 #from glue_vispy_viewers.common.vispy_data_viewer import BaseVispyViewer
 
