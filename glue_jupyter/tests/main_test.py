@@ -287,9 +287,9 @@ def test_lasso3d(app, dataxyz):
     assert s.layers[1].layer['y'].tolist() == [2, 3]
     assert s.layers[1].layer['z'].tolist() == [5, 6]
 
-def test_volume(app, data_volume, dataxyz):
+def test_volshow(app, data_volume, dataxyz):
     assert data_volume in app.data_collection
-    v = app.volume3d(data=data_volume)
+    v = app.volshow(data=data_volume)
 
     data = {'type': 'lasso', 'device': zip([0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])}
     # fake the callback
