@@ -33,7 +33,7 @@ class BqplotBaseView(IPyWidgetView):
             self.axis_y.label = str(self.state.y_att)
         self.state.add_callback('x_att', update_axes)
         self.state.add_callback('y_att', update_axes)
-        self.figure = bqplot.Figure(scales=self.scales, axes=[
+        self.figure = bqplot.Figure(scales=self.scales, animation_duration=0, axes=[
                                     self.axis_x, self.axis_y])
         self.figure.padding_y = 0
         
