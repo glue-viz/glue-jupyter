@@ -89,6 +89,14 @@ def test_scatter2d(app, dataxyz, dataxz):
     assert s.state.x_min == 2
     assert s.state.x_max == 4
 
+    s.layers[0].state.size_mode = 'Linear'
+
+    layer = s.layers[0]
+    assert not layer.quiver.visible
+    layer.state.vector_visible = True
+    assert layer.quiver.visible
+
+
 def test_scatter2d_subset(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     app.subset('test', dataxyz.id['x'] > 2)
@@ -230,6 +238,12 @@ def test_scatter3d(app, dataxyz, dataxz):
     size_previous = s.layers[0].scatter.size
     s.layers[0].state.size_vmax = s.layers[0].state.size_vmax * 2
     assert s.layers[0].scatter.size is not size_previous
+
+    # test quiver
+    layer = s.layers[0]
+    assert not layer.quiver.visible
+    layer.state.vector_visible = True
+    assert layer.quiver.visible
 
 def test_roi3d(dataxyz):
     roi = PolygonalProjected3dROI(vx=[0.5, 2.5, 2.5, 0.5], vy=[1, 1, 3.5, 3.5], projection_matrix=np.eye(4))
