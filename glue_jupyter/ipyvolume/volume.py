@@ -23,8 +23,10 @@ class IpyvolumeLayerState(VolumeLayerState):
     render_method = CallbackProperty()
     lighting = CallbackProperty()
     max_resolution = CallbackProperty()
-    data_min = CallbackProperty()
-    data_max = CallbackProperty()
+    vmin = CallbackProperty()
+    vmax = CallbackProperty()
+    clamp_min = CallbackProperty()
+    clamp_max = CallbackProperty()
     # attribute = SelectionCallbackProperty()
 
     def __init__(self, layer=None, **kwargs):
@@ -33,8 +35,10 @@ class IpyvolumeLayerState(VolumeLayerState):
         self.render_method = 'NORMAL'
         self.lighting = True
         self.max_resolution = 256
-        self.data_min = 0.
-        self.data_max = 1.
+        self.vmin = 0.
+        self.vmax = 1.
+        self.clamp_min = False
+        self.clamp_max = False
 
 
 
@@ -98,19 +102,20 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
         finite_mask_normalized = finite_data - finite_data.min()
         finite_mask_normalized = finite_mask_normalized / finite_mask_normalized.max()
 
-        data_min, data_max = np.percentile(finite_data, 1), np.percentile(finite_data, 99)
+        data_min, data_max = np.nanmin(data), np.nanmax(data) #np.percentile(finite_data, 1), np.percentile(finite_data, 99)
         # data_min, data_max = 0, 1
-        self.state.data_min = data_min
-        self.state.data_max = data_max
+        # self.state.data_min = data_min
+        # self.state.data_max = data_max
         #data_min, data_max = None, None
         self.last_shape = shape = data.shape
-        data = reduce_size(data, self.widget_max_resolution.value)
         if self.volume is None:
             with self.figure:
                 self.volume = ipv.volshow(data, data_min=data_min, data_max=data_max, extent=[[0, shape[0]], [0, shape[1]], [0, shape[2]]], controls=False,
                     tf=self.transfer_function)#, volume_rendering_method=self.state.render_method)
         else:
             self.ipyvolume_viewer.figure.volume_data_original = data
+            self.ipyvolume_viewer.figure.volume_data_min = data_min
+            self.ipyvolume_viewer.figure.volume_data_max = data_max
 
     def _update_transfer_function(self):
         self.transfer_function.rgba = _transfer_function_rgba(self.state.color, max_opacity=self.state.alpha)
@@ -134,13 +139,27 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
         link((self.state, 'max_resolution'), (self.figure, 'volume_data_max_shape'))
         #on_change([(self.state, 'max_resolution')])(self.update)
 
-        self.widget_data_min = widgets.FloatSlider(description='min', min=0, max=1, value=self.state.data_min, step=0.001)
-        link((self.state, 'data_min'), (self.widget_data_min, 'value'))
-        # link((self.state, 'data_min'), (self.figure, 'data_min'))
+        self.widget_data_min = widgets.FloatSlider(description='min', min=0, max=1, value=self.state.vmin, step=0.001)
+        link((self.state, 'vmin'), (self.widget_data_min, 'value'))
+        link((self.state, 'vmin'), (self.figure, 'volume_show_min'))
+        link((self.ipyvolume_viewer.figure, 'volume_data_min'), (self.widget_data_min, 'min'))
+        link((self.ipyvolume_viewer.figure, 'volume_data_max'), (self.widget_data_min, 'max'))
 
-        self.widget_data_max = widgets.FloatSlider(description='max', min=0, max=1, value=self.state.data_max, step=0.001)
-        link((self.state, 'data_max'), (self.widget_data_max, 'value'))
-        # link((self.state, 'data_max'), (self.figure, 'data_max'))
+        self.widget_data_max = widgets.FloatSlider(description='max', min=0, max=1, value=self.state.vmax, step=0.001)
+        link((self.state, 'vmax'), (self.widget_data_max, 'value'))
+        link((self.state, 'vmax'), (self.figure, 'volume_show_max'))
+        link((self.ipyvolume_viewer.figure, 'volume_data_min'), (self.widget_data_max, 'min'))
+        link((self.ipyvolume_viewer.figure, 'volume_data_max'), (self.widget_data_max, 'max'))
+
+        self.widget_clamp_min = widgets.Checkbox(description='clamp minimum', value=self.state.clamp_min)
+        link((self.state, 'clamp_min'), (self.widget_clamp_min, 'value'))
+        link((self.state, 'clamp_min'), (self.figure, 'volume_clamp_min'))
+
+        self.widget_clamp_max = widgets.Checkbox(description='clamp maximum', value=self.state.clamp_max)
+        link((self.state, 'clamp_max'), (self.widget_clamp_max, 'value'))
+        link((self.state, 'clamp_max'), (self.figure, 'volume_clamp_max'))
+
+
 
 
         self.widget_color = widgets.ColorPicker(value=self.state.color, description='color')
@@ -164,7 +183,8 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
                     ipv.zlim(0, self.last_shape[2])
         self.widget_reset_zoom.on_click(reset_zoom)
         return widgets.VBox([self.widget_render_method, self.widget_lighting, self.widget_data_min, 
-            self.widget_data_max, self.widget_max_resolution, self.widget_reset_zoom, self.widget_color, self.widget_opacity, self.widget_opacity_scale])
+            self.widget_data_max, self.widget_clamp_min, self.widget_clamp_max, 
+            self.widget_max_resolution, self.widget_reset_zoom, self.widget_color, self.widget_opacity, self.widget_opacity_scale])
 
 #from glue_vispy_viewers.common.vispy_data_viewer import BaseVispyViewer
 
