@@ -45,7 +45,7 @@ class BqplotImageLayerArtist(LayerArtistBase):
     get_image_shape = ImageLayerArtist.get_image_shape
     get_image_data  = ImageLayerArtist.get_image_data
     _update_visual_attributes = ImageLayerArtist._update_visual_attributes
-    _update_compatibility = ImageLayerArtist._update_compatibility
+    #_update_compatibility = ImageLayerArtist._update_compatibility
 
     def __init__(self, view, viewer_state, layer, layer_state):
         super(BqplotImageLayerArtist, self).__init__(layer)
@@ -56,7 +56,7 @@ class BqplotImageLayerArtist(LayerArtistBase):
         if self.state not in self._viewer_state.layers:
             self._viewer_state.layers.append(self.state)
 
-        self._update_compatibility()
+        # self._update_compatibility()
 
         self.scale_image = bqplot.ColorScale()
         self.scales = {'x': self.view.scale_x, 'y': self.view.scale_y, 'image': self.scale_image}

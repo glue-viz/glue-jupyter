@@ -206,6 +206,7 @@ class BqplotHistogramView(IPyWidgetView):
     _state_cls = HistogramViewerState
     _data_artist_cls = BqplotHistogramLayerArtist
     _subset_artist_cls = BqplotHistogramLayerArtist
+    large_data_size = 1e5
 
     def __init__(self, session):
         super(BqplotHistogramView, self).__init__(session)

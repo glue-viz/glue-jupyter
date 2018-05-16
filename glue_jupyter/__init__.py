@@ -145,7 +145,7 @@ class JupyterApplication(Application):
     def subset(self, name, state):
         return self.data_collection.new_subset_group(name, state)
 
-    def _update_undo_redo_enabled(self):
+    def _update_undo_redo_enabled(self, *args):
         pass  # TODO: if we want a gui for this, we need to update it here
 
 

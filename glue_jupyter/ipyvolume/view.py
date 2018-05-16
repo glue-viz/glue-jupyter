@@ -105,7 +105,7 @@ class IpyvolumeBaseView(IPyWidgetView):
                 roi = Projected3dROI(roi_2d, M)
                 self.apply_roi(roi)
 
-    def apply_roi(self, roi):
+    def apply_roi(self, roi, use_current=False):
         if len(self.layers) > 0:
             # self.state.x_att.parent.get_component(self.state.x_att)
             x = self.state.x_att
@@ -115,7 +115,8 @@ class IpyvolumeBaseView(IPyWidgetView):
             z = self.state.z_att
             subset_state = RoiSubsetState3d(x, y, z, roi)
             cmd = ApplySubsetState(data_collection=self._data,
-                                   subset_state=subset_state)
+                                   subset_state=subset_state,
+                                   use_current=use_current)
             self._session.command_stack.do(cmd)
 
     def limits_to_scales(self, *args):
@@ -181,6 +182,7 @@ class IpyvolumeScatterView(IpyvolumeBaseView):
     _state_cls = IpyvolumeScatterViewerState
     _data_artist_cls = IpyvolumeScatterLayerArtist
     _subset_artist_cls = IpyvolumeScatterLayerArtist
+    large_data_size = 1e7
 
     def get_data_layer_artist(self, layer=None, layer_state=None):
         layer = self.get_layer_artist(self._data_artist_cls, layer=layer, layer_state=layer_state)
@@ -195,6 +197,7 @@ class IpyvolumeScatterView(IpyvolumeBaseView):
 
 class IpyvolumeVolumeView(IpyvolumeBaseView):
     _state_cls = IpyvolumeVolumeViewerState
+    large_data_size = 1e8
 
 
     def get_data_layer_artist(self, layer=None, layer_state=None):

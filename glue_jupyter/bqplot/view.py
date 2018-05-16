@@ -119,22 +119,24 @@ class BqplotBaseView(IPyWidgetView):
                 roi = RangeROI(min=min(y), max=max(y), orientation='y')
                 self.apply_roi(roi)
 
-    def apply_roi(self, roi):
+    def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
         if len(self.layers) > 0:
             subset_state = self._roi_to_subset_state(roi)
             cmd = ApplySubsetState(data_collection=self._data,
-                                   subset_state=subset_state)
+                                   subset_state=subset_state,
+                                   use_current=use_current)
             self._session.command_stack.do(cmd)
         # else:
         #     # Make sure we force a redraw to get rid of the ROI
         #    self.axes.figure.canvas.draw()
 
-    def apply_roi(self, roi):
+    def apply_roi(self, roi, use_current=False):
         if len(self.layers) > 0:
             subset_state = self._roi_to_subset_state(roi)
             cmd = ApplySubsetState(data_collection=self._data,
-                                   subset_state=subset_state)
+                                   subset_state=subset_state,
+                                   use_current=use_current)
             self._session.command_stack.do(cmd)
         else:
             # Make sure we force a redraw to get rid of the ROI
@@ -216,6 +218,7 @@ class BqplotImageView(BqplotBaseView):
     allow_duplicate_data = False
     allow_duplicate_subset = False
     _state_cls = ImageViewerState
+    large_data_size = 2e7
 
     def get_data_layer_artist(self, layer=None, layer_state=None):
         if layer.ndim == 1:
@@ -243,3 +246,4 @@ class BqplotScatterView(BqplotBaseView):
     _state_cls = ScatterViewerState
     _data_artist_cls = BqplotScatterLayerArtist
     _subset_artist_cls = BqplotScatterLayerArtist
+    large_data_size = 1e5
