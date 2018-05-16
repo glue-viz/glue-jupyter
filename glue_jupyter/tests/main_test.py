@@ -7,19 +7,19 @@ from glue.core.component_link import ComponentLink
 from glue_jupyter.roi3d import PolygonalProjected3dROI
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture#(scope="module")
 def dataxyz():
     data = Data(x=[1, 2, 3], y=[2, 3, 4], z=[5, 6, 7], label="xyz data")
     return data
 
-@pytest.fixture(scope="module")
+@pytest.fixture#(scope="module")
 def dataxz():
     ox = 0
     oy = 1
     data = Data(x=[1 + ox, 2 + ox, 3 + ox], z=[2 + oy, 3 + oy, 4 + oy], label="xy data")
     return data
 
-@pytest.fixture(scope="module")
+@pytest.fixture#(scope="module")
 def data_volume():
     return gj.example_volume()
 
