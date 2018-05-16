@@ -3,6 +3,9 @@ from glue.core.application_base import ViewerBase
 from glue.core.layer_artist import LayerArtistContainer
 from glue.core.edit_subset_mode import (EditSubsetMode, OrMode, AndNotMode,
                                         AndMode, XorMode, ReplaceMode)
+from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
+from glue.core.subset import RoiSubsetState3d, RoiSubsetState
+from glue.core.command import ApplySubsetState
 from IPython.display import display
 import ipywidgets as widgets
 # from glue.core.session import Session
@@ -79,12 +82,74 @@ class JupyterApplication(Application):
             disabled=False,
             tooltips=[label for label, mode in self.selection_modes],
         )
-        self.widget = widgets.VBox(children=[self.widget_selection_mode])
+        self.widget_data_collection = widgets.SelectMultiple()
+        self.widget = widgets.VBox(children=[self.widget_selection_mode, self.widget_data_collection])
         self.widget_selection_mode.observe(self._set_selection_mode, 'index')
+        self.session.hub.subscribe(self, msg.EditSubsetMessage, handler=self._update_subset_mode)
+        self.session.hub.subscribe(self, msg.SubsetCreateMessage, handler=lambda x: self._update_data_collection())
+        self._update_data_collection()
         display(self.widget)
 
+    def _update_subset_mode(self, msg):
+        index = 0
+        for i, (name, mode) in enumerate(self.selection_modes):
+            if mode == msg.mode:
+                index = i
+        self.widget_selection_mode.index = index
+    
+    def _update_data_collection(self):
+        options = []
+        indices = []
+        index = 0
+        for data in self.data_collection:
+            options.append(data.label)
+            index += 1
+            print(data, data.subsets)
+            for subset in data.subsets:
+                options.append('    ' + subset.label)
+                if subset in self.session.edit_subset_mode.edit_subset:
+                    indices.append(index)
+                index += 1
+        self.widget_data_collection.options = options
+        self.widget_data_collection.index = tuple(indices)
+
     def _set_selection_mode(self, change):
-        EditSubsetMode().mode = self.selection_modes[change.new][1]
+        #EditSubsetMode().mode = self.selection_modes[change.new][1]
+        self.subset_mode(self.selection_modes[change.new][1])
+
+    def subset_mode(self, mode):
+        self.session.edit_subset_mode.mode = mode
+
+    def subset_mode_replace(self):
+        self.subset_mode(ReplaceMode)
+    
+    def subset_mode_and(self):
+        self.subset_mode(AndMode)
+
+    def subset_lasso2d(self, x, y, xvalues, yvalues):
+        roi = PolygonalROI(xvalues, yvalues)
+        self.subset_roi([x, y], roi)
+
+    def subset_roi(self, components, roi, use_current=False):
+        #subset_state = self._roi_to_subset_state(components, roi)
+        components
+        subset_state = RoiSubsetState(*components, roi)
+        cmd = ApplySubsetState(data_collection=self.data_collection,
+                               subset_state=subset_state,
+                               use_current=use_current)
+        self._session.command_stack.do(cmd)
+
+    def _roi_to_subset_state(self, components, roi):
+        return RoiSubsetState(*components, roi)
+        # x_comp = self.state.x_att.parent.get_component(self.state.x_att)
+        # y_comp = self.state.y_att.parent.get_component(self.state.y_att)
+
+        # return x_comp.subset_from_roi(self.state.x_att, roi,
+        #                               other_comp=y_comp,
+        #                               other_att=self.state.y_att,
+        #                               coord='x')
+
+
 
     def add_widget(self, widget, label=None, tab=None):
         pass

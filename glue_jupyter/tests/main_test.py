@@ -43,6 +43,23 @@ def app(dataxyz, dataxz, data_volume, data_image):
 
 def test_app(app, dataxyz, dataxz):
     assert app._data[0] in [dataxyz, dataxz]
+    assert app.widget_selection_mode.index == 0
+    assert len(app.widget_data_collection.options) == len(app.data_collection)
+    app.subset_mode_and()
+    assert app.widget_selection_mode.index == 2
+    app.subset_mode_replace()
+    assert app.widget_selection_mode.index == 0
+    app.subset_lasso2d(dataxyz.id['x'], dataxyz.id['y'], [0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])
+    count = 0
+    for data in app.data_collection:
+        count += 1
+        for subset in data.subsets:
+            count += 1
+    assert len(app.widget_data_collection.options) == count
+    assert app.data_collection[0].subsets[0]['x'].tolist() == [1, 2]
+    assert app.data_collection[0].subsets[0]['y'].tolist() == [2, 3]
+    assert app.data_collection[0].subsets[0]['z'].tolist() == [5, 6]
+
 
 xyzw2yxzw = np.array([
              [0, 1, 0, 0],
