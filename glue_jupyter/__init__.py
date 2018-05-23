@@ -83,35 +83,48 @@ class JupyterApplication(Application):
             tooltips=[label for label, mode in self.selection_modes],
         )
         self.widget_data_collection = widgets.SelectMultiple()
-        self.widget = widgets.VBox(children=[self.widget_selection_mode, self.widget_data_collection])
+        self.widget_subset_groups   = widgets.SelectMultiple()
+        self.widget = widgets.VBox(children=[self.widget_selection_mode, self.widget_subset_groups])
         self.widget_selection_mode.observe(self._set_selection_mode, 'index')
-        self.session.hub.subscribe(self, msg.EditSubsetMessage, handler=self._update_subset_mode)
-        self.session.hub.subscribe(self, msg.SubsetCreateMessage, handler=lambda x: self._update_data_collection())
-        self._update_data_collection()
+        self.widget_subset_groups.observe(self._set_subset_groups, 'index')
+        self.session.hub.subscribe(self, msg.EditSubsetMessage, handler=self._on_edit_subset_msg)
+        self.session.hub.subscribe(self, msg.SubsetCreateMessage, handler=self._on_subset_create_msg)
+        self._update_subset_mode(self.session.edit_subset_mode.mode)
+        self._update_subset_groups_selected(self.session.edit_subset_mode.edit_subset)
         display(self.widget)
 
-    def _update_subset_mode(self, msg):
+    def _on_edit_subset_msg(self, msg):
+        self._update_subset_mode(msg.mode)
+        self._update_subset_groups_selected(msg.subset)
+
+    def _on_subset_create_msg(self, msg):
+        self._update_subset_groups_selected(self.session.edit_subset_mode.edit_subset)
+
+    def _update_subset_mode(self, mode):
+        if self.session.edit_subset_mode.mode != mode:
+            self.session.edit_subset_mode.mode = mode
         index = 0
-        for i, (name, mode) in enumerate(self.selection_modes):
-            if mode == msg.mode:
+        EditSubsetMode
+        for i, (name, sel_mode) in enumerate(self.selection_modes):
+            if mode == sel_mode:
                 index = i
         self.widget_selection_mode.index = index
     
-    def _update_data_collection(self):
+    def _update_subset_groups_selected(self, subset_groups_selected):
+        if self.session.edit_subset_mode.edit_subset != subset_groups_selected:
+            self.session.edit_subset_mode.edit_subset = subset_groups_selected
         options = []
         indices = []
-        index = 0
-        for data in self.data_collection:
-            options.append(data.label)
-            index += 1
-            print(data, data.subsets)
-            for subset in data.subsets:
-                options.append('    ' + subset.label)
-                if subset in self.session.edit_subset_mode.edit_subset:
-                    indices.append(index)
-                index += 1
-        self.widget_data_collection.options = options
-        self.widget_data_collection.index = tuple(indices)
+        for i, subset_group in enumerate(self.data_collection.subset_groups):
+            options.append(subset_group.label)
+            if subset_group in self.session.edit_subset_mode.edit_subset:
+                indices.append(i)
+        self.widget_subset_groups.options = options
+        self.widget_subset_groups.index = tuple(indices)
+
+    def _set_subset_groups(self, change):
+        subset_groups = [self.data_collection.subset_groups[k] for k in self.widget_subset_groups.index]
+        self.session.edit_subset_mode.edit_subset = subset_groups
 
     def _set_selection_mode(self, change):
         #EditSubsetMode().mode = self.selection_modes[change.new][1]
