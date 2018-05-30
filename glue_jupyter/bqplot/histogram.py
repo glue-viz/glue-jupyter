@@ -313,22 +313,24 @@ class BqplotHistogramView(IPyWidgetView):
                 roi = RangeROI(min=min(y), max=max(y), orientation='y')
                 self.apply_roi(roi)
 
-    def apply_roi(self, roi):
+    def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
         if len(self.layers) > 0:
             subset_state = self._roi_to_subset_state(roi)
             cmd = ApplySubsetState(data_collection=self._data,
-                                   subset_state=subset_state)
+                                   subset_state=subset_state,
+                                   use_current=use_current)
             self._session.command_stack.do(cmd)
         # else:
         #     # Make sure we force a redraw to get rid of the ROI
         #    self.axes.figure.canvas.draw()
 
-    def apply_roi(self, roi):
+    def apply_roi(self, roi, use_current=False):
         if len(self.layers) > 0:
             subset_state = self._roi_to_subset_state(roi)
             cmd = ApplySubsetState(data_collection=self._data,
-                                   subset_state=subset_state)
+                                   subset_state=subset_state,
+                                   use_current=use_current)
             self._session.command_stack.do(cmd)
         else:
             # Make sure we force a redraw to get rid of the ROI
