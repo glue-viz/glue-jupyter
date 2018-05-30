@@ -1,0 +1,8 @@
+name: glue-jupyter
+channels:
+  - conda-forge
+dependencies:
+  - glue-core
+  - pip
+  - jupyterlab >=0.32
+  - ipywidgets

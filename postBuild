@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -ex
+
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+
+git clone https://github.com/maartenbreddels/ipyvolume/
+pushd ipyvolume
+pip install .
+jupyter labextension install js
+jupyter labextension install jupyter-threejs
+popd
+
+git clone https://github.com/maartenbreddels/bqplot/
+pushd bqplot
+git checkout image_colormap_frontend
+pip install .
+jupyter labextension install js
+popd
