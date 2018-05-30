@@ -8,6 +8,7 @@ from glue.core.subset import RoiSubsetState3d, RoiSubsetState
 from glue.core.command import ApplySubsetState
 from IPython.display import display
 import ipywidgets as widgets
+import six
 # from glue.core.session import Session
 # from glue.viewers.scatter.layer_artist import ScatterLayerArtist
 
@@ -16,11 +17,14 @@ def jglue(*args, **kwargs):
     from glue.core import DataCollection
     from glue.app.qt import GlueApplication
     from glue.qglue import parse_data, parse_links
+    from glue.core.data_factories import load_data
 
     links = kwargs.pop('links', None)
 
     dc = DataCollection()
     for label, data in kwargs.items():
+        if isinstance(data, six.string_types):
+            data = load_data(data)
         dc.extend(parse_data(data, label))
     for data in args:
         dc.append(data)
