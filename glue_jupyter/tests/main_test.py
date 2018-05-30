@@ -99,6 +99,19 @@ def test_histogram1d(app, dataxyz):
     assert s.layers[1].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
     assert s.layers[1].hist.tolist() == [0, 1, 1]
 
+    s.brush_x.brushing = True
+    s.brush_x.selected = [2.5, 3.5]
+    s.brush_x.brushing = False
+
+    assert len(s.layers) == 3
+    assert s.layers[2].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
+    assert s.layers[2].hist.tolist() == [0, 1, 0]
+
+
+    # s.state.hist_n_bin = 6
+    # assert s.layers[2].bins.tolist() == [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
+    # assert s.layers[2].hist.tolist() == [0, 1, 0, 0, 0, 0]
+
 
 def test_scatter2d(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)

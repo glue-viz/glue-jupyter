@@ -62,7 +62,7 @@ def calculation(inputs, output=None, initial_calulation=True):
             calculate()
     return decorator
 
-def on_change(inputs, initial_call=False):
+def on_change(inputs, initial_call=False, once=False):
     def decorator(f):
         for input in inputs:
             # input can be (obj, 'x', 'y'), or just obj, where 'value' is assumed for default
