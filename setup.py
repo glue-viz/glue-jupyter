@@ -12,15 +12,18 @@ author_email= 'maartenbreddels@gmail.com'
 license     = 'BSD License'
 version     = version.__version__
 url         = 'https://glueviz.org'
-install_requires_astro = ['glueviz']
+install_requires = ['glueviz', 'ipyvolume', 'bqplot', 'ipympl']
 
+extra_requires = {
+      'test': ['pytest-mock']
+}
 setup(name=name,
       version=version,
       description='Jupyter notebook/lab viewers for glue',
       url=url,
       author=author,
       author_email=author_email,
-      install_requires=install_requires_astro,
+      install_requires=install_requires,
       license=license,
       packages=[name.replace('-', '_')],
       zip_safe=False
