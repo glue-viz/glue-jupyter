@@ -13,6 +13,10 @@ import six
 # from glue.viewers.scatter.layer_artist import ScatterLayerArtist
 
 
+def load(path):
+    from glue.core.data_factories import load_data
+    return load_data(path)
+
 def jglue(*args, **kwargs):
     from glue.core import DataCollection
     from glue.app.qt import GlueApplication
@@ -96,6 +100,10 @@ class JupyterApplication(Application):
         self._update_subset_mode(self.session.edit_subset_mode.mode)
         self._update_subset_groups_selected(self.session.edit_subset_mode.edit_subset)
         display(self.widget)
+
+    def link(self, links):
+        from glue.qglue import parse_links
+        self.data_collection.add_link(parse_links(self.data_collection, links))
 
     def _on_edit_subset_msg(self, msg):
         self._update_subset_mode(msg.mode)
