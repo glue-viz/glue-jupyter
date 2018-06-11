@@ -137,8 +137,8 @@ class BqplotImageLayerArtist(LayerArtistBase):
             # data /= (self.state.v_max - self.state.v_min)
             # print(np.nanmin(data), np.nanmax(data))
             # png_data = _scalar_to_png_data(data)
-            self.scale_image.min = self.state.v_min.item()
-            self.scale_image.max = self.state.v_max.item()
+            self.scale_image.min = self.state.v_min
+            self.scale_image.max = self.state.v_max
             self.image_mark.image = data
         # force the image mark to update the image data
         # self.image_mark.send_state(key='image')
