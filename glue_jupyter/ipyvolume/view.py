@@ -5,51 +5,16 @@ import traitlets
 import numpy as np
 from IPython.display import display
 
-from glue_vispy_viewers.common.viewer_state import Vispy3DViewerState
-from glue_vispy_viewers.scatter.viewer_state import Vispy3DScatterViewerState
+rom glue_jupyter.common.state3d import ViewerState3DVolume, ViewerState3DScatter
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
 from glue.core.subset import RoiSubsetState3d
 from glue.core.command import ApplySubsetState
-from glue.viewers.common.qt.data_viewer_with_state import DataViewerWithState
 
 from .. import IPyWidgetView
 from ..link import link, dlink, link_component_id_to_select_widget
 from .scatter import IpyvolumeScatterLayerArtist
 from .volume import IpyvolumeVolumeLayerArtist
 
-
-class IpyvolumeVolumeViewerState(Vispy3DViewerState):
-    def __init__(self, **kwargs):
-        super(IpyvolumeVolumeViewerState, self).__init__()
-        self.add_callback('layers', self._update_attributes)
-        self.update_from_dict(kwargs)
-
-    def _update_attributes(self, *args):
-        for layer_state in self.layers:
-            if getattr(layer_state.layer, 'ndim', None) == 3:
-                data = layer_state.layer
-                break
-        else:
-            data = None
-
-        if data is None:
-            type(self).x_att.set_choices(self, [])
-            type(self).y_att.set_choices(self, [])
-            type(self).z_att.set_choices(self, [])
-
-        else:
-            z_cid, y_cid, x_cid = data.pixel_component_ids
-
-            type(self).x_att.set_choices(self, [x_cid])
-            type(self).y_att.set_choices(self, [y_cid])
-            type(self).z_att.set_choices(self, [z_cid])
-
-
-class IpyvolumeScatterViewerState(Vispy3DScatterViewerState):
-    pass
-
-
-#from .scatter import Scatter3dViewerState as IpyvolumeVolumeViewerState
 
 class IpyvolumeBaseView(IPyWidgetView):
     allow_duplicate_data = False
@@ -177,7 +142,7 @@ class IpyvolumeScatterView(IpyvolumeBaseView):
 
     allow_duplicate_data = False
     allow_duplicate_subset = False
-    _state_cls = IpyvolumeScatterViewerState
+    _state_cls = ViewerState3DScatter
     _data_artist_cls = IpyvolumeScatterLayerArtist
     _subset_artist_cls = IpyvolumeScatterLayerArtist
     large_data_size = 1e7
@@ -194,7 +159,7 @@ class IpyvolumeScatterView(IpyvolumeBaseView):
 
 
 class IpyvolumeVolumeView(IpyvolumeBaseView):
-    _state_cls = IpyvolumeVolumeViewerState
+    _state_cls = ViewerState3DVolume
     large_data_size = 1e8
 
 
