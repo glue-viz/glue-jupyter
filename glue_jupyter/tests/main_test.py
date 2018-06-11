@@ -118,19 +118,19 @@ def test_scatter2d(app, dataxyz, dataxz):
     assert s.state.x_att == 'x'
     assert s.state.y_att == 'y'
 
-    assert s.state.x_min == 1
-    assert s.state.x_max == 3
-    assert s.state.y_min == 2
-    assert s.state.y_max == 4
+    # assert s.state.x_min == 1
+    # assert s.state.x_max == 3
+    # assert s.state.y_min == 2
+    # assert s.state.y_max == 4
 
     # test when we swap x and x
     s = app.scatter2d('y', 'x', data=dataxyz)
     assert s.state.x_att == 'y'
     assert s.state.y_att == 'x'
-    assert s.state.y_min == 1
-    assert s.state.y_max == 3
-    assert s.state.x_min == 2
-    assert s.state.x_max == 4
+    # assert s.state.y_min == 1
+    # assert s.state.y_max == 3
+    # assert s.state.x_min == 2
+    # assert s.state.x_max == 4
 
     s.layers[0].state.size_mode = 'Linear'
 

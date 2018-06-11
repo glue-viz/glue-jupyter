@@ -5,7 +5,7 @@ import traitlets
 
 from glue.core.data import Subset
 from glue.core.command import ApplySubsetState
-from glue.core.layer_artist import LayerArtistBase
+from glue.viewers.common.layer_artist import LayerArtist
 from glue.core.state_objects import StateAttributeLimitsHelper
 from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
@@ -36,11 +36,11 @@ class Scatter3dLayerState(ScatterLayerState):
         else:
             self.vz_att_helper.set_multiple_data([self.layer])
 
-class IpyvolumeScatterLayerArtist(LayerArtistBase):
+class IpyvolumeScatterLayerArtist(LayerArtist):
     _layer_state_cls = Scatter3dLayerState
 
     def __init__(self, view, viewer_state, layer, layer_state):
-        super(IpyvolumeScatterLayerArtist, self).__init__(layer)
+        super(IpyvolumeScatterLayerArtist, self).__init__(viewer_state, layer_state=layer_state, layer=layer)
         self.view = view
         self.state = layer_state or self._layer_state_cls(viewer_state=viewer_state,
                                                           layer=self.layer)

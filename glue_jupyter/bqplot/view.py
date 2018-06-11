@@ -2,6 +2,7 @@ import bqplot
 import ipywidgets as widgets
 from IPython.display import display
 
+from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
 
@@ -174,10 +175,8 @@ class BqplotBaseView(IPyWidgetView):
             x_comp = self.state.x_att.parent.get_component(self.state.x_att)
             y_comp = self.state.y_att.parent.get_component(self.state.y_att)
 
-            return x_comp.subset_from_roi(self.state.x_att, roi,
-                                          other_comp=y_comp,
-                                          other_att=self.state.y_att,
-                                          coord='x')
+            return roi_to_subset_state(roi, self.state.x_att, self.state.y_att,
+                                            x_comp=x_comp, y_comp=y_comp)
 
     def limits_to_scales(self, *args):
         if self.state.x_min is not None and self.state.x_max is not None:
@@ -325,4 +324,4 @@ class BqplotHistogramView(BqplotBaseView):
 
         x_comp = self.state.x_att.parent.get_component(self.state.x_att)
 
-        return x_comp.subset_from_roi(self.state.x_att, roi_new, coord='x')
+        return roi_to_subset_state(roi_new, self.state.x_att, x_comp=x_comp)

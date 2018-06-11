@@ -1,5 +1,5 @@
 from glue.core import message as msg
-from glue.core.application_base import ViewerBase
+from glue.viewers.common.viewer import Viewer
 from glue.core.layer_artist import LayerArtistContainer
 from glue.core.edit_subset_mode import (EditSubsetMode, OrMode, AndNotMode,
                                         AndMode, XorMode, ReplaceMode)
@@ -246,7 +246,7 @@ class IPyWidgetLayerArtistContainer(LayerArtistContainer):
         pass  #print('layer artist created')
 
 
-class IPyWidgetView(ViewerBase):
+class IPyWidgetView(Viewer):
 
     _layer_artist_container_cls = IPyWidgetLayerArtistContainer
 

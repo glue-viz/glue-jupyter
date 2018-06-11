@@ -172,8 +172,6 @@ class IpyvolumeBaseView(IPyWidgetView):
         self.tab.set_title(0, "General")
         self.tab.set_title(1, "Axes")
 
-IpyvolumeBaseView.add_data = DataViewerWithState.add_data
-IpyvolumeBaseView.add_subset = DataViewerWithState.add_subset
 
 class IpyvolumeScatterView(IpyvolumeBaseView):
 
