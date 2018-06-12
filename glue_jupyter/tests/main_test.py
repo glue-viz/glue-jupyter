@@ -4,7 +4,7 @@ import numpy as np
 import glue_jupyter as gj
 from glue.core import Data
 from glue.core.component_link import ComponentLink
-from glue_jupyter.roi3d import PolygonalProjected3dROI
+from glue.core.roi import PolygonalROI, Projected3dROI
 
 
 @pytest.fixture#(scope="module")
@@ -289,15 +289,12 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert layer.quiver.visible
 
 def test_roi3d(dataxyz):
-    roi = PolygonalProjected3dROI(vx=[0.5, 2.5, 2.5, 0.5], vy=[1, 1, 3.5, 3.5], projection_matrix=np.eye(4))
+    roi_2d = PolygonalROI(vx=[0.5, 2.5, 2.5, 0.5], vy=[1, 1, 3.5, 3.5])
+    roi = Projected3dROI(roi_2d, projection_matrix=np.eye(4))
     assert roi.contains(dataxyz['x'], dataxyz['y']).tolist() == [True, True, False]
 
-    # xyzw2yxzw = [[0, 0, 1, 0],
-    #              [1, 0, 0, 0],
-    #              [0, 1, 0, 0],
-    #              [0, 0, 0, 1]
-    #             ]
-    roi = PolygonalProjected3dROI(vx=[1.5, 3.5, 3.5, 1.5], vy=[4, 4, 6.5, 6.5], projection_matrix=xyzw2yxzw)
+    roi_2d = PolygonalROI(vx=[1.5, 3.5, 3.5, 1.5], vy=[4, 4, 6.5, 6.5])
+    roi = Projected3dROI(roi_2d, projection_matrix=xyzw2yxzw)
     assert roi.contains3d(dataxyz['x'], dataxyz['y'], dataxyz['z']).tolist() == [True, True, False]
 
 def test_lasso3d(app, dataxyz):

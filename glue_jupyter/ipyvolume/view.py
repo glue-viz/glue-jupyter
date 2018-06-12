@@ -5,7 +5,7 @@ import traitlets
 import numpy as np
 from IPython.display import display
 
-rom glue_jupyter.common.state3d import ViewerState3DVolume, ViewerState3DScatter
+from glue_jupyter.common.state3d import ViewerState3DVolume, ViewerState3DScatter
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
 from glue.core.subset import RoiSubsetState3d
 from glue.core.command import ApplySubsetState
