@@ -224,10 +224,6 @@ class BqplotBaseView(IPyWidgetView):
 
 
 
-from glue.viewers.common.qt.data_viewer_with_state import DataViewerWithState
-BqplotBaseView.add_data = DataViewerWithState.add_data
-BqplotBaseView.add_subset = DataViewerWithState.add_subset
-
 from glue.viewers.image.state import ImageViewerState
 from glue.viewers.scatter.state import ScatterViewerState
 from glue.viewers.image.composite_array import CompositeArray

@@ -186,7 +186,3 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
             self.widget_data_max, self.widget_clamp_min, self.widget_clamp_max, 
             self.widget_max_resolution, self.widget_reset_zoom, self.widget_color, self.widget_opacity, self.widget_opacity_scale])
 
-#from glue_vispy_viewers.common.vispy_data_viewer import BaseVispyViewer
-
-
-#$IpyvolumeVolumeView.get_data_layer_artist = DataViewerWithState.get_data_layer_artist
