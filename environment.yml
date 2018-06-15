@@ -6,3 +6,6 @@ dependencies:
   - pip
   - jupyterlab >=0.32
   - ipywidgets
+  - bqplot
+  - ipyvolume
+  - ipympl

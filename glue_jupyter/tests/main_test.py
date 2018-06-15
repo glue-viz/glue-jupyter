@@ -31,7 +31,9 @@ def data_image():
 def app(dataxyz, dataxz, data_volume, data_image):
     link1 = ['dataxyz.x'], ['dataxz.x'], lambda x: x
     link2 = ['dataxyz.y'], ['dataxz.z'], lambda y: y+1, lambda z: z-1
-    app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, data_volume=data_volume, data_image=data_image, links=[link1, link2])
+    app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, links=[link1, link2])
+    app.add_data(data_volume=data_volume)
+    app.add_data(data_image=data_image)
     link1 =  ComponentLink([data_image.id['Pixel Axis 0 [y]']], dataxyz.id['y'])
     link2 =  ComponentLink([data_image.id['Pixel Axis 1 [x]']], dataxyz.id['x'])
     app.data_collection.add_link([link1, link2])

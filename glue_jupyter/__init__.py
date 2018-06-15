@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from glue.core import message as msg
 from glue.viewers.common.viewer import Viewer
 from glue.core.layer_artist import LayerArtistContainer
@@ -156,25 +157,14 @@ class JupyterApplication(Application):
         self.subset_roi([x, y], roi)
 
     def subset_roi(self, components, roi, use_current=False):
-        #subset_state = self._roi_to_subset_state(components, roi)
-        components
-        subset_state = RoiSubsetState(*components, roi)
+        subset_state = RoiSubsetState(components[0], components[1], roi)
         cmd = ApplySubsetState(data_collection=self.data_collection,
                                subset_state=subset_state,
                                use_current=use_current)
         self._session.command_stack.do(cmd)
 
     def _roi_to_subset_state(self, components, roi):
-        return RoiSubsetState(*components, roi)
-        # x_comp = self.state.x_att.parent.get_component(self.state.x_att)
-        # y_comp = self.state.y_att.parent.get_component(self.state.y_att)
-
-        # return x_comp.subset_from_roi(self.state.x_att, roi,
-        #                               other_comp=y_comp,
-        #                               other_att=self.state.y_att,
-        #                               coord='x')
-
-
+        return RoiSubsetState(components[0], components[1], roi)
 
     def add_widget(self, widget, label=None, tab=None):
         pass

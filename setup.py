@@ -1,6 +1,6 @@
 import os
 import imp
-from setuptools import setup
+from setuptools import setup, find_packages
 
 dirname = os.path.dirname(__file__)
 path_version = os.path.join(dirname, 'glue_jupyter/_version.py')
@@ -17,6 +17,7 @@ install_requires = ['glueviz', 'ipyvolume', 'bqplot', 'ipympl']
 extra_requires = {
       'test': ['pytest-mock']
 }
+
 setup(name=name,
       version=version,
       description='Jupyter notebook/lab viewers for glue',
@@ -25,6 +26,6 @@ setup(name=name,
       author_email=author_email,
       install_requires=install_requires,
       license=license,
-      packages=[name.replace('-', '_')],
+      packages=find_packages(),
       zip_safe=False
       )
