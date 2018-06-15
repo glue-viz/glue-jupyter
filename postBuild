@@ -18,6 +18,7 @@ jupyter labextension install js
 jupyter labextension install jupyter-threejs
 popd
 
+pip uninstall bqplot -y
 git clone https://github.com/maartenbreddels/bqplot/
 pushd bqplot
 git checkout scatter_webgl
