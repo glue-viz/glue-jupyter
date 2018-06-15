@@ -36,10 +36,10 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self.scale_size = bqplot.LinearScale()
         self.scale_size_quiver = bqplot.LinearScale()
         self.scale_rotation = bqplot.LinearScale()
-        self.scales = dict(**self.view.scales, size=self.scale_size)
-        self.scales_quiver = dict(**self.view.scales, size=self.scale_size_quiver, rotation=self.scale_rotation)
-        self.scatter = bqplot.Scatter(scales=self.scales, x=[0, 1], y=[0, 1])
-        self.quiver = bqplot.Scatter(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
+        self.scales = dict(self.view.scales, size=self.scale_size)
+        self.scales_quiver = dict(self.view.scales, size=self.scale_size_quiver, rotation=self.scale_rotation)
+        self.scatter = bqplot.ScatterMega(scales=self.scales, x=[0, 1], y=[0, 1])
+        self.quiver = bqplot.ScatterMega(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
         self.view.figure.marks = list(self.view.figure.marks) + [self.scatter, self.quiver]
         link((self.state, 'color'), (self.scatter, 'colors'), lambda x: [x], lambda x: x[0])
         link((self.state, 'color'), (self.quiver, 'colors'), lambda x: [x], lambda x: x[0])
@@ -84,10 +84,10 @@ class BqplotScatterLayerArtist(LayerArtistBase):
             self.quiver.selected_style = {}
             self.quiver.unselected_style = {'fill': 'none', 'stroke': 'none'}
         else:
-            self.scatter.selected = []
+            self.scatter.selected = None
             self.scatter.selected_style = {}
             self.scatter.unselected_style = {}
-            self.quiver.selected = []
+            self.quiver.selected = None
             self.quiver.selected_style = {}
             self.quiver.unselected_style = {}
             #self.scatter.selected_style = {'fill': 'none', 'stroke': 'none'}

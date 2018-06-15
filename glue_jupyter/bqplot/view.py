@@ -265,7 +265,7 @@ class BqplotScatterView(BqplotBaseView):
     _state_cls = ScatterViewerState
     _data_artist_cls = BqplotScatterLayerArtist
     _subset_artist_cls = BqplotScatterLayerArtist
-    large_data_size = 1e5
+    large_data_size = 1e7
 
 from .histogram import BqplotHistogramLayerArtist, HistogramViewerState
 
