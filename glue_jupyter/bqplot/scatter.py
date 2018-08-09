@@ -43,7 +43,6 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self.view.figure.marks = list(self.view.figure.marks) + [self.scatter, self.quiver]
         link((self.state, 'color'), (self.scatter, 'colors'), lambda x: [x], lambda x: x[0])
         link((self.state, 'color'), (self.quiver, 'colors'), lambda x: [x], lambda x: x[0])
-        link((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x], lambda x: x[0])
         self.scatter.observe(self._workaround_unselected_style, 'colors')
         self.quiver.observe(self._workaround_unselected_style, 'colors')
 
@@ -132,9 +131,15 @@ class BqplotScatterLayerArtist(LayerArtistBase):
             self.scale_size.max = 1
 
     def create_widgets(self):
-        widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (widget_visible, 'value'))
+        self.widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
+        link((self.state, 'visible'), (self.widget_visible, 'value'))
         link((self.state, 'visible'), (self.scatter, 'visible'))
+
+        self.widget_opacity = widgets.FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha, description='opacity')
+        link((self.state, 'alpha'), (self.widget_opacity, 'value'))
+        link((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x], lambda x: x[0])
+        link((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x], lambda x: x[0])
+
 
         self.widget_size = widgets.FloatSlider(description='size', min=0, max=10, value=self.state.size)
         link((self.state, 'size'), (self.widget_size, 'value'))
@@ -180,5 +185,5 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
 
 
-        return widgets.VBox([widget_visible, self.widget_size_mode, self.widget_size, self.widget_size_att, self.widget_size_v, self.widget_scaling, widget_color,
+        return widgets.VBox([self.widget_visible, self.widget_opacity, self.widget_size_mode, self.widget_size, self.widget_size_att, self.widget_size_v, self.widget_scaling, widget_color,
             self.widget_vector, self.widget_vector_x, self.widget_vector_y])
