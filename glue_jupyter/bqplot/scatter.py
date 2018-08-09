@@ -34,9 +34,9 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         if self.state not in self._viewer_state.layers:
             self._viewer_state.layers.append(self.state)
         self.scale_size = bqplot.LinearScale()
-        self.scale_size_quiver = bqplot.LinearScale()
-        self.scale_rotation = bqplot.LinearScale()
-        self.scales = dict(self.view.scales, size=self.scale_size)
+        self.scale_size_quiver = bqplot.LinearScale(min=0, max=1)
+        self.scale_rotation = bqplot.LinearScale(min=0, max=1)
+        self.scales = dict(self.view.scales, size=self.scale_size, rotation=self.scale_rotation)
         self.scales_quiver = dict(self.view.scales, size=self.scale_size_quiver, rotation=self.scale_rotation)
         self.scatter = bqplot.ScatterMega(scales=self.scales, x=[0, 1], y=[0, 1])
         self.quiver = bqplot.ScatterMega(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
@@ -128,6 +128,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         else:
             self.scatter.default_size = int(size * scale * 4) # *4 seems to give similar sizes as the Qt Glue
             self.scatter.size = None
+            self.scale_size.min = 0
+            self.scale_size.max = 1
 
     def create_widgets(self):
         widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
