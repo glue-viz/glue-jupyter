@@ -12,7 +12,7 @@ author_email= 'maartenbreddels@gmail.com'
 license     = 'BSD License'
 version     = version.__version__
 url         = 'https://glueviz.org'
-install_requires = ['glueviz', 'ipyvolume', 'bqplot', 'ipympl']
+install_requires = ['glue-core', 'glue-vispy-viewers', 'ipyvolume', 'bqplot', 'ipympl']
 
 extra_requires = {
       'test': ['pytest-mock']
