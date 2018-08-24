@@ -7,37 +7,22 @@ env:
   - PYTHON_VERSION=2.7
   - PYTHON_VERSION=3.5
   - PYTHON_VERSION=3.6
+ global:
+  - CONDA_DEPENDENICES="nodejs"
 # matrix:
 #   allow_failures:
 #     env: PYTHON_VERSION=3.6
 
 before_install:
-  - if [[ $TRAVIS_OS_NAME == linux ]]; then sudo apt-get update; fi
   - . $HOME/.nvm/nvm.sh
   - nvm install stable
   - nvm use stable
-  - if [[ $TRAVIS_OS_NAME == linux ]]; then wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh; fi
-  - if [[ $TRAVIS_OS_NAME == osx ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh; fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda info -a
-  - conda create -y -n test-environment python=$PYTHON_VERSION
-  - conda env update -n test-environment -f environment.yml
-  - source activate test-environment
-  - conda install -c conda-forge pytest pytest-cov runipy nodejs
-#  - bash postBuild
-  - git clone https://github.com/glue-viz/glue
-  - (cd glue; pip install .)
-  - pip uninstall ipyvolume -y
-  - git clone https://github.com/maartenbreddels/ipyvolume/
-  - (cd ipyvolume; pip install .)
-  - pip uninstall bqplot -y
-  - git clone https://github.com/maartenbreddels/bqplot
-  - (cd bqplot; git checkout scatter_webgl; pip install .)
-  - pip install coveralls
+
+  - git clone git://github.com/astropy/ci-helpers.git
+  - source ci-helpers/travis/setup_conda.sh
+
+  - pip install -r requirements.txt
+  - pip install pytest pytest-cov runipy coveralls
 
 install:
   - pip install -e .

@@ -1,0 +1,7 @@
+jupyterlab>=0.32
+ipywidgets
+ipympl
+git+https://github.com/maartenbreddels/ipyvolume.git
+git+https://github.com/maartenbreddels/bqplot.git@scatter_webgl
+git+https://github.com/glue-viz/glue.git
+git+https://github.com/glue-viz/glue-vispy-viewers.git
