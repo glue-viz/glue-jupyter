@@ -21,8 +21,6 @@ class ImageJupyterViewer(MatplotlibImageMixin, MatplotlibJupyterViewer):
 
     large_data_size = 2e7
 
-    tools = ['select:xrange']
-
     def __init__(self, session, parent=None, state=None):
         super(ImageJupyterViewer, self).__init__(session, wcs=True, parent=parent, state=state)
         MatplotlibImageMixin.setup_callbacks(self)

@@ -17,9 +17,6 @@ class MatplotlibJupyterViewer(MatplotlibMixin, Viewer):
 
     _state_cls = MatplotlibDataViewerState
 
-    # tools = ['mpl:home', 'mpl:pan', 'mpl:zoom']
-    # subtools = {'save': ['mpl:save']}
-
     large_data_size = None
 
     def __init__(self, session, parent=None, wcs=None, state=None):

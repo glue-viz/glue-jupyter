@@ -21,8 +21,6 @@ class ProfileJupyterViewer(MatplotlibProfileMixin, MatplotlibJupyterViewer):
 
     large_data_size = 2e7
 
-    tools = ['select:xrange']
-
     def __init__(self, session, parent=None, state=None):
         super(ProfileJupyterViewer, self).__init__(session, parent=parent, state=state)
         MatplotlibProfileMixin.setup_callbacks(self)

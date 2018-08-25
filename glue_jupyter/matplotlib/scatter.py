@@ -21,8 +21,6 @@ class ScatterJupyterViewer(MatplotlibScatterMixin, MatplotlibJupyterViewer):
 
     large_data_size = 2e7
 
-    tools = ['select:xrange']
-
     def __init__(self, session, parent=None, state=None):
         super(ScatterJupyterViewer, self).__init__(session, parent=parent, state=state)
         MatplotlibScatterMixin.setup_callbacks(self)
