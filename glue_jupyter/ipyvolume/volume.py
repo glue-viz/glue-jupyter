@@ -54,21 +54,24 @@ def _transfer_function_rgba(color, N=256, max_opacity=1):
     data[...,3] = ramp*max_opacity
     return data
 
+data0 = [[[1,2]]*2]*2
+
 class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
     def __init__(self, ipyvolume_viewer=None, state=None, layer=None, layer_state=None):
         super(IpyvolumeVolumeLayerArtist, self).__init__(layer)
         self.layer = layer or layer_state.layer
         self.ipyvolume_viewer = ipyvolume_viewer
         self.figure = self.ipyvolume_viewer.figure
-        self._viewer_state = ipyvolume_viewer.state
-        assert ipyvolume_viewer.state == state
         self.state = layer_state or IpyvolumeLayerState(layer=self.layer)
         self.transfer_function = ipv.TransferFunction(rgba=_transfer_function_rgba(self.state.color))
+        self.volume = ipv.Volume(extent_original=[[0,1]]*3, data_original=data0, tf=self.transfer_function, data_max_shape=128)
+        self.figure.volumes = self.figure.volumes + [self.volume,]
+        self._viewer_state = ipyvolume_viewer.state
+        assert ipyvolume_viewer.state == state
         if self.state not in self._viewer_state.layers:
             self._viewer_state.layers.append(self.state)
 
         #ipv.figure(self.ipyvolume_viewer.figure)
-        self.volume = None
         self.last_shape = None
 
     def clear(self):
@@ -113,9 +116,12 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
                 self.volume = ipv.volshow(data, data_min=data_min, data_max=data_max, extent=[[0, shape[0]], [0, shape[1]], [0, shape[2]]], controls=False,
                     tf=self.transfer_function)#, volume_rendering_method=self.state.render_method)
         else:
-            self.ipyvolume_viewer.figure.volume_data_original = data
-            self.ipyvolume_viewer.figure.volume_data_min = data_min
-            self.ipyvolume_viewer.figure.volume_data_max = data_max
+            self.volume.data_original = data
+            self.volume.extent_original = [[0, shape[0]], [0, shape[1]], [0, shape[2]]]
+            self.volume.data_min = data_min
+            self.volume.data_max = data_max
+        self.widget_data_min.value = self.state.vmin
+        self.widget_data_max.value = self.state.vmax
 
     def _update_transfer_function(self):
         self.transfer_function.rgba = _transfer_function_rgba(self.state.color, max_opacity=self.state.alpha)
@@ -125,39 +131,39 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
 
         self.widget_lighting = widgets.Checkbox(description='lighting', value=self.state.lighting)
         link((self.state, 'lighting'), (self.widget_lighting, 'value'))
-        link((self.state, 'lighting'), (self.figure, 'volume_rendering_lighting'))
+        link((self.state, 'lighting'), (self.volume, 'lighting'))
 
         render_methods = 'NORMAL MAX_INTENSITY'.split()
         self.widget_render_method = widgets.Dropdown(options=render_methods, value=self.state.render_method, description='method')
         link((self.state, 'render_method'), (self.widget_render_method, 'value'))
-        link((self.state, 'render_method'), (self.figure, 'volume_rendering_method'))
+        link((self.state, 'render_method'), (self.volume, 'rendering_method'))
 
         self.size_options = [32, 64, 128, 128+64, 256, 256+128, 512]
         options = [(str(k), k) for k in self.size_options]
         self.widget_max_resolution = widgets.Dropdown(options=options, value=128, description='max resolution')
         link((self.state, 'max_resolution'), (self.widget_max_resolution, 'value'))
-        link((self.state, 'max_resolution'), (self.figure, 'volume_data_max_shape'))
+        link((self.state, 'max_resolution'), (self.volume, 'data_max_shape'))
         #on_change([(self.state, 'max_resolution')])(self.update)
 
         self.widget_data_min = widgets.FloatSlider(description='min', min=0, max=1, value=self.state.vmin, step=0.001)
         link((self.state, 'vmin'), (self.widget_data_min, 'value'))
-        link((self.state, 'vmin'), (self.figure, 'volume_show_min'))
-        link((self.ipyvolume_viewer.figure, 'volume_data_min'), (self.widget_data_min, 'min'))
-        link((self.ipyvolume_viewer.figure, 'volume_data_max'), (self.widget_data_min, 'max'))
+        link((self.state, 'vmin'), (self.volume, 'show_min'))
+        link((self.volume, 'data_min'), (self.widget_data_min, 'min'))
+        link((self.volume, 'data_max'), (self.widget_data_min, 'max'))
 
         self.widget_data_max = widgets.FloatSlider(description='max', min=0, max=1, value=self.state.vmax, step=0.001)
         link((self.state, 'vmax'), (self.widget_data_max, 'value'))
-        link((self.state, 'vmax'), (self.figure, 'volume_show_max'))
-        link((self.ipyvolume_viewer.figure, 'volume_data_min'), (self.widget_data_max, 'min'))
-        link((self.ipyvolume_viewer.figure, 'volume_data_max'), (self.widget_data_max, 'max'))
+        link((self.state, 'vmax'), (self.volume, 'show_max'))
+        link((self.volume, 'data_min'), (self.widget_data_max, 'min'))
+        link((self.volume, 'data_max'), (self.widget_data_max, 'max'))
 
         self.widget_clamp_min = widgets.Checkbox(description='clamp minimum', value=self.state.clamp_min)
         link((self.state, 'clamp_min'), (self.widget_clamp_min, 'value'))
-        link((self.state, 'clamp_min'), (self.figure, 'volume_clamp_min'))
+        link((self.state, 'clamp_min'), (self.volume, 'clamp_min'))
 
         self.widget_clamp_max = widgets.Checkbox(description='clamp maximum', value=self.state.clamp_max)
         link((self.state, 'clamp_max'), (self.widget_clamp_max, 'value'))
-        link((self.state, 'clamp_max'), (self.figure, 'volume_clamp_max'))
+        link((self.state, 'clamp_max'), (self.volume, 'clamp_max'))
 
 
 
@@ -170,7 +176,7 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
 
         self.widget_opacity_scale = widgets.FloatLogSlider(description='opacity scale', base=10, min=-3, max=3, value=self.state.opacity_scale, step=0.01)
         link((self.state, 'opacity_scale'), (self.widget_opacity_scale, 'value'))
-        link((self.state, 'opacity_scale'), (self.figure, 'opacity_scale'))
+        link((self.state, 'opacity_scale'), (self.volume, 'opacity_scale'))
 
         on_change([(self.state, 'color', 'alpha')])(self._update_transfer_function)
 
