@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+from glue.utils import defer_draw, decorate_all_methods
 from glue.viewers.scatter.layer_artist import ScatterLayerArtist
 from glue.viewers.scatter.state import ScatterViewerState
 from glue.viewers.scatter.viewer import MatplotlibScatterMixin
@@ -9,7 +10,8 @@ from .base import MatplotlibJupyterViewer
 __all__ = ['ScatterJupyterViewer']
 
 
-class ScatterJupyterViewer(MatplotlibJupyterViewer, MatplotlibScatterMixin):
+@decorate_all_methods(defer_draw)
+class ScatterJupyterViewer(MatplotlibScatterMixin, MatplotlibJupyterViewer):
 
     LABEL = '1D Scatter'
 

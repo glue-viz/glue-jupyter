@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+from glue.utils import defer_draw, decorate_all_methods
 from glue.viewers.image.layer_artist import ImageLayerArtist
 from glue.viewers.image.state import ImageViewerState
 from glue.viewers.image.viewer import MatplotlibImageMixin
@@ -9,7 +10,8 @@ from .base import MatplotlibJupyterViewer
 __all__ = ['ImageJupyterViewer']
 
 
-class ImageJupyterViewer(MatplotlibJupyterViewer, MatplotlibImageMixin):
+@decorate_all_methods(defer_draw)
+class ImageJupyterViewer(MatplotlibImageMixin, MatplotlibJupyterViewer):
 
     LABEL = '1D Image'
 

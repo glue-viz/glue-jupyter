@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+from glue.utils import defer_draw, decorate_all_methods
 from glue.viewers.histogram.layer_artist import HistogramLayerArtist
 from glue.viewers.histogram.state import HistogramViewerState
 from glue.viewers.histogram.viewer import MatplotlibHistogramMixin
@@ -9,7 +10,8 @@ from .base import MatplotlibJupyterViewer
 __all__ = ['HistogramJupyterViewer']
 
 
-class HistogramJupyterViewer(MatplotlibJupyterViewer, MatplotlibHistogramMixin):
+@decorate_all_methods(defer_draw)
+class HistogramJupyterViewer(MatplotlibHistogramMixin, MatplotlibJupyterViewer):
 
     LABEL = '1D Histogram'
 
