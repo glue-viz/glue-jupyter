@@ -107,7 +107,7 @@ class BqplotBaseView(IPyWidgetView):
     def change_action(self, *ignore):
         self.figure.interaction = self.interact_map[self.button_action.value]
         if self.is2d:
-            self.brush.selected = []
+            self.brush.selected_x = []
             self.brush_y.selected = []
         self.brush_x.selected = []
 
