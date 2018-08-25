@@ -23,8 +23,6 @@ class IpyvolumeLayerState(VolumeLayerState):
     render_method = CallbackProperty()
     lighting = CallbackProperty()
     max_resolution = CallbackProperty()
-    vmin = CallbackProperty()
-    vmax = CallbackProperty()
     clamp_min = CallbackProperty()
     clamp_max = CallbackProperty()
     # attribute = SelectionCallbackProperty()
@@ -35,8 +33,6 @@ class IpyvolumeLayerState(VolumeLayerState):
         self.render_method = 'NORMAL'
         self.lighting = True
         self.max_resolution = 256
-        self.vmin = 0.
-        self.vmax = 1.
         self.clamp_min = False
         self.clamp_max = False
 
@@ -122,6 +118,12 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
             self.volume.data_max = data_max
         self.widget_data_min.value = self.state.vmin
         self.widget_data_max.value = self.state.vmax
+
+        # might be a bug in glue-core, it seems that for subsets vmin/vmax are
+        # not calculated
+        if self.state.vmin == self.state.vmax == 0:
+            self.state.lim_helper.log = False
+            self.state.percentile = 100
 
     def _update_transfer_function(self):
         self.transfer_function.rgba = _transfer_function_rgba(self.state.color, max_opacity=self.state.alpha)
