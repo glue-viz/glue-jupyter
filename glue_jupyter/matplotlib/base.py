@@ -90,8 +90,6 @@ class MatplotlibJupyterViewer(Viewer):
         self.update_x_ticklabel()
         self.update_y_ticklabel()
 
-        self.canvas.manager.show()
-
     def _update_computation(self, message=None):
         pass
 
@@ -206,3 +204,6 @@ class MatplotlibJupyterViewer(Viewer):
     def apply_roi(self, roi, override_mode=None):
         """ This method must be implemented by subclasses """
         raise NotImplementedError
+
+    def show(self):
+        self.canvas.manager.show()
