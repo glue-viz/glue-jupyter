@@ -13,7 +13,7 @@ __all__ = ['ScatterJupyterViewer']
 @decorate_all_methods(defer_draw)
 class ScatterJupyterViewer(MatplotlibScatterMixin, MatplotlibJupyterViewer):
 
-    LABEL = '1D Scatter'
+    LABEL = '2D Scatter'
 
     _state_cls = ScatterViewerState
     _data_artist_cls = ScatterLayerArtist

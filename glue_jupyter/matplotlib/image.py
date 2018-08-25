@@ -13,7 +13,7 @@ __all__ = ['ImageJupyterViewer']
 @decorate_all_methods(defer_draw)
 class ImageJupyterViewer(MatplotlibImageMixin, MatplotlibJupyterViewer):
 
-    LABEL = '1D Image'
+    LABEL = '2D Image'
 
     _state_cls = ImageViewerState
     _data_artist_cls = ImageLayerArtist
