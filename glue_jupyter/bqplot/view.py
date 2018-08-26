@@ -43,7 +43,7 @@ class BqplotBaseView(IPyWidgetView):
         self.figure = bqplot.Figure(scales=self.scales, animation_duration=0, axes=[
                                     self.axis_x, self.axis_y])
         self.figure.padding_y = 0
-        
+
         actions = ['move']
         self.interact_map = {}
         self.panzoom = bqplot.PanZoom(scales={'x': [self.scale_x], 'y': [self.scale_y]})
@@ -175,8 +175,7 @@ class BqplotBaseView(IPyWidgetView):
             x_comp = self.state.x_att.parent.get_component(self.state.x_att)
             y_comp = self.state.y_att.parent.get_component(self.state.y_att)
 
-            return roi_to_subset_state(roi, self.state.x_att, self.state.y_att,
-                                            x_comp=x_comp, y_comp=y_comp)
+            return roi_to_subset_state(roi, x_att=self.state.x_att, y_att=self.state.y_att)
 
     def limits_to_scales(self, *args):
         if self.state.x_min is not None and self.state.x_max is not None:
@@ -288,11 +287,11 @@ class BqplotHistogramView(BqplotBaseView):
         self.button_cumulative = widgets.ToggleButton(
             value=False, description='cumulative', tooltip='cumulative histogram')
         link((self.button_cumulative, 'value'), (self.state, 'cumulative'))
-        
+
 
         # @on_change([(self.state, 'hist_n_bin')])
         # def trigger():
-            
+
         # self.widget_hist_x_min = widgets.FloatText(description='x min')
         # link((self.state, 'hist_x_min'), (self.widget_hist_x_min, 'value'))
 
@@ -318,6 +317,4 @@ class BqplotHistogramView(BqplotBaseView):
 
         roi_new = RangeROI(min=lo, max=hi, orientation='x')
 
-        x_comp = self.state.x_att.parent.get_component(self.state.x_att)
-
-        return roi_to_subset_state(roi_new, self.state.x_att, x_comp=x_comp)
+        return roi_to_subset_state(roi_new, x_att=self.state.x_att)
