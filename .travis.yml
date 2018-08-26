@@ -41,4 +41,4 @@ script:
 #  - runipy examples/examples.ipynb
 
 after_success:
-  codecov
+  - codecov
