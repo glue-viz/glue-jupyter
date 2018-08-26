@@ -5,7 +5,7 @@ dependencies:
   - nodejs
   - pip:
     - jupyterlab
-    - glue-core
-    - glue-vispy-viewers
     - ipywidgets
     - ipympl
+    - https://github.com/glue-viz/glue/archive/master.zip
+    - https://github.com/glue-viz/glue-vispy-viewers/archive/master.zip
