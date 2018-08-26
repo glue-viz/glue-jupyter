@@ -71,10 +71,10 @@ class BqplotScatterLayerArtist(LayerArtistBase):
             self.quiver.unselected_style = {'fill': 'none', 'stroke': 'none'}
 
     def update(self):
-        self.scatter.x = self.layer.data[self._viewer_state.x_att]
-        self.scatter.y = self.layer.data[self._viewer_state.y_att]
-        self.quiver.x = self.layer.data[self._viewer_state.x_att]
-        self.quiver.y = self.layer.data[self._viewer_state.y_att]
+        self.scatter.x = self.layer.data[self._viewer_state.x_att].astype(np.float32)
+        self.scatter.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
+        self.quiver.x = self.layer.data[self._viewer_state.x_att].astype(np.float32)
+        self.quiver.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
         if isinstance(self.layer, Subset):
             self.scatter.selected = np.nonzero(self.layer.to_mask())[0].tolist()
             self.scatter.selected_style = {}
