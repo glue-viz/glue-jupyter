@@ -23,7 +23,7 @@ before_install:
   - source ci-helpers/travis/setup_conda.sh
 
   - conda env update -n test -f environment.yml
-  - conda install -c conda-forge pytest pytest-cov runipy nodejs
+  - pip install -v pytest pytest-cov runipy
 #  - bash postBuild
   - pip uninstall ipyvolume -y
   - git clone https://github.com/maartenbreddels/ipyvolume/
