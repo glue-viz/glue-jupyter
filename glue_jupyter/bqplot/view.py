@@ -266,6 +266,19 @@ class BqplotScatterView(BqplotBaseView):
     _subset_artist_cls = BqplotScatterLayerArtist
     large_data_size = 1e7
 
+    def create_tab(self):
+        super(BqplotScatterView, self).create_tab()
+        self.widgets_axis = []
+        for i, axis_name in enumerate('xy'):
+            if hasattr(self.state, axis_name + '_att_helper'):
+                helper = getattr(self.state, axis_name + '_att_helper')
+                widget_axis = widgets.Dropdown(options=[k.label for k in helper.choices],
+                                               value=getattr(self.state, axis_name + '_att'), description=axis_name + ' axis')
+                self.widgets_axis.append(widget_axis)
+                link_component_id_to_select_widget(self.state, axis_name + '_att', widget_axis)
+        self.tab_general.children += tuple(self.widgets_axis)
+
+
 from .histogram import BqplotHistogramLayerArtist, HistogramViewerState
 
 class BqplotHistogramView(BqplotBaseView):
@@ -289,6 +302,14 @@ class BqplotHistogramView(BqplotBaseView):
         link((self.button_cumulative, 'value'), (self.state, 'cumulative'))
 
 
+        self.widgets_axis = []
+        for i, axis_name in enumerate('x'):
+            if hasattr(self.state, axis_name + '_att_helper'):
+                helper = getattr(self.state, axis_name + '_att_helper')
+                widget_axis = widgets.Dropdown(options=[k.label for k in helper.choices],
+                                               value=getattr(self.state, axis_name + '_att'), description=axis_name + ' axis')
+                self.widgets_axis.append(widget_axis)
+                link_component_id_to_select_widget(self.state, axis_name + '_att', widget_axis)
         # @on_change([(self.state, 'hist_n_bin')])
         # def trigger():
 
@@ -298,7 +319,7 @@ class BqplotHistogramView(BqplotBaseView):
         # self.widget_hist_n_bin = widgets.IntSlider(min=1, max=1000, step=1, description='bins')
         # link((self.state, 'hist_n_bin'), (self.widget_hist_n_bin, 'value'))
 
-        self.tab_general.children += (widgets.HBox([self.button_normalize, self.button_cumulative]),)
+        self.tab_general.children += (widgets.HBox([self.button_normalize, self.button_cumulative] ),) + tuple(self.widgets_axis)
 
 
     def _roi_to_subset_state(self, roi):
