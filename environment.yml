@@ -1,15 +1,11 @@
 name: glue-jupyter
-channels:
-  - glueviz/label/dev
-  - conda-forge
 dependencies:
-  - glue-core
-  - glue-vispy-viewers
-  - pip
-  - jupyterlab >=0.32
-  - ipywidgets
-  - ipympl
+  - pyqt
   - nomkl
-# these are for now installed from git master in postBuild
-#  - bqplot
-#  - ipyvolume
+  - nodejs
+  - pip:
+    - jupyterlab
+    - ipywidgets
+    - ipympl
+    - https://github.com/glue-viz/glue/archive/master.zip
+    - https://github.com/glue-viz/glue-vispy-viewers/archive/master.zip

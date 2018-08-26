@@ -34,12 +34,12 @@ def app(dataxyz, dataxz, data_volume, data_image):
     app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, links=[link1, link2])
     app.add_data(data_volume=data_volume)
     app.add_data(data_image=data_image)
-    link1 =  ComponentLink([data_image.id['Pixel Axis 0 [y]']], dataxyz.id['y'])
-    link2 =  ComponentLink([data_image.id['Pixel Axis 1 [x]']], dataxyz.id['x'])
+    link1 = ComponentLink([data_image.id['Pixel Axis 0 [y]']], dataxyz.id['y'])
+    link2 = ComponentLink([data_image.id['Pixel Axis 1 [x]']], dataxyz.id['x'])
     app.data_collection.add_link([link1, link2])
-    link1 =  ComponentLink([data_volume.id['Pixel Axis 0 [z]']], dataxyz.id['z'])
-    link2 =  ComponentLink([data_volume.id['Pixel Axis 1 [y]']], dataxyz.id['y'])
-    link3 =  ComponentLink([data_volume.id['Pixel Axis 2 [x]']], dataxyz.id['x'])
+    link1 = ComponentLink([data_volume.id['Pixel Axis 0 [z]']], dataxyz.id['z'])
+    link2 = ComponentLink([data_volume.id['Pixel Axis 1 [y]']], dataxyz.id['y'])
+    link3 = ComponentLink([data_volume.id['Pixel Axis 2 [x]']], dataxyz.id['x'])
     app.data_collection.add_link([link1, link2, link3])
     return app
 
@@ -71,9 +71,9 @@ def test_app(app, dataxyz, dataxz):
 
     app.session.edit_subset_mode.edit_subset = []
     assert len(app.widget_subset_groups.index) == 0
-    assert app.data_collection[0].subsets[0]['x'].tolist() == [1, 2]
-    assert app.data_collection[0].subsets[0]['y'].tolist() == [2, 3]
-    assert app.data_collection[0].subsets[0]['z'].tolist() == [5, 6]
+    assert dataxyz.subsets[0]['x'].tolist() == [1, 2]
+    assert dataxyz.subsets[0]['y'].tolist() == [2, 3]
+    assert dataxyz.subsets[0]['z'].tolist() == [5, 6]
 
 
 xyzw2yxzw = np.array([
