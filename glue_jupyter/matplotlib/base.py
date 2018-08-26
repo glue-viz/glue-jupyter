@@ -5,15 +5,13 @@ from matplotlib.figure import Figure
 
 from glue.viewers.common.viewer import Viewer
 from glue.viewers.matplotlib.mpl_axes import init_mpl
-from glue.utils import defer_draw, decorate_all_methods
 from glue.viewers.matplotlib.state import MatplotlibDataViewerState
-from glue.viewers.matplotlib.viewer import MatplotlibMixin
+from glue.viewers.matplotlib.viewer import MatplotlibViewerMixin
 
 __all__ = ['MatplotlibJupyterViewer']
 
 
-@decorate_all_methods(defer_draw)
-class MatplotlibJupyterViewer(MatplotlibMixin, Viewer):
+class MatplotlibJupyterViewer(MatplotlibViewerMixin, Viewer):
 
     _state_cls = MatplotlibDataViewerState
 
@@ -29,7 +27,7 @@ class MatplotlibJupyterViewer(MatplotlibMixin, Viewer):
 
         self.figure, self.axes = init_mpl(self.figure, wcs=wcs)
 
-        MatplotlibMixin.setup_callbacks(self)
+        MatplotlibViewerMixin.setup_callbacks(self)
 
     def show(self):
         self.canvas.manager.show()
