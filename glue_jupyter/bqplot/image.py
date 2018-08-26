@@ -7,6 +7,7 @@ import ipywidgets.widgets.trait_types as tt
 from IPython.display import display
 import matplotlib.cm
 
+from glue.core.exceptions import IncompatibleAttribute
 from glue.core.layer_artist import LayerArtistBase
 from glue.core.data import Subset
 from glue.viewers.image.state import ImageLayerState

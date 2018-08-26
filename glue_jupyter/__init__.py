@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from glue.core import message as msg
+from glue.core.subset import Subset
 from glue.viewers.common.viewer import Viewer
 from glue.core.layer_artist import LayerArtistContainer
 from glue.core.edit_subset_mode import (EditSubsetMode, OrMode, AndNotMode,
@@ -337,7 +338,6 @@ class IPyWidgetView(Viewer):
         return cls(self, self.state, layer=layer, layer_state=layer_state)
 
     def _update_data(self, message):
-        print('update data', message)
         if message.data in self._layer_artist_container:
             for layer_artist in self._layer_artist_container:
                 if isinstance(layer_artist.layer, Subset):
