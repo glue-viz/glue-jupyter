@@ -170,7 +170,7 @@ class JupyterApplication(Application):
     def add_widget(self, widget, label=None, tab=None):
         pass
 
-    def histogram1d(self, x, data=None, widget='bqplot'):
+    def histogram1d(self, x=None, data=None, widget='bqplot'):
         if widget == 'bqplot':
             from .bqplot import BqplotHistogramView
             viewer_cls = BqplotHistogramView
@@ -179,13 +179,16 @@ class JupyterApplication(Application):
             viewer_cls = HistogramJupyterViewer
         else:
             raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
+        if data is None and len(self._data) != 1:
+            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
         data = data or self._data[0]
         view = self.new_data_viewer(viewer_cls, data=data)
-        x = data.id[x]
-        view.state.x_att = x
+        if x is not None:
+            x = data.id[x]
+            view.state.x_att = x
         return view
 
-    def scatter2d(self, x, y, data=None, widget='bqplot'):
+    def scatter2d(self, x=None, y=None, data=None, widget='bqplot'):
         if widget == 'bqplot':
             from .bqplot import BqplotScatterView
             viewer_cls = BqplotScatterView
@@ -194,27 +197,36 @@ class JupyterApplication(Application):
             viewer_cls = ScatterJupyterViewer
         else:
             raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
+        if data is None and len(self._data) != 1:
+            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
         data = data or self._data[0]
         view = self.new_data_viewer(viewer_cls, data=data)
-        x = data.id[x]
-        y = data.id[y]
-        view.state.x_att = x
-        view.state.y_att = y
+        if x is not None:
+            x = data.id[x]
+            view.state.x_att = x
+        if y is not None:
+            y = data.id[y]
+            view.state.y_att = y
         return view
 
-    def scatter3d(self, x, y, z, data=None):
+    def scatter3d(self, x=None, y=None, z=None, data=None):
         from .ipyvolume import IpyvolumeScatterView
+        if data is None and len(self._data) != 1:
+            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
         data = data or self._data[0]
         view = self.new_data_viewer(IpyvolumeScatterView, data=data)
-        x = data.id[x]
-        y = data.id[y]
-        z = data.id[z]
-        view.state.x_att = x
-        view.state.y_att = y
-        view.state.z_att = z
+        if x is not None:
+            x = data.id[x]
+            view.state.x_att = x
+        if y is not None:
+            y = data.id[y]
+            view.state.y_att = y
+        if z is not None:
+            z = data.id[z]
+            view.state.z_att = z
         return view
 
-    def imshow(self, x="Pixel Axis 1 [x]", y="Pixel Axis 0 [y]", data=None, widget='bqplot'):
+    def imshow(self, x=None, y=None, data=None, widget='bqplot'):
         if widget == 'bqplot':
             from .bqplot import BqplotImageView
             viewer_cls = BqplotImageView
@@ -224,11 +236,17 @@ class JupyterApplication(Application):
         else:
             raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
         data = data or self._data[0]
+        if data is None and len(self._data) != 1:
+            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
+        if len(data.pixel_component_ids) < 2:
+            raise ValueError('There are less than 2 pixel components (not an image?)')
         view = self.new_data_viewer(viewer_cls, data=data)
-        x = data.id[x]
-        y = data.id[y]
-        view.state.x_att = x
-        view.state.y_att = y
+        if x is not None:
+            x = data.id[x]
+            view.state.x_att = x
+        if y is not None:
+            y = data.id[y]
+            view.state.y_att = y
         return view
 
     def profile1d(self, x, data=None, widget='matplotlib'):
@@ -239,20 +257,26 @@ class JupyterApplication(Application):
             raise ValueError("Widget type should be 'matplotlib'")
         data = data or self._data[0]
         view = self.new_data_viewer(viewer_cls, data=data)
-        x = data.id[x]
-        view.state.x_att = x
+        if x is not None:
+            x = data.id[x]
+            view.state.x_att = x
         return view
 
     def volshow(self, x="Pixel Axis 2 [x]", y="Pixel Axis 1 [y]", z="Pixel Axis 0 [z]", data=None):
         from .ipyvolume import IpyvolumeVolumeView
         data = data or self._data[0]
+        if data is None and len(self._data) != 1:
+            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
         view = self.new_data_viewer(IpyvolumeVolumeView, data=data)
-        x = data.id[x]
-        y = data.id[y]
-        z = data.id[z]
-        view.state.x_att = x
-        view.state.y_att = y
-        view.state.z_att = z
+        if x is not None:
+            x = data.id[x]
+            view.state.x_att = x
+        if y is not None:
+            y = data.id[y]
+            view.state.y_att = y
+        if z is not None:
+            z = data.id[z]
+            view.state.z_att = z
         return view
 
     def subset(self, name, state):

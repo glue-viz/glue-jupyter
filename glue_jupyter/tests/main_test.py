@@ -20,6 +20,12 @@ def dataxz():
     return data
 
 @pytest.fixture#(scope="module")
+def datax():
+    ox = 0
+    data = Data(x=[1 + ox, 2 + ox, 3 + ox], label="x data")
+    return data
+
+@pytest.fixture#(scope="module")
 def data_volume():
     return gj.example_volume()
 
@@ -28,10 +34,11 @@ def data_image():
     return gj.example_image()
 
 @pytest.fixture
-def app(dataxyz, dataxz, data_volume, data_image):
+def app(dataxyz, datax, dataxz, data_volume, data_image):
     link1 = ['dataxyz.x'], ['dataxz.x'], lambda x: x
     link2 = ['dataxyz.y'], ['dataxz.z'], lambda y: y+1, lambda z: z-1
-    app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, links=[link1, link2])
+    link3 = ['dataxyz.x'], ['datax.x'], lambda x: x
+    app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, datax=datax, links=[link1, link2, link3])
     app.add_data(data_volume=data_volume)
     app.add_data(data_image=data_image)
     link1 = ComponentLink([data_image.id['Pixel Axis 0 [y]']], dataxyz.id['y'])
@@ -82,6 +89,28 @@ xyzw2yxzw = np.array([
              [1, 0, 0, 0],
              [0, 0, 0, 1]
             ])
+
+def test_default_components(app, datax, dataxz, dataxyz):
+    s = app.scatter2d(data=datax)
+    assert s.state.x_att is datax.main_components[0]
+
+    s = app.scatter2d(data=dataxz)
+    assert s.state.x_att is dataxz.main_components[0]
+    assert s.state.y_att is dataxz.main_components[1]
+
+    s = app.scatter3d(data=datax)
+    assert s.state.x_att is datax.main_components[0]
+
+    s = app.scatter3d(data=dataxz)
+    assert s.state.x_att is dataxz.main_components[0]
+    assert s.state.y_att is dataxz.main_components[1]
+
+    s = app.scatter3d(data=dataxyz)
+    assert s.state.x_att is dataxyz.main_components[0]
+    assert s.state.y_att is dataxyz.main_components[1]
+    assert s.state.z_att is dataxyz.main_components[2]
+
+
 
 def test_histogram1d(app, dataxyz):
     s = app.histogram1d('y', data=dataxyz)
