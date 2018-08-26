@@ -8,14 +8,15 @@ pip install .
 git clone https://github.com/glue-viz/glue
 (cd glue; pip install .)
 
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
+# jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
 pip uninstall ipyvolume -y
 git clone https://github.com/maartenbreddels/ipyvolume/
 pushd ipyvolume
-pip install .
-jupyter labextension install js
-jupyter labextension install jupyter-threejs
+
+pip install -v .
+# jupyter labextension install js --no-build
+# jupyter labextension install jupyter-threejs --no-build
 popd
 
 pip uninstall bqplot -y
@@ -23,5 +24,7 @@ git clone https://github.com/maartenbreddels/bqplot/
 pushd bqplot
 git checkout scatter_webgl
 pip install .
-jupyter labextension install js
+# jupyter labextension install js
 popd
+
+# jupyter labextension build
