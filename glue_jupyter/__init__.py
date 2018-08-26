@@ -122,7 +122,7 @@ class JupyterApplication(Application):
             if mode == sel_mode:
                 index = i
         self.widget_selection_mode.index = index
-    
+
     def _update_subset_groups_selected(self, subset_groups_selected):
         if self.session.edit_subset_mode.edit_subset != subset_groups_selected:
             self.session.edit_subset_mode.edit_subset = subset_groups_selected
@@ -148,7 +148,7 @@ class JupyterApplication(Application):
 
     def subset_mode_replace(self):
         self.subset_mode(ReplaceMode)
-    
+
     def subset_mode_and(self):
         self.subset_mode(AndMode)
 
@@ -169,19 +169,32 @@ class JupyterApplication(Application):
     def add_widget(self, widget, label=None, tab=None):
         pass
 
-    def histogram1d(self, x, data=None):
-        from .bqplot import BqplotHistogramView
+    def histogram1d(self, x, data=None, widget='bqplot'):
+        if widget == 'bqplot':
+            from .bqplot import BqplotHistogramView
+            viewer_cls = BqplotHistogramView
+        elif widget == 'matplotlib':
+            from .matplotlib.histogram import HistogramJupyterViewer
+            viewer_cls = HistogramJupyterViewer
+        else:
+            raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
         data = data or self._data[0]
-        view = self.new_data_viewer(BqplotHistogramView, data=data)
+        view = self.new_data_viewer(viewer_cls, data=data)
         x = data.id[x]
         view.state.x_att = x
         return view
 
-
-    def scatter2d(self, x, y, data=None):
-        from .bqplot import BqplotScatterView
+    def scatter2d(self, x, y, data=None, widget='bqplot'):
+        if widget == 'bqplot':
+            from .bqplot import BqplotScatterView
+            viewer_cls = BqplotScatterView
+        elif widget == 'matplotlib':
+            from .matplotlib.scatter import ScatterJupyterViewer
+            viewer_cls = ScatterJupyterViewer
+        else:
+            raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
         data = data or self._data[0]
-        view = self.new_data_viewer(BqplotScatterView, data=data)
+        view = self.new_data_viewer(viewer_cls, data=data)
         x = data.id[x]
         y = data.id[y]
         view.state.x_att = x
@@ -200,14 +213,33 @@ class JupyterApplication(Application):
         view.state.z_att = z
         return view
 
-    def imshow(self, x="Pixel Axis 1 [x]", y="Pixel Axis 0 [y]", data=None):
-        from .bqplot import BqplotImageView
+    def imshow(self, x="Pixel Axis 1 [x]", y="Pixel Axis 0 [y]", data=None, widget='bqplot'):
+        if widget == 'bqplot':
+            from .bqplot import BqplotImageView
+            viewer_cls = BqplotImageView
+        elif widget == 'matplotlib':
+            from .matplotlib.image import ImageJupyterViewer
+            viewer_cls = ImageJupyterViewer
+        else:
+            raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
         data = data or self._data[0]
-        view = self.new_data_viewer(BqplotImageView, data=data)
+        view = self.new_data_viewer(viewer_cls, data=data)
         x = data.id[x]
         y = data.id[y]
         view.state.x_att = x
         view.state.y_att = y
+        return view
+
+    def profile1d(self, x, data=None, widget='matplotlib'):
+        if widget == 'matplotlib':
+            from .matplotlib.profile import ProfileJupyterViewer
+            viewer_cls = ProfileJupyterViewer
+        else:
+            raise ValueError("Widget type should be 'matplotlib'")
+        data = data or self._data[0]
+        view = self.new_data_viewer(viewer_cls, data=data)
+        x = data.id[x]
+        view.state.x_att = x
         return view
 
     def volshow(self, x="Pixel Axis 2 [x]", y="Pixel Axis 1 [y]", z="Pixel Axis 0 [z]", data=None):
