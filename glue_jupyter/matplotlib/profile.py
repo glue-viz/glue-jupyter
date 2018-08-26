@@ -19,8 +19,6 @@ class ProfileJupyterViewer(MatplotlibProfileMixin, MatplotlibJupyterViewer):
     _data_artist_cls = ProfileLayerArtist
     _subset_artist_cls = ProfileLayerArtist
 
-    large_data_size = 2e7
-
     def __init__(self, session, parent=None, state=None):
         super(ProfileJupyterViewer, self).__init__(session, parent=parent, state=state)
         MatplotlibProfileMixin.setup_callbacks(self)

@@ -19,8 +19,6 @@ class ImageJupyterViewer(MatplotlibImageMixin, MatplotlibJupyterViewer):
     _data_artist_cls = ImageLayerArtist
     _subset_artist_cls = ImageLayerArtist
 
-    large_data_size = 2e7
-
     def __init__(self, session, parent=None, state=None):
         super(ImageJupyterViewer, self).__init__(session, wcs=True, parent=parent, state=state)
         MatplotlibImageMixin.setup_callbacks(self)

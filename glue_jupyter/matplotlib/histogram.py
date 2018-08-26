@@ -19,8 +19,6 @@ class HistogramJupyterViewer(MatplotlibHistogramMixin, MatplotlibJupyterViewer):
     _data_artist_cls = HistogramLayerArtist
     _subset_artist_cls = HistogramLayerArtist
 
-    large_data_size = 2e7
-
     def __init__(self, session, parent=None, state=None):
         super(HistogramJupyterViewer, self).__init__(session, parent=parent, state=state)
         MatplotlibHistogramMixin.setup_callbacks(self)

@@ -19,8 +19,6 @@ class ScatterJupyterViewer(MatplotlibScatterMixin, MatplotlibJupyterViewer):
     _data_artist_cls = ScatterLayerArtist
     _subset_artist_cls = ScatterLayerArtist
 
-    large_data_size = 2e7
-
     def __init__(self, session, parent=None, state=None):
         super(ScatterJupyterViewer, self).__init__(session, parent=parent, state=state)
         MatplotlibScatterMixin.setup_callbacks(self)
