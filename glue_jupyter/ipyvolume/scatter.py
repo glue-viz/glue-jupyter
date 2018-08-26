@@ -49,7 +49,7 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
             self._viewer_state.layers.append(self.state)
 
         self.scatter = ipyvolume.Scatter(x=[0, 1], y=[0, 1], z=[0,1], color='green',
-            color_selected='orange', size_selected=7, size=5, geo='sphere')
+            color_selected='orange', size_selected=7, size=5, geo='box')
         self.quiver = ipyvolume.Scatter(x=[0, 1], y=[0, 1], z=[0,1], color='green',
             color_selected='orange', size_selected=7, size=5, geo='arrow', visible=False)
         self.view.figure.scatters = list(self.view.figure.scatters) + [self.scatter, self.quiver]
@@ -118,6 +118,9 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         link((self.state, 'visible'), (widget_visible, 'value'))
         link((self.state, 'visible'), (self.scatter.material, 'visible'))
 
+        self.widget_marker = widgets.ToggleButtons(options=['sphere', 'box', 'diamond'])
+        widgets.link((self.scatter, 'geo'), (self.widget_marker, 'value'))
+
         self.widget_size = widgets.FloatSlider(description='size', min=0, max=10, value=self.state.size)
         link((self.state, 'size'), (self.widget_size, 'value'))
         self.widget_scaling = widgets.FloatSlider(description='scale', min=0, max=2, value=self.state.size_scaling)
@@ -172,5 +175,5 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
         dlink((self.widget_vector, 'value'), (self.widget_vector_z.layout, 'display'), lambda value: None if value else 'none')
 
-        return widgets.VBox([widget_visible, self.widget_size_mode, self.widget_size, self.widget_size_att, self.widget_size_v, self.widget_scaling, widget_color,
+        return widgets.VBox([widget_visible, self.widget_marker, self.widget_size_mode, self.widget_size, self.widget_size_att, self.widget_size_v, self.widget_scaling, widget_color,
             self.widget_vector, self.widget_vector_x, self.widget_vector_y, self.widget_vector_z])
