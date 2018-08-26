@@ -21,7 +21,7 @@ class MatplotlibJupyterViewer(MatplotlibViewerMixin, Viewer):
 
         super(MatplotlibJupyterViewer, self).__init__(session, state=state)
 
-        self.figure = Figure()
+        self.figure = Figure(figsize=(10, 6))
         self.canvas = FigureCanvasNbAgg(self.figure)
         self.canvas.manager = FigureManager(self.canvas, 0)
 
