@@ -9,6 +9,7 @@ from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3d
 from glue.core.subset import RoiSubsetState3d, RoiSubsetState
 from glue.core.command import ApplySubsetState
 from IPython.display import display
+from glue.core.link_helpers import LinkSame
 import ipywidgets as widgets
 import six
 # from glue.core.session import Session
@@ -106,6 +107,17 @@ class JupyterApplication(Application):
     def link(self, links):
         from glue.qglue import parse_links
         self.data_collection.add_link(parse_links(self.data_collection, links))
+
+    def add_link(self, data1, attribute1, data2, attribute2, function=None):
+        # For now this assumes attribute1 and attribute2 are strings and single
+        # attributes. In future we should generalize this while keeping the
+        # simplest use case simple.
+        if function is not None:
+            raise NotImplementedError
+        att1 = data1.id[attribute1]
+        att2 = data2.id[attribute2]
+        link = LinkSame(att1, att2)
+        self.data_collection.add_link(link)
 
     def _on_edit_subset_msg(self, msg):
         self._update_subset_mode(msg.mode)

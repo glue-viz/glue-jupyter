@@ -41,13 +41,11 @@ def app(dataxyz, datax, dataxz, data_volume, data_image):
     app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, datax=datax, links=[link1, link2, link3])
     app.add_data(data_volume=data_volume)
     app.add_data(data_image=data_image)
-    link1 = ComponentLink([data_image.id['Pixel Axis 0 [y]']], dataxyz.id['y'])
-    link2 = ComponentLink([data_image.id['Pixel Axis 1 [x]']], dataxyz.id['x'])
-    app.data_collection.add_link([link1, link2])
-    link1 = ComponentLink([data_volume.id['Pixel Axis 0 [z]']], dataxyz.id['z'])
-    link2 = ComponentLink([data_volume.id['Pixel Axis 1 [y]']], dataxyz.id['y'])
-    link3 = ComponentLink([data_volume.id['Pixel Axis 2 [x]']], dataxyz.id['x'])
-    app.data_collection.add_link([link1, link2, link3])
+    app.add_link(data_image, 'Pixel Axis 0 [y]', dataxyz, 'y')
+    app.add_link(data_image, 'Pixel Axis 1 [x]', dataxyz, 'x')
+    app.add_link(data_volume, 'Pixel Axis 0 [z]', dataxyz, 'z')
+    app.add_link(data_volume, 'Pixel Axis 1 [y]', dataxyz, 'y')
+    app.add_link(data_volume, 'Pixel Axis 2 [x]', dataxyz, 'x')
     return app
 
 def test_app(app, dataxyz, dataxz):
