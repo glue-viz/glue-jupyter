@@ -36,6 +36,9 @@ class IpyvolumeBaseView(IPyWidgetView):
         self.state.add_callback('x_max', self.limits_to_scales)
         self.state.add_callback('y_min', self.limits_to_scales)
         self.state.add_callback('y_max', self.limits_to_scales)
+        if hasattr(self.state, 'z_min'):
+            self.state.add_callback('z_min', self.limits_to_scales)
+            self.state.add_callback('z_max', self.limits_to_scales)
         self.output_widget = widgets.Output()
         self.main_widget = widgets.VBox(
             children=[widgets.HBox([ipv.gcc(), self.tab]), self.output_widget])
@@ -91,8 +94,9 @@ class IpyvolumeBaseView(IPyWidgetView):
             self.figure.ylim = self.state.y_min, self.state.y_max
         # if self.state.z_min is not None and self.state.z_max is not None:
         #     self.figure.zlim = self.state.z_min, self.state.z_max
-        if self.state.y_min is not None and self.state.y_max is not None:
-            self.figure.zlim = self.state.y_min, self.state.y_max
+        if hasattr(self.state, 'z_min'):
+            if self.state.z_min is not None and self.state.z_max is not None:
+                self.figure.zlim = self.state.z_min, self.state.z_max
 
     def redraw(self):
         pass
