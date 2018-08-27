@@ -394,3 +394,18 @@ def test_imshow(app, data_image, dataxyz):
     assert v.layers[0].widget_colormap.value == 'jet'
     assert v.layers[0].scale_image.scheme == 'jet'
     assert v.layers[0].scale_image.colors == []
+
+
+def test_double_load_data(tmpdir):
+
+    # Regression test for a bug that caused a crash when adding two datasets
+    # with the same shape.
+
+    filename = tmpdir.join('data1.csv').strpath
+
+    with open(filename, 'w') as f:
+        f.write('a,b\n1,2\n3,4\n5.6\n')
+
+    app = gj.jglue()
+    app.load_data(filename)
+    app.load_data(filename)

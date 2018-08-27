@@ -297,6 +297,10 @@ class JupyterApplication(Application):
     def _update_undo_redo_enabled(self, *args):
         pass  # TODO: if we want a gui for this, we need to update it here
 
+    def _choose_merge(self, *args, **kwargs):
+        # Never suggest automatic merging
+        return None, None
+
 
 class IPyWidgetLayerArtistContainer(LayerArtistContainer):
 
