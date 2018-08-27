@@ -84,7 +84,7 @@ class BqplotBaseView(IPyWidgetView):
         self.create_tab()
         self.output_widget = widgets.Output()
         self.main_widget = widgets.VBox(
-            children=[self.tab, self.figure, self.output_widget])
+            children=[widgets.HBox([self.figure, self.tab]), self.output_widget])
 
     def show(self):
         display(self.main_widget)

@@ -38,7 +38,7 @@ class IpyvolumeBaseView(IPyWidgetView):
         self.state.add_callback('y_max', self.limits_to_scales)
         self.output_widget = widgets.Output()
         self.main_widget = widgets.VBox(
-            children=[self.tab, ipv.gcc(), self.output_widget])
+            children=[widgets.HBox([ipv.gcc(), self.tab]), self.output_widget])
 
     def show(self):
         display(self.main_widget)
