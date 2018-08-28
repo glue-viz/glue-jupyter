@@ -1,4 +1,6 @@
 name: glue-jupyter
+channels:
+  - glueviz
 dependencies:
   - pyqt
   - nomkl
