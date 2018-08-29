@@ -1,5 +1,7 @@
 # Jupyter interface for Glue
 
+Sometimes known as "Glupyter"
+
 [![Build Status](https://travis-ci.org/glue-viz/glue-jupyter.svg?branch=master)](https://travis-ci.org/glue-viz/glue-jupyter)
 
 ### About

@@ -1,17 +1,13 @@
 name: glue-jupyter
-channels:
-  - glueviz
 dependencies:
   - pyqt
   - nomkl
   - nodejs
   - pip:
-    - jupyterlab >=0.34
+    - jupyterlab ==0.34
     - notebook >=5.5
-    - ipywidgets >=7.4.0
+    - ipywidgets
     - ipympl
     - pythreejs
     - https://github.com/glue-viz/glue/archive/master.zip
     - https://github.com/glue-viz/glue-vispy-viewers/archive/master.zip
-    - https://github.com/maartenbreddels/ipyvolume/archive/master.zip
-    - https://github.com/maartenbreddels/bqplot/archive/scatter_webgl.zip
