@@ -1,0 +1,173 @@
+def test_histogram1d(app, dataxyz):
+    s = app.histogram1d('y', data=dataxyz)
+    assert s.state.x_att == 'y'
+    assert len(s.layers) == 1
+    assert s.layers[0].layer['y'].tolist() == [2, 3, 4]
+    print('updating histogram state')
+    s.state.hist_x_min = 1.5
+    s.state.hist_x_max = 4.5
+    s.state.hist_n_bin = 3
+    assert s.layers[0].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
+    assert s.layers[0].hist.tolist() == [1, 1, 1]
+
+    app.subset('test', dataxyz.id['x'] > 1)
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['y'].tolist() == [3, 4]
+    assert s.layers[1].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
+    assert s.layers[1].hist.tolist() == [0, 1, 1]
+
+    s.brush_x.brushing = True
+    s.brush_x.selected = [2.5, 3.5]
+    s.brush_x.brushing = False
+
+    assert len(s.layers) == 3
+    assert s.layers[2].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
+    assert s.layers[2].hist.tolist() == [0, 1, 0]
+
+
+    # s.state.hist_n_bin = 6
+    # assert s.layers[2].bins.tolist() == [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
+    # assert s.layers[2].hist.tolist() == [0, 1, 0, 0, 0, 0]
+
+
+def test_scatter2d(app, dataxyz, dataxz):
+    s = app.scatter2d('x', 'y', data=dataxyz)
+    assert s.state.x_att == 'x'
+    assert s.state.y_att == 'y'
+
+    # assert s.state.x_min == 1
+    # assert s.state.x_max == 3
+    # assert s.state.y_min == 2
+    # assert s.state.y_max == 4
+
+    # test when we swap x and x
+    s = app.scatter2d('y', 'x', data=dataxyz)
+    assert s.state.x_att == 'y'
+    assert s.state.y_att == 'x'
+    # assert s.state.y_min == 1
+    # assert s.state.y_max == 3
+    # assert s.state.x_min == 2
+    # assert s.state.x_max == 4
+
+    s.layers[0].state.size_mode = 'Linear'
+
+    layer = s.layers[0]
+    assert not layer.quiver.visible
+    layer.state.vector_visible = True
+    assert layer.quiver.visible
+
+
+def test_scatter2d_subset(app, dataxyz, dataxz):
+    s = app.scatter2d('x', 'y', data=dataxyz)
+    app.subset('test', dataxyz.id['x'] > 2)
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [3]
+    assert s.layers[1].layer['y'].tolist() == [4]
+    assert s.layers[1].layer['z'].tolist() == [7]
+
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.selected == [2]
+
+    s.state.y_att = 'z'
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
+    assert s.layers[1].scatter.selected == [2]
+
+def test_scatter2d_brush(app, dataxyz, dataxz):
+    s = app.scatter2d('x', 'y', data=dataxyz)
+
+    # 1d x brushing
+    s.button_action.value = 'brush x'
+    s.brush_x.brushing = True
+    s.brush_x.selected = [1.5, 3.5]
+    s.brush_x.brushing = False
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [2, 3]
+    assert s.layers[1].layer['y'].tolist() == [3, 4]
+    assert s.layers[1].layer['z'].tolist() == [6, 7]
+
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.selected.tolist() == [1, 2]
+
+    # 1d y brushing is not working for bqplot
+    # s.button_action.value = 'brush y'
+    # s.brush_y.brushing = True
+    # s.brush_y.selected = [1.5, 3.5]
+    # s.brush_y.brushing = False
+    # assert len(s.layers) == 2
+    # assert s.layers[1].layer['x'].tolist() == [1, 2]
+    # assert s.layers[1].layer['y'].tolist() == [2, 3]
+    # assert s.layers[1].layer['z'].tolist() == [5, 6]
+
+    # assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    # assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    # assert s.layers[1].scatter.selected == [0, 1]
+
+
+    # 2d brushing
+    # format is (x1, y1), (x2, y2)
+    s.brush.brushing = True
+    s.brush.selected = [(1.5, 3.5), (3.5, 5)]
+    s.brush.brushing = False
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [3]
+    assert s.layers[1].layer['y'].tolist() == [4]
+    assert s.layers[1].layer['z'].tolist() == [7]
+
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.selected == [2]
+
+    # nothing should change when we change modes
+    s.button_action.value = 'brush'
+    assert s.layers[1].scatter.selected == [2]
+    s.button_action.value = 'brush x'
+    assert s.layers[1].scatter.selected == [2]
+
+def test_scatter2d_properties(app, dataxyz, dataxz):
+    s = app.scatter2d('x', 'y', data=dataxyz)
+    l1 = s.layers[0]
+    l1.state.color = 'green'
+    assert l1.scatter.colors == ['green']
+    l1.scatter.colors = ['orange']
+    assert l1.state.color == 'orange'
+
+
+def test_scatter2d_and_histogram(app, dataxyz):
+    s = app.scatter2d('x', 'y', data=dataxyz)
+    h = app.histogram1d('x', data=dataxyz)
+    s.brush.brushing = True
+    s.brush.selected = [(1.5, 3.5), (3.5, 5)]
+    s.brush.brushing = False
+    assert len(s.layers) == 2
+    import glue.core.subset
+    assert isinstance(s.layers[1].layer.subset_state, glue.core.subset.RoiSubsetState)
+
+
+
+
+def test_imshow(app, data_image, dataxyz):
+    assert data_image in app.data_collection
+    v = app.imshow(data=data_image)
+
+    v.add_data(dataxyz)
+
+    assert len(v.layers) == 2
+    v.brush.brushing = True
+    v.brush.selected = [(1.5, 3.5), (300.5, 550)]
+    v.brush.brushing = False
+
+    assert len(v.layers) == 4
+
+    v.layers[0].state.cmap = 'Grey'
+    assert v.layers[0].widget_colormap.label == 'Grey'
+    assert isinstance(v.layers[0].widget_colormap.value, list)
+    assert v.layers[0].scale_image.scheme
+
+    v.layers[0].state.cmap = 'Jet'
+    assert v.layers[0].widget_colormap.label == 'Jet'
+    assert v.layers[0].widget_colormap.value == 'jet'
+    assert v.layers[0].scale_image.scheme == 'jet'
+    assert v.layers[0].scale_image.colors == []
