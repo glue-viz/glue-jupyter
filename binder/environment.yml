@@ -9,5 +9,6 @@ dependencies:
     - ipywidgets
     - ipympl
     - pythreejs
+    - ipyvolume >=0.5.1
     - https://github.com/glue-viz/glue/archive/master.zip
     - https://github.com/glue-viz/glue-vispy-viewers/archive/master.zip
