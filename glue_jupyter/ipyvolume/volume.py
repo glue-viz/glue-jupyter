@@ -112,8 +112,8 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
                 self.volume = ipv.volshow(data, data_min=data_min, data_max=data_max, extent=[[0, shape[0]], [0, shape[1]], [0, shape[2]]], controls=False,
                     tf=self.transfer_function)#, volume_rendering_method=self.state.render_method)
         else:
-            self.volume.data_original = data
             self.volume.extent_original = [[0, shape[0]], [0, shape[1]], [0, shape[2]]]
+            self.volume.data_original = data
             self.volume.data_min = data_min
             self.volume.data_max = data_max
         self.widget_data_min.value = self.state.vmin
