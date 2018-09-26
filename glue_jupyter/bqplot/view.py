@@ -79,10 +79,14 @@ class BqplotBaseView(IPyWidgetView):
 #         self.state.add_callback('x_log', self._update_axes)
 #         self.state.add_callback('y_log', self._update_axes)
 
-        self.state.add_callback('x_min', self.limits_to_scales)
-        self.state.add_callback('x_max', self.limits_to_scales)
-        self.state.add_callback('y_min', self.limits_to_scales)
-        self.state.add_callback('y_max', self.limits_to_scales)
+        # self.state.add_callback('x_min', self.limits_to_scales)
+        # self.state.add_callback('x_max', self.limits_to_scales)
+        # self.state.add_callback('y_min', self.limits_to_scales)
+        # self.state.add_callback('y_max', self.limits_to_scales)
+        link((self.state, 'x_min'), (self.scale_x, 'min'))
+        link((self.state, 'x_max'), (self.scale_x, 'max'))
+        link((self.state, 'y_min'), (self.scale_y, 'min'))
+        link((self.state, 'y_max'), (self.scale_y, 'max'))
 
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
@@ -181,8 +185,8 @@ class BqplotBaseView(IPyWidgetView):
         #    roi = roi.transformed(xfunc=mpl_to_datetime64 if x_date else None,
         #                          yfunc=mpl_to_datetime64 if y_date else None)
         if self.is2d:
-            x_comp = self.state.x_att.parent.get_component(self.state.x_att)
-            y_comp = self.state.y_att.parent.get_component(self.state.y_att)
+            x_comp = self.state.x_att
+            y_comp = self.state.y_att
 
             return roi_to_subset_state(roi, x_att=self.state.x_att, y_att=self.state.y_att)
 

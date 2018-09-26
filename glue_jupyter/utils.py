@@ -112,8 +112,10 @@ def debounced(delay_seconds=0.5, method=False):
 
             def thread_safe():
                 ioloop.add_timeout(time.time() + delay_seconds, debounced_execute)
-
-            ioloop.add_callback(thread_safe)
+            if ioloop is None: # not IPython, maybe unittest
+                debounced_execute()
+            else:
+                ioloop.add_callback(thread_safe)
         return execute
     return wrapped
 
