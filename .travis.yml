@@ -32,7 +32,7 @@ before_install:
   - (cd ipyvolume; pip install -v .)
   - pip uninstall bqplot -y
   - git clone https://github.com/maartenbreddels/bqplot
-  - (cd bqplot; git checkout scatter_webgl; pip install -v .)
+  - (cd bqplot; git checkout scatter_webgl; git merge image_colormap_frontend; pip install -v .)
   - conda info -a
 
 install:
