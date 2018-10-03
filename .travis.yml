@@ -23,7 +23,7 @@ before_install:
   - source ci-helpers/travis/setup_conda.sh
 
   - export MPLBACKEND='Agg';
-
+  - conda install -c conda-forge nodejs
   - conda env update -n test -f environment.yml
   - pip install -v pytest pytest-cov runipy
 #  - bash postBuild
