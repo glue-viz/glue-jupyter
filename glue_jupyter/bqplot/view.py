@@ -2,6 +2,7 @@ import bqplot
 import ipywidgets as widgets
 from IPython.display import display
 
+import glue.icons
 from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
@@ -9,6 +10,14 @@ from glue.core.command import ApplySubsetState
 from ..view import IPyWidgetView
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 from ..utils import float_or_none
+
+ICON_WIDTH = 20
+icon_brush = widgets.Icon.from_file(glue.icons.icon_path('glue_square', icon_format='svg'), width=ICON_WIDTH)
+icon_pan = widgets.Icon.from_file(glue.icons.icon_path('glue_move', icon_format='svg'), width=ICON_WIDTH)
+icon_brush_x = widgets.Icon.from_file(glue.icons.icon_path('glue_xrange_select', icon_format='svg'), width=ICON_WIDTH)
+icon_brush_y = widgets.Icon.from_file(glue.icons.icon_path('glue_yrange_select', icon_format='svg'), width=ICON_WIDTH)
+icon_brush_lasso = widgets.Icon.from_file(glue.icons.icon_path('glue_lasso', icon_format='svg'), width=ICON_WIDTH)
+
 
 class BqplotBaseView(IPyWidgetView):
 
@@ -47,42 +56,35 @@ class BqplotBaseView(IPyWidgetView):
         self._fig_margin_zero['left'] = 0
         self._fig_margin_zero['bottom'] = 0
 
-        actions = ['move']
         self.interact_map = {}
-        self.panzoom = bqplot.PanZoom(scales={'x': [self.scale_x], 'y': [self.scale_y]})
-        self.interact_map['move'] = self.panzoom
+        self.interact_panzoom = bqplot.PanZoom(scales={'x': [self.scale_x], 'y': [self.scale_y]})
+
+        self.interacts = []
+        self.interacts.append((icon_pan, self.interact_panzoom))
 
         if self.is2d:
-            self.brush = bqplot.interacts.BrushSelector(x_scale=self.scale_x, y_scale=self.scale_y, color="green")
-            self.interact_map['brush'] = self.brush
-            self.brush.observe(self.update_brush, "brushing")
-            actions.append('brush')
+            self.interact_brush = bqplot.interacts.BrushSelector(x_scale=self.scale_x, y_scale=self.scale_y, color="green")
+            self.interact_brush.observe(self.update_brush, "brushing")
+            self.interacts.append((icon_brush, self.interact_brush))
 
-        self.brush_x = bqplot.interacts.BrushIntervalSelector(scale=self.scale_x, color="green" )
-        self.interact_map['brush x'] = self.brush_x
-        self.brush_x.observe(self.update_brush_x, "brushing")
-        actions.append('brush x')
+        self.interact_brush_x = bqplot.interacts.BrushIntervalSelector(scale=self.scale_x, color="green" )
+        self.interact_brush_x.observe(self.update_brush_x, "brushing")
+        self.interacts.append((icon_brush_x, self.interact_brush_x))
 
         if self.is2d:
-            self.brush_y = bqplot.interacts.BrushIntervalSelector(scale=self.scale_y, color="green", orientation='vertical')
-            self.interact_map['brush y'] = self.brush_y
-            self.brush_y.observe(self.update_brush_y, "brushing")
-            actions.append('brush y')
+            self.interact_brush_y = bqplot.interacts.BrushIntervalSelector(scale=self.scale_y, color="green", orientation='vertical')
+            self.widget_menu_select_y = widgets.Menu(description='Y selection', icon=icon_brush_y, checkable=True)
+            self.interact_brush_y.observe(self.update_brush_y, "brushing")
+            self.interacts.append((icon_brush_y, self.interact_brush_y))
 
 
-        self.button_action = widgets.ToggleButtons(description='Mode: ', options=[(action, action) for action in actions],
-                                                   icons=["arrows", "pencil-square-o"])
-        self.button_action.observe(self.change_action, "value")
+        self.widget_button_interact = widgets.ToggleButtons(description='Mode: ', options=[('', interact) for (icon, interact) in self.interacts],
+                                                   icons=[icon for (icon, interact) in self.interacts], style=dict(button_width='40px'))
+        self.widget_button_interact.observe(self.change_action, "value")
+
+        self.widget_toolbar = self.widget_button_interact
         self.change_action()  # 'fire' manually for intial value
 
-#         self.state.add_callback('y_att', self._update_axes)
-#         self.state.add_callback('x_log', self._update_axes)
-#         self.state.add_callback('y_log', self._update_axes)
-
-        # self.state.add_callback('x_min', self.limits_to_scales)
-        # self.state.add_callback('x_max', self.limits_to_scales)
-        # self.state.add_callback('y_min', self.limits_to_scales)
-        # self.state.add_callback('y_max', self.limits_to_scales)
         link((self.state, 'x_min'), (self.scale_x, 'min'), float_or_none)
         link((self.state, 'x_max'), (self.scale_x, 'max'), float_or_none)
         link((self.state, 'y_min'), (self.scale_y, 'min'), float_or_none)
@@ -101,7 +103,7 @@ class BqplotBaseView(IPyWidgetView):
     def create_tab(self):
         self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
         self.widgets_axis = []
-        self.tab_general = widgets.VBox([self.button_action, self.widget_show_axes] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
+        self.tab_general = widgets.VBox([self.widget_toolbar, self.widget_show_axes] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
         children = [self.tab_general]
         self.tab = widgets.Tab(children)
         self.tab.set_title(0, "General")
@@ -118,16 +120,17 @@ class BqplotBaseView(IPyWidgetView):
         print('update viewer state', rec, context)
 
     def change_action(self, *ignore):
-        self.figure.interaction = self.interact_map[self.button_action.value]
+        self.figure.interaction = self.widget_button_interact.value #self.interact_map[self.button_action.value]
         if self.is2d:
-            self.brush.selected_x = []
-            self.brush_y.selected = []
-        self.brush_x.selected = []
+            self.interact_brush.selected_x = []
+            self.interact_brush_y.selected = []
+        self.interact_brush_x.selected = []
 
     def update_brush(self, *ignore):
         with self.output_widget:
-            if not self.brush.brushing:  # only select when we ended
-                (x1, y1), (x2, y2) = self.brush.selected
+            if not self.interact_brush.brushing:  # only select when we ended
+                (x1, y1) = self.interact_brush.selected_x
+                (x2, y2) = self.interact_brush.selected_y
                 x = [x1, x2]
                 y = [y1, y2]
                 roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
@@ -135,16 +138,16 @@ class BqplotBaseView(IPyWidgetView):
 
     def update_brush_x(self, *ignore):
         with self.output_widget:
-            if not self.brush_x.brushing:  # only select when we ended
-                x = self.brush_x.selected
+            if not self.interact_brush_x.brushing:  # only select when we ended
+                x = self.interact_brush_x.selected
                 if x is not None and len(x):
                     roi = RangeROI(min=min(x), max=max(x), orientation='x')
                     self.apply_roi(roi)
 
     def update_brush_y(self, *ignore):
         with self.output_widget:
-            if not self.brush_y.brushing:  # only select when we ended
-                y = self.brush_y.selected
+            if not self.interact_brush_y.brushing:  # only select when we ended
+                y = self.interact_brush_y.selected
                 if y is not None and len(y):
                     roi = RangeROI(min=min(y), max=max(y), orientation='y')
                     self.apply_roi(roi)
