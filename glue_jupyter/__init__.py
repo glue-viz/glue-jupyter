@@ -51,7 +51,7 @@ def example_data_xyz(seed=42, N=500, loc=0, scale=1):
     vy = y - y.mean()
     vz = z - z.mean()
     speed = np.sqrt(vx**2 + vy**2 + vz**2)
-    data_xyz = Data(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, speed=speed, label="xyz data")
+    data_xyz = Data(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, speed=speed, label="xyz")
     return data_xyz
 
 def example_volume(shape=64, limits=[-4, 4]):
@@ -391,4 +391,8 @@ class IPyWidgetView(Viewer):
     def _add_layer_tab(self, layer):
         layer_tab = layer.create_widgets()
         self.tab.children = self.tab.children + (layer_tab, )
-        self.tab.set_title(len(self.tab.children)-1, layer.layer.label)
+        if isinstance(layer.layer, Subset):
+            label = '{data_label}:{subset_label}'.format(data_label=layer.layer.data.label, subset_label=layer.layer.label)
+        else:
+            label = layer.layer.label
+        self.tab.set_title(len(self.tab.children)-1, label)
