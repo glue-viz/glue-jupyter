@@ -68,6 +68,3 @@ def example_image(shape=64, limits=[-4, 4]):
     data.coords = Coordinates()
     data.add_component(I, label='intensity')
     return data
-
-
-

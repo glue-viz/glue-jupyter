@@ -79,7 +79,7 @@ class BqplotBaseView(IPyWidgetView):
 
 
         self.widget_button_interact = widgets.ToggleButtons(description='Mode: ', options=[('', interact) for (icon, interact) in self.interacts],
-                                                   icons=[icon for (icon, interact) in self.interacts], style=dict(button_width='40px'))
+                                                   icons=[icon for (icon, interact) in self.interacts], style=dict(button_width='35px'))
         self.widget_button_interact.observe(self.change_action, "value")
 
         self.widget_toolbar = self.widget_button_interact
@@ -103,7 +103,10 @@ class BqplotBaseView(IPyWidgetView):
     def create_tab(self):
         self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
         self.widgets_axis = []
-        self.tab_general = widgets.VBox([self.widget_toolbar, self.widget_show_axes] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
+        self.tab_general = widgets.VBox([
+                self.session.application.widget_selection_mode,
+                widgets.HBox([widgets.Label(value="Active subset", layout={'width': '80px'}), self.session.application.widget_subset_group_button]),
+                self.widget_toolbar, self.widget_show_axes] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
         children = [self.tab_general]
         self.tab = widgets.Tab(children)
         self.tab.set_title(0, "General")

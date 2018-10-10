@@ -10,8 +10,16 @@ from glue.core.link_helpers import LinkSame
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
 from glue.core.subset import RoiSubsetState3d, RoiSubsetState
 from glue.core.command import ApplySubsetState
+import glue.icons
 
 from glue_jupyter.utils import _update_not_none
+
+ICON_WIDTH = 20
+icon_replace = widgets.Icon.from_file(glue.icons.icon_path('glue_replace', icon_format='svg'), width=ICON_WIDTH)
+icon_or = widgets.Icon.from_file(glue.icons.icon_path('glue_or', icon_format='svg'), width=ICON_WIDTH)
+icon_and = widgets.Icon.from_file(glue.icons.icon_path('glue_and', icon_format='svg'), width=ICON_WIDTH)
+icon_xor = widgets.Icon.from_file(glue.icons.icon_path('glue_xor', icon_format='svg'), width=ICON_WIDTH)
+icon_andnot = widgets.Icon.from_file(glue.icons.icon_path('glue_andnot', icon_format='svg'), width=ICON_WIDTH)
 
 # not sure we need to inherit: from glue.core.application_base import Application
 # what would we gain that would be natural in the notebook?
@@ -19,15 +27,28 @@ class JupyterApplication(Application):
 
     def __init__(self, data_collection=None, session=None):
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
-        self.selection_modes = [('replace', ReplaceMode), ('add', OrMode), ('and', AndMode), ('xor', XorMode), ('remove', AndNotMode)]
+        self.selection_modes = [('replace', icon_replace, ReplaceMode), ('add', icon_or, OrMode), ('and', icon_and, AndMode), ('xor', icon_xor, XorMode), ('remove', icon_andnot, AndNotMode)]
         self.widget_selection_mode = widgets.ToggleButtons(
-            options=[label for label, mode in self.selection_modes],
-            description='Selection mode:',
+            options=['' for label, icon, mode in self.selection_modes],
+            icons=[icon for label, icon, mode in self.selection_modes],
+            style=dict(button_width='35px'),
+            description='Mode:',
             disabled=False,
-            tooltips=[label for label, mode in self.selection_modes],
+            tooltips=[label for label, icon, mode in self.selection_modes],
         )
         self.widget_data_collection = widgets.SelectMultiple()
         self.widget_subset_groups   = widgets.SelectMultiple()
+
+        self._updating_subset_menu_items = False
+        self.widget_subset_group_menu_item_select_multiple = widgets.Menu(description='Select multiple subsets', checkable=True, value=False, enabled=False)
+        self.widget_subset_group_menu_item_no_active = widgets.Menu(description='None', checkable=True, value=True)
+        self.widget_subset_group_menu_items_subsets = []
+        self.widget_subset_group_menu_item_no_active.observe(self._on_click_subset_group_menu_item_no_active, 'value')
+        self.widget_subset_group_menu = widgets.Menu(items=[self.widget_subset_group_menu_item_select_multiple,
+                                                            self.widget_subset_group_menu_item_no_active] + self.widget_subset_group_menu_items_subsets)
+        self.widget_subset_group_button = widgets.Button(icon='lala', menu=self.widget_subset_group_menu, menu_delay=0)
+
+
         self.widget = widgets.VBox(children=[self.widget_selection_mode, self.widget_subset_groups])
         self.widget_selection_mode.observe(self._set_selection_mode, 'index')
         self.widget_subset_groups.observe(self._set_subset_groups, 'index')
@@ -35,6 +56,8 @@ class JupyterApplication(Application):
         self.session.hub.subscribe(self, msg.SubsetCreateMessage, handler=self._on_subset_create_msg)
         self._update_subset_mode(self.session.edit_subset_mode.mode)
         self._update_subset_groups_selected(self.session.edit_subset_mode.edit_subset)
+
+    def _ipython_display_(self):
         display(self.widget)
 
     def link(self, links):
@@ -64,22 +87,92 @@ class JupyterApplication(Application):
             self.session.edit_subset_mode.mode = mode
         index = 0
         EditSubsetMode
-        for i, (name, sel_mode) in enumerate(self.selection_modes):
+        for i, (name, icon, sel_mode) in enumerate(self.selection_modes):
             if mode == sel_mode:
                 index = i
         self.widget_selection_mode.index = index
 
+    def _on_click_subset_group_menu_item_no_active(self, change):
+        self._updating_subset_menu_items = True
+        try:
+            if change.new:
+                for item in self.widget_subset_group_menu_items_subsets:
+                    item.value = False
+                self.session.edit_subset_mode.edit_subset = []
+        finally:
+            self._updating_subset_menu_items = False
+
+    def _active_subset_changed_from_ui(self, change):
+        if self._updating_subset_menu_items:
+            return
+        self._updating_subset_menu_items = True
+        try:
+            subsets = []
+            index = self.widget_subset_group_menu_items_subsets.index(change.owner)
+            if self.widget_subset_group_menu_item_select_multiple.value:
+                for i, (menu, subset_group) in enumerate(zip(self.widget_subset_group_menu_items_subsets, self.data_collection.subset_groups)):
+                    if menu.value:
+                        subsets.append(subset_group)
+            else:
+                subsets = []
+                if change.new: # if setting value to true, we disable the rest
+                    subsets = [self.data_collection.subset_groups[index]]
+                    for item in self.widget_subset_group_menu_items_subsets:
+                        if item != change.owner:
+                            item.value = False
+                # else:
+                #     self.widget_subset_group_menu_items_subsets[index].value = True
+                self.session.edit_subset_mode.edit_subset = subsets
+        finally:
+            self._updating_subset_menu_items = False
+
+
     def _update_subset_groups_selected(self, subset_groups_selected):
-        if self.session.edit_subset_mode.edit_subset != subset_groups_selected:
-            self.session.edit_subset_mode.edit_subset = subset_groups_selected
+        if self.session.edit_subset_mode._edit_subset != subset_groups_selected:
+            self.session.edit_subset_mode._edit_subset = subset_groups_selected
         options = []
         indices = []
-        for i, subset_group in enumerate(self.data_collection.subset_groups):
-            options.append(subset_group.label)
-            if subset_group in self.session.edit_subset_mode.edit_subset:
-                indices.append(i)
-        self.widget_subset_groups.options = options
-        self.widget_subset_groups.index = tuple(indices)
+        # truncate list when needed
+        self.widget_subset_group_menu_items_subsets = self.widget_subset_group_menu_items_subsets[:len(self.data_collection.subset_groups)]
+        self._updating_subset_menu_items = True
+        try:
+            for i, subset_group in enumerate(self.data_collection.subset_groups):
+                # don't recreate all widgets, reuse them
+                if len(self.widget_subset_group_menu_items_subsets) <= i:
+                    new_menu = widgets.Menu(description='', checkable=True)
+                    new_menu.observe(self._active_subset_changed_from_ui, 'value')
+                    self.widget_subset_group_menu_items_subsets.append(new_menu)
+                menu = self.widget_subset_group_menu_items_subsets[i]
+                menu.description = subset_group.label
+                options.append(subset_group.label)
+                if subset_group in self.session.edit_subset_mode.edit_subset:
+                    indices.append(i)
+                    menu.value = True
+                else:
+                    menu.value = False
+            if len(self.widget_subset_group_menu_items_subsets) == 0:
+                self.widget_subset_group_button.description = 'None'
+                self.widget_subset_group_menu_item_select_multiple.enabled = False
+            else:
+                self.widget_subset_group_menu_item_select_multiple.enabled = True
+            
+            self.widget_subset_group_menu_item_no_active.value = len(subset_groups_selected) == 0
+            
+            if len(self.session.edit_subset_mode.edit_subset) > 1:
+                self.widget_subset_group_button.description = "Multiple"
+            elif len(self.session.edit_subset_mode.edit_subset) == 0:
+                self.widget_subset_group_button.description = 'None'
+            elif len(self.session.edit_subset_mode.edit_subset) == 1:
+                index = self.data_collection.subset_groups.index(self.session.edit_subset_mode.edit_subset[0])
+                self.widget_subset_group_button.description = self.widget_subset_group_menu_items_subsets[index].description
+                self.widget_subset_group_button.icon = self.widget_subset_group_menu_items_subsets[index].icon
+            self.widget_subset_group_menu.items = \
+                [self.widget_subset_group_menu_item_select_multiple,
+                self.widget_subset_group_menu_item_no_active] + self.widget_subset_group_menu_items_subsets
+            self.widget_subset_groups.options = options
+            self.widget_subset_groups.index = tuple(indices)
+        finally:
+            self._updating_subset_menu_items = False
 
     def _set_subset_groups(self, change):
         subset_groups = [self.data_collection.subset_groups[k] for k in self.widget_subset_groups.index]
@@ -87,7 +180,7 @@ class JupyterApplication(Application):
 
     def _set_selection_mode(self, change):
         #EditSubsetMode().mode = self.selection_modes[change.new][1]
-        self.subset_mode(self.selection_modes[change.new][1])
+        self.subset_mode(self.selection_modes[change.new][2])
 
     def subset_mode(self, mode):
         self.session.edit_subset_mode.mode = mode
