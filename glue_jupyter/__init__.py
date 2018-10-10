@@ -33,7 +33,7 @@ def jglue(*args, **kwargs):
     japp = JupyterApplication(dc)
     return japp
 
-def example_data_xyz(seed=42, N=500, loc=0, scale=1):
+def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz'):
     from glue.core import Data
     import numpy as np
     rng = np.random.RandomState(seed)
@@ -42,7 +42,7 @@ def example_data_xyz(seed=42, N=500, loc=0, scale=1):
     vy = y - y.mean()
     vz = z - z.mean()
     speed = np.sqrt(vx**2 + vy**2 + vz**2)
-    data_xyz = Data(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, speed=speed, label="xyz")
+    data_xyz = Data(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, speed=speed, label=label)
     return data_xyz
 
 def example_volume(shape=64, limits=[-4, 4]):
