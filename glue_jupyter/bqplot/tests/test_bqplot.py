@@ -212,9 +212,12 @@ def test_imshow_equal_aspect(app, data_image):
 
 def test_show_axes(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)
+    assert s.state.show_axes
     assert s.widget_show_axes.value
     margin_initial = s.figure.fig_margin
-    s.widget_show_axes.value = False
+    s.state.show_axes = False
+    assert s.widget_show_axes.value == False
     assert s.figure.fig_margin != margin_initial
     s.widget_show_axes.value = True
+    assert s.state.show_axes == False
     assert s.figure.fig_margin == margin_initial

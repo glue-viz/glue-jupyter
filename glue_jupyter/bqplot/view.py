@@ -85,6 +85,8 @@ class BqplotBaseView(IPyWidgetView):
         self.state.add_callback('y_min', self.limits_to_scales)
         self.state.add_callback('y_max', self.limits_to_scales)
 
+        on_change([(self.state, 'show_axes')])(self._sync_show_axes)
+
         self.create_tab()
         self.output_widget = widgets.Output()
         self.main_widget = widgets.VBox(
@@ -101,10 +103,7 @@ class BqplotBaseView(IPyWidgetView):
         self.tab = widgets.Tab(children)
         self.tab.set_title(0, "General")
         self.tab.set_title(1, "Axes")
-
-        # TODO: maybe the show_axes should go into MatplotlibDataViewerState
-        # see also https://github.com/glue-viz/glue/issues/1591
-        on_change([self.widget_show_axes])(self._sync_show_axes)
+        link((self.state, 'show_axes'), (self.widget_show_axes, 'value'))
 
     def _sync_show_axes(self):
         # TODO: if moved to state, this would not rely on the widget
