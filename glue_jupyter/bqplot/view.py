@@ -43,6 +43,10 @@ class BqplotBaseView(IPyWidgetView):
         self.figure = bqplot.Figure(scales=self.scales, animation_duration=0, axes=[
                                     self.axis_x, self.axis_y])
         self.figure.padding_y = 0
+        self._fig_margin_default = self.figure.fig_margin
+        self._fig_margin_zero = dict(self.figure.fig_margin)
+        self._fig_margin_zero['left'] = 0
+        self._fig_margin_zero['bottom'] = 0
 
         actions = ['move']
         self.interact_map = {}
@@ -90,13 +94,22 @@ class BqplotBaseView(IPyWidgetView):
         display(self.main_widget)
 
     def create_tab(self):
-        self.widget_show_axes = widgets.Checkbox(value=False, description="Show axes")
+        self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
         self.widgets_axis = []
         self.tab_general = widgets.VBox([self.button_action, self.widget_show_axes] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
         children = [self.tab_general]
         self.tab = widgets.Tab(children)
         self.tab.set_title(0, "General")
         self.tab.set_title(1, "Axes")
+
+        # TODO: maybe the show_axes should go into MatplotlibDataViewerState
+        # see also https://github.com/glue-viz/glue/issues/1591
+        on_change([self.widget_show_axes])(self._sync_show_axes)
+
+    def _sync_show_axes(self):
+        # TODO: if moved to state, this would not rely on the widget
+        self.axis_x.visible = self.axis_y.visible = self.widget_show_axes.value
+        self.figure.fig_margin = self._fig_margin_default if self.widget_show_axes.value else self._fig_margin_zero
 
 
 

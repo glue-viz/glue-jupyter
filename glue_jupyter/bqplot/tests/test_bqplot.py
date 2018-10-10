@@ -209,3 +209,12 @@ def test_imshow_equal_aspect(app, data_image):
     assert v.widgets_aspect.value
     assert v.figure.min_aspect_ratio == 1
     assert v.figure.max_aspect_ratio == 1
+
+def test_show_axes(app, dataxyz):
+    s = app.scatter2d('x', 'y', data=dataxyz)
+    assert s.widget_show_axes.value
+    margin_initial = s.figure.fig_margin
+    s.widget_show_axes.value = False
+    assert s.figure.fig_margin != margin_initial
+    s.widget_show_axes.value = True
+    assert s.figure.fig_margin == margin_initial
