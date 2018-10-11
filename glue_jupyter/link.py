@@ -92,6 +92,7 @@ def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='v
         value = getattr(state, state_attr)
         widget.options = [(display_func(options[k]), k) for k in range(len(options))]
         # componentId's don't hash or compare well, use 'is' instead of ==
+        # ISSUE: value can be a string, and then it will never match
         matches = [k for k in range(len(options)) if value is options[k]]
         if len(matches):
             widget.index = matches[0]
@@ -100,3 +101,4 @@ def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='v
         options = [k for k in getattr(type(state), state_attr).get_choices(state) if not isinstance(k, glue.external.echo.selection.ChoiceSeparator)]
         setattr(state, state_attr, options[change.new])
     widget.observe(update_state, 'index')
+    update()
