@@ -1,6 +1,7 @@
 import pytest
 from glue.core import Data
 import glue_jupyter as gj
+from glue.core.component_link import ComponentLink
 
 @pytest.fixture
 def dataxyz():

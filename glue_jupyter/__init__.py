@@ -404,6 +404,40 @@ class IPyWidgetView(Viewer):
         #               filter=self._is_appearance_settings)
 
 
+    def add_data(self, data, color=None, alpha=None, **layer_state):
+
+        # Check if data already exists in viewer
+        if not self.allow_duplicate_data and data in self._layer_artist_container:
+            return None
+
+        if self.large_data_size is not None and data.size >= self.large_data_size:
+            proceed = self.warn('Add large data set?', 'Data set {0:s} has {1:d} points, and '
+                                'may render slowly.'.format(data.label, data.size),
+                                default='Cancel', setting='show_large_data_warning')
+            if not proceed:
+                return None
+
+        if data not in self.session.data_collection:
+            raise IncompatibleDataException("Data not in DataCollection")
+
+        # Create layer artist and add to container
+        layer = self.get_data_layer_artist(data)
+
+        if layer is None:
+            return None
+
+        self._layer_artist_container.append(layer)
+        layer_state = dict(layer_state)
+        _update_not_none(layer_state, color=color, alpha=alpha)
+        layer.update()
+        layer.state.update_from_dict(layer_state)
+
+        # Add existing subsets to viewer
+        for subset in data.subsets:
+            self.add_subset(subset)
+
+        return layer
+
     def remove_subset(self, subset):
         if subset in self._layer_artist_container:
             self._layer_artist_container.pop(subset)
