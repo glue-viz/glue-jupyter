@@ -78,7 +78,7 @@ class BqplotBaseView(IPyWidgetView):
             self.interacts.append((icon_brush_y, self.interact_brush_y))
 
 
-        self.widget_button_interact = widgets.ToggleButtons(description='Mode: ', options=[('', interact) for (icon, interact) in self.interacts],
+        self.widget_button_interact = widgets.ToggleButtons(description='Action: ', options=[('', interact) for (icon, interact) in self.interacts],
                                                    icons=[icon for (icon, interact) in self.interacts], style=dict(button_width='35px'))
         self.widget_button_interact.observe(self.change_action, "value")
 
@@ -94,8 +94,18 @@ class BqplotBaseView(IPyWidgetView):
 
         self.create_tab()
         self.output_widget = widgets.Output()
-        self.main_widget = widgets.VBox(
-            children=[widgets.HBox([self.figure, self.tab]), self.output_widget])
+        self.widget_toolbar = widgets.HBox([
+                    widgets.HBox([
+                        widgets.Label(value="Active subset", layout={'width': '80px'}),
+                        self.session.application.widget_subset_group_button]
+                    ),
+                    self.session.application.widget_selection_mode]
+             )
+        self.main_widget = widgets.VBox([
+                self.widget_toolbar,
+                widgets.HBox([self.figure, self.tab]),
+                self.output_widget
+            ])
 
     def show(self):
         display(self.main_widget)
@@ -104,8 +114,6 @@ class BqplotBaseView(IPyWidgetView):
         self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
         self.widgets_axis = []
         self.tab_general = widgets.VBox([
-                self.session.application.widget_selection_mode,
-                widgets.HBox([widgets.Label(value="Active subset", layout={'width': '80px'}), self.session.application.widget_subset_group_button]),
                 self.widget_toolbar, self.widget_show_axes] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
         children = [self.tab_general]
         self.tab = widgets.Tab(children)
