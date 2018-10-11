@@ -12,6 +12,8 @@ from IPython.display import display
 from glue.core.link_helpers import LinkSame
 import ipywidgets as widgets
 import six
+
+from glue_jupyter.utils import _update_not_none
 # from glue.core.session import Session
 # from glue.viewers.scatter.layer_artist import ScatterLayerArtist
 
@@ -182,7 +184,39 @@ class JupyterApplication(Application):
     def add_widget(self, widget, label=None, tab=None):
         pass
 
-    def histogram1d(self, x=None, data=None, widget='bqplot'):
+    # TODO: remove when https://github.com/glue-viz/glue/pull/1877 is merged
+    def new_data_viewer(self, viewer_class, data=None, state=None):
+        """
+        Create a new data viewer, add it to the UI,
+        and populate with data
+
+        """
+        from glue.core import BaseData
+
+        if viewer_class is None:
+            return
+
+        if state is not None:
+            c = viewer_class(self._session, state=state)
+        else:
+            c = viewer_class(self._session)
+        c.register_to_hub(self._session.hub)
+
+        if data is not None:
+            if isinstance(data, BaseData):
+                result = c.add_data(data)
+            elif isinstance(data, Subset):
+                result = c.add_subset(data)
+            if not result:
+                c.close(warn=False)
+                return
+
+        self.add_widget(c)
+        c.show()
+        return c
+
+
+    def histogram1d(self, x=None, data=None, widget='bqplot', color=None, x_min=None, x_max=None, hist_n_bin=None, normalize=False, cumulative=False, viewer_state=None, layer_state=None):
         if widget == 'bqplot':
             from .bqplot import BqplotHistogramView
             viewer_cls = BqplotHistogramView
@@ -194,13 +228,28 @@ class JupyterApplication(Application):
         if data is None and len(self._data) != 1:
             raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
         data = data or self._data[0]
-        view = self.new_data_viewer(viewer_cls, data=data)
+
+        state = viewer_cls._state_cls()
+        state.x_att_helper.append_data(data)
+
+        viewer_state_obj = viewer_cls._state_cls()
+        viewer_state_obj.x_att_helper.append_data(data)
+        viewer_state = viewer_state or {}
         if x is not None:
-            x = data.id[x]
-            view.state.x_att = x
+            viewer_state['x_att'] = data.id[x]
+        # x_min and x_max get set to the hist_x_min/max in glue.viewers.histogram.state
+        # for this API it make more sense to call it x_min and x_max, and for consistency with the rest
+        _update_not_none(viewer_state, hist_x_min=x_min, hist_x_max=x_max, hist_n_bin=hist_n_bin,
+            normalize=normalize, cumulative=cumulative)
+        viewer_state_obj.update_from_dict(viewer_state)
+
+        view = self.new_data_viewer(viewer_cls, data=data, state=viewer_state_obj)
+        layer_state = layer_state or {}
+        _update_not_none(layer_state, color=color)
+        view.layers[0].state.update_from_dict(layer_state)
         return view
 
-    def scatter2d(self, x=None, y=None, data=None, widget='bqplot'):
+    def scatter2d(self, x=None, y=None, data=None, widget='bqplot', color=None, size=None, viewer_state=None, layer_state=None):
         if widget == 'bqplot':
             from .bqplot import BqplotScatterView
             viewer_cls = BqplotScatterView
@@ -212,13 +261,20 @@ class JupyterApplication(Application):
         if data is None and len(self._data) != 1:
             raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
         data = data or self._data[0]
-        view = self.new_data_viewer(viewer_cls, data=data)
+        viewer_state_obj = viewer_cls._state_cls()
+        viewer_state_obj.x_att_helper.append_data(data)
+        viewer_state_obj.y_att_helper.append_data(data)
+        viewer_state = viewer_state or {}
         if x is not None:
-            x = data.id[x]
-            view.state.x_att = x
-        if y is not None:
-            y = data.id[y]
-            view.state.y_att = y
+            viewer_state['x_att'] = data.id[x]
+        if x is not None:
+            viewer_state['y_att'] = data.id[y]
+        viewer_state_obj.update_from_dict(viewer_state)
+
+        view = self.new_data_viewer(viewer_cls, data=data, state=viewer_state_obj)
+        layer_state = layer_state or {}
+        _update_not_none(layer_state, color=color, size=size)
+        view.layers[0].state.update_from_dict(layer_state)
         return view
 
     def scatter3d(self, x=None, y=None, z=None, data=None):
@@ -313,8 +369,8 @@ class IPyWidgetView(Viewer):
 
     _layer_artist_container_cls = IPyWidgetLayerArtistContainer
 
-    def __init__(self, session):
-        super(IPyWidgetView, self).__init__(session)
+    def __init__(self, session, state=None):
+        super(IPyWidgetView, self).__init__(session, state=state)
 
     # TODO: a lot of this comes from DataViewerWithState
     def register_to_hub(self, hub):

@@ -19,11 +19,10 @@ class BqplotBaseView(IPyWidgetView):
     # _data_artist_cls = BqplotImageLayerArtist
     # _subset_artist_cls = BqplotImageLayerArtist
 
-    def __init__(self, session):
-        super(BqplotBaseView, self).__init__(session)
+    def __init__(self, session, state=None):
+        super(BqplotBaseView, self).__init__(session, state=state)
         # session.hub.subscribe(self, SubsetCreateMessage,
         #                       handler=self.receive_message)
-        self.state = self._state_cls()
 
         # if we allow padding, we sometimes get odd behaviour with the interacts
         self.scale_x = bqplot.LinearScale(min=0, max=1, allow_padding=False)
