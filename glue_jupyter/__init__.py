@@ -11,6 +11,7 @@ def load(path):
     return load_data(path)
 
 def jglue(*args, **kwargs):
+    show = kwargs.pop('show', False)
     from glue.core import DataCollection
     from glue.app.qt import GlueApplication
     from glue.qglue import parse_data, parse_links
@@ -31,6 +32,8 @@ def jglue(*args, **kwargs):
         dc.add_link(parse_links(dc, links))
 
     japp = JupyterApplication(dc)
+    if show:
+        display(app)
     return japp
 
 def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz'):
