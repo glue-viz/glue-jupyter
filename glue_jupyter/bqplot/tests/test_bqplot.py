@@ -134,6 +134,29 @@ def test_scatter2d_properties(app, dataxyz, dataxz):
     l1.scatter.colors = ['orange']
     assert l1.state.color == 'orange'
 
+def test_scatter2d_cmap_mode(app,dataxyz):
+    s = app.scatter2d('x', 'y', data=dataxyz)
+    l1 = s.layers[0]
+    assert l1.state.cmap_mode == 'Fixed', 'expected default value'
+    assert l1.state.cmap_name == 'Gray'
+
+    assert l1.scatter.color is None
+    l1.state.cmap_att = 'x'
+    l1.state.cmap_mode = 'Linear'
+    assert l1.widget_cmap_mode.label == 'Linear'
+    assert l1.state.cmap_name == 'Gray'
+    l1.state.cmap_vmin  = 0
+    l1.state.cmap_vmax  = 10
+    assert l1.scatter.color is not None
+
+    l1.widget_cmap.label = 'Viridis'
+    assert l1.state.cmap_name == 'Viridis'
+    assert l1.widget_cmap.label == 'Viridis'
+
+    l1.widget_cmap.label = 'Gray'
+    assert l1.widget_cmap.label == 'Gray'
+    assert l1.state.cmap_name == 'Gray'
+
 
 def test_scatter2d_and_histogram(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)

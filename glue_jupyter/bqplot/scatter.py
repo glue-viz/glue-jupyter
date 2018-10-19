@@ -7,20 +7,16 @@ from IPython.display import display
 from glue.core.data import Subset
 from glue.core.layer_artist import LayerArtistBase
 from glue.viewers.scatter.state import ScatterLayerState
+from glue.config import colormaps
 
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+from ..utils import colormap_to_hexlist
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
 
 
-
 from .. import IPyWidgetView
-
-# def convert_color(color):
-#     #if color == 'green':
-#     #    return color
-#     return '#777'
 
 class BqplotScatterLayerArtist(LayerArtistBase):
     _layer_state_cls = ScatterLayerState
@@ -34,9 +30,10 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         if self.state not in self._viewer_state.layers:
             self._viewer_state.layers.append(self.state)
         self.scale_size = bqplot.LinearScale()
+        self.scale_color = bqplot.ColorScale()
         self.scale_size_quiver = bqplot.LinearScale(min=0, max=1)
         self.scale_rotation = bqplot.LinearScale(min=0, max=1)
-        self.scales = dict(self.view.scales, size=self.scale_size, rotation=self.scale_rotation)
+        self.scales = dict(self.view.scales, size=self.scale_size, rotation=self.scale_rotation, color=self.scale_color)
         self.scales_quiver = dict(self.view.scales, size=self.scale_size_quiver, rotation=self.scale_rotation)
         self.scatter = bqplot.ScatterMega(scales=self.scales, x=[0, 1], y=[0, 1])
         self.quiver = bqplot.ScatterMega(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
@@ -46,18 +43,34 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self.scatter.observe(self._workaround_unselected_style, 'colors')
         self.quiver.observe(self._workaround_unselected_style, 'colors')
 
+        on_change([(self.state, 'cmap_mode', 'cmap_att')])(self._on_change_cmap_mode_or_att)
+        on_change([(self.state, 'cmap')])(self._on_change_cmap)
+        link((self.state, 'cmap_vmin'), (self.scale_color, 'min'))
+        link((self.state, 'cmap_vmax'), (self.scale_color, 'max'))
+
         viewer_state.add_callback('x_att', self._update_xy_att)
         viewer_state.add_callback('y_att', self._update_xy_att)
         self._update_size()
+        # set initial values for the colormap
+        self._on_change_cmap()
 
     def _update_xy_att(self, *args):
         self.update()
 
+    def _on_change_cmap_mode_or_att(self, ignore=None):
+        if self.state.cmap_mode == 'Linear':
+            self.scatter.color = self.layer.data[self.state.cmap_att].astype(np.float32)
+        else:
+            self.scatter.color = None
+
+    def _on_change_cmap(self, ignore=None):
+        cmap = self.state.cmap
+        colors = colormap_to_hexlist(cmap)
+        self.scale_color.colors = colors
+
     def redraw(self):
         pass
         self.update()
-        #self.scatter.x = self.layer[self._viewer_state.x_att]
-        #self.scatter.y = self.layer[self._viewer_state.y_att]
 
     def clear(self):
         pass
@@ -146,9 +159,38 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self.widget_scaling = widgets.FloatSlider(description='scale', min=0, max=2, value=self.state.size_scaling)
         link((self.state, 'size_scaling'), (self.widget_scaling, 'value'))
 
-        widget_color = widgets.ColorPicker(description='color')
-        link((self.state, 'color'), (widget_color, 'value'))
+        # color
+        self.widget_color = widgets.ColorPicker(description='color')
+        link((self.state, 'color'), (self.widget_color, 'value'))
 
+        cmap_mode_options = type(self.state).cmap_mode.get_choice_labels(self.state)
+        self.widget_cmap_mode = widgets.RadioButtons(options=cmap_mode_options, description='cmap mode')
+        link((self.state, 'cmap_mode'), (self.widget_cmap_mode, 'value'))
+
+        helper = self.state.cmap_att_helper
+        self.widget_cmap_att = widgets.Dropdown(options=[k.label for k in helper.choices],
+                                       value=self.state.cmap_att, description='color attr.')
+        link_component_id_to_select_widget(self.state, 'cmap_att', self.widget_cmap_att)
+        # on_change([(self.state, 'cmap', 'cmap_mode', 'cmap_vmin', 'cmap_vmax')])(self._update_cmap)
+
+        self.widget_cmap_vmin = widgets.FloatText(description='color min')
+        self.widget_cmap_vmax = widgets.FloatText(description='color max')
+        self.widget_cmap_v = widgets.VBox([self.widget_cmap_vmin, self.widget_cmap_vmax])
+        link((self.state, 'cmap_vmin'), (self.widget_cmap_vmin, 'value'))
+        link((self.state, 'cmap_vmax'), (self.widget_cmap_vmax, 'value'))
+
+        self.widget_cmap = widgets.Dropdown(options=colormaps, description='colormap')
+        link((self.state, 'cmap'), (self.widget_cmap, 'label'), lambda cmap: colormaps.name_from_cmap(cmap), lambda name: colormaps[name])
+
+        dlink((self.widget_cmap_mode, 'value'), (self.widget_color.layout, 'display'),     lambda value: None if value == cmap_mode_options[0] else 'none')
+        dlink((self.widget_cmap_mode, 'value'), (self.widget_cmap.layout, 'display'),     lambda value: None if value == cmap_mode_options[1] else 'none')
+        dlink((self.widget_cmap_mode, 'value'), (self.widget_cmap_att.layout, 'display'), lambda value: None if value == cmap_mode_options[1] else 'none')
+        dlink((self.widget_cmap_mode, 'value'), (self.widget_cmap_v.layout, 'display'), lambda value: None if value == cmap_mode_options[1] else 'none')
+
+
+
+
+        # size
         options = type(self.state).size_mode.get_choice_labels(self.state)
         self.widget_size_mode = widgets.RadioButtons(options=options, description='size mode')
         link((self.state, 'size_mode'), (self.widget_size_mode, 'value'))
@@ -160,9 +202,9 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
 
 
-        self.widget_size_vmin = widgets.FloatText()
-        self.widget_size_vmax = widgets.FloatText()
-        self.widget_size_v = widgets.HBox([widgets.Label(value='limits'), self.widget_size_vmin, self.widget_size_vmax])
+        self.widget_size_vmin = widgets.FloatText(description='size min')
+        self.widget_size_vmax = widgets.FloatText(description='size min')
+        self.widget_size_v = widgets.VBox([self.widget_size_vmin, self.widget_size_vmax])
         link((self.state, 'size_vmin'), (self.widget_size_vmin, 'value'))
         link((self.state, 'size_vmax'), (self.widget_size_vmax, 'value'))
 
@@ -185,5 +227,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
 
 
-        return widgets.VBox([self.widget_visible, self.widget_opacity, self.widget_size_mode, self.widget_size, self.widget_size_att, self.widget_size_v, self.widget_scaling, widget_color,
+        return widgets.VBox([self.widget_visible, self.widget_opacity,
+            self.widget_size_mode, self.widget_size, self.widget_size_att, self.widget_size_v,
+            self.widget_cmap_mode, self.widget_color, self.widget_cmap_att, self.widget_cmap_v, self.widget_cmap,
+            self.widget_scaling,
             self.widget_vector, self.widget_vector_x, self.widget_vector_y])
