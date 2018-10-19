@@ -6,7 +6,7 @@ dependencies:
   - nomkl
   - nodejs
   - pip:
-    - jupyterlab >=0.34
+    # - jupyterlab >=0.34  # since we still support python2.7, do not include this
     - notebook >=5.5
     - ipywidgets >=7.4.0
     - ipympl
