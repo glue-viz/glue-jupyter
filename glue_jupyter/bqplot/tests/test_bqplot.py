@@ -219,5 +219,5 @@ def test_show_axes(app, dataxyz):
     assert s.widget_show_axes.value == False
     assert s.figure.fig_margin != margin_initial
     s.widget_show_axes.value = True
-    assert s.state.show_axes == False
+    assert s.state.show_axes == True
     assert s.figure.fig_margin == margin_initial

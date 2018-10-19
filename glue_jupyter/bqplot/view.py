@@ -107,10 +107,8 @@ class BqplotBaseView(IPyWidgetView):
 
     def _sync_show_axes(self):
         # TODO: if moved to state, this would not rely on the widget
-        self.axis_x.visible = self.axis_y.visible = self.widget_show_axes.value
-        self.figure.fig_margin = self._fig_margin_default if self.widget_show_axes.value else self._fig_margin_zero
-
-
+        self.axis_x.visible = self.axis_y.visible = self.state.show_axes
+        self.figure.fig_margin = self._fig_margin_default if self.state.show_axes else self._fig_margin_zero
 
     @staticmethod
     def update_viewer_state(rec, context):
