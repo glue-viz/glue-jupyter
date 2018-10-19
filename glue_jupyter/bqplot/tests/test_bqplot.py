@@ -171,3 +171,18 @@ def test_imshow(app, data_image, dataxyz):
     assert v.layers[0].widget_colormap.value == 'jet'
     assert v.layers[0].scale_image.scheme == 'jet'
     assert v.layers[0].scale_image.colors == []
+
+def test_imshow_equal_aspect(app, data_image):
+    assert data_image in app.data_collection
+    v = app.imshow(data=data_image)
+    assert v.widgets_aspect.value
+    assert v.figure.min_aspect_ratio == 1
+    assert v.figure.max_aspect_ratio == 1
+    v.state.aspect = 'auto'
+    assert not v.widgets_aspect.value
+    assert v.figure.min_aspect_ratio == 0
+    assert v.figure.max_aspect_ratio == 100
+    v.state.aspect = 'equal'
+    assert v.widgets_aspect.value
+    assert v.figure.min_aspect_ratio == 1
+    assert v.figure.max_aspect_ratio == 1
