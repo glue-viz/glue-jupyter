@@ -22,14 +22,6 @@ tt.Color.validate = lambda self, obj, value: value
 
 colormaps = [('Viridis', 'viridis'), ('Jet', 'jet'), ('Grey', ['black', 'grey']), ('RdYlGn', 'RdYlGn')]
 
-from .. import IPyWidgetView
-
-# def convert_color(color):
-#     #if color == 'green':
-#     #    return color
-#     return '#777'
-
-
 def _mask_to_rgba_data(mask, color):
     r, g, b = matplotlib.colors.to_rgb(color)
     rgba = np.zeros(mask.shape + (4,), dtype=np.uint8)

@@ -7,16 +7,14 @@ from IPython.display import display
 from glue.core.data import Subset
 from glue.core.layer_artist import LayerArtistBase
 from glue.viewers.scatter.state import ScatterLayerState
-from glue.config import colormaps
 
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 from ..utils import colormap_to_hexlist
+import glue_jupyter.widgets
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
 
-
-from .. import IPyWidgetView
 
 class BqplotScatterLayerArtist(LayerArtistBase):
     _layer_state_cls = ScatterLayerState
@@ -47,6 +45,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         on_change([(self.state, 'cmap')])(self._on_change_cmap)
         link((self.state, 'cmap_vmin'), (self.scale_color, 'min'))
         link((self.state, 'cmap_vmax'), (self.scale_color, 'max'))
+
+        on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
 
         viewer_state.add_callback('x_att', self._update_xy_att)
         viewer_state.add_callback('y_att', self._update_xy_att)
@@ -153,65 +153,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         link((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x], lambda x: x[0])
         link((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x], lambda x: x[0])
 
-
-        self.widget_size = widgets.FloatSlider(description='size', min=0, max=10, value=self.state.size)
-        link((self.state, 'size'), (self.widget_size, 'value'))
-        self.widget_scaling = widgets.FloatSlider(description='scale', min=0, max=2, value=self.state.size_scaling)
-        link((self.state, 'size_scaling'), (self.widget_scaling, 'value'))
-
-        # color
-        self.widget_color = widgets.ColorPicker(description='color')
-        link((self.state, 'color'), (self.widget_color, 'value'))
-
-        cmap_mode_options = type(self.state).cmap_mode.get_choice_labels(self.state)
-        self.widget_cmap_mode = widgets.RadioButtons(options=cmap_mode_options, description='cmap mode')
-        link((self.state, 'cmap_mode'), (self.widget_cmap_mode, 'value'))
-
-        helper = self.state.cmap_att_helper
-        self.widget_cmap_att = widgets.Dropdown(options=[k.label for k in helper.choices],
-                                       value=self.state.cmap_att, description='color attr.')
-        link_component_id_to_select_widget(self.state, 'cmap_att', self.widget_cmap_att)
-        # on_change([(self.state, 'cmap', 'cmap_mode', 'cmap_vmin', 'cmap_vmax')])(self._update_cmap)
-
-        self.widget_cmap_vmin = widgets.FloatText(description='color min')
-        self.widget_cmap_vmax = widgets.FloatText(description='color max')
-        self.widget_cmap_v = widgets.VBox([self.widget_cmap_vmin, self.widget_cmap_vmax])
-        link((self.state, 'cmap_vmin'), (self.widget_cmap_vmin, 'value'))
-        link((self.state, 'cmap_vmax'), (self.widget_cmap_vmax, 'value'))
-
-        self.widget_cmap = widgets.Dropdown(options=colormaps, description='colormap')
-        link((self.state, 'cmap'), (self.widget_cmap, 'label'), lambda cmap: colormaps.name_from_cmap(cmap), lambda name: colormaps[name])
-
-        dlink((self.widget_cmap_mode, 'value'), (self.widget_color.layout, 'display'),     lambda value: None if value == cmap_mode_options[0] else 'none')
-        dlink((self.widget_cmap_mode, 'value'), (self.widget_cmap.layout, 'display'),     lambda value: None if value == cmap_mode_options[1] else 'none')
-        dlink((self.widget_cmap_mode, 'value'), (self.widget_cmap_att.layout, 'display'), lambda value: None if value == cmap_mode_options[1] else 'none')
-        dlink((self.widget_cmap_mode, 'value'), (self.widget_cmap_v.layout, 'display'), lambda value: None if value == cmap_mode_options[1] else 'none')
-
-
-
-
-        # size
-        options = type(self.state).size_mode.get_choice_labels(self.state)
-        self.widget_size_mode = widgets.RadioButtons(options=options, description='size mode')
-        link((self.state, 'size_mode'), (self.widget_size_mode, 'value'))
-
-        helper = self.state.size_att_helper
-        self.widget_size_att = widgets.Dropdown(options=[k.label for k in helper.choices],
-                                       value=self.state.size_att, description='size')
-        link_component_id_to_select_widget(self.state, 'size_att', self.widget_size_att)
-        on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
-
-
-        self.widget_size_vmin = widgets.FloatText(description='size min')
-        self.widget_size_vmax = widgets.FloatText(description='size min')
-        self.widget_size_v = widgets.VBox([self.widget_size_vmin, self.widget_size_vmax])
-        link((self.state, 'size_vmin'), (self.widget_size_vmin, 'value'))
-        link((self.state, 'size_vmax'), (self.widget_size_vmax, 'value'))
-
-        dlink((self.widget_size_mode, 'value'), (self.widget_size.layout, 'display'),     lambda value: None if value == options[0] else 'none')
-        dlink((self.widget_size_mode, 'value'), (self.widget_size_att.layout, 'display'), lambda value: None if value == options[1] else 'none')
-        dlink((self.widget_size_mode, 'value'), (self.widget_size_v.layout, 'display'), lambda value: None if value == options[1] else 'none')
-
+        self.widget_color = glue_jupyter.widgets.Color(state=self.state)
+        self.widget_size = glue_jupyter.widgets.Size(state=self.state)
 
         self.widget_vector = widgets.Checkbox(description='show vectors', value=self.state.vector_visible)
         helper = self.state.vx_att_helper
@@ -228,7 +171,6 @@ class BqplotScatterLayerArtist(LayerArtistBase):
 
 
         return widgets.VBox([self.widget_visible, self.widget_opacity,
-            self.widget_size_mode, self.widget_size, self.widget_size_att, self.widget_size_v,
-            self.widget_cmap_mode, self.widget_color, self.widget_cmap_att, self.widget_cmap_v, self.widget_cmap,
-            self.widget_scaling,
+            self.widget_size, 
+            self.widget_color,
             self.widget_vector, self.widget_vector_x, self.widget_vector_y])
