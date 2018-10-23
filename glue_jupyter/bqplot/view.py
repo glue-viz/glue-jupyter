@@ -19,11 +19,10 @@ class BqplotBaseView(IPyWidgetView):
     # _data_artist_cls = BqplotImageLayerArtist
     # _subset_artist_cls = BqplotImageLayerArtist
 
-    def __init__(self, session):
-        super(BqplotBaseView, self).__init__(session)
+    def __init__(self, session, state=None):
+        super(BqplotBaseView, self).__init__(session, state=state)
         # session.hub.subscribe(self, SubsetCreateMessage,
         #                       handler=self.receive_message)
-        self.state = self._state_cls()
 
         # if we allow padding, we sometimes get odd behaviour with the interacts
         self.scale_x = bqplot.LinearScale(min=0, max=1, allow_padding=False)
@@ -296,8 +295,7 @@ class BqplotScatterView(BqplotBaseView):
         for i, axis_name in enumerate('xy'):
             if hasattr(self.state, axis_name + '_att_helper'):
                 helper = getattr(self.state, axis_name + '_att_helper')
-                widget_axis = widgets.Dropdown(options=[k.label for k in helper.choices],
-                                               value=getattr(self.state, axis_name + '_att'), description=axis_name + ' axis')
+                widget_axis = widgets.Dropdown(description=axis_name + ' axis')
                 self.widgets_axis.append(widget_axis)
                 link_component_id_to_select_widget(self.state, axis_name + '_att', widget_axis)
         self.tab_general.children += tuple(self.widgets_axis)
@@ -330,8 +328,7 @@ class BqplotHistogramView(BqplotBaseView):
         for i, axis_name in enumerate('x'):
             if hasattr(self.state, axis_name + '_att_helper'):
                 helper = getattr(self.state, axis_name + '_att_helper')
-                widget_axis = widgets.Dropdown(options=[k.label for k in helper.choices],
-                                               value=getattr(self.state, axis_name + '_att'), description=axis_name + ' axis')
+                widget_axis = widgets.Dropdown(description=axis_name + ' axis')
                 self.widgets_axis.append(widget_axis)
                 link_component_id_to_select_widget(self.state, axis_name + '_att', widget_axis)
         # @on_change([(self.state, 'hist_n_bin')])

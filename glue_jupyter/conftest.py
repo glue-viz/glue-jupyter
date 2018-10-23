@@ -1,6 +1,7 @@
 import pytest
 from glue.core import Data
 import glue_jupyter as gj
+from glue.core.component_link import ComponentLink
 
 @pytest.fixture
 def dataxyz():
@@ -31,9 +32,13 @@ def data_image():
 @pytest.fixture
 def app(dataxyz, datax, dataxz, data_volume, data_image):
     link1 = ['dataxyz.x'], ['dataxz.x'], lambda x: x
-    link2 = ['dataxyz.y'], ['dataxz.z'], lambda y: y+1, lambda z: z-1
+    link2 = ['dataxyz.y'], ['dataxz.z'], lambda y: y#+1, lambda z: z-1
+    link1 =  ComponentLink([dataxyz.id['x']], dataxz.id['x'])
+    link2 =  ComponentLink([dataxyz.id['y']], dataxz.id['z'])
+
     link3 = ['dataxyz.x'], ['datax.x'], lambda x: x
-    app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, datax=datax, links=[link1, link2, link3])
+    app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, datax=datax, links=[link3])
+    app.data_collection.add_link([link1, link2])
     app.add_data(data_volume=data_volume)
     app.add_data(data_image=data_image)
     app.add_link(data_image, 'Pixel Axis 0 [y]', dataxyz, 'y')

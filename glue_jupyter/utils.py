@@ -34,6 +34,12 @@ def reduce_size(data, max_size):
             shape = data.shape
     return data
 
+def _update_not_none(d, **kwargs):
+    for key, value in kwargs.items():
+        if value is not None:
+            d[key] = value
+
+
 def grid_slice(xmin, xmax, shape, ymin, ymax):
     '''Given a grid with shape, and begin and end coordinates xmin, xmax, what slice
     do we need to take such that it minimally covers ymin, ymax.
