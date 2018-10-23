@@ -16,9 +16,6 @@ from ..link import link, dlink, calculation, link_component_id_to_select_widget,
 tt.Color.validate = lambda self, obj, value: value
 
 
-from .. import IPyWidgetView
-
-
 class BqplotHistogramLayerArtist(LayerArtistBase):
     _layer_state_cls = HistogramLayerState
 

@@ -6,7 +6,7 @@ from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
 
-from .. import IPyWidgetView
+from ..view import IPyWidgetView
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 
 

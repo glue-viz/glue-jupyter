@@ -10,7 +10,7 @@ from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3d
 from glue.core.subset import RoiSubsetState3d
 from glue.core.command import ApplySubsetState
 
-from .. import IPyWidgetView
+from ..view import IPyWidgetView
 from ..link import link, dlink, link_component_id_to_select_widget
 from .scatter import IpyvolumeScatterLayerArtist
 from .volume import IpyvolumeVolumeLayerArtist

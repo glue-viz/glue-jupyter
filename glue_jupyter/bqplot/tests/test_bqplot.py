@@ -143,18 +143,18 @@ def test_scatter2d_cmap_mode(app,dataxyz):
     assert l1.scatter.color is None
     l1.state.cmap_att = 'x'
     l1.state.cmap_mode = 'Linear'
-    assert l1.widget_cmap_mode.label == 'Linear'
+    assert l1.widget_color.widget_cmap_mode.label == 'Linear'
     assert l1.state.cmap_name == 'Gray'
     l1.state.cmap_vmin  = 0
     l1.state.cmap_vmax  = 10
     assert l1.scatter.color is not None
 
-    l1.widget_cmap.label = 'Viridis'
+    l1.widget_color.widget_cmap.label = 'Viridis'
     assert l1.state.cmap_name == 'Viridis'
-    assert l1.widget_cmap.label == 'Viridis'
+    assert l1.widget_color.widget_cmap.label == 'Viridis'
 
-    l1.widget_cmap.label = 'Gray'
-    assert l1.widget_cmap.label == 'Gray'
+    l1.widget_color.widget_cmap.label = 'Gray'
+    assert l1.widget_color.widget_cmap.label == 'Gray'
     assert l1.state.cmap_name == 'Gray'
 
 

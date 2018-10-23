@@ -17,8 +17,8 @@ from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
                                            DeferredDrawCallbackProperty as DDCProperty,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
-from .. import IPyWidgetView
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+import glue_jupyter.widgets
 
 class Scatter3dLayerState(ScatterLayerState):
     vz_att = DDSCProperty(docstring="The attribute to use for the z vector arrow")
@@ -55,9 +55,30 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         self.view.figure.scatters = list(self.view.figure.scatters) + [self.scatter, self.quiver]
         #link((self.scatter, 'selected'), (self.quiver, 'selected'))
 
+        on_change([(self.state, 'cmap_mode', 'cmap_att', 'cmap_vmin', 'cmap_vmax', 'cmap', 'color')])(self._update_color)
+        on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
+
+
         viewer_state.add_callback('x_att', self._update_xyz_att)
         viewer_state.add_callback('y_att', self._update_xyz_att)
         viewer_state.add_callback('z_att', self._update_xyz_att)
+        self._update_color()
+
+    def _update_color(self, ignore=None):
+        cmap = self.state.cmap
+        if self.state.cmap_mode == 'Linear':
+            values = self.layer.data[self.state.cmap_att].astype(np.float32)
+            normalized_values = (values - self.state.cmap_vmin) / (self.state.cmap_vmax - self.state.cmap_vmin)
+            color_values = cmap(normalized_values).astype(np.float32)
+            self.scatter.color = color_values
+        else:
+            self.scatter.color = self.state.color
+        # for ipyvolume we set all colors the same, and resize unselected points to 0
+        self.quiver.color = self.scatter.color
+        self.scatter.color_selected = self.scatter.color
+        self.quiver.color_selected = self.quiver.color
+
+
 
     def _update_xyz_att(self, *args):
         self.update()
@@ -121,37 +142,8 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         self.widget_marker = widgets.ToggleButtons(options=['sphere', 'box', 'diamond'])
         widgets.link((self.scatter, 'geo'), (self.widget_marker, 'value'))
 
-        self.widget_size = widgets.FloatSlider(description='size', min=0, max=10, value=self.state.size)
-        link((self.state, 'size'), (self.widget_size, 'value'))
-        self.widget_scaling = widgets.FloatSlider(description='scale', min=0, max=2, value=self.state.size_scaling)
-        link((self.state, 'size_scaling'), (self.widget_scaling, 'value'))
-
-        widget_color = widgets.ColorPicker(description='color')
-        link((self.state, 'color'), (widget_color, 'value'))
-        link((widget_color, 'value'), (self.scatter, 'color'))
-        link((widget_color, 'value'), (self.scatter, 'color_selected'))
-        link((widget_color, 'value'), (self.quiver, 'color'))
-        link((widget_color, 'value'), (self.quiver, 'color_selected'))
-
-        options = type(self.state).size_mode.get_choice_labels(self.state)
-        self.widget_size_mode = widgets.RadioButtons(options=options, description='size mode')
-        link((self.state, 'size_mode'), (self.widget_size_mode, 'value'))
-
-        helper = self.state.size_att_helper
-        self.widget_size_att = widgets.Dropdown(options=[k.label for k in helper.choices],
-                                       value=self.state.size_att, description='size')
-        link_component_id_to_select_widget(self.state, 'size_att', self.widget_size_att)
-        on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
-
-        self.widget_size_vmin = widgets.FloatText()
-        self.widget_size_vmax = widgets.FloatText()
-        self.widget_size_v = widgets.HBox([widgets.Label(value='limits'), self.widget_size_vmin, self.widget_size_vmax])
-        link((self.state, 'size_vmin'), (self.widget_size_vmin, 'value'))
-        link((self.state, 'size_vmax'), (self.widget_size_vmax, 'value'))
-
-        dlink((self.widget_size_mode, 'value'), (self.widget_size.layout, 'display'),     lambda value: None if value == options[0] else 'none')
-        dlink((self.widget_size_mode, 'value'), (self.widget_size_att.layout, 'display'), lambda value: None if value == options[1] else 'none')
-        dlink((self.widget_size_mode, 'value'), (self.widget_size_v.layout, 'display'), lambda value: None if value == options[1] else 'none')
+        self.widget_size = glue_jupyter.widgets.Size(state=self.state)
+        self.widget_color = glue_jupyter.widgets.Color(state=self.state)
 
         # vector/quivers
         self.widget_vector = widgets.Checkbox(description='show vectors', value=self.state.vector_visible)
@@ -175,5 +167,5 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
         dlink((self.widget_vector, 'value'), (self.widget_vector_z.layout, 'display'), lambda value: None if value else 'none')
 
-        return widgets.VBox([widget_visible, self.widget_marker, self.widget_size_mode, self.widget_size, self.widget_size_att, self.widget_size_v, self.widget_scaling, widget_color,
+        return widgets.VBox([widget_visible, self.widget_marker, self.widget_size, self.widget_color,
             self.widget_vector, self.widget_vector_x, self.widget_vector_y, self.widget_vector_z])
