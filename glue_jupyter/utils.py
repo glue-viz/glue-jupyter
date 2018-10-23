@@ -110,3 +110,8 @@ def debounced(delay_seconds=0.5, method=False):
             ioloop.add_callback(thread_safe)
         return execute
     return wrapped
+
+def colormap_to_hexlist(cmap, N=256):
+    x = np.linspace(0, 1, N)
+    colors = ["#%02x%02x%02x" % tuple([int(k*255) for k in color]) for color in cmap(x)[:,:3]]
+    return colors

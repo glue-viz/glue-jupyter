@@ -6,8 +6,8 @@ from glue.core.component_link import ComponentLink
 
 
 
-def test_app(app, dataxyz, dataxz):
-    assert app._data[0] in [dataxyz, dataxz]
+def test_app(app, datax, dataxyz, dataxz):
+    assert app._data[0] in [datax, dataxyz, dataxz]
     assert app.widget_selection_mode.index == 0
     assert len(app.widget_subset_groups.options) == 0
     assert len(app.widget_subset_groups.index) == 0
@@ -19,7 +19,7 @@ def test_app(app, dataxyz, dataxz):
     app.subset_lasso2d(dataxyz.id['x'], dataxyz.id['y'], [0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])
 
     assert len(app.widget_subset_groups.options) == len(app.data_collection.subset_groups)
-    assert len(app.widget_subset_groups.index) == 0
+    assert len(app.widget_subset_groups.index) == 1
 
     app.session.edit_subset_mode.edit_subset = [app.data_collection.subset_groups[0]]
     assert len(app.widget_subset_groups.index) == 1
