@@ -6,8 +6,8 @@ from glue.core.component_link import ComponentLink
 
 
 
-def test_app(app, dataxyz, dataxz):
-    assert app._data[0] in [dataxyz, dataxz]
+def test_app(app, datax, dataxyz, dataxz):
+    assert app._data[0] in [datax, dataxyz, dataxz]
     assert app.widget_selection_mode.index == 0
     assert len(app.widget_subset_groups.options) == 0
     assert len(app.widget_subset_groups.index) == 0
