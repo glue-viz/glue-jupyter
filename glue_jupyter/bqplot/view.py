@@ -8,7 +8,7 @@ from glue.core.command import ApplySubsetState
 
 from ..view import IPyWidgetView
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
-
+from ..utils import float_or_none
 
 class BqplotBaseView(IPyWidgetView):
 
@@ -83,10 +83,10 @@ class BqplotBaseView(IPyWidgetView):
         # self.state.add_callback('x_max', self.limits_to_scales)
         # self.state.add_callback('y_min', self.limits_to_scales)
         # self.state.add_callback('y_max', self.limits_to_scales)
-        link((self.state, 'x_min'), (self.scale_x, 'min'))
-        link((self.state, 'x_max'), (self.scale_x, 'max'))
-        link((self.state, 'y_min'), (self.scale_y, 'min'))
-        link((self.state, 'y_max'), (self.scale_y, 'max'))
+        link((self.state, 'x_min'), (self.scale_x, 'min'), float_or_none)
+        link((self.state, 'x_max'), (self.scale_x, 'max'), float_or_none)
+        link((self.state, 'y_min'), (self.scale_y, 'min'), float_or_none)
+        link((self.state, 'y_max'), (self.scale_y, 'max'), float_or_none)
 
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 

@@ -5,6 +5,8 @@ try:
 except:
     from StringIO import StringIO # python2
 
+def float_or_none(x):
+    return float(x) if x is not None else None
 
 def rgba_to_png_data(rgba):
     width, height = rgba.shape[1], rgba.shape[0]

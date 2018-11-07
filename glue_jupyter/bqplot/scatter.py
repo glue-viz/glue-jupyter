@@ -9,7 +9,7 @@ from glue.core.layer_artist import LayerArtistBase
 from glue.viewers.scatter.state import ScatterLayerState
 
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
-from ..utils import colormap_to_hexlist, debounced
+from ..utils import colormap_to_hexlist, debounced, float_or_none
 import glue_jupyter.widgets
 from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
                                            MatplotlibLayerState,
@@ -59,8 +59,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
 
         on_change([(self.state, 'cmap_mode', 'cmap_att')])(self._on_change_cmap_mode_or_att)
         on_change([(self.state, 'cmap')])(self._on_change_cmap)
-        link((self.state, 'cmap_vmin'), (self.scale_color, 'min'))
-        link((self.state, 'cmap_vmax'), (self.scale_color, 'max'))
+        link((self.state, 'cmap_vmin'), (self.scale_color, 'min'), float_or_none)
+        link((self.state, 'cmap_vmax'), (self.scale_color, 'max'), float_or_none)
 
         on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
 
@@ -184,8 +184,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         if self.state.size_mode == 'Linear':
             self.scatter.default_size = int(scale * 100) # *50 seems to give similar sizes as the Qt Glue
             self.scatter.size = self.layer.data[self.state.size_att]
-            self.scale_size.min = self.state.size_vmin
-            self.scale_size.max = self.state.size_vmax
+            self.scale_size.min = float_or_none(self.state.size_vmin)
+            self.scale_size.max = float_or_none(self.state.size_vmax)
             self._workaround_unselected_style()
         else:
             self.scatter.default_size = int(size * scale * 4) # *4 seems to give similar sizes as the Qt Glue
