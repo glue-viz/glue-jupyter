@@ -9,15 +9,22 @@ from glue.core.layer_artist import LayerArtistBase
 from glue.viewers.scatter.state import ScatterLayerState
 
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
-from ..utils import colormap_to_hexlist
+from ..utils import colormap_to_hexlist, debounced, float_or_none
 import glue_jupyter.widgets
+from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
+                                           MatplotlibLayerState,
+                                           DeferredDrawCallbackProperty as DDCProperty,
+                                           DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
 
+class BqplotScatterLayerState(ScatterLayerState):
+    bins = DDCProperty(128, docstring='The number of bins in each dimension for the density map')
+
 
 class BqplotScatterLayerArtist(LayerArtistBase):
-    _layer_state_cls = ScatterLayerState
+    _layer_state_cls = BqplotScatterLayerState
 
     def __init__(self, view, viewer_state, layer, layer_state):
         super(BqplotScatterLayerArtist, self).__init__(layer)
@@ -32,10 +39,19 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self.scale_size_quiver = bqplot.LinearScale(min=0, max=1)
         self.scale_rotation = bqplot.LinearScale(min=0, max=1)
         self.scales = dict(self.view.scales, size=self.scale_size, rotation=self.scale_rotation, color=self.scale_color)
+        self.scale_image = bqplot.ColorScale()
         self.scales_quiver = dict(self.view.scales, size=self.scale_size_quiver, rotation=self.scale_rotation)
+        self.scales_image  = dict(self.view.scales, image=self.scale_image)
         self.scatter = bqplot.ScatterMega(scales=self.scales, x=[0, 1], y=[0, 1])
         self.quiver = bqplot.ScatterMega(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
-        self.view.figure.marks = list(self.view.figure.marks) + [self.scatter, self.quiver]
+
+        self.counts = None
+        self.image = bqplot.Image(scales=self.scales_image)
+        on_change([(self.state, 'density_map')])(self._on_change_density_map)
+        on_change([(self.state, 'bins')])(self._update_scatter)
+        self._viewer_state.add_global_callback(self._update_scatter)
+
+        self.view.figure.marks = list(self.view.figure.marks) + [self.image, self.scatter, self.quiver ]
         link((self.state, 'color'), (self.scatter, 'colors'), lambda x: [x], lambda x: x[0])
         link((self.state, 'color'), (self.quiver, 'colors'), lambda x: [x], lambda x: x[0])
         self.scatter.observe(self._workaround_unselected_style, 'colors')
@@ -43,8 +59,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
 
         on_change([(self.state, 'cmap_mode', 'cmap_att')])(self._on_change_cmap_mode_or_att)
         on_change([(self.state, 'cmap')])(self._on_change_cmap)
-        link((self.state, 'cmap_vmin'), (self.scale_color, 'min'))
-        link((self.state, 'cmap_vmax'), (self.scale_color, 'max'))
+        link((self.state, 'cmap_vmin'), (self.scale_color, 'min'), float_or_none)
+        link((self.state, 'cmap_vmax'), (self.scale_color, 'max'), float_or_none)
 
         on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
 
@@ -68,6 +84,12 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         colors = colormap_to_hexlist(cmap)
         self.scale_color.colors = colors
 
+    def _on_change_density_map(self):
+        self.image.visible = self.state.density_map
+        self.scatter.visible = not self.state.density_map
+        self.quiver.visible = not self.state.density_map
+        self._update_scatter()
+
     def redraw(self):
         pass
         self.update()
@@ -83,11 +105,39 @@ class BqplotScatterLayerArtist(LayerArtistBase):
             self.quiver.unselected_style = {'fill': 'white', 'stroke': 'none'}
             self.quiver.unselected_style = {'fill': 'none', 'stroke': 'none'}
 
+    @debounced(method=True)
+    def update_histogram(self):
+        if isinstance(self.layer, Subset):
+            data = self.layer.data
+            subset_state = self.layer.subset_state
+        else:
+            data = self.layer
+            subset_state = None
+        if self.state.density_map:
+            bins = [self.state.bins, self.state.bins]
+            range_x = [self.view.scale_x.min, self.view.scale_x.max]
+            range_y = [self.view.scale_y.min, self.view.scale_y.max]
+            range = [range_x, range_y]
+            self.counts = data.compute_histogram([self._viewer_state.y_att, self._viewer_state.x_att], subset_state=subset_state, bins=bins, range=range)
+            self.scale_image.min = 0
+            self.scale_image.max = np.nanmax(self.counts)
+            with self.image.hold_sync():
+                self.image.x = range_x
+                self.image.y = range_y
+                self.image.image = self.counts.T.copy(np.float32)
+
+    def _update_scatter(self, **changes):
+        self.update_histogram()
+        self.update()
+
     def update(self):
-        self.scatter.x = self.layer.data[self._viewer_state.x_att].astype(np.float32)
-        self.scatter.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
-        self.quiver.x = self.layer.data[self._viewer_state.x_att].astype(np.float32)
-        self.quiver.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
+        if self.state.density_map:
+            pass
+        else:
+            self.scatter.x = self.layer.data[self._viewer_state.x_att].astype(np.float32)
+            self.scatter.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
+            self.quiver.x = self.layer.data[self._viewer_state.x_att].astype(np.float32)
+            self.quiver.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
         if isinstance(self.layer, Subset):
             self.scatter.selected = np.nonzero(self.layer.to_mask())[0].tolist()
             self.scatter.selected_style = {}
@@ -134,8 +184,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         if self.state.size_mode == 'Linear':
             self.scatter.default_size = int(scale * 100) # *50 seems to give similar sizes as the Qt Glue
             self.scatter.size = self.layer.data[self.state.size_att]
-            self.scale_size.min = self.state.size_vmin
-            self.scale_size.max = self.state.size_vmax
+            self.scale_size.min = float_or_none(self.state.size_vmin)
+            self.scale_size.max = float_or_none(self.state.size_vmax)
             self._workaround_unselected_style()
         else:
             self.scatter.default_size = int(size * scale * 4) # *4 seems to give similar sizes as the Qt Glue
@@ -169,6 +219,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'), lambda value: None if value else 'none')
         dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
 
+        self.widget_bins = widgets.IntSlider(min=0, max=1024, value=self.state.bins, description='bin count')
+        link((self.state, 'bins'), (self.widget_bins, 'value'))
 
         return widgets.VBox([self.widget_visible, self.widget_opacity,
             self.widget_size, 

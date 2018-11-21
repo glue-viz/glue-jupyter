@@ -5,6 +5,8 @@ try:
 except:
     from StringIO import StringIO # python2
 
+def float_or_none(x):
+    return float(x) if x is not None else None
 
 def rgba_to_png_data(rgba):
     width, height = rgba.shape[1], rgba.shape[0]
@@ -112,8 +114,10 @@ def debounced(delay_seconds=0.5, method=False):
 
             def thread_safe():
                 ioloop.add_timeout(time.time() + delay_seconds, debounced_execute)
-
-            ioloop.add_callback(thread_safe)
+            if ioloop is None: # not IPython, maybe unittest
+                debounced_execute()
+            else:
+                ioloop.add_callback(thread_safe)
         return execute
     return wrapped
 

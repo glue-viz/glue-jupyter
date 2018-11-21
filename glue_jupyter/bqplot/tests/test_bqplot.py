@@ -57,6 +57,20 @@ def test_scatter2d(app, dataxyz, dataxz):
     assert layer.quiver.visible
 
 
+def test_scatter2d_density(app, dataxyz):
+    s = app.scatter2d('x', 'y', data=dataxyz)
+    s.layers[0].state.points_mode = 'density'
+    assert s.layers[0].state.density_map == True
+
+    s.state.x_min == 1
+    s.state.x_max == 3
+    s.state.y_min == 2
+    s.state.y_max == 4
+    assert s.layers[0].state.density_map == True
+    s.layers[0].state.bins = 2
+    assert s.layers[0].image.image.tolist() == [[0, 1], [0, 0]]
+
+
 def test_scatter2d_subset(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     app.subset('test', dataxyz.id['x'] > 2)

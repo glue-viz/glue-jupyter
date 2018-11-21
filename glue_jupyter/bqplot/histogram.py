@@ -54,39 +54,7 @@ class BqplotHistogramLayerArtist(LayerArtistBase):
         pass
 
     def _calculate_histogram(self):
-        # TODO: comes from glue/viewers/histogram/layer_artist.py
-
-        # self.remove()
-
-        try:
-            x = self.layer[self._viewer_state.x_att]
-        except AttributeError:
-            return
-        except (IncompatibleAttribute, IndexError):
-            self.disable_invalid_attributes(self._viewer_state.x_att)
-            return
-        else:
-            self.enable()
-
-        x = x[~np.isnan(x) & (x >= self._viewer_state.hist_x_min) &
-                             (x <= self._viewer_state.hist_x_max)]
-
-        if len(x) == 0:
-            self.redraw()
-            return
-
-        # For histogram
-        xmin, xmax = sorted([self._viewer_state.hist_x_min,
-                             self._viewer_state.hist_x_max])
-        if self._viewer_state.x_log:
-            range = None
-            bins = np.logspace(np.log10(xmin), np.log10(
-                xmax), self._viewer_state.hist_n_bin)
-        else:
-            range = [xmin, xmax]
-            bins = self._viewer_state.hist_n_bin
-
-        self.hist_unscaled, self.bins = np.histogram(x, bins, range=range)
+        self.bins, self.hist_unscaled = self.state.histogram
 
     def _scale_histogram(self):
         # TODO: comes from glue/viewers/histogram/layer_artist.py
@@ -193,6 +161,7 @@ class BqplotHistogramLayerArtist(LayerArtistBase):
             self._update_visual_attributes()
 
     def update(self):
+        self.state.reset_cache()
         self._update_histogram(force=True)
         self.redraw()
 
