@@ -1,5 +1,6 @@
 import numpy as np
 import bqplot
+from ipyastroimage.astroimage import AstroImage
 import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
 from IPython.display import display
@@ -46,7 +47,7 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self.quiver = bqplot.ScatterGL(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
 
         self.counts = None
-        self.image = bqplot.Image(scales=self.scales_image)
+        self.image = AstroImage(scales=self.scales_image)
         on_change([(self.state, 'density_map')])(self._on_change_density_map)
         on_change([(self.state, 'bins')])(self._update_scatter)
         self._viewer_state.add_global_callback(self._update_scatter)
