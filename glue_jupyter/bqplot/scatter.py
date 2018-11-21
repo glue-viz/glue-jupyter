@@ -42,8 +42,8 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self.scale_image = bqplot.ColorScale()
         self.scales_quiver = dict(self.view.scales, size=self.scale_size_quiver, rotation=self.scale_rotation)
         self.scales_image  = dict(self.view.scales, image=self.scale_image)
-        self.scatter = bqplot.ScatterMega(scales=self.scales, x=[0, 1], y=[0, 1])
-        self.quiver = bqplot.ScatterMega(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
+        self.scatter = bqplot.ScatterGL(scales=self.scales, x=[0, 1], y=[0, 1])
+        self.quiver = bqplot.ScatterGL(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
 
         self.counts = None
         self.image = bqplot.Image(scales=self.scales_image)
