@@ -12,7 +12,7 @@ For some notebooks with examples of usage of glue-jupyter, see the ``notebooks``
 
 You can try out glue-jupyter online at mybinder:
 
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/glue-viz/glue-jupyter/mybinder)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/glue-viz/glue-jupyter/mybinder)
 
 Notebooks with real data:
 
