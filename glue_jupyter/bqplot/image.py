@@ -2,6 +2,7 @@ import uuid
 
 import numpy as np
 import bqplot
+from ipyastroimage.astroimage import AstroImage
 import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
 from IPython.display import display
@@ -53,7 +54,7 @@ class BqplotImageLayerArtist(LayerArtistBase):
 
         self.scale_image = bqplot.ColorScale()
         self.scales = {'x': self.view.scale_x, 'y': self.view.scale_y, 'image': self.scale_image}
-        self.image_mark = bqplot.Image(image=[[1, 2], [3,4]], scales=self.scales)
+        self.image_mark = AstroImage(image=[[1, 2], [3,4]], scales=self.scales)
         self.color_axis = bqplot.ColorAxis(side='right', scale=self.scale_image, orientation='vertical')
         self.view.figure.axes = list(self.view.figure.axes) + [self.color_axis]
 

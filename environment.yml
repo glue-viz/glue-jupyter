@@ -15,3 +15,4 @@ dependencies:
     - https://github.com/glue-viz/glue-vispy-viewers/archive/master.zip
     - https://github.com/maartenbreddels/ipyvolume/archive/master.zip
     - https://github.com/maartenbreddels/bqplot/archive/scatter_webgl.zip
+    - https://github.com/glue-viz/ipyastroimage/archive/master.zip
