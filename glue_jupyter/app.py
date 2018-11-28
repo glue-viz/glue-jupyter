@@ -1,4 +1,5 @@
 import ipywidgets as widgets
+import ipymaterialui as mui
 from IPython.display import display
 
 
@@ -15,11 +16,11 @@ import glue.icons
 from glue_jupyter.utils import _update_not_none
 
 ICON_WIDTH = 20
-icon_replace = widgets.Icon.from_file(glue.icons.icon_path('glue_replace', icon_format='svg'), width=ICON_WIDTH)
-icon_or = widgets.Icon.from_file(glue.icons.icon_path('glue_or', icon_format='svg'), width=ICON_WIDTH)
-icon_and = widgets.Icon.from_file(glue.icons.icon_path('glue_and', icon_format='svg'), width=ICON_WIDTH)
-icon_xor = widgets.Icon.from_file(glue.icons.icon_path('glue_xor', icon_format='svg'), width=ICON_WIDTH)
-icon_andnot = widgets.Icon.from_file(glue.icons.icon_path('glue_andnot', icon_format='svg'), width=ICON_WIDTH)
+icon_replace = widgets.Image.from_file(glue.icons.icon_path('glue_replace', icon_format='svg'), width=ICON_WIDTH)
+icon_or = widgets.Image.from_file(glue.icons.icon_path('glue_or', icon_format='svg'), width=ICON_WIDTH)
+icon_and = widgets.Image.from_file(glue.icons.icon_path('glue_and', icon_format='svg'), width=ICON_WIDTH)
+icon_xor = widgets.Image.from_file(glue.icons.icon_path('glue_xor', icon_format='svg'), width=ICON_WIDTH)
+icon_andnot = widgets.Image.from_file(glue.icons.icon_path('glue_andnot', icon_format='svg'), width=ICON_WIDTH)
 
 # not sure we need to inherit: from glue.core.application_base import Application
 # what would we gain that would be natural in the notebook?
@@ -28,29 +29,36 @@ class JupyterApplication(Application):
     def __init__(self, data_collection=None, session=None):
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
         self.selection_modes = [('replace', icon_replace, ReplaceMode), ('add', icon_or, OrMode), ('and', icon_and, AndMode), ('xor', icon_xor, XorMode), ('remove', icon_andnot, AndNotMode)]
-        self.widget_selection_mode = widgets.ToggleButtons(
-            options=['' for label, icon, mode in self.selection_modes],
-            icons=[icon for label, icon, mode in self.selection_modes],
-            style=dict(button_width='35px'),
-            description='Mode:',
-            disabled=False,
-            tooltips=[label for label, icon, mode in self.selection_modes],
+        self.widget_selection_mode = mui.ToggleButtonGroup(exclusive=True, value=0,
+            children=[mui.ToggleButton(children=[icon], value=k) for k, (label, icon, mode) in enumerate(self.selection_modes)]
+            # options=['' for label, icon, mode in self.selection_modes],
+            # icons=[icon for label, icon, mode in self.selection_modes],
+            # style=dict(button_width='35px'),
+            # description='Mode:',
+            # disabled=False,
+            # tooltips=[label for label, icon, mode in self.selection_modes],
         )
         self.widget_data_collection = widgets.SelectMultiple()
         self.widget_subset_groups   = widgets.SelectMultiple()
 
         self._updating_subset_menu_items = False
-        self.widget_subset_group_menu_item_select_multiple = widgets.Menu(description='Select multiple subsets', checkable=True, value=False, enabled=False)
-        self.widget_subset_group_menu_item_no_active = widgets.Menu(description='None', checkable=True, value=True)
+        self.widget_subset_group_menu_item_select_multiple_checkbox = mui.Checkbox()
+        self.widget_subset_group_menu_item_select_multiple_fcl = mui.FormControlLabel(control=self.widget_subset_group_menu_item_select_multiple_checkbox, label='Select multiple')
+        self.widget_subset_group_menu_item_select_multiple = mui.MenuItem(children=[self.widget_subset_group_menu_item_select_multiple_fcl])
+        self.widget_subset_group_menu_item_no_active_checkbox = mui.Checkbox()
+        self.widget_subset_group_menu_item_no_active_fcl = mui.FormControlLabel(control=self.widget_subset_group_menu_item_no_active_checkbox, label='No subset (create new)')
+        self.widget_subset_group_menu_item_no_active = mui.MenuItem(children=[self.widget_subset_group_menu_item_no_active_fcl])
         self.widget_subset_group_menu_items_subsets = []
-        self.widget_subset_group_menu_item_no_active.observe(self._on_click_subset_group_menu_item_no_active, 'value')
-        self.widget_subset_group_menu = widgets.Menu(items=[self.widget_subset_group_menu_item_select_multiple,
+        self.widget_subset_group_menu_item_no_active_checkbox.observe(self._on_click_subset_group_menu_item_no_active, 'checked')
+        self.widget_subset_group_menu = mui.Menu(children=[self.widget_subset_group_menu_item_select_multiple,
                                                             self.widget_subset_group_menu_item_no_active] + self.widget_subset_group_menu_items_subsets)
-        self.widget_subset_group_button = widgets.Button(icon='lala', menu=self.widget_subset_group_menu, menu_delay=0)
+        # self.widget_subset_group_button = widgets.Button(icon='lala', menu=self.widget_subset_group_menu, menu_delay=0)
+        self.widget_subset_group_button_text = mui.ListItemText(primary="Active subset", secondary="No subset (create new)", button=True)
+        self.widget_subset_group_button = mui.ListItem(children=[self.widget_subset_group_button_text], menu=self.widget_subset_group_menu)#icon='lala', menu=self.widget_subset_group_menu, menu_delay=0)
 
 
         self.widget = widgets.VBox(children=[self.widget_selection_mode, self.widget_subset_groups])
-        self.widget_selection_mode.observe(self._set_selection_mode, 'index')
+        self.widget_selection_mode.observe(self._set_selection_mode, 'value')
         self.widget_subset_groups.observe(self._set_subset_groups, 'index')
         self.session.hub.subscribe(self, msg.EditSubsetMessage, handler=self._on_edit_subset_msg)
         self.session.hub.subscribe(self, msg.SubsetCreateMessage, handler=self._on_subset_create_msg)
@@ -97,7 +105,7 @@ class JupyterApplication(Application):
         try:
             if change.new:
                 for item in self.widget_subset_group_menu_items_subsets:
-                    item.value = False
+                    item.children[0].control.checked = False
                 self.session.edit_subset_mode.edit_subset = []
         finally:
             self._updating_subset_menu_items = False
@@ -108,18 +116,19 @@ class JupyterApplication(Application):
         self._updating_subset_menu_items = True
         try:
             subsets = []
-            index = self.widget_subset_group_menu_items_subsets.index(change.owner)
-            if self.widget_subset_group_menu_item_select_multiple.value:
+            checkboxes = [k.children[0].control for k in self.widget_subset_group_menu_items_subsets]
+            index = checkboxes.index(change.owner)
+            if self.widget_subset_group_menu_item_select_multiple_checkbox.checked:
                 for i, (menu, subset_group) in enumerate(zip(self.widget_subset_group_menu_items_subsets, self.data_collection.subset_groups)):
-                    if menu.value:
+                    if menu.children[0].control.checked:
                         subsets.append(subset_group)
             else:
                 subsets = []
                 if change.new: # if setting value to true, we disable the rest
                     subsets = [self.data_collection.subset_groups[index]]
                     for item in self.widget_subset_group_menu_items_subsets:
-                        if item != change.owner:
-                            item.value = False
+                        if item.children[0].control != change.owner:
+                            item.children[0].control.checked = False
                 # else:
                 #     self.widget_subset_group_menu_items_subsets[index].value = True
                 self.session.edit_subset_mode.edit_subset = subsets
@@ -139,34 +148,39 @@ class JupyterApplication(Application):
             for i, subset_group in enumerate(self.data_collection.subset_groups):
                 # don't recreate all widgets, reuse them
                 if len(self.widget_subset_group_menu_items_subsets) <= i:
-                    new_menu = widgets.Menu(description='', checkable=True)
-                    new_menu.observe(self._active_subset_changed_from_ui, 'value')
+                    checkbox = mui.Checkbox()
+                    fcl = mui.FormControlLabel(control=checkbox, label='Select multiple')
+                    new_menu = mui.MenuItem(children=[fcl], checkable=True)
+                    checkbox.observe(self._active_subset_changed_from_ui, 'checked')
                     self.widget_subset_group_menu_items_subsets.append(new_menu)
                 menu = self.widget_subset_group_menu_items_subsets[i]
-                menu.description = subset_group.label
+                fcl = menu.children[0]
+                checkbox = fcl.control
+                fcl.label = subset_group.label
                 options.append(subset_group.label)
                 if subset_group in self.session.edit_subset_mode.edit_subset:
                     indices.append(i)
-                    menu.value = True
+                    checkbox.checked = True
                 else:
-                    menu.value = False
+                    checkbox.checked = False
             if len(self.widget_subset_group_menu_items_subsets) == 0:
-                self.widget_subset_group_button.description = 'None'
-                self.widget_subset_group_menu_item_select_multiple.enabled = False
+                self.widget_subset_group_button.primary = 'No subset (create new)'
+                self.widget_subset_group_menu_item_select_multiple_checkbox.checked = False
             else:
-                self.widget_subset_group_menu_item_select_multiple.enabled = True
+                self.widget_subset_group_menu_item_select_multiple_checkbox.checked = True
             
-            self.widget_subset_group_menu_item_no_active.value = len(subset_groups_selected) == 0
+            self.widget_subset_group_menu_item_no_active_checkbox.checked = len(subset_groups_selected) == 0
             
             if len(self.session.edit_subset_mode.edit_subset) > 1:
-                self.widget_subset_group_button.description = "Multiple"
+                self.widget_subset_group_button.primary = "Multiple"
             elif len(self.session.edit_subset_mode.edit_subset) == 0:
-                self.widget_subset_group_button.description = 'None'
+                self.widget_subset_group_button.primary = 'No subset (create new)'
             elif len(self.session.edit_subset_mode.edit_subset) == 1:
                 index = self.data_collection.subset_groups.index(self.session.edit_subset_mode.edit_subset[0])
-                self.widget_subset_group_button.description = self.widget_subset_group_menu_items_subsets[index].description
-                self.widget_subset_group_button.icon = self.widget_subset_group_menu_items_subsets[index].icon
-            self.widget_subset_group_menu.items = \
+                self.widget_subset_group_button.primary = self.widget_subset_group_menu_items_subsets[index].children[0].label
+                # TODO: this the icon
+                # self.widget_subset_group_button.icon = self.widget_subset_group_menu_items_subsets[index].icon
+            self.widget_subset_group_menu.children = \
                 [self.widget_subset_group_menu_item_select_multiple,
                 self.widget_subset_group_menu_item_no_active] + self.widget_subset_group_menu_items_subsets
             self.widget_subset_groups.options = options

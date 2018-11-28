@@ -11,9 +11,9 @@ def test_app(app, datax, dataxyz, dataxz):
     assert app.widget_selection_mode.index == 0
 
     # if there are no subsets, you cannot select multiple
-    assert app.widget_subset_group_menu_item_select_multiple.enabled == False
+    assert app.widget_subset_group_menu_item_select_multiple_checkbox.checked == False
     assert app.widget_subset_group_menu_item_no_active
-    assert app.widget_subset_group_button.description == app.widget_subset_group_menu_item_no_active.description
+    assert app.widget_subset_group_button.primary == app.widget_subset_group_menu_item_no_active_fcl.label
 
 
     assert len(app.widget_subset_groups.options) == 0
@@ -29,8 +29,8 @@ def test_app(app, datax, dataxyz, dataxz):
     app.subset_lasso2d(dataxyz.id['x'], dataxyz.id['y'], [0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])
 
     assert len(app.widget_subset_group_menu_items_subsets) == 1
-    assert app.widget_subset_group_button.description == app.widget_subset_group_menu_items_subsets[0].description
-    assert app.widget_subset_group_menu_item_no_active.value == False
+    assert app.widget_subset_group_button.primary == app.widget_subset_group_menu_items_subsets[0].children[0].label
+    assert app.widget_subset_group_menu_item_no_active_checkbox.checked == False
 
     assert len(app.widget_subset_groups.options) == len(app.data_collection.subset_groups)
     assert len(app.widget_subset_groups.index) == 1
@@ -38,20 +38,20 @@ def test_app(app, datax, dataxyz, dataxz):
     app.session.edit_subset_mode.edit_subset = [app.data_collection.subset_groups[0]]
     assert len(app.widget_subset_groups.index) == 1
     assert app.widget_subset_groups.index == (0,)
-    assert app.widget_subset_group_menu_item_no_active.value == False
-    assert app.widget_subset_group_menu_items_subsets[0].value == True
+    assert app.widget_subset_group_menu_item_no_active_checkbox.checked == False
+    assert app.widget_subset_group_menu_items_subsets[0].children[0].control.checked == True
 
 
     app.session.edit_subset_mode.edit_subset = []
-    assert app.widget_subset_group_menu_item_no_active.value == True
-    assert app.widget_subset_group_menu_items_subsets[0].value == False
+    assert app.widget_subset_group_menu_item_no_active_checkbox.checked == True
+    assert app.widget_subset_group_menu_items_subsets[0].children[0].control.checked == False
     assert len(app.widget_subset_groups.index) == 0
     assert app.widget_subset_groups.index == ()
 
     app.widget_subset_groups.index = (0,)
     assert app.session.edit_subset_mode.edit_subset == [app.data_collection.subset_groups[0]]
-    assert app.widget_subset_group_menu_item_no_active.value == False
-    assert app.widget_subset_group_menu_items_subsets[0].value == True
+    assert app.widget_subset_group_menu_item_no_active_checkbox.checked == False
+    assert app.widget_subset_group_menu_items_subsets[0].children[0].control.checked == True
 
     app.session.edit_subset_mode.edit_subset = []
     assert len(app.widget_subset_groups.index) == 0
@@ -61,32 +61,32 @@ def test_app(app, datax, dataxyz, dataxz):
 
     # now do a second selection
     app.session.edit_subset_mode.edit_subset = [app.data_collection.subset_groups[0]]
-    assert app.widget_subset_group_menu_items_subsets[0].value == True
-    assert app.widget_subset_group_menu_item_no_active.value == False
+    assert app.widget_subset_group_menu_items_subsets[0].children[0].control.checked == True
+    assert app.widget_subset_group_menu_item_no_active_checkbox.checked == False
 
-    app.widget_subset_group_menu_item_no_active.value = True
+    app.widget_subset_group_menu_item_no_active_checkbox.checked = True
     assert app.session.edit_subset_mode.edit_subset == [], 'should have triggered nothing to be selected'
-    assert app.widget_subset_group_menu_items_subsets[0].value == False
+    assert app.widget_subset_group_menu_items_subsets[0].children[0].control.checked == False
 
     app.subset_lasso2d(dataxyz.id['x'], dataxyz.id['y'], [0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])
-    assert app.widget_subset_group_menu_item_no_active.value == False
-    assert app.widget_subset_group_menu_items_subsets[0].value == False
-    assert app.widget_subset_group_menu_items_subsets[1].value == True
+    assert app.widget_subset_group_menu_item_no_active_checkbox.checked == False
+    assert app.widget_subset_group_menu_items_subsets[0].children[0].control.checked == False
+    assert app.widget_subset_group_menu_items_subsets[1].children[0].control.checked == True
 
     # we do not have multiple subsets enabled
-    app.widget_subset_group_menu_items_subsets[0].value = True
-    assert app.widget_subset_group_menu_items_subsets[0].value == True
-    assert app.widget_subset_group_menu_items_subsets[1].value == False
+    app.widget_subset_group_menu_items_subsets[0].children[0].control.checked = True
+    assert app.widget_subset_group_menu_items_subsets[0].children[0].control.checked == True
+    assert app.widget_subset_group_menu_items_subsets[1].children[0].control.checked == False
 
     # do multiple
-    app.widget_subset_group_menu_item_select_multiple.value = True
+    app.widget_subset_group_menu_item_select_multiple_checkbox.checked = True
     # now nothing should have changed in the selected subsets
-    assert app.widget_subset_group_menu_items_subsets[0].value == True
-    assert app.widget_subset_group_menu_items_subsets[1].value == False
+    assert app.widget_subset_group_menu_items_subsets[0].children[0].control.checked == True
+    assert app.widget_subset_group_menu_items_subsets[1].children[0].control.checked == False
     # now we do have it enabled, so we can select the second one
-    app.widget_subset_group_menu_items_subsets[1].value = True
-    assert app.widget_subset_group_menu_items_subsets[0].value == True
-    assert app.widget_subset_group_menu_items_subsets[1].value == True
+    app.widget_subset_group_menu_items_subsets[1].children[0].control.checked = True
+    assert app.widget_subset_group_menu_items_subsets[0].children[0].control.checked == True
+    assert app.widget_subset_group_menu_items_subsets[1].children[0].control.checked == True
 
     # TODO: not implemented yet.. not sure if we want this
     if 0:
