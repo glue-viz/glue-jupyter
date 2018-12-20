@@ -31,6 +31,13 @@ pip install .
 jupyter labextension install js --no-build
 popd
 
+git clone https://github.com/maartenbreddels/ipymaterialui/
+pushd ipymaterialui
+pip install .
+jupyter labextension install js --no-build
+popd
+
+
 git clone https://github.com/glue-viz/ipyastroimage/
 pushd ipyastroimage
 pip install .
