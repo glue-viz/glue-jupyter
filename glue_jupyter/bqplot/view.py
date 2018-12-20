@@ -1,5 +1,6 @@
 import bqplot
 import ipywidgets as widgets
+import ipymaterialui as mui
 from IPython.display import display
 
 import glue.icons
@@ -12,11 +13,11 @@ from ..link import link, dlink, calculation, link_component_id_to_select_widget,
 from ..utils import float_or_none
 
 ICON_WIDTH = 20
-icon_brush = widgets.Icon.from_file(glue.icons.icon_path('glue_square', icon_format='svg'), width=ICON_WIDTH)
-icon_pan = widgets.Icon.from_file(glue.icons.icon_path('glue_move', icon_format='svg'), width=ICON_WIDTH)
-icon_brush_x = widgets.Icon.from_file(glue.icons.icon_path('glue_xrange_select', icon_format='svg'), width=ICON_WIDTH)
-icon_brush_y = widgets.Icon.from_file(glue.icons.icon_path('glue_yrange_select', icon_format='svg'), width=ICON_WIDTH)
-icon_brush_lasso = widgets.Icon.from_file(glue.icons.icon_path('glue_lasso', icon_format='svg'), width=ICON_WIDTH)
+icon_brush = widgets.Image.from_file(glue.icons.icon_path('glue_square', icon_format='svg'), width=ICON_WIDTH)
+icon_pan = widgets.Image.from_file(glue.icons.icon_path('glue_move', icon_format='svg'), width=ICON_WIDTH)
+icon_brush_x = widgets.Image.from_file(glue.icons.icon_path('glue_xrange_select', icon_format='svg'), width=ICON_WIDTH)
+icon_brush_y = widgets.Image.from_file(glue.icons.icon_path('glue_yrange_select', icon_format='svg'), width=ICON_WIDTH)
+icon_brush_lasso = widgets.Image.from_file(glue.icons.icon_path('glue_lasso', icon_format='svg'), width=ICON_WIDTH)
 
 
 class BqplotBaseView(IPyWidgetView):
@@ -73,13 +74,13 @@ class BqplotBaseView(IPyWidgetView):
 
         if self.is2d:
             self.interact_brush_y = bqplot.interacts.BrushIntervalSelector(scale=self.scale_y, color="green", orientation='vertical')
-            self.widget_menu_select_y = widgets.Menu(description='Y selection', icon=icon_brush_y, checkable=True)
             self.interact_brush_y.observe(self.update_brush_y, "brushing")
             self.interacts.append((icon_brush_y, self.interact_brush_y))
 
 
-        self.widget_button_interact = widgets.ToggleButtons(description='Action: ', options=[('', interact) for (icon, interact) in self.interacts],
-                                                   icons=[icon for (icon, interact) in self.interacts], style=dict(button_width='35px'))
+        self.widget_button_interact = mui.ToggleButtonGroup(exclusive=True, value=self.interact_panzoom, style={'margin': '4px'},
+            children=[mui.ToggleButton(children=[icon], value=value) for k, (icon, value) in enumerate(self.interacts)]
+        )
         self.widget_button_interact.observe(self.change_action, "value")
 
         self.widget_toolbar = self.widget_button_interact
@@ -95,11 +96,8 @@ class BqplotBaseView(IPyWidgetView):
         self.create_tab()
         self.output_widget = widgets.Output()
         self.widget_toolbar = widgets.HBox([
-                    widgets.HBox([
-                        widgets.Label(value="Active subset", layout={'width': '80px'}),
-                        self.session.application.widget_subset_group_button]
-                    ),
-                    self.session.application.widget_selection_mode]
+                        self.session.application.widget_subset_select,
+                        self.session.application.widget_subset_mode]
              )
         self.main_widget = widgets.VBox([
                 self.widget_toolbar,
@@ -111,15 +109,18 @@ class BqplotBaseView(IPyWidgetView):
         display(self.main_widget)
 
     def create_tab(self):
-        self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
+        COLOR = 'blue'
+        # self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
+        self.widget_show_axes = mui.Checkbox(checked=True, style={'color': COLOR})
+        self.widget_show_axes_fcl = mui.FormControlLabel(control=self.widget_show_axes, label="Show axes")
         self.widgets_axis = []
         self.tab_general = widgets.VBox([
-                self.widget_toolbar, self.widget_show_axes] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
+                self.widget_toolbar, self.widget_show_axes_fcl] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
         children = [self.tab_general]
         self.tab = widgets.Tab(children)
         self.tab.set_title(0, "General")
         self.tab.set_title(1, "Axes")
-        link((self.state, 'show_axes'), (self.widget_show_axes, 'value'))
+        link((self.state, 'show_axes'), (self.widget_show_axes, 'checked'))
 
     def _sync_show_axes(self):
         # TODO: if moved to state, this would not rely on the widget
@@ -131,6 +132,7 @@ class BqplotBaseView(IPyWidgetView):
         print('update viewer state', rec, context)
 
     def change_action(self, *ignore):
+        index = self.widget_button_interact.value
         self.figure.interaction = self.widget_button_interact.value #self.interact_map[self.button_action.value]
         if self.is2d:
             self.interact_brush.selected_x = []
@@ -139,7 +141,7 @@ class BqplotBaseView(IPyWidgetView):
 
     def update_brush(self, *ignore):
         with self.output_widget:
-            if not self.interact_brush.brushing:  # only select when we ended
+            if self.interact_brush.brushing is not None and self.interact_brush.selected_x is not None and len(self.interact_brush.selected_x):  # only select when we ended
                 (x1, y1) = self.interact_brush.selected_x
                 (x2, y2) = self.interact_brush.selected_y
                 x = [x1, x2]

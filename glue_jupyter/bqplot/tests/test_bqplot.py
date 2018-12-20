@@ -24,10 +24,10 @@ def test_histogram1d(app, dataxyz):
     assert s.layers[2].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
     assert s.layers[2].hist.tolist() == [0, 1, 0]
 
-
     # s.state.hist_n_bin = 6
     # assert s.layers[2].bins.tolist() == [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
     # assert s.layers[2].hist.tolist() == [0, 1, 0, 0, 0, 0]
+
 
 def test_interact(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)
@@ -95,6 +95,7 @@ def test_scatter2d_subset(app, dataxyz, dataxz):
     assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
     assert s.layers[1].scatter.selected == [2]
 
+
 def test_scatter2d_brush(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
 
@@ -126,7 +127,6 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     # assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
     # assert s.layers[1].scatter.selected == [0, 1]
 
-
     # 2d brushing
     # format is (x1, y1), (x2, y2)
     s.interact_brush.brushing = True
@@ -147,6 +147,7 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     s.widget_button_interact.value = s.interact_brush_y
     assert s.layers[1].scatter.selected == [2]
 
+
 def test_scatter2d_properties(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     l1 = s.layers[0]
@@ -155,7 +156,8 @@ def test_scatter2d_properties(app, dataxyz, dataxz):
     l1.scatter.colors = ['orange']
     assert l1.state.color == 'orange'
 
-def test_scatter2d_cmap_mode(app,dataxyz):
+
+def test_scatter2d_cmap_mode(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     l1 = s.layers[0]
     assert l1.state.cmap_mode == 'Fixed', 'expected default value'
@@ -166,8 +168,8 @@ def test_scatter2d_cmap_mode(app,dataxyz):
     l1.state.cmap_mode = 'Linear'
     assert l1.widget_color.widget_cmap_mode.label == 'Linear'
     assert l1.state.cmap_name == 'Gray'
-    l1.state.cmap_vmin  = 0
-    l1.state.cmap_vmax  = 10
+    l1.state.cmap_vmin = 0
+    l1.state.cmap_vmax = 10
     assert l1.scatter.color is not None
 
     l1.widget_color.widget_cmap.label = 'Viridis'
@@ -187,9 +189,8 @@ def test_scatter2d_and_histogram(app, dataxyz):
     s.interact_brush.brushing = False
     assert len(s.layers) == 2
     import glue.core.subset
-    assert isinstance(s.layers[1].layer.subset_state, glue.core.subset.RoiSubsetState)
-
-
+    assert isinstance(s.layers[1].layer.subset_state,
+                      glue.core.subset.RoiSubsetState)
 
 
 def test_imshow(app, data_image, dataxyz):
@@ -216,6 +217,7 @@ def test_imshow(app, data_image, dataxyz):
     assert v.layers[0].scale_image.scheme == 'jet'
     assert v.layers[0].scale_image.colors == []
 
+
 def test_imshow_equal_aspect(app, data_image):
     assert data_image in app.data_collection
     v = app.imshow(data=data_image)
@@ -224,21 +226,22 @@ def test_imshow_equal_aspect(app, data_image):
     assert v.figure.max_aspect_ratio == 1
     v.state.aspect = 'auto'
     assert not v.widgets_aspect.value
-    assert v.figure.min_aspect_ratio == 0
+    assert v.figure.min_aspect_ratio == 0.01
     assert v.figure.max_aspect_ratio == 100
     v.state.aspect = 'equal'
     assert v.widgets_aspect.value
     assert v.figure.min_aspect_ratio == 1
     assert v.figure.max_aspect_ratio == 1
 
+
 def test_show_axes(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     assert s.state.show_axes
-    assert s.widget_show_axes.value
+    assert s.widget_show_axes.checked
     margin_initial = s.figure.fig_margin
     s.state.show_axes = False
-    assert s.widget_show_axes.value == False
+    assert s.widget_show_axes.checked == False
     assert s.figure.fig_margin != margin_initial
-    s.widget_show_axes.value = True
+    s.widget_show_axes.checked = True
     assert s.state.show_axes == True
     assert s.figure.fig_margin == margin_initial
