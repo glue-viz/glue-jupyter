@@ -49,9 +49,6 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.layers[1].scatter.z.tolist() == [1, 2, 3]
     assert s.layers[1].scatter.selected == [2]
 
-    assert s.widgets_axis[0].label == 'y'
-    assert s.widgets_axis[1].label == 'z'
-    assert s.widgets_axis[2].label == 'x'
 
     size_previous = s.layers[0].scatter.size
     s.layers[0].state.size_mode = 'Linear'

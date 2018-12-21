@@ -18,7 +18,7 @@ from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
                                            DeferredDrawCallbackProperty as DDCProperty,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
-from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+from ..link import link, dlink, calculation, on_change
 import glue_jupyter.widgets
 
 class Scatter3dLayerState(ScatterLayerState):
@@ -162,17 +162,15 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         # vector/quivers
         self.widget_vector = widgets.Checkbox(description='show vectors', value=self.state.vector_visible)
 
-        helper = self.state.vx_att_helper
-        self.widget_vector_x = widgets.Dropdown(options=[k.label for k in helper.choices], value=self.state.vx_att, description='vx')
-        link_component_id_to_select_widget(self.state, 'vx_att', self.widget_vector_x)
-
-        helper = self.state.vy_att_helper
-        self.widget_vector_y = widgets.Dropdown(options=[k.label for k in helper.choices], value=self.state.vy_att, description='vy')
-        link_component_id_to_select_widget(self.state, 'vy_att', self.widget_vector_y)
-
-        helper = self.state.vz_att_helper
-        self.widget_vector_z = widgets.Dropdown(options=[k.label for k in helper.choices], value=self.state.vz_att, description='vz')
-        link_component_id_to_select_widget(self.state, 'vz_att', self.widget_vector_z)
+        self.widget_vector_x = glue_jupyter.widgets.Component(
+            self.state, 'vx_att', label='vx'
+        )
+        self.widget_vector_y = glue_jupyter.widgets.Component(
+            self.state, 'vy_att', label='vy'
+        )
+        self.widget_vector_z = glue_jupyter.widgets.Component(
+            self.state, 'vz_att', label='vz'
+        )
 
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att', 'vz_att')])(self._update_quiver)
         link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
