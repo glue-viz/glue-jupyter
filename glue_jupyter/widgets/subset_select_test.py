@@ -41,7 +41,6 @@ def test_subset_select(app, datax, dataxyz, dataxz):
     # assert subset_select.widgets.index == ()
 
     # ui -> glue
-    print('GO ' * 10)
     subset_select.widget_select.value = 0
     assert app.session.edit_subset_mode.edit_subset == [app.data_collection.subset_groups[0]]
     assert subset_select.widget_select.value == 0
