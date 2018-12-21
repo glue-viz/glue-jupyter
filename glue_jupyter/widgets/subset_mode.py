@@ -3,7 +3,7 @@ import ipymaterialui as mui
 
 from glue.core import message as msg
 import glue.icons
-from glue.core.edit_subset_mode import EditSubsetMode, OrMode, AndNotMode, AndMode, XorMode, ReplaceMode
+from glue.core.edit_subset_mode import OrMode, AndNotMode, AndMode, XorMode, ReplaceMode
 from glue.core.hub import HubListener
 
 ICON_WIDTH = 20
@@ -16,7 +16,7 @@ icon_andnot = widgets.Image.from_file(glue.icons.icon_path("glue_andnot", icon_f
 
 class SubsetMode(mui.Div, HubListener):
     """Widget that manages the subset mode (replace/add/and/xor/remove) state between UI and glue state.
-    
+
     On glue's side, the state is in `session.edit_subset_mode.mode`. On the UI side, the state
     is in `widget_selection_mode.value`
 
@@ -58,4 +58,3 @@ class SubsetMode(mui.Div, HubListener):
 
     def _sync_state_from_ui(self, change):
         self.session.edit_subset_mode.mode = self.selection_modes[self.widget_selection_mode.value][2]
-

@@ -7,7 +7,7 @@ from glue.core.hub import HubListener
 
 class SubsetSelect(mui.Div, HubListener):
     """Widget responsible for selecting which subsets are active, sync state between UI and glue.
-    
+
     On glue's side, the state is in `session.edit_subset_mode.edit_subset`. On the UI side, the state
     is in `widget_select.value` (which gets synced to the menu items manually).
 
@@ -96,7 +96,7 @@ class SubsetSelect(mui.Div, HubListener):
             if self.session.edit_subset_mode._edit_subset != subset_groups_selected:
                 self.session.edit_subset_mode._edit_subset = subset_groups_selected
             # truncate list when needed
-            self.widget_menu_items_subsets = self.widget_menu_items_subsets[:len(self.data_collection.subset_groups)]
+            self.widget_menu_items_subsets = self.widget_menu_items_subsets[: len(self.data_collection.subset_groups)]
             self._updating_subset_menu_items = True
             try:
                 values = []
