@@ -26,7 +26,7 @@ before_install:
   - conda install -c conda-forge nodejs
   - conda env update -n test -f environment.yml
   - pip install -v pytest pytest-cov runipy
-  - pip install https://github.com/maartenbreddels/ipymaterialui/
+  - pip install git+https://github.com/maartenbreddels/ipymaterialui/
 #  - bash postBuild
   - pip uninstall ipyvolume -y
   - git clone https://github.com/maartenbreddels/ipyvolume/
