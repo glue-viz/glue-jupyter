@@ -24,6 +24,8 @@ before_install:
 
   - export MPLBACKEND='Agg';
   - conda install -c conda-forge nodejs
+  - conda install -c conda-forge numpy
+  - pip install fast_histogram
   - conda env update -n test -f environment.yml
   - pip install -v pytest pytest-cov runipy
   - pip install git+https://github.com/maartenbreddels/ipymaterialui/
