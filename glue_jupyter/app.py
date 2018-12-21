@@ -1,17 +1,23 @@
 import ipywidgets as widgets
+import ipymaterialui as mui
 from IPython.display import display
 
 
 from glue.core.application_base import Application
 from glue.core import message as msg
-from glue.core.edit_subset_mode import (EditSubsetMode, OrMode, AndNotMode,
-                                        AndMode, XorMode, ReplaceMode)
 from glue.core.link_helpers import LinkSame
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
 from glue.core.subset import RoiSubsetState3d, RoiSubsetState
 from glue.core.command import ApplySubsetState
+from glue.core.edit_subset_mode import (EditSubsetMode, OrMode, AndNotMode,
+                                        AndMode, XorMode, ReplaceMode)
+
+import glue.icons
 
 from glue_jupyter.utils import _update_not_none
+from glue_jupyter.widgets.subset_select import SubsetSelect
+from glue_jupyter.widgets.subset_mode import SubsetMode
+
 
 # not sure we need to inherit: from glue.core.application_base import Application
 # what would we gain that would be natural in the notebook?
@@ -19,22 +25,13 @@ class JupyterApplication(Application):
 
     def __init__(self, data_collection=None, session=None):
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
-        self.selection_modes = [('replace', ReplaceMode), ('add', OrMode), ('and', AndMode), ('xor', XorMode), ('remove', AndNotMode)]
-        self.widget_selection_mode = widgets.ToggleButtons(
-            options=[label for label, mode in self.selection_modes],
-            description='Selection mode:',
-            disabled=False,
-            tooltips=[label for label, mode in self.selection_modes],
-        )
+        self.output = widgets.Output()
         self.widget_data_collection = widgets.SelectMultiple()
-        self.widget_subset_groups   = widgets.SelectMultiple()
-        self.widget = widgets.VBox(children=[self.widget_selection_mode, self.widget_subset_groups])
-        self.widget_selection_mode.observe(self._set_selection_mode, 'index')
-        self.widget_subset_groups.observe(self._set_subset_groups, 'index')
-        self.session.hub.subscribe(self, msg.EditSubsetMessage, handler=self._on_edit_subset_msg)
-        self.session.hub.subscribe(self, msg.SubsetCreateMessage, handler=self._on_subset_create_msg)
-        self._update_subset_mode(self.session.edit_subset_mode.mode)
-        self._update_subset_groups_selected(self.session.edit_subset_mode.edit_subset)
+        self.widget_subset_select = SubsetSelect(self.session)
+        self.widget_subset_mode = SubsetMode(self.session)
+        self.widget = widgets.VBox(children=[self.widget_subset_mode, self.output])
+
+    def _ipython_display_(self):
         display(self.widget)
 
     def link(self, links):
@@ -51,43 +48,6 @@ class JupyterApplication(Application):
         att2 = data2.id[attribute2]
         link = LinkSame(att1, att2)
         self.data_collection.add_link(link)
-
-    def _on_edit_subset_msg(self, msg):
-        self._update_subset_mode(msg.mode)
-        self._update_subset_groups_selected(msg.subset)
-
-    def _on_subset_create_msg(self, msg):
-        self._update_subset_groups_selected(self.session.edit_subset_mode.edit_subset)
-
-    def _update_subset_mode(self, mode):
-        if self.session.edit_subset_mode.mode != mode:
-            self.session.edit_subset_mode.mode = mode
-        index = 0
-        EditSubsetMode
-        for i, (name, sel_mode) in enumerate(self.selection_modes):
-            if mode == sel_mode:
-                index = i
-        self.widget_selection_mode.index = index
-
-    def _update_subset_groups_selected(self, subset_groups_selected):
-        if self.session.edit_subset_mode.edit_subset != subset_groups_selected:
-            self.session.edit_subset_mode.edit_subset = subset_groups_selected
-        options = []
-        indices = []
-        for i, subset_group in enumerate(self.data_collection.subset_groups):
-            options.append(subset_group.label)
-            if subset_group in self.session.edit_subset_mode.edit_subset:
-                indices.append(i)
-        self.widget_subset_groups.options = options
-        self.widget_subset_groups.index = tuple(indices)
-
-    def _set_subset_groups(self, change):
-        subset_groups = [self.data_collection.subset_groups[k] for k in self.widget_subset_groups.index]
-        self.session.edit_subset_mode.edit_subset = subset_groups
-
-    def _set_selection_mode(self, change):
-        #EditSubsetMode().mode = self.selection_modes[change.new][1]
-        self.subset_mode(self.selection_modes[change.new][1])
 
     def subset_mode(self, mode):
         self.session.edit_subset_mode.mode = mode

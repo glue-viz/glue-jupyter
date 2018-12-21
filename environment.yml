@@ -5,14 +5,16 @@ dependencies:
   - pyqt
   - nomkl
   - nodejs
+  - jupyterlab >=0.34  # [not py27]
   - pip:
     # - jupyterlab >=0.34  # since we still support python2.7, do not include this
     - notebook >=5.5
-    - ipywidgets >=7.4.0
+    # - ipywidgets >=7.4.0
     - ipympl
     - pythreejs
     - https://github.com/glue-viz/glue/archive/master.zip
     - https://github.com/glue-viz/glue-vispy-viewers/archive/master.zip
+    - https://github.com/astrofrog/ipywidgets/archive/custom-icons.zip
     - https://github.com/maartenbreddels/ipyvolume/archive/master.zip
     - https://github.com/maartenbreddels/bqplot/archive/scatter_webgl.zip
     - https://github.com/glue-viz/ipyastroimage/archive/master.zip
