@@ -12,7 +12,6 @@ def load(path):
 
 def jglue(*args, **kwargs):
     show = kwargs.pop('show', False)
-    import six
     from glue.core import DataCollection
     from glue.qglue import parse_data, parse_links
     from glue.core.data_factories import load_data
@@ -22,7 +21,7 @@ def jglue(*args, **kwargs):
 
     dc = DataCollection()
     for label, data in kwargs.items():
-        if isinstance(data, six.string_types):
+        if isinstance(data, str):
             data = load_data(data)
         dc.extend(parse_data(data, label))
     for data in args:
@@ -36,6 +35,7 @@ def jglue(*args, **kwargs):
         display(app)
     return japp
 
+
 def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz'):
     from glue.core import Data
     import numpy as np
@@ -48,6 +48,7 @@ def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz'):
     data_xyz = Data(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, speed=speed, label=label)
     return data_xyz
 
+
 def example_volume(shape=64, limits=[-4, 4]):
     """Creates a test data set containing a ball"""
     from glue.core import Data
@@ -57,6 +58,7 @@ def example_volume(shape=64, limits=[-4, 4]):
     data = Data()
     data.add_component(ball_data, label='intensity')
     return data
+
 
 def example_image(shape=64, limits=[-4, 4]):
     """Creates a test data set containing a ball"""
