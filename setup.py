@@ -1,31 +1,21 @@
-import os
-import imp
-from setuptools import setup, find_packages
+#!/usr/bin/env python
 
-dirname = os.path.dirname(__file__)
-path_version = os.path.join(dirname, 'glue_jupyter/_version.py')
-version = imp.load_source('version', path_version)
+import sys
+import pip
+import setuptools
+from distutils.version import LooseVersion
+from setuptools import setup
 
-name        = 'glue-jupyter'
-author      = 'Maarten A. Breddels'
-author_email= 'maartenbreddels@gmail.com'
-license     = 'BSD License'
-version     = version.__version__
-url         = 'https://glueviz.org'
-install_requires = ['glue-core', 'glue-vispy-viewers', 'ipyvolume', 'bqplot', 'ipympl']
+# Setuptools 30.3.0 or later is needed for setup.cfg options to be used
+if LooseVersion(setuptools.__version__) < LooseVersion('30.3.0'):
+    sys.stderr.write("ERROR: glue-jupyter requires setuptools 30.3.0 or "
+                     "later (found {0})".format(setuptools.__version__))
+    sys.exit(1)
 
-extra_requires = {
-      'test': ['pytest-mock']
-}
+# pip 18 or later is needed for setup.cfg install_requires URLs
+if LooseVersion(pip.__version__) < LooseVersion('18'):
+    sys.stderr.write("ERROR: glue-jupyter requires pip 18 or "
+                     "later (found {0})".format(pip.__version__))
+    sys.exit(1)
 
-setup(name=name,
-      version=version,
-      description='Jupyter notebook/lab viewers for glue',
-      url=url,
-      author=author,
-      author_email=author_email,
-      install_requires=install_requires,
-      license=license,
-      packages=find_packages(),
-      zip_safe=False
-      )
+setup()

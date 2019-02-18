@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-from glue.core import message as msg
-import six
+
+from ._version import __version__
 
 # from glue.core.session import Session
 # from glue.viewers.scatter.layer_artist import ScatterLayerArtist
@@ -12,8 +12,8 @@ def load(path):
 
 def jglue(*args, **kwargs):
     show = kwargs.pop('show', False)
+    import six
     from glue.core import DataCollection
-    from glue.app.qt import GlueApplication
     from glue.qglue import parse_data, parse_links
     from glue.core.data_factories import load_data
     from .app import JupyterApplication
