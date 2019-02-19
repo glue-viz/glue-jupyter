@@ -5,7 +5,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
 
-def test_matplotlib():
+def test_notebook():
 
     # Run an actual notebook
 

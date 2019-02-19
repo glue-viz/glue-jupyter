@@ -1,5 +1,11 @@
+import os
+
+import nbformat
 import numpy as np
 from glue.core.roi import PolygonalROI, Projected3dROI
+from nbconvert.preprocessors import ExecutePreprocessor
+
+DATA = os.path.join(os.path.dirname(__file__), 'data')
 
 xyzw2yxzw = np.array([
              [0, 1, 0, 0],
@@ -145,3 +151,14 @@ def test_volshow(app, data_volume, dataxyz):
     # assert s.layers[1].layer['x'].tolist() == [1, 2]
     # assert s.layers[1].layer['y'].tolist() == [2, 3]
     # assert s.layers[1].layer['z'].tolist() == [5, 6]
+
+
+def test_notebook():
+
+    # Run an actual notebook
+
+    with open(os.path.join(DATA, 'ipyvolume.ipynb')) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    ep = ExecutePreprocessor(timeout=600, kernel_name='python3')
+    ep.preprocess(nb, {'metadata': {'path': DATA}})
