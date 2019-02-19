@@ -1,3 +1,10 @@
+import os
+import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor
+
+DATA = os.path.join(os.path.dirname(__file__), 'data')
+
+
 def test_histogram1d(app, dataxyz):
     s = app.histogram1d('y', data=dataxyz)
     assert s.state.x_att == 'y'
@@ -245,3 +252,14 @@ def test_show_axes(app, dataxyz):
     s.widget_show_axes.checked = True
     assert s.state.show_axes == True
     assert s.figure.fig_margin == margin_initial
+
+
+def test_notebook():
+
+    # Run an actual notebook
+
+    with open(os.path.join(DATA, 'bqplot.ipynb')) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    ep = ExecutePreprocessor(timeout=600, kernel_name='python3')
+    ep.preprocess(nb, {'metadata': {'path': DATA}})
