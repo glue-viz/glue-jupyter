@@ -13,7 +13,7 @@ class link(object):
     def __init__(self, source, target, f1=lambda x: x, f2=lambda x: x):
         self.source = source
         self.target = target
-        
+
         self._link(source, target, 'source', f1, True)
         self._link(target, source, 'target', f2)
 
@@ -85,7 +85,9 @@ def on_change(inputs, initial_call=False, once=False):
     return decorator
 
 def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='value'):
+
     helper = getattr(state, state_attr + '_helper')
+
     def update(*ignore):
         options = [k for k in getattr(type(state), state_attr).get_choices(state) if not isinstance(k, glue.external.echo.selection.ChoiceSeparator)]
         display_func = getattr(type(state), state_attr).get_display_func(state)
@@ -96,9 +98,13 @@ def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='v
         matches = [k for k in range(len(options)) if value is options[k]]
         if len(matches):
             widget.index = matches[0]
+
     getattr(type(state), state_attr).add_callback(state, update)
+
     def update_state(change):
         options = [k for k in getattr(type(state), state_attr).get_choices(state) if not isinstance(k, glue.external.echo.selection.ChoiceSeparator)]
-        setattr(state, state_attr, options[change.new])
+        if change.new is not None:
+            setattr(state, state_attr, options[change.new])
+
     widget.observe(update_state, 'index')
     update()
