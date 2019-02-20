@@ -54,7 +54,11 @@ class BqplotHistogramLayerArtist(LayerArtistBase):
         pass
 
     def _calculate_histogram(self):
-        self.bins, self.hist_unscaled = self.state.histogram
+        try:
+            self.bins, self.hist_unscaled = self.state.histogram
+        except IncompatibleAttribute:
+            self.disable('Could not compute histogram')
+            self.bins = self.hist_unscaled = None
 
     def _scale_histogram(self):
         # TODO: comes from glue/viewers/histogram/layer_artist.py

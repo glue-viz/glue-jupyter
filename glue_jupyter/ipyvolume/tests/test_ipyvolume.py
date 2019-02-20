@@ -137,7 +137,20 @@ def test_lasso3d(app, dataxyz):
     assert s.layers[1].layer['y'].tolist() == [2, 3]
     assert s.layers[1].layer['z'].tolist() == [5, 6]
 
+
+def test_scatter3d_multiple_subsets(app, data_unlinked, dataxyz):
+    # Make sure that things work fine if an incompatible subset is added
+    viewer = app.scatter3d('x', 'y', 'z', data=dataxyz)
+    app.subset('test1', dataxyz.id['x'] > 1)
+    app.subset('test2', data_unlinked.id['a'] > 1)
+    assert viewer.layers[0].enabled
+    assert viewer.layers[1].enabled
+    assert not viewer.layers[2].enabled
+
+
+
 def test_volshow(app, data_volume, dataxyz):
+
     assert data_volume in app.data_collection
     v = app.volshow(data=data_volume)
 
@@ -151,6 +164,16 @@ def test_volshow(app, data_volume, dataxyz):
     # assert s.layers[1].layer['x'].tolist() == [1, 2]
     # assert s.layers[1].layer['y'].tolist() == [2, 3]
     # assert s.layers[1].layer['z'].tolist() == [5, 6]
+
+
+def test_volshow_multiple_subsets(app, data_unlinked, data_volume):
+    # Make sure that things work fine if an incompatible subset is added
+    viewer = app.volshow(data=data_volume)
+    app.subset('test1', data_volume.id['intensity'] > 1)
+    app.subset('test2', data_unlinked.id['a'] > 1)
+    assert viewer.layers[0].enabled
+    assert viewer.layers[1].enabled
+    assert not viewer.layers[2].enabled
 
 
 def test_notebook():

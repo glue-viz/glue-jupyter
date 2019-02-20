@@ -86,7 +86,7 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
                 self.disable("Subset cannot be applied to this data")
                 return
             else:
-                self._enabled = True
+                self.enable()
             # if self.state.subset_mode == 'outline':
             #     data = mask.astype(np.float32)
             # else:
@@ -190,7 +190,6 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
                     ipv.ylim(0, self.last_shape[1])
                     ipv.zlim(0, self.last_shape[2])
         self.widget_reset_zoom.on_click(reset_zoom)
-        return widgets.VBox([self.widget_render_method, self.widget_lighting, self.widget_data_min, 
-            self.widget_data_max, self.widget_clamp_min, self.widget_clamp_max, 
+        return widgets.VBox([self.widget_render_method, self.widget_lighting, self.widget_data_min,
+            self.widget_data_max, self.widget_clamp_min, self.widget_clamp_max,
             self.widget_max_resolution, self.widget_reset_zoom, self.widget_color, self.widget_opacity, self.widget_opacity_scale])
-

@@ -36,6 +36,16 @@ def test_histogram1d(app, dataxyz):
     # assert s.layers[2].hist.tolist() == [0, 1, 0, 0, 0, 0]
 
 
+def test_histogram1d_multiple_subsets(app, data_unlinked, datax):
+    # Make sure that things work fine if an incompatible subset is added
+    viewer = app.histogram1d('x', data=datax)
+    app.subset('test1', datax.id['x'] > 1)
+    app.subset('test2', data_unlinked.id['a'] > 1)
+    assert viewer.layers[0].enabled
+    assert viewer.layers[1].enabled
+    assert not viewer.layers[2].enabled
+
+
 def test_interact(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     # s.widget_menu_select_x.value = True
@@ -101,6 +111,16 @@ def test_scatter2d_subset(app, dataxyz, dataxz):
     assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
     assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
     assert s.layers[1].scatter.selected == [2]
+
+
+def test_scatter2d_multiple_subsets(app, data_unlinked, dataxz):
+    # Make sure that things work fine if an incompatible subset is added
+    viewer = app.scatter2d('x', 'z', data=dataxz)
+    app.subset('test1', dataxz.id['x'] > 1)
+    app.subset('test2', data_unlinked.id['a'] > 1)
+    assert viewer.layers[0].enabled
+    assert viewer.layers[1].enabled
+    assert not viewer.layers[2].enabled
 
 
 def test_scatter2d_brush(app, dataxyz, dataxz):
