@@ -8,6 +8,7 @@ from IPython.display import display
 from glue.core.data import Subset
 from glue.core.layer_artist import LayerArtistBase
 from glue.viewers.scatter.state import ScatterLayerState
+from glue.core.exceptions import IncompatibleAttribute
 
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 from ..utils import colormap_to_hexlist, debounced, float_or_none
@@ -132,6 +133,7 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self.update()
 
     def update(self):
+
         if self.state.density_map:
             pass
         else:
@@ -139,29 +141,43 @@ class BqplotScatterLayerArtist(LayerArtistBase):
             self.scatter.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
             self.quiver.x = self.layer.data[self._viewer_state.x_att].astype(np.float32)
             self.quiver.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
+
         if isinstance(self.layer, Subset):
-            self.scatter.selected = np.nonzero(self.layer.to_mask())[0].tolist()
+
+            try:
+                mask = self.layer.to_mask()
+            except IncompatibleAttribute:
+                self.disable("Could not compute subset")
+                self._clear_selection()
+                return
+
+            selected_indices = np.nonzero(mask)[0].tolist()
+
+            self.scatter.selected = selected_indices
             self.scatter.selected_style = {}
             self.scatter.unselected_style = {'fill': 'none', 'stroke': 'none'}
-            self.quiver.selected = np.nonzero(self.layer.to_mask())[0].tolist()
+            self.quiver.selected = selected_indices
             self.quiver.selected_style = {}
             self.quiver.unselected_style = {'fill': 'none', 'stroke': 'none'}
+
         else:
-            self.scatter.selected = None
-            self.scatter.selected_style = {}
-            self.scatter.unselected_style = {}
-            self.quiver.selected = None
-            self.quiver.selected_style = {}
-            self.quiver.unselected_style = {}
-            #self.scatter.selected_style = {'fill': 'none', 'stroke': 'none'}
-            #self.scatter.unselected_style = {'fill': 'green', 'stroke': 'none'}
+            self._clear_selection()
+
+    def _clear_selection(self):
+        self.scatter.selected = None
+        self.scatter.selected_style = {}
+        self.scatter.unselected_style = {}
+        self.quiver.selected = None
+        self.quiver.selected_style = {}
+        self.quiver.unselected_style = {}
+
 
     def _update_quiver(self):
         if not self.state.vector_visible:
             return
         size = 50
         scale = 1
-        self.quiver.default_size = int(size * scale * 4) 
+        self.quiver.default_size = int(size * scale * 4)
         vx = self.layer.data[self.state.vx_att]
         vy = self.layer.data[self.state.vy_att]
         length = np.sqrt(vx**2 + vy**2)
@@ -224,6 +240,6 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         link((self.state, 'bins'), (self.widget_bins, 'value'))
 
         return widgets.VBox([self.widget_visible, self.widget_opacity,
-            self.widget_size, 
+            self.widget_size,
             self.widget_color,
             self.widget_vector, self.widget_vector_x, self.widget_vector_y])

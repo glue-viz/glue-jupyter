@@ -10,6 +10,7 @@ from glue.core.state_objects import StateAttributeLimitsHelper
 from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
 from glue.core.subset import RoiSubsetState3d
+from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.viewers.scatter.state import ScatterViewerState
 from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
@@ -78,8 +79,6 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         self.scatter.color_selected = self.scatter.color
         self.quiver.color_selected = self.quiver.color
 
-
-
     def _update_xyz_att(self, *args):
         self.update()
 
@@ -99,9 +98,24 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         self.quiver.y = self.layer.data[self._viewer_state.y_att]
         self.quiver.z = self.layer.data[self._viewer_state.z_att]
         if isinstance(self.layer, Subset):
-            self.scatter.selected = np.nonzero(self.layer.to_mask())[0]#.tolist()
-            self.quiver.selected = np.nonzero(self.layer.to_mask())[0]#.tolist()
+
+            try:
+                mask = self.layer.to_mask()
+            except IncompatibleAttribute:
+                self.disable("Could not compute subset")
+                self._clear_selection()
+                return
+
+            selected_indices = np.nonzero(mask)[0]
+
+            self.scatter.selected = selected_indices
+            self.quiver.selected = selected_indices
+
         self._update_size()
+
+    def _clear_selection(self):
+        self.scatter.selected = np.array([])
+        self.quiver.selected = np.array([])
 
     def _update_quiver(self):
         with self.quiver.hold_sync():

@@ -1,3 +1,10 @@
+import os
+import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor
+
+DATA = os.path.join(os.path.dirname(__file__), 'data')
+
+
 def test_histogram1d(app, dataxyz):
     s = app.histogram1d('y', data=dataxyz)
     assert s.state.x_att == 'y'
@@ -27,6 +34,16 @@ def test_histogram1d(app, dataxyz):
     # s.state.hist_n_bin = 6
     # assert s.layers[2].bins.tolist() == [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
     # assert s.layers[2].hist.tolist() == [0, 1, 0, 0, 0, 0]
+
+
+def test_histogram1d_multiple_subsets(app, data_unlinked, datax):
+    # Make sure that things work fine if an incompatible subset is added
+    viewer = app.histogram1d('x', data=datax)
+    app.subset('test1', datax.id['x'] > 1)
+    app.subset('test2', data_unlinked.id['a'] > 1)
+    assert viewer.layers[0].enabled
+    assert viewer.layers[1].enabled
+    assert not viewer.layers[2].enabled
 
 
 def test_interact(app, dataxyz):
@@ -94,6 +111,16 @@ def test_scatter2d_subset(app, dataxyz, dataxz):
     assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
     assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
     assert s.layers[1].scatter.selected == [2]
+
+
+def test_scatter2d_multiple_subsets(app, data_unlinked, dataxz):
+    # Make sure that things work fine if an incompatible subset is added
+    viewer = app.scatter2d('x', 'z', data=dataxz)
+    app.subset('test1', dataxz.id['x'] > 1)
+    app.subset('test2', data_unlinked.id['a'] > 1)
+    assert viewer.layers[0].enabled
+    assert viewer.layers[1].enabled
+    assert not viewer.layers[2].enabled
 
 
 def test_scatter2d_brush(app, dataxyz, dataxz):
@@ -245,3 +272,14 @@ def test_show_axes(app, dataxyz):
     s.widget_show_axes.checked = True
     assert s.state.show_axes == True
     assert s.figure.fig_margin == margin_initial
+
+
+def test_notebook():
+
+    # Run an actual notebook
+
+    with open(os.path.join(DATA, 'bqplot.ipynb')) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    ep = ExecutePreprocessor(timeout=600, kernel_name='python3')
+    ep.preprocess(nb, {'metadata': {'path': DATA}})
