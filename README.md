@@ -19,16 +19,18 @@ Notebooks with real data:
 * [Investigating star formation in the W5 region](https://mybinder.org/v2/gh/glue-viz/glue-jupyter/master?filepath=notebooks%2FAstronomy%2FW5%2FW5%20Tutorial.ipynb) (example with linking a table and an image)
 * [Exploring the L1448 data in 3D](https://mybinder.org/v2/gh/glue-viz/glue-jupyter/master?filepath=notebooks%2FAstronomy%2FL1448%2FL1448%20in%203D.ipynb) (example of 3D volume rendering)
 * [Visualizing flight paths in the Boston area](https://mybinder.org/v2/gh/glue-viz/glue-jupyter/master?filepath=notebooks%2FPlanes%2FBoston%20Planes.ipynb) (example with a single tabular dataset)
+* [Distance to the Pleiades with GAIA data](https://mybinder.org/v2/gh/glue-viz/glue-jupyter/master?filepath=notebooks%2FAstronomy%2FGAIA%2FDistance%20to%20The%20Pleiades%20with%20Glupyter%20and%20Gaia%20DR2.ipynb)
+
+
 
 ### Installing
 
 For now, installing should be done using pip:
 
     pip install -e .
-    
+
 ### Testing
 
 The test suite can be run using:
 
     pytest glue_jupyter
-
