@@ -6,9 +6,10 @@ set -ex
 git config --global user.email "bin@der.com"
 git config --global user.name "Bin Der"
 
-# Install glue-jupyter and all requirements as well as Jupyter Lab
+# Install glue-jupyter and all requirements as well as Jupyter Lab. Also
+# install astroquery for the GAIA notebook.
 
-pip install . jupyterlab --user
+pip install . jupyterlab astroquery --user
 
 # Install Jupyter Lab widgets extensions
 
