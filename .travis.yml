@@ -27,7 +27,8 @@ install:
 
 script:
   - pytest --cov glue_jupyter glue_jupyter
-#  - runipy examples/examples.ipynb
+  - pip install astroquery pyyaml
+  - python .validate-notebooks.py
 
 after_success:
   - codecov
