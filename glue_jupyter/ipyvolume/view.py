@@ -11,9 +11,10 @@ from glue.core.subset import RoiSubsetState3d
 from glue.core.command import ApplySubsetState
 
 from ..view import IPyWidgetView
-from ..link import link, dlink, link_component_id_to_select_widget
+from ..link import link, dlink
 from .scatter import IpyvolumeScatterLayerArtist
 from .volume import IpyvolumeVolumeLayerArtist
+import glue_jupyter.widgets
 
 
 class IpyvolumeBaseView(IPyWidgetView):
@@ -114,15 +115,13 @@ class IpyvolumeBaseView(IPyWidgetView):
                     ipv.style.box_off()
         self.widget_show_axes.observe(change, 'value')
 
-
         self.widgets_axis = []
         for i, axis_name in enumerate('xyz'):
             if hasattr(self.state, axis_name + '_att_helper'):
-                helper = getattr(self.state, axis_name + '_att_helper')
-                widget_axis = widgets.Dropdown(options=[k.label for k in helper.choices],
-                                               value=getattr(self.state, axis_name + '_att'), description=axis_name + ' axis')
+                widget_axis = glue_jupyter.widgets.Component(
+                    self.state, axis_name + '_att', label=axis_name + ' axis'
+                )
                 self.widgets_axis.append(widget_axis)
-                link_component_id_to_select_widget(self.state, axis_name + '_att', widget_axis)
 
         selectors = ['lasso', 'circle', 'rectangle']
         self.button_action = widgets.ToggleButtons(description='Mode: ', options=[(selector, selector) for selector in selectors],

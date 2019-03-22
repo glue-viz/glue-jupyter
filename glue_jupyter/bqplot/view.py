@@ -8,6 +8,7 @@ from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
 
+import glue_jupyter.widgets.component
 from ..view import IPyWidgetView
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 from ..utils import float_or_none
@@ -324,10 +325,10 @@ class BqplotScatterView(BqplotBaseView):
         self.widgets_axis = []
         for i, axis_name in enumerate('xy'):
             if hasattr(self.state, axis_name + '_att_helper'):
-                helper = getattr(self.state, axis_name + '_att_helper')
-                widget_axis = widgets.Dropdown(description=axis_name + ' axis')
+                widget_axis = glue_jupyter.widgets.component.Component(
+                    self.state, axis_name + '_att', label=axis_name + ' axis'
+                )
                 self.widgets_axis.append(widget_axis)
-                link_component_id_to_select_widget(self.state, axis_name + '_att', widget_axis)
         self.tab_general.children += tuple(self.widgets_axis)
 
 
@@ -357,10 +358,10 @@ class BqplotHistogramView(BqplotBaseView):
         self.widgets_axis = []
         for i, axis_name in enumerate('x'):
             if hasattr(self.state, axis_name + '_att_helper'):
-                helper = getattr(self.state, axis_name + '_att_helper')
-                widget_axis = widgets.Dropdown(description=axis_name + ' axis')
+                widget_axis = glue_jupyter.widgets.component.Component(
+                    self.state, axis_name + '_att', label=axis_name + ' axis'
+                )
                 self.widgets_axis.append(widget_axis)
-                link_component_id_to_select_widget(self.state, axis_name + '_att', widget_axis)
         # @on_change([(self.state, 'hist_n_bin')])
         # def trigger():
 
