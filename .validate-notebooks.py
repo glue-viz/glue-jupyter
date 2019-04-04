@@ -6,6 +6,10 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 for notebook in glob.glob('notebooks/**/*.ipynb', recursive=True):
 
+    if 'Gaia' in notebook:
+        print('Skipping {0}'.format(notebook))
+        continue
+
     print("Running {0}".format(notebook))
 
     with open(notebook) as f:
