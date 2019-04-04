@@ -143,8 +143,8 @@ class BqplotBaseView(IPyWidgetView):
     def update_brush(self, *ignore):
         with self.output_widget:
             if self.interact_brush.brushing is not None and self.interact_brush.selected_x is not None and len(self.interact_brush.selected_x):  # only select when we ended
-                (x1, y1) = self.interact_brush.selected_x
-                (x2, y2) = self.interact_brush.selected_y
+                (x1, x2) = self.interact_brush.selected_x
+                (y1, y2) = self.interact_brush.selected_y
                 x = [x1, x2]
                 y = [y1, y2]
                 roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
