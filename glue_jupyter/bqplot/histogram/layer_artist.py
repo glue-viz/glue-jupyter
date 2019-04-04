@@ -2,15 +2,12 @@ import numpy as np
 import bqplot
 import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
-from IPython.display import display
 
-from glue.core.roi import RectangularROI, RangeROI
 from glue.core.exceptions import IncompatibleAttribute
-from glue.core.command import ApplySubsetState
-from glue.viewers.histogram.state import HistogramViewerState, HistogramLayerState
+from glue.viewers.histogram.state import HistogramLayerState
 from glue.viewers.common.layer_artist import LayerArtist
 
-from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+from ...link import link
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value

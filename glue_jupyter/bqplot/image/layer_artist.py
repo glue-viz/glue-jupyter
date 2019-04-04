@@ -1,11 +1,8 @@
-import uuid
-
 import numpy as np
 import bqplot
 from ipyastroimage.astroimage import AstroImage
 import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
-from IPython.display import display
 import matplotlib.cm
 
 from glue.core.exceptions import IncompatibleAttribute
@@ -14,8 +11,7 @@ from glue.viewers.image.state import ImageLayerState
 from glue.viewers.image.layer_artist import ImageLayerArtist
 from glue.viewers.common.layer_artist import LayerArtist
 
-from ..link import link, calculation, link_component_id_to_select_widget, on_change
-from .scatter import BqplotScatterLayerArtist
+from ...link import link, on_change
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
