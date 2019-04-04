@@ -9,10 +9,10 @@ from IPython.display import display
 import matplotlib.cm
 
 from glue.core.exceptions import IncompatibleAttribute
-from glue.core.layer_artist import LayerArtistBase
 from glue.core.data import Subset
 from glue.viewers.image.state import ImageLayerState
 from glue.viewers.image.layer_artist import ImageLayerArtist
+from glue.viewers.common.layer_artist import LayerArtist
 
 from ..link import link, calculation, link_component_id_to_select_widget, on_change
 from .scatter import BqplotScatterLayerArtist
@@ -32,7 +32,8 @@ def _mask_to_rgba_data(mask, color):
     rgba[~mask,3] = 0
     return rgba
 
-class BqplotImageLayerArtist(LayerArtistBase):
+
+class BqplotImageLayerArtist(LayerArtist):
     _layer_state_cls = ImageLayerState
 
     get_layer_color = ImageLayerArtist.get_layer_color
@@ -41,14 +42,12 @@ class BqplotImageLayerArtist(LayerArtistBase):
     _update_visual_attributes = ImageLayerArtist._update_visual_attributes
     #_update_compatibility = ImageLayerArtist._update_compatibility
 
-    def __init__(self, view, viewer_state, layer, layer_state):
-        super(BqplotImageLayerArtist, self).__init__(layer)
+    def __init__(self, view, viewer_state, layer_state=None, layer=None):
+
+        super(BqplotImageLayerArtist, self).__init__(viewer_state,
+                                                     layer_state=layer_state, layer=layer)
+
         self.view = view
-        self.state = layer_state or self._layer_state_cls(viewer_state=viewer_state,
-                                                          layer=self.layer)
-        self._viewer_state = viewer_state
-        if self.state not in self._viewer_state.layers:
-            self._viewer_state.layers.append(self.state)
 
         # self._update_compatibility()
 
@@ -69,15 +68,11 @@ class BqplotImageLayerArtist(LayerArtistBase):
     def redraw(self):
         self.update()
 
-    def clear(self):
-        pass
-
     def _workaround_unselected_style(self, change):
         # see https://github.com/bloomberg/bqplot/issues/606
         if hasattr(self.layer, 'to_mask'):  # TODO: what is the best way to test if it is Data or Subset?
             self.image.unselected_style = {'fill': 'white', 'stroke': 'none'}
             self.image.unselected_style = {'fill': 'none', 'stroke': 'none'}
-
 
     def _update_scale_image(self):
         contrast = self.state.contrast

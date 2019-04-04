@@ -4,11 +4,11 @@ import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
 from IPython.display import display
 
-from glue.core.layer_artist import LayerArtistBase
 from glue.core.roi import RectangularROI, RangeROI
 from glue.core.exceptions import IncompatibleAttribute
 from glue.core.command import ApplySubsetState
 from glue.viewers.histogram.state import HistogramViewerState, HistogramLayerState
+from glue.viewers.common.layer_artist import LayerArtist
 
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 
@@ -16,23 +16,25 @@ from ..link import link, dlink, calculation, link_component_id_to_select_widget,
 tt.Color.validate = lambda self, obj, value: value
 
 
-class BqplotHistogramLayerArtist(LayerArtistBase):
+class BqplotHistogramLayerArtist(LayerArtist):
+
     _layer_state_cls = HistogramLayerState
 
-    def __init__(self, view, viewer_state, layer, layer_state):
-        super(BqplotHistogramLayerArtist, self).__init__(layer)
-        self.reset_cache()
+    def __init__(self, view, viewer_state, layer_state=None, layer=None):
+
+        super(BqplotHistogramLayerArtist, self).__init__(viewer_state,
+                                                         layer_state=layer_state, layer=layer)
+
         self.view = view
-        self.state = layer_state or self._layer_state_cls(viewer_state=viewer_state,
-                                                          layer=self.layer)
-        self._viewer_state = viewer_state
-        if self.state not in self._viewer_state.layers:
-            self._viewer_state.layers.append(self.state)
+
         self.bars = bqplot.Bars(
             scales=self.view.scales, x=[0, 1], y=[0, 1])
+
         self.view.figure.marks = list(self.view.figure.marks) + [self.bars]
+
         link((self.state, 'color'), (self.bars, 'colors'),
              lambda x: [x], lambda x: x[0])
+
         #link((self.bars, 'default_opacities'), (self.state, 'alpha'), lambda x: x[0], lambda x: [x])
         #link((self.bars, 'default_size'), (self.state, 'size'))
 
@@ -40,18 +42,8 @@ class BqplotHistogramLayerArtist(LayerArtistBase):
         self.state.add_global_callback(self._update_histogram)
         self.bins = None
 
-    def reset_cache(self):
-        self._last_viewer_state = {}
-        self._last_layer_state = {}
-
     def _update_xy_att(self, *args):
         self.update()
-
-    def redraw(self):
-        pass
-
-    def clear(self):
-        pass
 
     def _calculate_histogram(self):
         try:
@@ -125,34 +117,17 @@ class BqplotHistogramLayerArtist(LayerArtistBase):
         self.redraw()
 
     def _update_histogram(self, force=False, **kwargs):
+
         # TODO: comes from glue/viewers/histogram/layer_artist.py
+
         if (self._viewer_state.hist_x_min is None or
                 self._viewer_state.hist_x_max is None or
                 self._viewer_state.hist_n_bin is None or
                 self._viewer_state.x_att is None or
                 self.state.layer is None):
             return
-        # Figure out which attributes are different from before. Ideally we shouldn't
-        # need this but currently this method is called multiple times if an
-        # attribute is changed due to x_att changing then hist_x_min, hist_x_max, etc.
-        # If we can solve this so that _update_histogram is really only called once
-        # then we could consider simplifying this. Until then, we manually keep track
-        # of which properties have changed.
 
-        changed = set()
-
-        if not force:
-
-            for key, value in self._viewer_state.as_dict().items():
-                if value != self._last_viewer_state.get(key, None):
-                    changed.add(key)
-
-            for key, value in self.state.as_dict().items():
-                if value != self._last_layer_state.get(key, None):
-                    changed.add(key)
-
-        self._last_viewer_state.update(self._viewer_state.as_dict())
-        self._last_layer_state.update(self.state.as_dict())
+        changed = set() if force else self.pop_changed_properties()
 
         if force or any(prop in changed for prop in ('layer', 'x_att', 'hist_x_min', 'hist_x_max', 'hist_n_bin', 'x_log')):
             self._calculate_histogram()

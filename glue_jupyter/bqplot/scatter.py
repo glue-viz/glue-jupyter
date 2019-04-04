@@ -6,9 +6,9 @@ import ipywidgets.widgets.trait_types as tt
 from IPython.display import display
 
 from glue.core.data import Subset
-from glue.core.layer_artist import LayerArtistBase
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.core.exceptions import IncompatibleAttribute
+from glue.viewers.common.layer_artist import LayerArtist
 
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 from ..utils import colormap_to_hexlist, debounced, float_or_none
@@ -25,17 +25,16 @@ class BqplotScatterLayerState(ScatterLayerState):
     bins = DDCProperty(128, docstring='The number of bins in each dimension for the density map')
 
 
-class BqplotScatterLayerArtist(LayerArtistBase):
+class BqplotScatterLayerArtist(LayerArtist):
     _layer_state_cls = BqplotScatterLayerState
 
-    def __init__(self, view, viewer_state, layer, layer_state):
-        super(BqplotScatterLayerArtist, self).__init__(layer)
+    def __init__(self, view, viewer_state, layer_state=None, layer=None):
+
+        super(BqplotScatterLayerArtist, self).__init__(viewer_state,
+                                                       layer_state=layer_state, layer=layer)
+
         self.view = view
-        self.state = layer_state or self._layer_state_cls(viewer_state=viewer_state,
-                                                          layer=self.layer)
-        self._viewer_state = viewer_state
-        if self.state not in self._viewer_state.layers:
-            self._viewer_state.layers.append(self.state)
+
         self.scale_size = bqplot.LinearScale()
         self.scale_color = bqplot.ColorScale()
         self.scale_size_quiver = bqplot.LinearScale(min=0, max=1)
@@ -93,11 +92,7 @@ class BqplotScatterLayerArtist(LayerArtistBase):
         self._update_scatter()
 
     def redraw(self):
-        pass
         self.update()
-
-    def clear(self):
-        pass
 
     def _workaround_unselected_style(self, change=None):
         # see https://github.com/bloomberg/bqplot/issues/606
