@@ -9,7 +9,7 @@ from glue.core.exceptions import IncompatibleAttribute
 from glue.core.data import Subset
 from glue.viewers.image.state import ImageLayerState
 from glue.viewers.image.layer_artist import ImageLayerArtist
-from glue.viewers.common.layer_artist import LayerArtist
+from glue_jupyter.compat import LayerArtist
 
 from ...link import link, on_change
 

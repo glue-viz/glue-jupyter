@@ -8,7 +8,7 @@ from IPython.display import display
 from glue.core.data import Subset
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.core.exceptions import IncompatibleAttribute
-from glue.viewers.common.layer_artist import LayerArtist
+from glue_jupyter.compat import LayerArtist
 
 from ...link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none

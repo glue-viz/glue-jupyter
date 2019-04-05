@@ -5,7 +5,7 @@ import ipywidgets.widgets.trait_types as tt
 
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.histogram.state import HistogramLayerState
-from glue.viewers.common.layer_artist import LayerArtist
+from glue_jupyter.compat import LayerArtist
 
 from ...link import link
 

@@ -5,7 +5,7 @@ import traitlets
 
 from glue.core.data import Subset
 from glue.core.command import ApplySubsetState
-from glue.viewers.common.layer_artist import LayerArtist
+from glue_jupyter.compat import LayerArtist
 from glue.core.state_objects import StateAttributeLimitsHelper
 from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
