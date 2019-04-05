@@ -1,7 +1,8 @@
 from glue.core.state_objects import State
 from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.external.echo import SelectionCallbackProperty
-from .component import Component
+
+from ..component import Component
 
 
 class DummyState(State):
