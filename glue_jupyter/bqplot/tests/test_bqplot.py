@@ -1,5 +1,6 @@
 import os
 import nbformat
+import numpy as np
 from nbconvert.preprocessors import ExecutePreprocessor
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
@@ -259,6 +260,11 @@ def test_imshow_equal_aspect(app, data_image):
     assert v.widgets_aspect.value
     assert v.figure.min_aspect_ratio == 1
     assert v.figure.max_aspect_ratio == 1
+
+
+def test_imshow_nonfloat(app):
+    data = app.add_data(data_int=np.array([[1, 2], [2, 3]], dtype=np.uint16))[0]
+    app.imshow(data=data)
 
 
 def test_show_axes(app, dataxyz):

@@ -81,8 +81,8 @@ class BqplotImageLayerArtist(LayerArtist):
             min = (min - bias * width)*contrast + 0.5 * width
             max = (max - bias * width)*contrast + 0.5 * width
             with self.scale_image.hold_sync():
-                self.scale_image.min = min
-                self.scale_image.max = max
+                self.scale_image.min = float(min)
+                self.scale_image.max = float(max)
 
     def _update_cmap(self):
         if isinstance(self.layer, Subset):
@@ -122,8 +122,8 @@ class BqplotImageLayerArtist(LayerArtist):
             # data /= (self.state.v_max - self.state.v_min)
             # print(np.nanmin(data), np.nanmax(data))
             # png_data = _scalar_to_png_data(data)
-            self.scale_image.min = self.state.v_min
-            self.scale_image.max = self.state.v_max
+            self.scale_image.min = float(self.state.v_min)
+            self.scale_image.max = float(self.state.v_max)
             self.image_mark.image = data
         # force the image mark to update the image data
         # self.image_mark.send_state(key='image')
