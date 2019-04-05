@@ -109,7 +109,7 @@ class JupyterApplication(Application):
 
     def histogram1d(self, x=None, data=None, widget='bqplot', color=None, x_min=None, x_max=None, hist_n_bin=None, normalize=False, cumulative=False, viewer_state=None, layer_state=None):
         if widget == 'bqplot':
-            from .bqplot import BqplotHistogramView
+            from .bqplot.histogram import BqplotHistogramView
             viewer_cls = BqplotHistogramView
         elif widget == 'matplotlib':
             from .matplotlib.histogram import HistogramJupyterViewer
@@ -142,7 +142,7 @@ class JupyterApplication(Application):
 
     def scatter2d(self, x=None, y=None, data=None, widget='bqplot', color=None, size=None, viewer_state=None, layer_state=None):
         if widget == 'bqplot':
-            from .bqplot import BqplotScatterView
+            from .bqplot.scatter import BqplotScatterView
             viewer_cls = BqplotScatterView
         elif widget == 'matplotlib':
             from .matplotlib.scatter import ScatterJupyterViewer
@@ -187,7 +187,7 @@ class JupyterApplication(Application):
 
     def imshow(self, x=None, y=None, data=None, widget='bqplot'):
         if widget == 'bqplot':
-            from .bqplot import BqplotImageView
+            from .bqplot.image import BqplotImageView
             viewer_cls = BqplotImageView
         elif widget == 'matplotlib':
             from .matplotlib.image import ImageJupyterViewer

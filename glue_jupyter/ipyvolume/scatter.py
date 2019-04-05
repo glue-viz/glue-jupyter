@@ -5,7 +5,7 @@ import traitlets
 
 from glue.core.data import Subset
 from glue.core.command import ApplySubsetState
-from glue.viewers.common.layer_artist import LayerArtist
+from glue_jupyter.compat import LayerArtist
 from glue.core.state_objects import StateAttributeLimitsHelper
 from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
@@ -37,17 +37,18 @@ class Scatter3dLayerState(ScatterLayerState):
         else:
             self.vz_att_helper.set_multiple_data([self.layer])
 
+
 class IpyvolumeScatterLayerArtist(LayerArtist):
+
     _layer_state_cls = Scatter3dLayerState
 
     def __init__(self, view, viewer_state, layer, layer_state):
-        super(IpyvolumeScatterLayerArtist, self).__init__(viewer_state, layer_state=layer_state, layer=layer)
+
+        super(IpyvolumeScatterLayerArtist, self).__init__(viewer_state,
+                                                          layer_state=layer_state,
+                                                          layer=layer)
+
         self.view = view
-        self.state = layer_state or self._layer_state_cls(viewer_state=viewer_state,
-                                                          layer=self.layer)
-        self._viewer_state = viewer_state
-        if self.state not in self._viewer_state.layers:
-            self._viewer_state.layers.append(self.state)
 
         self.scatter = ipyvolume.Scatter(x=[0, 1], y=[0, 1], z=[0,1], color='green',
             color_selected='orange', size_selected=7, size=5, geo='box')
@@ -58,7 +59,6 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
         on_change([(self.state, 'cmap_mode', 'cmap_att', 'cmap_vmin', 'cmap_vmax', 'cmap', 'color')])(self._update_color)
         on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
-
 
         viewer_state.add_callback('x_att', self._update_xyz_att)
         viewer_state.add_callback('y_att', self._update_xyz_att)
@@ -85,9 +85,6 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
     def redraw(self):
         pass
         #self.update()
-
-    def clear(self):
-        pass
 
     def update(self):
         # we don't use layer, but layer.data to get everything
