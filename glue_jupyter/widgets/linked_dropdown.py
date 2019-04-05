@@ -1,8 +1,26 @@
+from ipywidgets import Dropdown
 import ipymaterialui as mui
 from glue.external.echo.selection import ChoiceSeparator
 
+__all__ = ['LinkedDropdown', 'LinkedDropdownMaterial']
 
-class LinkedDropdown(mui.Div):
+
+def get_choices(state, attribute_name):
+    """
+    Return a list of the choices (excluding separators) in the
+    SelectionCallbackProperty.
+    """
+    choices = []
+    labels = []
+    display_func = getattr(type(state), attribute_name).get_display_func(state)
+    for choice in getattr(type(state), attribute_name).get_choices(state):
+        if not isinstance(choice, ChoiceSeparator):
+            choices.append(choice)
+            labels.append(display_func(choice))
+    return choices, labels
+
+
+class LinkedDropdown(Dropdown):
     """
     A dropdown widget that is automatically linked to a SelectionCallbackProperty
     and syncs changes both ways.
@@ -14,7 +32,77 @@ class LinkedDropdown(mui.Div):
 
     def __init__(self, state, attribute_name, ui_name=None, label=None):
 
-        super(LinkedDropdown, self).__init__()
+        if label is None:
+            label = ui_name
+
+        super(LinkedDropdown, self).__init__(description=label)
+
+        self.state = state
+        self.attribute_name = attribute_name
+
+        self._update_options()
+
+        self.state.add_callback(self.attribute_name, self._update_ui_from_glue_state)
+        self.observe(self._update_glue_state_from_ui, 'value')
+
+        # Set initial UI state to match SelectionCallbackProperty
+        self._update_ui_from_glue_state()
+
+    def _update_options(self):
+        self._choices, self._labels = get_choices(self.state, self.attribute_name)
+        value = self.value
+        self.options = list(zip(self._labels, self._choices))
+        if value is not None:
+            self.value = value
+
+    def _update_glue_state_from_ui(self, change):
+        """
+        Update the SelectionCallbackProperty based on the UI.
+        """
+        # If we are here, the SelectionCallbackProperty has been changed, and
+        # this can be due to the options or the selection changing so we need
+        # to update the options.
+        self._update_options()
+        setattr(self.state, self.attribute_name, self.value)
+
+    def _update_ui_from_glue_state(self, *ignore_args):
+        """
+        Update the UI based on the SelectionCallbackProperty.
+        """
+        if len(self._choices) > 0:
+            value = getattr(self.state, self.attribute_name)
+            for choice in self._choices:
+                if choice is value:
+                    self.value = value
+                    break
+            else:
+                if isinstance(value, str):
+                    for i, label in enumerate(self._labels):
+                        if label == value:
+                            self.value = self._choices[i]
+                            break
+                    else:
+                        self.value = None
+                else:
+                    self.value = None
+
+
+class LinkedDropdownMaterial(mui.Div):
+    """
+    A dropdown widget that is automatically linked to a SelectionCallbackProperty
+    and syncs changes both ways (Material UI version)
+
+    * On glue's side the state is in state.<attribute_name>.
+    * On the UI the state is in widget_select.value which holds the index of the selected item.
+    * Indices are (for the moment) calculated from a list of choices (ignoring separators)
+    """
+
+    def __init__(self, state, attribute_name, ui_name=None, label=None):
+
+        super(LinkedDropdownMaterial, self).__init__()
+
+        if label is None:
+            label = ui_name
 
         self.state = state
         self.attribute_name = attribute_name
@@ -24,6 +112,7 @@ class LinkedDropdown(mui.Div):
         self.menu_items = self._create_menu_items()
 
         # Set up the UI dropdown
+
         self.widget_select = mui.Select(value=self._get_glue_selected_item_index(),
                                         children=self.menu_items, multiple=False)
 
@@ -50,7 +139,7 @@ class LinkedDropdown(mui.Div):
         if self.widget_select.value == '':
             selected = None
         else:
-            selected = self._get_choices()[0][self.widget_select.value]
+            selected = get_choices(self.state, self.attribute_name)[0][self.widget_select.value]
         setattr(self.state, self.attribute_name, selected)
 
     def _update_ui_from_glue_state(self, *ignore_args):
@@ -60,20 +149,6 @@ class LinkedDropdown(mui.Div):
         index = self._get_glue_selected_item_index()
         self.widget_select.value = index
 
-    def _get_choices(self):
-        """
-        Return a list of the choices (excluding separators) in the
-        SelectionCallbackProperty.
-        """
-        choices = []
-        labels = []
-        display_func = getattr(type(self.state), self.attribute_name).get_display_func(self.state)
-        for choice in getattr(type(self.state), self.attribute_name).get_choices(self.state):
-            if not isinstance(choice, ChoiceSeparator):
-                choices.append(choice)
-                labels.append(display_func(choice))
-        return choices, labels
-
     def _create_menu_items(self):
         """
         Generate the MenuItem based on the choices of the
@@ -81,7 +156,7 @@ class LinkedDropdown(mui.Div):
         """
 
         # Get the choices from the SelectionCallbackProperty
-        choices, labels = self._get_choices()
+        choices, labels = get_choices(self.state, self.attribute_name)
 
         # Generate menu items
         return [mui.MenuItem(description=label, value=index) for index, label in enumerate(labels)]
@@ -93,7 +168,7 @@ class LinkedDropdown(mui.Div):
         """
 
         # Get the chocies from the SelectionCallbackProperty
-        choices, labels = self._get_choices()
+        choices, labels = get_choices(self.state, self.attribute_name)
 
         # Find the selected item
         selected = getattr(self.state, self.attribute_name)
