@@ -222,8 +222,8 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.widget_vector = widgets.Checkbox(description='show vectors', value=self.state.vector_visible)
         helper = self.state.vx_att_helper
 
-        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', ui_name='vx')
-        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy')
+        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', ui_name='vx', label='vx attribute')
+        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy', label='vy attribute')
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
         link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
         link((self.state, 'vector_visible'), (self.quiver, 'visible'))

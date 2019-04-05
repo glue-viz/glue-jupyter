@@ -22,7 +22,7 @@ class Size(widgets.VBox):
         self.widget_size_mode = widgets.RadioButtons(options=options, description='size mode')
         link((self.state, 'size_mode'), (self.widget_size_mode, 'value'))
 
-        self.widget_size_att = LinkedDropdown(self.state, 'size_att', ui_name='size')
+        self.widget_size_att = LinkedDropdown(self.state, 'size_att', ui_name='size attribute', label='size attribute')
 
         self.widget_size_vmin = widgets.FloatText(description='size min')
         self.widget_size_vmax = widgets.FloatText(description='size min')

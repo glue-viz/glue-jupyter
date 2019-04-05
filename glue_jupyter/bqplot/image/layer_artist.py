@@ -168,7 +168,7 @@ class BqplotImageLayerArtist(LayerArtist):
                           90: '90%'}
                           #'Custom': 'Custom'} # TODO: support custom
 
-            self.widget_percentile = LinkedDropdown(self.state, 'percentile', ui_name='limits')
+            self.widget_percentile = LinkedDropdown(self.state, 'percentile', ui_name='limits', label='percentile')
 
             on_change([(self.state, 'bias', 'contrast', 'v_min', 'v_max')])(self._update_scale_image)
 

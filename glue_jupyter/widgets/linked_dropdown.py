@@ -27,13 +27,12 @@ class LinkedDropdown(mui.Div):
         self.widget_select = mui.Select(value=self._get_glue_selected_item_index(),
                                         children=self.menu_items, multiple=False)
 
-        label = label or getattr(type(self.state), self.attribute_name).__doc__
         self.widget_input_label = mui.InputLabel(description=label,
                                                  placeholder='No selection')
 
         # Note that style is a dict with css key/values
         self.widget_form_control = mui.FormControl(
-            children=[self.widget_input_label, self.widget_select], style={'width': '205px'}
+            children=[self.widget_input_label, self.widget_select], style={'width': '100%'}
         )
         self.child = self.widget_form_control
 
