@@ -4,6 +4,8 @@ import ipywidgets as widgets
 from glue.config import colormaps
 
 from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+from .linked_dropdown import LinkedDropdown
+
 
 class Size(widgets.VBox):
 
@@ -16,16 +18,11 @@ class Size(widgets.VBox):
         self.widget_scaling = widgets.FloatSlider(description='scale', min=0, max=2, value=self.state.size_scaling)
         link((self.state, 'size_scaling'), (self.widget_scaling, 'value'))
 
-
         options = type(self.state).size_mode.get_choice_labels(self.state)
         self.widget_size_mode = widgets.RadioButtons(options=options, description='size mode')
         link((self.state, 'size_mode'), (self.widget_size_mode, 'value'))
 
-        helper = self.state.size_att_helper
-        self.widget_size_att = widgets.Dropdown(options=[k.label for k in helper.choices],
-                                       value=self.state.size_att, description='size')
-        link_component_id_to_select_widget(self.state, 'size_att', self.widget_size_att)
-
+        self.widget_size_att = LinkedDropdown(self.state, 'size_att', ui_name='size')
 
         self.widget_size_vmin = widgets.FloatText(description='size min')
         self.widget_size_vmax = widgets.FloatText(description='size min')

@@ -4,7 +4,7 @@ from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RangeROI
 from glue.viewers.histogram.state import HistogramViewerState
 
-import glue_jupyter.widgets.component
+from ...widgets.linked_dropdown import LinkedDropdown
 
 from ...link import link
 
@@ -36,9 +36,7 @@ class BqplotHistogramView(BqplotBaseView):
         self.widgets_axis = []
         for i, axis_name in enumerate('x'):
             if hasattr(self.state, axis_name + '_att_helper'):
-                widget_axis = glue_jupyter.widgets.component.Component(
-                    self.state, axis_name + '_att', label=axis_name + ' axis'
-                )
+                widget_axis = LinkedDropdown(self.state, axis_name + '_att', label=axis_name + ' axis')
                 self.widgets_axis.append(widget_axis)
 
         # @on_change([(self.state, 'hist_n_bin')])

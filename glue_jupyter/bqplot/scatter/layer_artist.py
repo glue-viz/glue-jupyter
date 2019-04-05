@@ -12,6 +12,7 @@ from glue_jupyter.compat import LayerArtist
 
 from ...link import link, dlink, calculation, link_component_id_to_select_widget, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
+from ...widgets import LinkedDropdown
 import glue_jupyter.widgets
 from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
                                            MatplotlibLayerState,
@@ -220,11 +221,9 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         self.widget_vector = widgets.Checkbox(description='show vectors', value=self.state.vector_visible)
         helper = self.state.vx_att_helper
-        self.widget_vector_x = widgets.Dropdown(options=[k.label for k in helper.choices], value=self.state.vx_att, description='vx')
-        link_component_id_to_select_widget(self.state, 'vx_att', self.widget_vector_x)
-        helper = self.state.vy_att_helper
-        self.widget_vector_y = widgets.Dropdown(options=[k.label for k in helper.choices], value=self.state.vy_att, description='vy')
-        link_component_id_to_select_widget(self.state, 'vy_att', self.widget_vector_y)
+
+        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', ui_name='vx')
+        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy')
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
         link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
         link((self.state, 'vector_visible'), (self.quiver, 'visible'))
