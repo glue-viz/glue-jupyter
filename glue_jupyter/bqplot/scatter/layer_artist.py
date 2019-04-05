@@ -194,13 +194,13 @@ class BqplotScatterLayerArtist(LayerArtist):
         size = self.state.size
         scale = self.state.size_scaling
         if self.state.size_mode == 'Linear':
-            self.scatter.default_size = int(scale * 100) # *50 seems to give similar sizes as the Qt Glue
+            self.scatter.default_size = int(scale * 25) # *50 seems to give similar sizes as the Qt Glue
             self.scatter.size = self.layer.data[self.state.size_att]
             self.scale_size.min = float_or_none(self.state.size_vmin)
             self.scale_size.max = float_or_none(self.state.size_vmax)
             self._workaround_unselected_style()
         else:
-            self.scatter.default_size = int(size * scale * 4) # *4 seems to give similar sizes as the Qt Glue
+            self.scatter.default_size = int(size * scale)
             self.scatter.size = None
             self.scale_size.min = 0
             self.scale_size.max = 1
