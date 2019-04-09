@@ -54,19 +54,15 @@ def test_component_default_index(app, dataxz, dataxyz):
     # setup
     state = DummyState()
     helper = ComponentIDComboHelper(state, 'y_att', app.data_collection)
-    helper.append_data(dataxz)
     state.helper = helper
-
-    # main object we test
     dropdown = LinkedDropdown(state, 'y_att', 'y test attribute')
+    assert [item[0] for item in dropdown.options] == []
 
-    # simple sanity tests
+    helper.append_data(dataxz)
     assert [item[0] for item in dropdown.options] == ['x', 'z']
 
-    # initial state
     assert state.y_att is dataxz.id['z']
     assert dropdown.value is dataxz.id['z']
-
 
 
 def test_component_material(app, dataxz, dataxyz):
