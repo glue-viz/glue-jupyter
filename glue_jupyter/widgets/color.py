@@ -1,10 +1,9 @@
-import traitlets
 import ipywidgets as widgets
 
 from glue.config import colormaps
 
-from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
-import glue_jupyter.widgets
+from ..link import link, dlink
+from .linked_dropdown import LinkedDropdown
 
 
 class Color(widgets.VBox):
@@ -20,7 +19,9 @@ class Color(widgets.VBox):
         self.widget_cmap_mode = widgets.RadioButtons(options=cmap_mode_options, description='cmap mode')
         link((self.state, 'cmap_mode'), (self.widget_cmap_mode, 'value'))
 
-        self.widget_cmap_att = glue_jupyter.widgets.Component(self.state, 'cmap_att', ui_name='color attribute')
+        self.widget_cmap_att = LinkedDropdown(self.state, 'cmap_att',
+                                              ui_name='color attribute',
+                                              label='color attribute')
 
         self.widget_cmap_vmin = widgets.FloatText(description='color min')
         self.widget_cmap_vmax = widgets.FloatText(description='color max')

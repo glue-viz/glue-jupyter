@@ -1,6 +1,7 @@
 from glue.viewers.scatter.state import ScatterViewerState
 
-import glue_jupyter.widgets.component
+from ...widgets.linked_dropdown import LinkedDropdown
+
 from ..view import BqplotBaseView
 
 from .layer_artist import BqplotScatterLayerArtist
@@ -20,8 +21,6 @@ class BqplotScatterView(BqplotBaseView):
         self.widgets_axis = []
         for i, axis_name in enumerate('xy'):
             if hasattr(self.state, axis_name + '_att_helper'):
-                widget_axis = glue_jupyter.widgets.component.Component(
-                    self.state, axis_name + '_att', label=axis_name + ' axis'
-                )
+                widget_axis = LinkedDropdown(self.state, axis_name + '_att', label=axis_name + ' axis')
                 self.widgets_axis.append(widget_axis)
         self.tab_general.children += tuple(self.widgets_axis)

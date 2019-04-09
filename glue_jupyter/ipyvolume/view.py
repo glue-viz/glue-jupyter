@@ -14,7 +14,8 @@ from ..view import IPyWidgetView
 from ..link import link, dlink
 from .scatter import IpyvolumeScatterLayerArtist
 from .volume import IpyvolumeVolumeLayerArtist
-import glue_jupyter.widgets
+
+from ..widgets import LinkedDropdown
 
 
 class IpyvolumeBaseView(IPyWidgetView):
@@ -118,9 +119,7 @@ class IpyvolumeBaseView(IPyWidgetView):
         self.widgets_axis = []
         for i, axis_name in enumerate('xyz'):
             if hasattr(self.state, axis_name + '_att_helper'):
-                widget_axis = glue_jupyter.widgets.Component(
-                    self.state, axis_name + '_att', label=axis_name + ' axis'
-                )
+                widget_axis = LinkedDropdown(self.state, axis_name + '_att', label=axis_name + ' axis')
                 self.widgets_axis.append(widget_axis)
 
         selectors = ['lasso', 'circle', 'rectangle']
@@ -132,7 +131,6 @@ class IpyvolumeBaseView(IPyWidgetView):
         self.widget_show_movie_maker = widgets.ToggleButton(value=False, description="Show movie maker")
         self.movie_maker = ipv.moviemaker.MovieMaker(self.figure, self.figure.camera)
         dlink((self.widget_show_movie_maker, 'value'), (self.movie_maker.widget_main.layout, 'display'), lambda value: None if value else 'none')
-
 
         self.tab_general = widgets.VBox([self.button_action, self.widget_show_axes] + self.widgets_axis + [self.widget_show_movie_maker, self.movie_maker.widget_main])#, self.widget_y_axis, self.widget_z_axis])
         children = [self.tab_general]

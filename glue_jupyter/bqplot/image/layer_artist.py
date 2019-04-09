@@ -12,6 +12,7 @@ from glue.viewers.image.layer_artist import ImageLayerArtist
 from glue_jupyter.compat import LayerArtist
 
 from ...link import link, on_change
+from ...widgets import LinkedDropdown
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
@@ -167,9 +168,8 @@ class BqplotImageLayerArtist(LayerArtist):
                           90: '90%'}
                           #'Custom': 'Custom'} # TODO: support custom
 
-            self.widget_percentile = widgets.Dropdown(options=[(percentile_display[k], k) for k in [100, 99.5, 99, 95, 90]],#, 'Custom']],
-                                           value=self.state.percentile, description='limits')
-            link((self.state, 'percentile'), (self.widget_percentile, 'value'))
+            self.widget_percentile = LinkedDropdown(self.state, 'percentile', ui_name='limits', label='percentile')
+
             on_change([(self.state, 'bias', 'contrast', 'v_min', 'v_max')])(self._update_scale_image)
 
             self.widget_colormap = widgets.Dropdown(options=colormaps, value=colormaps[0][1], description='colormap')

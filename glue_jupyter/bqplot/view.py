@@ -8,7 +8,7 @@ from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
 
-import glue_jupyter.widgets.component
+from ..widgets.linked_dropdown import LinkedDropdown
 from ..view import IPyWidgetView
 from ..link import link, on_change
 from ..utils import float_or_none

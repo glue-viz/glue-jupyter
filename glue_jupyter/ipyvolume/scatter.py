@@ -18,8 +18,10 @@ from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
                                            DeferredDrawCallbackProperty as DDCProperty,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
+from ..widgets import LinkedDropdown
 from ..link import link, dlink, calculation, on_change
 import glue_jupyter.widgets
+
 
 class Scatter3dLayerState(ScatterLayerState):
     vz_att = DDSCProperty(docstring="The attribute to use for the z vector arrow")
@@ -159,15 +161,9 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         # vector/quivers
         self.widget_vector = widgets.Checkbox(description='show vectors', value=self.state.vector_visible)
 
-        self.widget_vector_x = glue_jupyter.widgets.Component(
-            self.state, 'vx_att', label='vx'
-        )
-        self.widget_vector_y = glue_jupyter.widgets.Component(
-            self.state, 'vy_att', label='vy'
-        )
-        self.widget_vector_z = glue_jupyter.widgets.Component(
-            self.state, 'vz_att', label='vz'
-        )
+        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', label='vx')
+        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', label='vy')
+        self.widget_vector_z = LinkedDropdown(self.state, 'vz_att', label='vz')
 
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att', 'vz_att')])(self._update_quiver)
         link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
