@@ -103,14 +103,9 @@ class BqplotImageLayerArtist(LayerArtist):
 
     def update(self):
         if isinstance(self.layer, Subset):
-            try:
-                mask = self.get_image_data()
-            except IncompatibleAttribute:
-                # The following includes a call to self.clear()
-                self.disable("Subset cannot be applied to this data")
+            mask = self.get_image_data()
+            if mask is None:
                 return
-            else:
-                self._enabled = True
             # if self.state.subset_mode == 'outline':
             #     data = mask.astype(np.float32)
             # else:
