@@ -56,6 +56,7 @@ class BqplotImageLayerArtist(LayerArtist):
 
         self.view.figure.marks = list(self.view.figure.marks) + [self.image_mark]
 
+        viewer_state.add_callback('slices', self._update_xy_att)
         viewer_state.add_callback('x_att', self._update_xy_att)
         viewer_state.add_callback('y_att', self._update_xy_att)
 
@@ -103,7 +104,7 @@ class BqplotImageLayerArtist(LayerArtist):
     def update(self):
         if isinstance(self.layer, Subset):
             try:
-                mask = self.layer.to_mask()
+                mask = self.get_image_data()
             except IncompatibleAttribute:
                 # The following includes a call to self.clear()
                 self.disable("Subset cannot be applied to this data")
@@ -118,7 +119,7 @@ class BqplotImageLayerArtist(LayerArtist):
             data[~mask] = np.nan
             self.image_mark.image = data
         else:
-            data = self.layer[self.state.attribute]
+            data = self.get_image_data()
             # data = data - self.state.v_min
             # data /= (self.state.v_max - self.state.v_min)
             # print(np.nanmin(data), np.nanmax(data))
@@ -128,7 +129,7 @@ class BqplotImageLayerArtist(LayerArtist):
             self.image_mark.image = data
         # force the image mark to update the image data
         # self.image_mark.send_state(key='image')
-        height, width = data.shape
+        height, width = self.get_image_shape()
         self.image_mark.x = [0, width]
         self.image_mark.y = [0, height]
         # bug? this will cause a redraw for sure, but why is this needed?
