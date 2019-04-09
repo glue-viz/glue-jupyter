@@ -103,9 +103,17 @@ class BqplotImageLayerArtist(LayerArtist):
 
     def update(self):
         if isinstance(self.layer, Subset):
-            mask = self.get_image_data()
-            if mask is None:
+            # The following try...except can be simplified once we rely
+            # on glue-core v0.15.
+            try:
+                mask = self.get_image_data()
+                if mask is None:
+                    return
+            except ValueError:
+                self.disable("Subset can't be sliced")
                 return
+            else:
+                self.enable()
             # if self.state.subset_mode == 'outline':
             #     data = mask.astype(np.float32)
             # else:
@@ -114,7 +122,15 @@ class BqplotImageLayerArtist(LayerArtist):
             data[~mask] = np.nan
             self.image_mark.image = data
         else:
-            data = self.get_image_data()
+            # The following try...except can be simplified once we rely
+            # on glue-core v0.15.
+            try:
+                data = self.get_image_data()
+            except ValueError:
+                self.disable("Data can't be sliced")
+                return
+            else:
+                self.enable()
             # data = data - self.state.v_min
             # data /= (self.state.v_max - self.state.v_min)
             # print(np.nanmin(data), np.nanmax(data))
