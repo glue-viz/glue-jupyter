@@ -8,10 +8,10 @@ from ...link import on_change
 from ..view import BqplotBaseView
 from ..scatter.layer_artist import BqplotScatterLayerArtist
 
-from .layer_artist import BqplotImageLayerArtist
+from .layer_artist import BqplotImageLayerArtist, BqplotImageSubsetLayerArtist
 from .frb_mark import FRBImage
 
-from .layer_style_widget import ImageLayerStateWidget
+from .layer_style_widget import ImageLayerStateWidget, ImageSubsetLayerStateWidget
 from .viewer_options_widget import ImageViewerStateWidget
 
 
@@ -21,7 +21,8 @@ class BqplotImageView(BqplotBaseView):
     allow_duplicate_subset = False
     large_data_size = 2e7
 
-    _layer_style_widget_cls = {BqplotImageLayerArtist: ImageLayerStateWidget}
+    _layer_style_widget_cls = {BqplotImageLayerArtist: ImageLayerStateWidget,
+                               BqplotImageSubsetLayerArtist: ImageSubsetLayerStateWidget}
     _state_cls = ImageViewerState
     _options_cls = ImageViewerStateWidget
 
@@ -62,5 +63,5 @@ class BqplotImageView(BqplotBaseView):
         if layer.ndim == 1:
             cls = BqplotScatterLayerArtist
         else:
-            cls = BqplotImageLayerArtist
+            cls = BqplotImageSubsetLayerArtist
         return self.get_layer_artist(cls, layer=layer, layer_state=layer_state)

@@ -57,7 +57,10 @@ class FRBImage(AstroImage):
 
         # Get the array and assign it to the artist
         with self.hold_sync():
-            self.image = self.array_maker(bounds=bounds)
+            image = self.array_maker(bounds=bounds)
+            if image is None:
+                image = np.array([[np.nan]])
+            self.image = image
             self.x = (xmin, xmax)
             self.y = (ymin, ymax)
 

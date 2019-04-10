@@ -9,7 +9,7 @@ from ...widgets import LinkedDropdown
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
 
-__all__ = ['ImageLayerStateWidget']
+__all__ = ['ImageLayerStateWidget', 'ImageSubsetLayerStateWidget']
 
 
 class ImageLayerStateWidget(VBox):
@@ -54,21 +54,33 @@ class ImageLayerStateWidget(VBox):
 
         children = [self.widget_visible, self.widget_opacity]
 
-        if isinstance(self.state, ImageSubsetLayerState):
+        children.append(self.widget_contrast)
+        children.append(self.widget_bias)
+        children.append(self.widget_percentile)
+        children.append(self.widget_v_min)
+        children.append(self.widget_v_max)
 
+        if self.state.viewer_state.color_mode == 'Colormaps':
+            children.append(self.widget_colormap)
+        else:
             children.append(self.widget_color)
 
-        else:
-
-            children.append(self.widget_contrast)
-            children.append(self.widget_bias)
-            children.append(self.widget_percentile)
-            children.append(self.widget_v_min)
-            children.append(self.widget_v_max)
-
-            if self.state.viewer_state.color_mode == 'Colormaps':
-                children.append(self.widget_colormap)
-            else:
-                children.append(self.widget_color)
-
         self.children = children
+
+
+class ImageSubsetLayerStateWidget(VBox):
+
+    def __init__(self, layer_state):
+
+        self.state = layer_state
+
+        self.widget_visible = Checkbox(description='visible', value=self.state.visible)
+        link((self.state, 'visible'), (self.widget_visible, 'value'))
+
+        self.widget_opacity = FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha, description='opacity')
+        link((self.state, 'alpha'), (self.widget_opacity, 'value'))
+
+        self.widget_color = ColorPicker(description='color')
+        link((self.state, 'color'), (self.widget_color, 'value'))
+
+        super().__init__([self.widget_visible, self.widget_opacity, self.widget_color])
