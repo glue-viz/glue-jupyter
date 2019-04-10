@@ -2,6 +2,7 @@ import bqplot
 import ipywidgets as widgets
 
 from glue.viewers.image.state import ImageViewerState
+from glue.viewers.image.composite_array import CompositeArray
 
 from ...link import link, on_change
 
@@ -11,6 +12,7 @@ from ..scatter.layer_artist import BqplotScatterLayerArtist
 from .layer_artist import BqplotImageLayerArtist
 from ...widgets.linked_dropdown import LinkedDropdown
 from ...common.slice_helpers import MultiSliceWidgetHelper
+from .frb_mark import FRBImage
 
 
 class BqplotImageView(BqplotBaseView):
@@ -21,9 +23,21 @@ class BqplotImageView(BqplotBaseView):
     large_data_size = 2e7
 
     def __init__(self, session):
+
         super(BqplotImageView, self).__init__(session)
+
         on_change([(self.state, 'aspect')])(self._sync_figure_aspect)
         self._sync_figure_aspect()
+
+        self._composite = CompositeArray()
+        self._composite_image = FRBImage(self, self._composite)
+        self.figure.marks = list(self.figure.marks) + [self._composite_image]
+        self.state.add_callback('reference_data', self._reset_limits)
+        self.state.add_callback('x_att', self._reset_limits)
+        self.state.add_callback('y_att', self._reset_limits)
+
+    def _reset_limits(self, *args):
+        self.state.reset_limits()
 
     def _sync_figure_aspect(self):
         with self.figure.hold_trait_notifications():
