@@ -14,6 +14,8 @@ def get_choices(state, attribute_name):
     choices = []
     labels = []
     display_func = getattr(type(state), attribute_name).get_display_func(state)
+    if display_func is None:
+        display_func = str
     for choice in getattr(type(state), attribute_name).get_choices(state):
         if not isinstance(choice, ChoiceSeparator):
             choices.append(choice)
