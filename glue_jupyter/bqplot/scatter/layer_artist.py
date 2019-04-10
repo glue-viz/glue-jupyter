@@ -72,6 +72,19 @@ class BqplotScatterLayerArtist(LayerArtist):
         # set initial values for the colormap
         self._on_change_cmap()
 
+        # FIXME: these need to be one-way links so that changing vector_visible
+        # doesn't end up changing visible
+        link((self.state, 'visible'), (self.scatter, 'visible'))
+        link((self.state, 'visible'), (self.quiver, 'visible'))
+        link((self.state, 'visible'), (self.image, 'visible'))
+
+        link((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x], lambda x: x[0])
+        link((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x], lambda x: x[0])
+        link((self.state, 'alpha'), (self.image, 'opacity'))
+
+        on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
+        link((self.state, 'vector_visible'), (self.quiver, 'visible'))
+
     def _update_xy_att(self, *args):
         self.update()
 
@@ -205,35 +218,3 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter.size = None
             self.scale_size.min = 0
             self.scale_size.max = 1
-
-    def create_widgets(self):
-        self.widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (self.widget_visible, 'value'))
-        link((self.state, 'visible'), (self.scatter, 'visible'))
-
-        self.widget_opacity = widgets.FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha, description='opacity')
-        link((self.state, 'alpha'), (self.widget_opacity, 'value'))
-        link((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x], lambda x: x[0])
-        link((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x], lambda x: x[0])
-
-        self.widget_color = glue_jupyter.widgets.Color(state=self.state)
-        self.widget_size = glue_jupyter.widgets.Size(state=self.state)
-
-        self.widget_vector = widgets.Checkbox(description='show vectors', value=self.state.vector_visible)
-        helper = self.state.vx_att_helper
-
-        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', ui_name='vx', label='vx attribute')
-        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy', label='vy attribute')
-        on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
-        link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
-        link((self.state, 'vector_visible'), (self.quiver, 'visible'))
-        dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'), lambda value: None if value else 'none')
-        dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
-
-        self.widget_bins = widgets.IntSlider(min=0, max=1024, value=self.state.bins, description='bin count')
-        link((self.state, 'bins'), (self.widget_bins, 'value'))
-
-        return widgets.VBox([self.widget_visible, self.widget_opacity,
-            self.widget_size,
-            self.widget_color,
-            self.widget_vector, self.widget_vector_x, self.widget_vector_y])
