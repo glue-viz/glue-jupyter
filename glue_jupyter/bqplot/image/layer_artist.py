@@ -10,6 +10,10 @@ from .frb_mark import FRBImage
 
 class BqplotImageLayerArtist(ImageLayerArtist):
 
+    def enable(self):
+        if self.enabled:
+            return
+
     def redraw(self):
         pass
 
@@ -36,7 +40,7 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         if not self.enabled:
             return
 
-        self.image_artist.visible  = self.state.visible
+        self.image_artist.visible = self.state.visible
         self.image_artist.opacity = self.state.alpha
 
     def _update_image(self, force=False, **kwargs):
@@ -61,6 +65,8 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         PIXEL_CACHE.pop(self.state.uuid, None)
 
     def enable(self, redraw=True):
+        if self.enabled:
+            return
         super(BqplotImageSubsetLayerArtist, self).enable()
         # We need to now ensure that image_artist, which may have been marked
         # as not being visible when the layer was cleared is made visible
