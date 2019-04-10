@@ -11,13 +11,19 @@ from ..scatter.layer_artist import BqplotScatterLayerArtist
 from .layer_artist import BqplotImageLayerArtist
 from .frb_mark import FRBImage
 
+from .layer_style_widget import ImageLayerStateWidget
+from .viewer_options_widget import ImageViewerStateWidget
+
 
 class BqplotImageView(BqplotBaseView):
 
     allow_duplicate_data = False
     allow_duplicate_subset = False
-    _state_cls = ImageViewerState
     large_data_size = 2e7
+
+    _layer_style_widget_cls = {BqplotImageLayerArtist: ImageLayerStateWidget}
+    _state_cls = ImageViewerState
+    _options_cls = ImageViewerStateWidget
 
     def __init__(self, session):
 

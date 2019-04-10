@@ -1,15 +1,13 @@
 from glue.viewers.image.state import ImageSubsetLayerState
 from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox, Dropdown, FloatText
 import ipywidgets.widgets.trait_types as tt
+from glue.config import colormaps
 
 from ...link import link
 from ...widgets import LinkedDropdown
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
-
-colormaps = [('Viridis', 'viridis'), ('Jet', 'jet'),
-             ('Grey', ['black', 'grey']), ('RdYlGn', 'RdYlGn')]
 
 __all__ = ['ImageLayerStateWidget']
 
@@ -43,8 +41,8 @@ class ImageLayerStateWidget(VBox):
         self.widget_color = ColorPicker(description='color')
         link((self.state, 'color'), (self.widget_color, 'value'))
 
-        self.widget_colormap = Dropdown(options=colormaps, value=colormaps[0][1], description='colormap')
-        link((self.widget_colormap, 'label'), (self.state, 'cmap'))
+        self.widget_colormap = Dropdown(options=colormaps.members, description='colormap')
+        link((self.state, 'cmap'), (self.widget_colormap, 'value'))
 
         super().__init__()
 

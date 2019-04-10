@@ -116,6 +116,7 @@ class BqplotBaseView(IPyWidgetView):
         self.tab_general = widgets.VBox([
                 self.widget_toolbar, self.widget_show_axes_fcl] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
         children = [self.tab_general]
+        self.tab_general.children += self._options_cls(self.state).children
         self.tab = widgets.Tab(children)
         self.tab.set_title(0, "General")
         self.tab.set_title(1, "Axes")

@@ -45,7 +45,7 @@ class IPyWidgetView(Viewer):
         return cls(self, self.state, layer=layer, layer_state=layer_state)
 
     def _add_layer_tab(self, layer):
-        layer_tab = layer.create_widgets()
+        layer_tab = self._layer_style_widget_cls[type(layer)](layer.state)
         self.tab.children = self.tab.children + (layer_tab, )
         if isinstance(layer.layer, Subset):
             label = '{data_label}:{subset_label}'.format(data_label=layer.layer.data.label, subset_label=layer.layer.label)
