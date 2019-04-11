@@ -10,12 +10,14 @@ def _is_echo(link):
 
 
 class link(object):
-    def __init__(self, source, target, f1=lambda x: x, f2=lambda x: x):
+    def __init__(self, source, target, f1=lambda x: x, f2=lambda x: x, forwards=True, backwards=True):
         self.source = source
         self.target = target
 
-        self._link(source, target, 'source', f1, True)
-        self._link(target, source, 'target', f2)
+        if forwards:
+            self._link(source, target, 'source', f1, True)
+        if backwards:
+            self._link(target, source, 'target', f2)
 
     def _link(self, source, target, name, f, sync_directly=False):
         def sync(*ignore):
@@ -107,4 +109,5 @@ def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='v
             setattr(state, state_attr, options[change.new])
 
     widget.observe(update_state, 'index')
+
     update()

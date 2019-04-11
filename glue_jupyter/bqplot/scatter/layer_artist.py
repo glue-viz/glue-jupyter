@@ -69,16 +69,16 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         # FIXME: these need to be one-way links so that changing vector_visible
         # doesn't end up changing visible
-        link((self.state, 'visible'), (self.scatter, 'visible'))
-        link((self.state, 'visible'), (self.quiver, 'visible'))
-        link((self.state, 'visible'), (self.image, 'visible'))
+        link((self.state, 'visible'), (self.scatter, 'visible'), backwards=False)
+        link((self.state, 'visible'), (self.quiver, 'visible'), backwards=False)
+        link((self.state, 'visible'), (self.image, 'visible'), backwards=False)
 
         link((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x], lambda x: x[0])
         link((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x], lambda x: x[0])
         link((self.state, 'alpha'), (self.image, 'opacity'))
 
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
-        link((self.state, 'vector_visible'), (self.quiver, 'visible'))
+        link((self.state, 'vector_visible'), (self.quiver, 'visible'), backwards=False)
 
     def _update_xy_att(self, *args):
         self.update()
