@@ -1,30 +1,23 @@
 import numpy as np
 import ipyvolume
-import ipywidgets as widgets
-import traitlets
 
 from glue.core.data import Subset
-from glue.core.command import ApplySubsetState
 from glue_jupyter.compat import LayerArtist
-from glue.core.state_objects import StateAttributeLimitsHelper
 from glue.core.data_combo_helper import ComponentIDComboHelper
-from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
-from glue.core.subset import RoiSubsetState3d
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.scatter.state import ScatterLayerState
-from glue.viewers.scatter.state import ScatterViewerState
-from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
-                                           MatplotlibLayerState,
-                                           DeferredDrawCallbackProperty as DDCProperty,
-                                           DeferredDrawSelectionCallbackProperty as DDSCProperty)
+from glue.external.echo import CallbackProperty, SelectionCallbackProperty
 
-from ..widgets import LinkedDropdown
-from ..link import link, dlink, calculation, on_change
-import glue_jupyter.widgets
+from ...link import link, on_change
+
+__all__ = ['IpyvolumeScatterLayerArtist']
 
 
 class Scatter3dLayerState(ScatterLayerState):
-    vz_att = DDSCProperty(docstring="The attribute to use for the z vector arrow")
+
+    # FIXME: the following should be a SelectionCallbackProperty
+    geo = CallbackProperty('sphere', docstring="Type of marker")
+    vz_att = SelectionCallbackProperty(docstring="The attribute to use for the z vector arrow")
 
     def __init__(self, viewer_state=None, layer=None, **kwargs):
         self.vz_att_helper = ComponentIDComboHelper(self, 'vz_att',
@@ -66,6 +59,13 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         viewer_state.add_callback('y_att', self._update_xyz_att)
         viewer_state.add_callback('z_att', self._update_xyz_att)
         self._update_color()
+
+        link((self.state, 'visible'), (self.scatter.material, 'visible'))
+
+        on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att', 'vz_att')])(self._update_quiver)
+        link((self.state, 'vector_visible'), (self.quiver, 'visible'))
+
+        link((self.state, 'geo'), (self.scatter, 'geo'))
 
     def _update_color(self, ignore=None):
         cmap = self.state.cmap
@@ -145,32 +145,3 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         else:
             self.quiver.size = value
             self.quiver.size_selected = value
-
-
-    def create_widgets(self):
-        widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (widget_visible, 'value'))
-        link((self.state, 'visible'), (self.scatter.material, 'visible'))
-
-        self.widget_marker = widgets.ToggleButtons(options=['sphere', 'box', 'diamond'])
-        widgets.link((self.scatter, 'geo'), (self.widget_marker, 'value'))
-
-        self.widget_size = glue_jupyter.widgets.Size(state=self.state)
-        self.widget_color = glue_jupyter.widgets.Color(state=self.state)
-
-        # vector/quivers
-        self.widget_vector = widgets.Checkbox(description='show vectors', value=self.state.vector_visible)
-
-        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', label='vx')
-        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', label='vy')
-        self.widget_vector_z = LinkedDropdown(self.state, 'vz_att', label='vz')
-
-        on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att', 'vz_att')])(self._update_quiver)
-        link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
-        link((self.state, 'vector_visible'), (self.quiver, 'visible'))
-        dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'), lambda value: None if value else 'none')
-        dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
-        dlink((self.widget_vector, 'value'), (self.widget_vector_z.layout, 'display'), lambda value: None if value else 'none')
-
-        return widgets.VBox([widget_visible, self.widget_marker, self.widget_size, self.widget_color,
-            self.widget_vector, self.widget_vector_x, self.widget_vector_y, self.widget_vector_z])

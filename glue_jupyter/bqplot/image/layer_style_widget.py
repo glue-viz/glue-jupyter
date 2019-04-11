@@ -1,4 +1,3 @@
-from glue.viewers.image.state import ImageSubsetLayerState
 from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox, Dropdown, FloatText
 import ipywidgets.widgets.trait_types as tt
 from glue.config import colormaps

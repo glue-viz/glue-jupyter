@@ -72,27 +72,31 @@ def test_scatter3d(app, dataxyz, dataxz):
 
 
 def test_scatter3d_cmap_mode(app,dataxyz):
+
     s = app.scatter3d('x', 'y', data=dataxyz)
     l1 = s.layers[0]
+
+    layer_widget = s.tab.children[-1]
+
     assert l1.state.cmap_mode == 'Fixed', 'expected default value'
     assert l1.state.cmap_name == 'Gray'
 
     assert l1.scatter.color.shape == (), 'numpy scalar'
     l1.state.cmap_att = 'x'
     l1.state.cmap_mode = 'Linear'
-    assert l1.widget_color.widget_cmap_mode.label == 'Linear'
+    assert layer_widget.widget_color.widget_cmap_mode.label == 'Linear'
     assert l1.state.cmap_name == 'Gray'
     l1.state.cmap_vmin  = 0
     l1.state.cmap_vmax  = 10
     assert l1.scatter.color.shape == (3, 4)
     assert l1.scatter.color is not None
 
-    l1.widget_color.widget_cmap.label = 'Viridis'
+    layer_widget.widget_color.widget_cmap.label = 'Viridis'
     assert l1.state.cmap_name == 'Viridis'
-    assert l1.widget_color.widget_cmap.label == 'Viridis'
+    assert layer_widget.widget_color.widget_cmap.label == 'Viridis'
 
-    l1.widget_color.widget_cmap.label = 'Gray'
-    assert l1.widget_color.widget_cmap.label == 'Gray'
+    layer_widget.widget_color.widget_cmap.label = 'Gray'
+    assert layer_widget.widget_color.widget_cmap.label == 'Gray'
     assert l1.state.cmap_name == 'Gray'
 
 def test_roi3d(dataxyz):

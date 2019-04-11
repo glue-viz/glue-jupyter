@@ -5,8 +5,8 @@ from IPython.display import display
 import numpy as np
 import matplotlib.colors
 
-from .scatter import IpyvolumeScatterLayerArtist
-from ..utils import reduce_size
+from ..scatter.layer_artist import IpyvolumeScatterLayerArtist
+from ...utils import reduce_size
 
 #from glue_vispy_viewers.common.layer_state import VispyLayerState
 from glue_vispy_viewers.volume.layer_state import VolumeLayerState
@@ -15,10 +15,11 @@ from glue.external.echo import (CallbackProperty, SelectionCallbackProperty)
 from glue.core.data import Subset
 from glue.core.exceptions import IncompatibleAttribute
 
-from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+from ...link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+
 
 class IpyvolumeLayerState(VolumeLayerState):
-    pass
+
     opacity_scale = CallbackProperty()
     render_method = CallbackProperty()
     lighting = CallbackProperty()
@@ -27,8 +28,11 @@ class IpyvolumeLayerState(VolumeLayerState):
     clamp_max = CallbackProperty()
     # attribute = SelectionCallbackProperty()
 
+    data_min = CallbackProperty(0)
+    data_max = CallbackProperty(1)
+
     def __init__(self, layer=None, **kwargs):
-        super(IpyvolumeLayerState, self).__init__(layer=layer)
+        super(IpyvolumeLayerState, self).__init__(layer=layer, **kwargs)
         self.opacity_scale = 0.1
         self.render_method = 'NORMAL'
         self.lighting = True
@@ -69,6 +73,23 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
 
         #ipv.figure(self.ipyvolume_viewer.figure)
         self.last_shape = None
+
+        link((self.state, 'lighting'), (self.volume, 'lighting'))
+        link((self.state, 'render_method'), (self.volume, 'rendering_method'))
+        link((self.state, 'max_resolution'), (self.volume, 'data_max_shape'))
+
+        link((self.state, 'vmin'), (self.volume, 'show_min'))
+        link((self.state, 'vmax'), (self.volume, 'show_max'))
+
+        link((self.state, 'data_min'), (self.volume, 'data_min'))
+        link((self.state, 'data_max'), (self.volume, 'data_max'))
+
+        link((self.state, 'clamp_min'), (self.volume, 'clamp_min'))
+        link((self.state, 'clamp_max'), (self.volume, 'clamp_max'))
+
+        link((self.state, 'opacity_scale'), (self.volume, 'opacity_scale'))
+
+        on_change([(self.state, 'color', 'alpha')])(self._update_transfer_function)
 
     def clear(self):
         pass
@@ -116,8 +137,8 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
             self.volume.data_original = data
             self.volume.data_min = data_min
             self.volume.data_max = data_max
-        self.widget_data_min.value = self.state.vmin
-        self.widget_data_max.value = self.state.vmax
+        self.state.data_min = self.state.vmin
+        self.state.data_max = self.state.vmax
 
         # might be a bug in glue-core, it seems that for subsets vmin/vmax are
         # not calculated
@@ -127,69 +148,3 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
 
     def _update_transfer_function(self):
         self.transfer_function.rgba = _transfer_function_rgba(self.state.color, max_opacity=self.state.alpha)
-
-
-    def create_widgets(self):
-
-        self.widget_lighting = widgets.Checkbox(description='lighting', value=self.state.lighting)
-        link((self.state, 'lighting'), (self.widget_lighting, 'value'))
-        link((self.state, 'lighting'), (self.volume, 'lighting'))
-
-        render_methods = 'NORMAL MAX_INTENSITY'.split()
-        self.widget_render_method = widgets.Dropdown(options=render_methods, value=self.state.render_method, description='method')
-        link((self.state, 'render_method'), (self.widget_render_method, 'value'))
-        link((self.state, 'render_method'), (self.volume, 'rendering_method'))
-
-        self.size_options = [32, 64, 128, 128+64, 256, 256+128, 512]
-        options = [(str(k), k) for k in self.size_options]
-        self.widget_max_resolution = widgets.Dropdown(options=options, value=128, description='max resolution')
-        link((self.state, 'max_resolution'), (self.widget_max_resolution, 'value'))
-        link((self.state, 'max_resolution'), (self.volume, 'data_max_shape'))
-        #on_change([(self.state, 'max_resolution')])(self.update)
-
-        self.widget_data_min = widgets.FloatSlider(description='min', min=0, max=1, value=self.state.vmin, step=0.001)
-        link((self.state, 'vmin'), (self.widget_data_min, 'value'))
-        link((self.state, 'vmin'), (self.volume, 'show_min'))
-        link((self.volume, 'data_min'), (self.widget_data_min, 'min'))
-        link((self.volume, 'data_max'), (self.widget_data_min, 'max'))
-
-        self.widget_data_max = widgets.FloatSlider(description='max', min=0, max=1, value=self.state.vmax, step=0.001)
-        link((self.state, 'vmax'), (self.widget_data_max, 'value'))
-        link((self.state, 'vmax'), (self.volume, 'show_max'))
-        link((self.volume, 'data_min'), (self.widget_data_max, 'min'))
-        link((self.volume, 'data_max'), (self.widget_data_max, 'max'))
-
-        self.widget_clamp_min = widgets.Checkbox(description='clamp minimum', value=self.state.clamp_min)
-        link((self.state, 'clamp_min'), (self.widget_clamp_min, 'value'))
-        link((self.state, 'clamp_min'), (self.volume, 'clamp_min'))
-
-        self.widget_clamp_max = widgets.Checkbox(description='clamp maximum', value=self.state.clamp_max)
-        link((self.state, 'clamp_max'), (self.widget_clamp_max, 'value'))
-        link((self.state, 'clamp_max'), (self.volume, 'clamp_max'))
-
-
-
-
-        self.widget_color = widgets.ColorPicker(value=self.state.color, description='color')
-        link((self.state, 'color'), (self.widget_color, 'value'))
-
-        self.widget_opacity = widgets.FloatSlider(description='opacity', min=0, max=1, value=self.state.alpha, step=0.001)
-        link((self.state, 'alpha'), (self.widget_opacity, 'value'))
-
-        self.widget_opacity_scale = widgets.FloatLogSlider(description='opacity scale', base=10, min=-3, max=3, value=self.state.opacity_scale, step=0.01)
-        link((self.state, 'opacity_scale'), (self.widget_opacity_scale, 'value'))
-        link((self.state, 'opacity_scale'), (self.volume, 'opacity_scale'))
-
-        on_change([(self.state, 'color', 'alpha')])(self._update_transfer_function)
-
-        self.widget_reset_zoom = widgets.Button(description="Reset zoom")
-        def reset_zoom(*ignore):
-            with self.figure:
-                if self.last_shape is not None:
-                    ipv.xlim(0, self.last_shape[0])
-                    ipv.ylim(0, self.last_shape[1])
-                    ipv.zlim(0, self.last_shape[2])
-        self.widget_reset_zoom.on_click(reset_zoom)
-        return widgets.VBox([self.widget_render_method, self.widget_lighting, self.widget_data_min,
-            self.widget_data_max, self.widget_clamp_min, self.widget_clamp_max,
-            self.widget_max_resolution, self.widget_reset_zoom, self.widget_color, self.widget_opacity, self.widget_opacity_scale])

@@ -1,1 +1,2 @@
-from .view import IpyvolumeVolumeView, IpyvolumeScatterView
+from .volume.viewer import IpyvolumeVolumeView
+from .scatter.viewer import IpyvolumeScatterView

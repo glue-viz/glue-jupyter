@@ -13,8 +13,8 @@ class BqplotScatterView(BqplotBaseView):
     allow_duplicate_subset = False
     large_data_size = 1e7
 
-    _layer_style_widget_cls = ScatterLayerStateWidget
     _state_cls = ScatterViewerState
     _options_cls = ScatterViewerStateWidget
     _data_artist_cls = BqplotScatterLayerArtist
     _subset_artist_cls = BqplotScatterLayerArtist
+    _layer_style_widget_cls = ScatterLayerStateWidget

@@ -1,29 +1,27 @@
 import ipyvolume as ipv
 import ipyvolume.moviemaker
 import ipywidgets as widgets
+from ipywidgets import Checkbox, VBox, Tab, ToggleButtons, ToggleButton
+
 import traitlets
 import numpy as np
 from IPython.display import display
 
-from glue_jupyter.common.state3d import ViewerState3DVolume, ViewerState3DScatter
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
 from glue.core.subset import RoiSubsetState3d
 from glue.core.command import ApplySubsetState
 
-from ..view import IPyWidgetView
-from ..link import link, dlink
-from .scatter import IpyvolumeScatterLayerArtist
-from .volume import IpyvolumeVolumeLayerArtist
+from ...view import IPyWidgetView
+from ...link import link, dlink
 
-from ..widgets import LinkedDropdown
+from .viewer_options_widget import Viewer3DStateWidget
 
 
 class IpyvolumeBaseView(IPyWidgetView):
     allow_duplicate_data = False
     allow_duplicate_subset = False
 
-    # _layer_style_widget_cls = {VolumeLayerArtist: IpyvolumeLayerStyleWidget,
-    #                            ScatterLayerArtist: IpyvolumeScatterLayerArtist}
+    _options_cls = Viewer3DStateWidget
 
     def __init__(self, *args, **kwargs):
         super(IpyvolumeBaseView, self).__init__(*args, **kwargs)
@@ -104,6 +102,7 @@ class IpyvolumeBaseView(IPyWidgetView):
         pass
 
     def create_tab(self):
+
         self.widget_show_axes = widgets.Checkbox(value=False, description="Show axes")
         link((self.state, 'visible_axes'), (self.widget_show_axes, 'value'))
         def change(change):
@@ -116,63 +115,20 @@ class IpyvolumeBaseView(IPyWidgetView):
                     ipv.style.box_off()
         self.widget_show_axes.observe(change, 'value')
 
-        self.widgets_axis = []
-        for i, axis_name in enumerate('xyz'):
-            if hasattr(self.state, axis_name + '_att_helper'):
-                widget_axis = LinkedDropdown(self.state, axis_name + '_att', label=axis_name + ' axis')
-                self.widgets_axis.append(widget_axis)
-
         selectors = ['lasso', 'circle', 'rectangle']
-        self.button_action = widgets.ToggleButtons(description='Mode: ', options=[(selector, selector) for selector in selectors],
-                                                   icons=["arrows", "pencil-square-o"])
+        self.widget_toolbar = ToggleButtons(description='Mode: ', options=[(selector, selector) for selector in selectors],
+                                           icons=["arrows", "pencil-square-o"])
         traitlets.link((self.figure, 'selector'),
-                       (self.button_action, 'label'))
+                       (self.widget_toolbar, 'label'))
 
-        self.widget_show_movie_maker = widgets.ToggleButton(value=False, description="Show movie maker")
+        self.widget_show_movie_maker = ToggleButton(value=False, description="Show movie maker")
         self.movie_maker = ipv.moviemaker.MovieMaker(self.figure, self.figure.camera)
         dlink((self.widget_show_movie_maker, 'value'), (self.movie_maker.widget_main.layout, 'display'), lambda value: None if value else 'none')
 
-        self.tab_general = widgets.VBox([self.button_action, self.widget_show_axes] + self.widgets_axis + [self.widget_show_movie_maker, self.movie_maker.widget_main])#, self.widget_y_axis, self.widget_z_axis])
+        self.tab_general = VBox([self.widget_toolbar, self.widget_show_axes])
+        self.tab_general.children += self._options_cls(self.state).children
+        self.tab_general.children += (self.widget_show_movie_maker, self.movie_maker.widget_main)
         children = [self.tab_general]
-        self.tab = widgets.Tab(children)
+        self.tab = Tab(children)
         self.tab.set_title(0, "General")
         self.tab.set_title(1, "Axes")
-
-
-class IpyvolumeScatterView(IpyvolumeBaseView):
-
-    allow_duplicate_data = False
-    allow_duplicate_subset = False
-    _state_cls = ViewerState3DScatter
-    _data_artist_cls = IpyvolumeScatterLayerArtist
-    _subset_artist_cls = IpyvolumeScatterLayerArtist
-    large_data_size = 1e7
-
-    def get_data_layer_artist(self, layer=None, layer_state=None):
-        layer = self.get_layer_artist(self._data_artist_cls, layer=layer, layer_state=layer_state)
-        self._add_layer_tab(layer)
-        return layer
-
-    def get_subset_layer_artist(self, layer=None, layer_state=None):
-        layer = self.get_layer_artist(self._subset_artist_cls, layer=layer, layer_state=layer_state)
-        self._add_layer_tab(layer)
-        return layer
-
-
-class IpyvolumeVolumeView(IpyvolumeBaseView):
-    _state_cls = ViewerState3DVolume
-    large_data_size = 1e8
-
-
-    def get_data_layer_artist(self, layer=None, layer_state=None):
-        if layer.ndim == 1:
-            cls = IpyvolumeScatterLayerArtist
-        else:
-            cls = IpyvolumeVolumeLayerArtist
-        #print('layer', layer, cls)
-        layer = self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
-        self._add_layer_tab(layer)
-        return layer
-
-    def get_subset_layer_artist(self, layer=None, layer_state=None):
-        return self.get_data_layer_artist(layer, layer_state)
