@@ -103,17 +103,15 @@ class IpyvolumeBaseView(IPyWidgetView):
 
     def create_tab(self):
 
-        self.widget_show_axes = widgets.Checkbox(value=False, description="Show axes")
-        link((self.state, 'visible_axes'), (self.widget_show_axes, 'value'))
-        def change(change):
+        def change(visible):
             with self.figure:
-                if change.new:
+                if visible:
                     ipv.style.axes_on()
                     ipv.style.box_on()
                 else:
                     ipv.style.axes_off()
                     ipv.style.box_off()
-        self.widget_show_axes.observe(change, 'value')
+        self.state.add_callback('visible_axes', change)
 
         selectors = ['lasso', 'circle', 'rectangle']
         self.widget_toolbar = ToggleButtons(description='Mode: ', options=[(selector, selector) for selector in selectors],
@@ -125,7 +123,7 @@ class IpyvolumeBaseView(IPyWidgetView):
         self.movie_maker = ipv.moviemaker.MovieMaker(self.figure, self.figure.camera)
         dlink((self.widget_show_movie_maker, 'value'), (self.movie_maker.widget_main.layout, 'display'), lambda value: None if value else 'none')
 
-        self.tab_general = VBox([self.widget_toolbar, self.widget_show_axes])
+        self.tab_general = VBox([self.widget_toolbar])
         self.tab_general.children += self._options_cls(self.state).children
         self.tab_general.children += (self.widget_show_movie_maker, self.movie_maker.widget_main)
         children = [self.tab_general]
