@@ -19,9 +19,6 @@ class ScatterLayerStateWidget(VBox):
         self.widget_visible = Checkbox(description='visible', value=self.state.visible)
         link((self.state, 'visible'), (self.widget_visible, 'value'), backwards=False)
 
-        print(self.state.visible)
-        print(self.widget_visible.value)
-
         self.widget_opacity = FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha, description='opacity')
         link((self.state, 'alpha'), (self.widget_opacity, 'value'))
 

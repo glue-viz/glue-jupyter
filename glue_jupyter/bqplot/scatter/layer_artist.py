@@ -67,8 +67,6 @@ class BqplotScatterLayerArtist(LayerArtist):
         # set initial values for the colormap
         self._on_change_cmap()
 
-        # FIXME: these need to be one-way links so that changing vector_visible
-        # doesn't end up changing visible
         link((self.state, 'visible'), (self.scatter, 'visible'), backwards=False)
         link((self.state, 'visible'), (self.quiver, 'visible'), backwards=False)
         link((self.state, 'visible'), (self.image, 'visible'), backwards=False)
