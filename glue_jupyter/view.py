@@ -55,4 +55,10 @@ class IPyWidgetView(Viewer):
             label = '{data_label}:{subset_label}'.format(data_label=layer.layer.data.label, subset_label=layer.layer.label)
         else:
             label = layer.layer.label
+
+        # Long tab titles can cause issues
+        # (see https://github.com/jupyter-widgets/ipywidgets/issues/2366)
+        if len(label) > 15:
+            label = label[:15] + '...'
+
         self.tab.set_title(len(self.tab.children)-1, label)
