@@ -2,7 +2,6 @@ import os
 import nbformat
 import numpy as np
 from nbconvert.preprocessors import ExecutePreprocessor
-import matplotlib.pyplot as plt
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 

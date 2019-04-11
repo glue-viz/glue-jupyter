@@ -1,1 +1,1 @@
-from .viewer import BqplotHistogramView
+from .viewer import BqplotHistogramView  # noqa

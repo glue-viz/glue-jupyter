@@ -1,1 +1,1 @@
-from .layer_artist import IpyvolumeScatterLayerArtist
+from .layer_artist import IpyvolumeScatterLayerArtist  # noqa

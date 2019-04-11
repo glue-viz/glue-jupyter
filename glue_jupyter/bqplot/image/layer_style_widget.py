@@ -1,4 +1,5 @@
-from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox, Dropdown, FloatText
+from ipywidgets import (Checkbox, FloatSlider, ColorPicker, VBox, Dropdown,
+                        FloatText)
 import ipywidgets.widgets.trait_types as tt
 from glue.config import colormaps
 

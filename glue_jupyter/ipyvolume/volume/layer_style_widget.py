@@ -1,5 +1,5 @@
 from ipywidgets import (Checkbox, VBox, ColorPicker, Dropdown, FloatSlider,
-                        FloatLogSlider, Button)
+                        FloatLogSlider)
 
 from ...link import link
 

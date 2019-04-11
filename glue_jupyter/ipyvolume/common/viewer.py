@@ -1,7 +1,7 @@
 import ipyvolume as ipv
 import ipyvolume.moviemaker
 import ipywidgets as widgets
-from ipywidgets import Checkbox, VBox, Tab, ToggleButtons, ToggleButton
+from ipywidgets import VBox, Tab, ToggleButtons, ToggleButton
 
 import traitlets
 import numpy as np

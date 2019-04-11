@@ -1,12 +1,9 @@
-
 from glue.viewers.common.viewer import Viewer
 from glue.core.layer_artist import LayerArtistContainer
 from glue.core import message as msg
 from glue.core.subset import Subset
 
 from glue_jupyter.utils import _update_not_none
-
-from .link import link
 
 
 class IPyWidgetLayerArtistContainer(LayerArtistContainer):

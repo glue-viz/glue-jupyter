@@ -1,21 +1,14 @@
 import ipyvolume as ipv
-import ipywidgets as widgets
-import traitlets
-from IPython.display import display
 import numpy as np
 import matplotlib.colors
 
-from ..scatter.layer_artist import IpyvolumeScatterLayerArtist
-from ...utils import reduce_size
-
-#from glue_vispy_viewers.common.layer_state import VispyLayerState
 from glue_vispy_viewers.volume.layer_state import VolumeLayerState
-from glue.core.data_combo_helper import ComponentIDComboHelper
-from glue.external.echo import (CallbackProperty, SelectionCallbackProperty)
+from glue.external.echo import CallbackProperty
 from glue.core.data import Subset
 from glue.core.exceptions import IncompatibleAttribute
+from glue_vispy_viewers.common.layer_artist import VispyLayerArtist
 
-from ...link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+from ...link import link, on_change
 
 
 class IpyvolumeLayerState(VolumeLayerState):
@@ -41,9 +34,6 @@ class IpyvolumeLayerState(VolumeLayerState):
         self.clamp_max = False
 
 
-
-from glue_vispy_viewers.common.layer_artist import VispyLayerArtist
-
 def _transfer_function_rgba(color, N=256, max_opacity=1):
     r, g, b = matplotlib.colors.to_rgb(color)
     data = np.zeros((N, 4), dtype=np.float32)
@@ -55,6 +45,7 @@ def _transfer_function_rgba(color, N=256, max_opacity=1):
     return data
 
 data0 = [[[1,2]]*2]*2
+
 
 class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
     def __init__(self, ipyvolume_viewer=None, state=None, layer=None, layer_state=None):

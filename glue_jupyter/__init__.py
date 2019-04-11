@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from ._version import __version__
+from ._version import __version__  # noqa
 
 # from glue.core.session import Session
 # from glue.viewers.scatter.layer_artist import ScatterLayerArtist
@@ -9,6 +9,7 @@ from ._version import __version__
 def load(path):
     from glue.core.data_factories import load_data
     return load_data(path)
+
 
 def jglue(*args, **kwargs):
     show = kwargs.pop('show', False)
@@ -52,7 +53,6 @@ def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz'):
 def example_volume(shape=64, limits=[-4, 4]):
     """Creates a test data set containing a ball"""
     from glue.core import Data
-    import numpy as np
     import ipyvolume as ipv
     ball_data = ipv.examples.ball(shape=shape, limits=limits, show=False, draw=False)
     data = Data()
@@ -64,7 +64,6 @@ def example_image(shape=64, limits=[-4, 4]):
     """Creates a test data set containing a ball"""
     from glue.core import Data, Coordinates
     import numpy as np
-    import ipyvolume as ipv
     x = np.linspace(-3, 3, num=shape)
     X, Y = np.meshgrid(x, x)
     rho = 0.8

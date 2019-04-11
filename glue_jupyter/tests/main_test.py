@@ -1,8 +1,5 @@
-import pytest
-import numpy as np
-
 import glue_jupyter as gj
-from glue.core.component_link import ComponentLink
+
 
 def test_default_components(app, datax, dataxz, dataxyz):
     s = app.scatter2d(data=datax)

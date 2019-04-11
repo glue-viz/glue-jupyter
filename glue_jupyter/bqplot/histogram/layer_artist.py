@@ -1,6 +1,5 @@
 import numpy as np
 import bqplot
-import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
 
 from glue.core.exceptions import IncompatibleAttribute

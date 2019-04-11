@@ -1,1 +1,1 @@
-from .viewer import BqplotImageView
+from .viewer import BqplotImageView  # noqa

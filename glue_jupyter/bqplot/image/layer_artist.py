@@ -1,6 +1,3 @@
-import numpy as np
-import matplotlib.cm
-
 from glue.viewers.image.layer_artist import BaseImageLayerArtist, ImageLayerArtist, ImageSubsetArray
 from glue.viewers.image.state import ImageSubsetLayerState
 from glue.core.fixed_resolution_buffer import ARRAY_CACHE, PIXEL_CACHE

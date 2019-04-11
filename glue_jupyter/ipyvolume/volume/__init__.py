@@ -1,1 +1,1 @@
-from .layer_artist import IpyvolumeVolumeLayerArtist
+from .layer_artist import IpyvolumeVolumeLayerArtist  # noqa

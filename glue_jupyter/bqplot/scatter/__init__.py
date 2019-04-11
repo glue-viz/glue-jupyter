@@ -1,1 +1,1 @@
-from .viewer import BqplotScatterView
+from .viewer import BqplotScatterView  # noqa

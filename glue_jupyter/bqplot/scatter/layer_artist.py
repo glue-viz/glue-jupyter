@@ -3,27 +3,22 @@ import bqplot
 from ipyastroimage.astroimage import AstroImage
 import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
-from IPython.display import display
 
 from glue.core.data import Subset
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.core.exceptions import IncompatibleAttribute
 from glue_jupyter.compat import LayerArtist
 
-from ...link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+from ...link import link, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
-from ...widgets import LinkedDropdown
-import glue_jupyter.widgets
-from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
-                                           MatplotlibLayerState,
-                                           DeferredDrawCallbackProperty as DDCProperty,
-                                           DeferredDrawSelectionCallbackProperty as DDSCProperty)
+from glue.external.echo import CallbackProperty
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
 
+
 class BqplotScatterLayerState(ScatterLayerState):
-    bins = DDCProperty(128, docstring='The number of bins in each dimension for the density map')
+    bins = CallbackProperty(128, docstring='The number of bins in each dimension for the density map')
 
 
 class BqplotScatterLayerArtist(LayerArtist):
