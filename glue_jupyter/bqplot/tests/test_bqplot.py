@@ -2,6 +2,7 @@ import os
 import nbformat
 import numpy as np
 from nbconvert.preprocessors import ExecutePreprocessor
+import matplotlib.pyplot as plt
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -194,19 +195,10 @@ def test_scatter2d_cmap_mode(app, dataxyz):
     assert l1.scatter.color is None
     l1.state.cmap_att = 'x'
     l1.state.cmap_mode = 'Linear'
-    assert l1.widget_color.widget_cmap_mode.label == 'Linear'
     assert l1.state.cmap_name == 'Gray'
     l1.state.cmap_vmin = 0
     l1.state.cmap_vmax = 10
     assert l1.scatter.color is not None
-
-    l1.widget_color.widget_cmap.label = 'Viridis'
-    assert l1.state.cmap_name == 'Viridis'
-    assert l1.widget_color.widget_cmap.label == 'Viridis'
-
-    l1.widget_color.widget_cmap.label = 'Gray'
-    assert l1.widget_color.widget_cmap.label == 'Gray'
-    assert l1.state.cmap_name == 'Gray'
 
 
 def test_scatter2d_and_histogram(app, dataxyz):
@@ -234,30 +226,16 @@ def test_imshow(app, data_image, dataxyz):
 
     assert len(v.layers) == 4
 
-    v.layers[0].state.cmap = 'Grey'
-    assert v.layers[0].widget_colormap.label == 'Grey'
-    assert isinstance(v.layers[0].widget_colormap.value, list)
-    assert v.layers[0].scale_image.scheme
-
-    v.layers[0].state.cmap = 'Jet'
-    assert v.layers[0].widget_colormap.label == 'Jet'
-    assert v.layers[0].widget_colormap.value == 'jet'
-    assert v.layers[0].scale_image.scheme == 'jet'
-    assert v.layers[0].scale_image.colors == []
-
 
 def test_imshow_equal_aspect(app, data_image):
     assert data_image in app.data_collection
     v = app.imshow(data=data_image)
-    assert v.widgets_aspect.value
     assert v.figure.min_aspect_ratio == 1
     assert v.figure.max_aspect_ratio == 1
     v.state.aspect = 'auto'
-    assert not v.widgets_aspect.value
     assert v.figure.min_aspect_ratio == 0.01
     assert v.figure.max_aspect_ratio == 100
     v.state.aspect = 'equal'
-    assert v.widgets_aspect.value
     assert v.figure.min_aspect_ratio == 1
     assert v.figure.max_aspect_ratio == 1
 
@@ -270,13 +248,13 @@ def test_imshow_nonfloat(app):
 def test_show_axes(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     assert s.state.show_axes
-    assert s.widget_show_axes.checked
+    assert s.widget_show_axes.value
     margin_initial = s.figure.fig_margin
     s.state.show_axes = False
-    assert s.widget_show_axes.checked == False
+    assert not s.widget_show_axes.value
     assert s.figure.fig_margin != margin_initial
-    s.widget_show_axes.checked = True
-    assert s.state.show_axes == True
+    s.widget_show_axes.value = True
+    assert s.state.show_axes
     assert s.figure.fig_margin == margin_initial
 
 
