@@ -1,6 +1,6 @@
 from glue.viewers.scatter.state import ScatterViewerState
 
-from ..view import BqplotBaseView
+from ..common.viewer import BqplotBaseView
 
 from .layer_artist import BqplotScatterLayerArtist
 from .viewer_options_widget import ScatterViewerStateWidget

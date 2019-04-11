@@ -2,7 +2,7 @@ from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RangeROI
 from glue.viewers.histogram.state import HistogramViewerState
 
-from ..view import BqplotBaseView
+from ..common.viewer import BqplotBaseView
 
 from .layer_artist import BqplotHistogramLayerArtist
 from .layer_style_widget import HistogramLayerStateWidget

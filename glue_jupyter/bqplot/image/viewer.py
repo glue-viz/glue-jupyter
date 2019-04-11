@@ -5,7 +5,7 @@ from glue.viewers.image.composite_array import CompositeArray
 
 from ...link import on_change
 
-from ..view import BqplotBaseView
+from ..common.viewer import BqplotBaseView
 from ..scatter.layer_artist import BqplotScatterLayerArtist
 from ..scatter.layer_style_widget import ScatterLayerStateWidget
 
