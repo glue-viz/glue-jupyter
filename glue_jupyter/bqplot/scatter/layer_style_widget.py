@@ -13,9 +13,6 @@ class ScatterLayerStateWidget(VBox):
 
         self.state = layer_state
 
-        # NOTE: we need to use backwards=False here to make sure that changing
-        # state.vector_visible doesn't cause self.state.visible to change
-        # via self.widget_visible.value
         self.widget_visible = Checkbox(description='visible', value=self.state.visible)
         dlink((self.state, 'visible'), (self.widget_visible, 'value'))
 
