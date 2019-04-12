@@ -98,6 +98,11 @@ class JupyterApplication(Application):
             mode = SUBSET_MODES[mode]
         self.session.edit_subset_mode.mode = mode
 
+    def new_data_viewer(self, *args, **kwargs):
+        viewer = super().new_data_viewer(*args, **kwargs)
+        viewer.show()
+        return viewer
+
     def histogram1d(self, x=None, data=None, widget='bqplot', color=None, x_min=None, x_max=None, n_bin=None, normalize=False, cumulative=False, viewer_state=None, layer_state=None):
         """
         Open an interactive histogram viewer.
