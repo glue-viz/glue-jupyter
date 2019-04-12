@@ -1,6 +1,6 @@
 # This is an image sub-class that automatically gets its values from an object
-# that implements __call__ with a bounds= argument. It is the equivalent of
-# FRBArtist in glue-core.
+# that implements __call__ with a bounds= argument and returns a fixed
+# resolution buffer (FRB). It is the equivalent of FRBArtist in glue-core.
 
 import numpy as np
 
