@@ -24,6 +24,10 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         super(BqplotImageSubsetLayerArtist, self).__init__(view, viewer_state,
                                                            layer_state=layer_state, layer=layer)
 
+        # NOTE: we need to do this explicitly since BaseImageLayerArtist
+        # actually stores this in self.axes rather than self.view.
+        self.view = view
+
         self.subset_array = ImageSubsetArray(self._viewer_state, self)
 
         self.image_artist = FRBImage(view, self.subset_array)
