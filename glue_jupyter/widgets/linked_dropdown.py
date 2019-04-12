@@ -1,6 +1,7 @@
 from ipywidgets import Dropdown
 import ipymaterialui as mui
 from glue.external.echo.selection import ChoiceSeparator
+from glue.utils import avoid_circular
 
 __all__ = ['LinkedDropdown', 'LinkedDropdownMaterial']
 
@@ -13,6 +14,8 @@ def get_choices(state, attribute_name):
     choices = []
     labels = []
     display_func = getattr(type(state), attribute_name).get_display_func(state)
+    if display_func is None:
+        display_func = str
     for choice in getattr(type(state), attribute_name).get_choices(state):
         if not isinstance(choice, ChoiceSeparator):
             choices.append(choice)
@@ -55,20 +58,25 @@ class LinkedDropdown(Dropdown):
         if value is not None:
             self.value = value
 
+    @avoid_circular
     def _update_glue_state_from_ui(self, change):
         """
         Update the SelectionCallbackProperty based on the UI.
         """
-        # If we are here, the SelectionCallbackProperty has been changed, and
-        # this can be due to the options or the selection changing so we need
-        # to update the options.
-        self._update_options()
         setattr(self.state, self.attribute_name, self.value)
 
+    @avoid_circular
     def _update_ui_from_glue_state(self, *ignore_args):
         """
         Update the UI based on the SelectionCallbackProperty.
         """
+        value = getattr(self.state, self.attribute_name)
+
+        # If we are here, the SelectionCallbackProperty has been changed, and
+        # this can be due to the options or the selection changing so we need
+        # to update the options.
+        self._update_options()
+
         if len(self._choices) > 0:
             value = getattr(self.state, self.attribute_name)
             for choice in self._choices:

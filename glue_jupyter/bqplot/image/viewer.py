@@ -1,27 +1,49 @@
 import bqplot
-import ipywidgets as widgets
 
 from glue.viewers.image.state import ImageViewerState
+from glue.viewers.image.composite_array import CompositeArray
 
-from ...link import link, on_change
+from ...link import on_change
 
-from ..view import BqplotBaseView
+from ..common.viewer import BqplotBaseView
 from ..scatter.layer_artist import BqplotScatterLayerArtist
+from ..scatter.layer_style_widget import ScatterLayerStateWidget
 
-from .layer_artist import BqplotImageLayerArtist
+from .layer_artist import BqplotImageLayerArtist, BqplotImageSubsetLayerArtist
+from .frb_mark import FRBImage
+
+from .layer_style_widget import ImageLayerStateWidget, ImageSubsetLayerStateWidget
+from .viewer_options_widget import ImageViewerStateWidget
 
 
 class BqplotImageView(BqplotBaseView):
 
     allow_duplicate_data = False
     allow_duplicate_subset = False
-    _state_cls = ImageViewerState
     large_data_size = 2e7
 
+    _layer_style_widget_cls = {BqplotImageLayerArtist: ImageLayerStateWidget,
+                               BqplotImageSubsetLayerArtist: ImageSubsetLayerStateWidget,
+                               BqplotScatterLayerArtist: ScatterLayerStateWidget}
+    _state_cls = ImageViewerState
+    _options_cls = ImageViewerStateWidget
+
     def __init__(self, session):
+
         super(BqplotImageView, self).__init__(session)
+
         on_change([(self.state, 'aspect')])(self._sync_figure_aspect)
         self._sync_figure_aspect()
+
+        self._composite = CompositeArray()
+        self._composite_image = FRBImage(self, self._composite)
+        self.figure.marks = list(self.figure.marks) + [self._composite_image]
+        self.state.add_callback('reference_data', self._reset_limits)
+        self.state.add_callback('x_att', self._reset_limits)
+        self.state.add_callback('y_att', self._reset_limits)
+
+    def _reset_limits(self, *args):
+        self.state.reset_limits()
 
     def _sync_figure_aspect(self):
         with self.figure.hold_trait_notifications():
@@ -43,14 +65,5 @@ class BqplotImageView(BqplotBaseView):
         if layer.ndim == 1:
             cls = BqplotScatterLayerArtist
         else:
-            cls = BqplotImageLayerArtist
+            cls = BqplotImageSubsetLayerArtist
         return self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
-
-    def create_tab(self):
-        super(BqplotImageView, self).create_tab()
-        self.widgets_aspect = widgets.Checkbox(description='Equal aspect ratio')
-        aspect_mapping = {'equal': True, 'auto': False}
-        aspect_mapping_inverse = {True: 'equal', False: 'auto'}
-        link((self.state, 'aspect'), (self.widgets_aspect, 'value'), lambda x: aspect_mapping[x], lambda x: aspect_mapping_inverse[x])
-
-        self.tab_general.children += (self.widgets_aspect,)

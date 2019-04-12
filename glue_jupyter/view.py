@@ -5,6 +5,7 @@ from glue.core.subset import Subset
 
 from glue_jupyter.utils import _update_not_none
 
+
 class IPyWidgetLayerArtistContainer(LayerArtistContainer):
 
     def __init__(self):
@@ -45,10 +46,19 @@ class IPyWidgetView(Viewer):
         return cls(self, self.state, layer=layer, layer_state=layer_state)
 
     def _add_layer_tab(self, layer):
-        layer_tab = layer.create_widgets()
+        if isinstance(self._layer_style_widget_cls, dict):
+            layer_tab = self._layer_style_widget_cls[type(layer)](layer.state)
+        else:
+            layer_tab = self._layer_style_widget_cls(layer.state)
         self.tab.children = self.tab.children + (layer_tab, )
         if isinstance(layer.layer, Subset):
             label = '{data_label}:{subset_label}'.format(data_label=layer.layer.data.label, subset_label=layer.layer.label)
         else:
             label = layer.layer.label
+
+        # Long tab titles can cause issues
+        # (see https://github.com/jupyter-widgets/ipywidgets/issues/2366)
+        if len(label) > 15:
+            label = label[:15] + '...'
+
         self.tab.set_title(len(self.tab.children)-1, label)

@@ -9,6 +9,7 @@ class DummyState(State):
     """Mock state class for testing only."""
 
     x_att = SelectionCallbackProperty(docstring='x test attribute')
+    y_att = SelectionCallbackProperty(docstring='y test attribute', default_index=-1)
 
 
 def test_component(app, dataxz, dataxyz):
@@ -23,7 +24,6 @@ def test_component(app, dataxz, dataxyz):
 
     # simple sanity tests
     assert dropdown.description == 'x test attribute'
-    items = getattr(type(state), 'x_att').get_choice_labels(state)
     assert [item[0] for item in dropdown.options] == ['x', 'z']
 
     # initial state
@@ -44,6 +44,25 @@ def test_component(app, dataxz, dataxyz):
 
     state.x_att = 'x'
     assert dropdown.value is dataxz.id['x']
+
+
+def test_component_default_index(app, dataxz, dataxyz):
+
+    # Regression test for a bug that caused the incorrect element to be selected
+    # when default_index is involved.
+
+    # setup
+    state = DummyState()
+    helper = ComponentIDComboHelper(state, 'y_att', app.data_collection)
+    state.helper = helper
+    dropdown = LinkedDropdown(state, 'y_att', 'y test attribute')
+    assert [item[0] for item in dropdown.options] == []
+
+    helper.append_data(dataxz)
+    assert [item[0] for item in dropdown.options] == ['x', 'z']
+
+    assert state.y_att is dataxz.id['z']
+    assert dropdown.value is dataxz.id['z']
 
 
 def test_component_material(app, dataxz, dataxyz):

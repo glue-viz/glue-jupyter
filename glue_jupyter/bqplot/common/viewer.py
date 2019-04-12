@@ -8,10 +8,9 @@ from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
 
-from ..widgets.linked_dropdown import LinkedDropdown
-from ..view import IPyWidgetView
-from ..link import link, on_change
-from ..utils import float_or_none
+from ...view import IPyWidgetView
+from ...link import link, on_change
+from ...utils import float_or_none
 
 ICON_WIDTH = 20
 
@@ -108,18 +107,14 @@ class BqplotBaseView(IPyWidgetView):
         display(self.main_widget)
 
     def create_tab(self):
-        COLOR = 'blue'
-        # self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
-        self.widget_show_axes = mui.Checkbox(checked=True, style={'color': COLOR})
-        self.widget_show_axes_fcl = mui.FormControlLabel(control=self.widget_show_axes, label="Show axes")
-        self.widgets_axis = []
-        self.tab_general = widgets.VBox([
-                self.widget_toolbar, self.widget_show_axes_fcl] + self.widgets_axis)#, self.widget_y_axis, self.widget_z_axis])
+        self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
+        self.tab_general = widgets.VBox([self.widget_toolbar, self.widget_show_axes])
         children = [self.tab_general]
+        self.tab_general.children += self._options_cls(self.state).children
         self.tab = widgets.Tab(children)
         self.tab.set_title(0, "General")
         self.tab.set_title(1, "Axes")
-        link((self.state, 'show_axes'), (self.widget_show_axes, 'checked'))
+        link((self.state, 'show_axes'), (self.widget_show_axes, 'value'))
 
     def _sync_show_axes(self):
         # TODO: if moved to state, this would not rely on the widget

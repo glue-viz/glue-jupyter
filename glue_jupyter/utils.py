@@ -1,12 +1,15 @@
+import functools
+import collections
+import time
+
 import PIL.Image
 import numpy as np
-try:
-    from io import BytesIO as StringIO # python3
-except:
-    from StringIO import StringIO # python2
+from io import BytesIO as StringIO # python3
+
 
 def float_or_none(x):
     return float(x) if x is not None else None
+
 
 def rgba_to_png_data(rgba):
     width, height = rgba.shape[1], rgba.shape[0]
@@ -15,6 +18,7 @@ def rgba_to_png_data(rgba):
     img.save(f, "png")
     return f.getvalue()
 
+
 def scalar_to_png_data(I, colormap='viridis'):
     mask = ~np.isfinite(I)
     I = np.ma.masked_array(I, mask)
@@ -22,6 +26,7 @@ def scalar_to_png_data(I, colormap='viridis'):
     colormap.set_bad(alpha=0)
     data = colormap(I, bytes=True)
     return rgba_to_png_data(data)
+
 
 def reduce_size(data, max_size):
     for axis in range(3):
@@ -35,6 +40,7 @@ def reduce_size(data, max_size):
             data = (data[slices1])# + data.__getitem__(slices2))/2
             shape = data.shape
     return data
+
 
 def _update_not_none(d, **kwargs):
     for key, value in kwargs.items():
@@ -84,6 +90,7 @@ def grid_slice(xmin, xmax, shape, ymin, ymax):
 #     else:
     return (imin, imax), (xmin + nmin * width, xmin + nmax * width)
 
+
 def get_ioloop():
     import IPython
     import zmq
@@ -91,9 +98,6 @@ def get_ioloop():
     if ipython and hasattr(ipython, 'kernel'):
         return zmq.eventloop.ioloop.IOLoop.instance()
 
-import functools
-import collections
-import time
 
 def debounced(delay_seconds=0.5, method=False):
     def wrapped(f):
@@ -120,6 +124,7 @@ def debounced(delay_seconds=0.5, method=False):
                 ioloop.add_callback(thread_safe)
         return execute
     return wrapped
+
 
 def colormap_to_hexlist(cmap, N=256):
     x = np.linspace(0, 1, N)

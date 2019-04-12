@@ -1,9 +1,6 @@
-import traitlets
 import ipywidgets as widgets
 
-from glue.config import colormaps
-
-from ..link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+from ..link import link, dlink
 from .linked_dropdown import LinkedDropdown
 
 

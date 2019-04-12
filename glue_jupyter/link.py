@@ -107,4 +107,5 @@ def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='v
             setattr(state, state_attr, options[change.new])
 
     widget.observe(update_state, 'index')
+
     update()

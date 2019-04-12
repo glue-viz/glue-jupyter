@@ -3,27 +3,22 @@ import bqplot
 from ipyastroimage.astroimage import AstroImage
 import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
-from IPython.display import display
 
 from glue.core.data import Subset
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.core.exceptions import IncompatibleAttribute
 from glue_jupyter.compat import LayerArtist
 
-from ...link import link, dlink, calculation, link_component_id_to_select_widget, on_change
+from ...link import dlink, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
-from ...widgets import LinkedDropdown
-import glue_jupyter.widgets
-from glue.viewers.matplotlib.state import (MatplotlibDataViewerState,
-                                           MatplotlibLayerState,
-                                           DeferredDrawCallbackProperty as DDCProperty,
-                                           DeferredDrawSelectionCallbackProperty as DDSCProperty)
+from glue.external.echo import CallbackProperty
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
 
+
 class BqplotScatterLayerState(ScatterLayerState):
-    bins = DDCProperty(128, docstring='The number of bins in each dimension for the density map')
+    bins = CallbackProperty(128, docstring='The number of bins in each dimension for the density map')
 
 
 class BqplotScatterLayerArtist(LayerArtist):
@@ -54,15 +49,15 @@ class BqplotScatterLayerArtist(LayerArtist):
         self._viewer_state.add_global_callback(self._update_scatter)
 
         self.view.figure.marks = list(self.view.figure.marks) + [self.image, self.scatter, self.quiver ]
-        link((self.state, 'color'), (self.scatter, 'colors'), lambda x: [x], lambda x: x[0])
-        link((self.state, 'color'), (self.quiver, 'colors'), lambda x: [x], lambda x: x[0])
+        dlink((self.state, 'color'), (self.scatter, 'colors'), lambda x: [x])
+        dlink((self.state, 'color'), (self.quiver, 'colors'), lambda x: [x])
         self.scatter.observe(self._workaround_unselected_style, 'colors')
         self.quiver.observe(self._workaround_unselected_style, 'colors')
 
         on_change([(self.state, 'cmap_mode', 'cmap_att')])(self._on_change_cmap_mode_or_att)
         on_change([(self.state, 'cmap')])(self._on_change_cmap)
-        link((self.state, 'cmap_vmin'), (self.scale_color, 'min'), float_or_none)
-        link((self.state, 'cmap_vmax'), (self.scale_color, 'max'), float_or_none)
+        dlink((self.state, 'cmap_vmin'), (self.scale_color, 'min'), float_or_none)
+        dlink((self.state, 'cmap_vmax'), (self.scale_color, 'max'), float_or_none)
 
         on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
 
@@ -71,6 +66,17 @@ class BqplotScatterLayerArtist(LayerArtist):
         self._update_size()
         # set initial values for the colormap
         self._on_change_cmap()
+
+        dlink((self.state, 'visible'), (self.scatter, 'visible'))
+        dlink((self.state, 'visible'), (self.quiver, 'visible'))
+        dlink((self.state, 'visible'), (self.image, 'visible'))
+
+        dlink((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x])
+        dlink((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x])
+        dlink((self.state, 'alpha'), (self.image, 'opacity'))
+
+        on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
+        dlink((self.state, 'vector_visible'), (self.quiver, 'visible'))
 
     def _update_xy_att(self, *args):
         self.update()
@@ -185,12 +191,6 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.scale_rotation.max = np.pi
         self.quiver.rotation = angle
 
-    def create_widgets(self):
-        self.widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (self.widget_visible, 'value'))
-        link((self.state, 'visible'), (self.scatter, 'visible'))
-        return widgets.VBox([self.widget_visible])
-
     def _update_size(self):
         size = self.state.size
         scale = self.state.size_scaling
@@ -205,35 +205,3 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter.size = None
             self.scale_size.min = 0
             self.scale_size.max = 1
-
-    def create_widgets(self):
-        self.widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (self.widget_visible, 'value'))
-        link((self.state, 'visible'), (self.scatter, 'visible'))
-
-        self.widget_opacity = widgets.FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha, description='opacity')
-        link((self.state, 'alpha'), (self.widget_opacity, 'value'))
-        link((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x], lambda x: x[0])
-        link((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x], lambda x: x[0])
-
-        self.widget_color = glue_jupyter.widgets.Color(state=self.state)
-        self.widget_size = glue_jupyter.widgets.Size(state=self.state)
-
-        self.widget_vector = widgets.Checkbox(description='show vectors', value=self.state.vector_visible)
-        helper = self.state.vx_att_helper
-
-        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', ui_name='vx', label='vx attribute')
-        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy', label='vy attribute')
-        on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
-        link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
-        link((self.state, 'vector_visible'), (self.quiver, 'visible'))
-        dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'), lambda value: None if value else 'none')
-        dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
-
-        self.widget_bins = widgets.IntSlider(min=0, max=1024, value=self.state.bins, description='bin count')
-        link((self.state, 'bins'), (self.widget_bins, 'value'))
-
-        return widgets.VBox([self.widget_visible, self.widget_opacity,
-            self.widget_size,
-            self.widget_color,
-            self.widget_vector, self.widget_vector_x, self.widget_vector_y])

@@ -1,6 +1,5 @@
 import numpy as np
 import bqplot
-import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
 
 from glue.core.exceptions import IncompatibleAttribute
@@ -38,6 +37,8 @@ class BqplotHistogramLayerArtist(LayerArtist):
         self._viewer_state.add_global_callback(self._update_histogram)
         self.state.add_global_callback(self._update_histogram)
         self.bins = None
+
+        link((self.state, 'visible'), (self.bars, 'visible'))
 
     def _update_xy_att(self, *args):
         self.update()
@@ -140,13 +141,3 @@ class BqplotHistogramLayerArtist(LayerArtist):
         self.state.reset_cache()
         self._update_histogram(force=True)
         self.redraw()
-
-    def create_widgets(self):
-        self.widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (self.widget_visible, 'value'))
-        link((self.state, 'visible'), (self.bars, 'visible'))
-
-        self.widget_color = widgets.ColorPicker(description='color')
-        link((self.state, 'color'), (self.widget_color, 'value'))
-
-        return widgets.VBox([self.widget_visible, self.widget_color])

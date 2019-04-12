@@ -1,9 +1,11 @@
-from glue.viewers.common.state import LayerState
 from glue.viewers.common.state import ViewerState
 from glue.external.echo import (CallbackProperty, SelectionCallbackProperty)
 from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.state_objects import StateAttributeLimitsHelper
 from glue.utils import nonpartial
+
+__all__ = ['ViewerState3D', 'ViewerState3DVolume', 'ViewerState3DScatter']
+
 
 class ViewerState3D(ViewerState):
     """

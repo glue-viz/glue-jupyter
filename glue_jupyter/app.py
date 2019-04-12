@@ -1,18 +1,13 @@
 import ipywidgets as widgets
-import ipymaterialui as mui
 from IPython.display import display
 
 
 from glue.core.application_base import Application
-from glue.core import message as msg
 from glue.core.link_helpers import LinkSame
-from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
-from glue.core.subset import RoiSubsetState3d, RoiSubsetState
+from glue.core.roi import PolygonalROI
+from glue.core.subset import RoiSubsetState
 from glue.core.command import ApplySubsetState
-from glue.core.edit_subset_mode import (EditSubsetMode, OrMode, AndNotMode,
-                                        AndMode, XorMode, ReplaceMode)
-
-import glue.icons
+from glue.core.edit_subset_mode import AndMode, ReplaceMode
 
 from glue_jupyter.utils import _update_not_none
 from glue_jupyter.widgets.subset_select import SubsetSelect

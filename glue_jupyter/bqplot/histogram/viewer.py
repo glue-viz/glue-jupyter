@@ -1,54 +1,26 @@
-import ipywidgets as widgets
-
 from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RangeROI
 from glue.viewers.histogram.state import HistogramViewerState
 
-from ...widgets.linked_dropdown import LinkedDropdown
-
-from ...link import link
-
-from ..view import BqplotBaseView
+from ..common.viewer import BqplotBaseView
 
 from .layer_artist import BqplotHistogramLayerArtist
+from .layer_style_widget import HistogramLayerStateWidget
+from .viewer_options_widget import HistogramViewerStateWidget
 
 
 class BqplotHistogramView(BqplotBaseView):
 
     allow_duplicate_data = False
     allow_duplicate_subset = False
-    _state_cls = HistogramViewerState
-    _data_artist_cls = BqplotHistogramLayerArtist
-    _subset_artist_cls = BqplotHistogramLayerArtist
     large_data_size = 1e5
     is2d = False
 
-    def create_tab(self):
-        super(BqplotHistogramView, self).create_tab()
-        self.button_normalize = widgets.ToggleButton(
-            value=False, description='normalize', tooltip='Normalize histogram')
-        link((self.button_normalize, 'value'), (self.state, 'normalize'))
-
-        self.button_cumulative = widgets.ToggleButton(
-            value=False, description='cumulative', tooltip='cumulative histogram')
-        link((self.button_cumulative, 'value'), (self.state, 'cumulative'))
-
-        self.widgets_axis = []
-        for i, axis_name in enumerate('x'):
-            if hasattr(self.state, axis_name + '_att_helper'):
-                widget_axis = LinkedDropdown(self.state, axis_name + '_att', label=axis_name + ' axis')
-                self.widgets_axis.append(widget_axis)
-
-        # @on_change([(self.state, 'hist_n_bin')])
-        # def trigger():
-
-        # self.widget_hist_x_min = widgets.FloatText(description='x min')
-        # link((self.state, 'hist_x_min'), (self.widget_hist_x_min, 'value'))
-
-        # self.widget_hist_n_bin = widgets.IntSlider(min=1, max=1000, step=1, description='bins')
-        # link((self.state, 'hist_n_bin'), (self.widget_hist_n_bin, 'value'))
-
-        self.tab_general.children += (widgets.HBox([self.button_normalize, self.button_cumulative] ),) + tuple(self.widgets_axis)
+    _state_cls = HistogramViewerState
+    _options_cls = HistogramViewerStateWidget
+    _data_artist_cls = BqplotHistogramLayerArtist
+    _subset_artist_cls = BqplotHistogramLayerArtist
+    _layer_style_widget_cls = HistogramLayerStateWidget
 
     def _roi_to_subset_state(self, roi):
         # TODO: copy paste from glue/viewers/histogram/qt/data_viewer.py
