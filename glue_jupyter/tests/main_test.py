@@ -1,4 +1,11 @@
+import os
+
+import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor
+
 import glue_jupyter as gj
+
+DATA = os.path.join(os.path.dirname(__file__), 'data')
 
 
 def test_default_components(app, datax, dataxz, dataxyz):
@@ -44,6 +51,7 @@ def test_viewer_state(app, dataxyz):
     assert s.state.x_min == -2
     assert s.state.x_max == 2
 
+
 def test_layer_state(app, dataxyz):
     s = app.scatter2d(data=dataxyz, layer_state=dict(size=10))
     assert s.layers[0].state.size == 10
@@ -63,6 +71,7 @@ def test_add_data_with_state(app, dataxz, dataxyz):
     assert s.layers[1].state.alpha == 0.2
     assert s.layers[1].state.size == 3.3
 
+
 def test_double_load_data(tmpdir):
 
     # Regression test for a bug that caused a crash when adding two datasets
@@ -76,3 +85,12 @@ def test_double_load_data(tmpdir):
     app = gj.jglue()
     app.load_data(filename)
     app.load_data(filename)
+
+
+def test_state_widget_notebook():
+
+    with open(os.path.join(DATA, 'state_widgets.ipynb')) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    ep = ExecutePreprocessor(timeout=600, kernel_name='python3')
+    ep.preprocess(nb, {'metadata': {'path': DATA}})
