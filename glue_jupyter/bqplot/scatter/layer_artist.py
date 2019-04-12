@@ -9,7 +9,7 @@ from glue.viewers.scatter.state import ScatterLayerState
 from glue.core.exceptions import IncompatibleAttribute
 from glue_jupyter.compat import LayerArtist
 
-from ...link import link, on_change
+from ...link import dlink, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
 from glue.external.echo import CallbackProperty
 
@@ -49,15 +49,15 @@ class BqplotScatterLayerArtist(LayerArtist):
         self._viewer_state.add_global_callback(self._update_scatter)
 
         self.view.figure.marks = list(self.view.figure.marks) + [self.image, self.scatter, self.quiver ]
-        link((self.state, 'color'), (self.scatter, 'colors'), lambda x: [x], lambda x: x[0])
-        link((self.state, 'color'), (self.quiver, 'colors'), lambda x: [x], lambda x: x[0])
+        dlink((self.state, 'color'), (self.scatter, 'colors'), lambda x: [x])
+        dlink((self.state, 'color'), (self.quiver, 'colors'), lambda x: [x])
         self.scatter.observe(self._workaround_unselected_style, 'colors')
         self.quiver.observe(self._workaround_unselected_style, 'colors')
 
         on_change([(self.state, 'cmap_mode', 'cmap_att')])(self._on_change_cmap_mode_or_att)
         on_change([(self.state, 'cmap')])(self._on_change_cmap)
-        link((self.state, 'cmap_vmin'), (self.scale_color, 'min'), float_or_none)
-        link((self.state, 'cmap_vmax'), (self.scale_color, 'max'), float_or_none)
+        dlink((self.state, 'cmap_vmin'), (self.scale_color, 'min'), float_or_none)
+        dlink((self.state, 'cmap_vmax'), (self.scale_color, 'max'), float_or_none)
 
         on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
 
@@ -67,16 +67,16 @@ class BqplotScatterLayerArtist(LayerArtist):
         # set initial values for the colormap
         self._on_change_cmap()
 
-        link((self.state, 'visible'), (self.scatter, 'visible'), backwards=False)
-        link((self.state, 'visible'), (self.quiver, 'visible'), backwards=False)
-        link((self.state, 'visible'), (self.image, 'visible'), backwards=False)
+        dlink((self.state, 'visible'), (self.scatter, 'visible'))
+        dlink((self.state, 'visible'), (self.quiver, 'visible'))
+        dlink((self.state, 'visible'), (self.image, 'visible'))
 
-        link((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x], lambda x: x[0])
-        link((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x], lambda x: x[0])
-        link((self.state, 'alpha'), (self.image, 'opacity'))
+        dlink((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x])
+        dlink((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x])
+        dlink((self.state, 'alpha'), (self.image, 'opacity'))
 
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
-        link((self.state, 'vector_visible'), (self.quiver, 'visible'), backwards=False)
+        dlink((self.state, 'vector_visible'), (self.quiver, 'visible'))
 
     def _update_xy_att(self, *args):
         self.update()
@@ -190,12 +190,6 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.scale_rotation.min = -np.pi
         self.scale_rotation.max = np.pi
         self.quiver.rotation = angle
-
-    def create_widgets(self):
-        self.widget_visible = widgets.Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (self.widget_visible, 'value'))
-        link((self.state, 'visible'), (self.scatter, 'visible'))
-        return widgets.VBox([self.widget_visible])
 
     def _update_size(self):
         size = self.state.size

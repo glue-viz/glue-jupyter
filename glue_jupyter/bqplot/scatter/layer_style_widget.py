@@ -17,7 +17,7 @@ class ScatterLayerStateWidget(VBox):
         # state.vector_visible doesn't cause self.state.visible to change
         # via self.widget_visible.value
         self.widget_visible = Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (self.widget_visible, 'value'), backwards=False)
+        dlink((self.state, 'visible'), (self.widget_visible, 'value'))
 
         self.widget_opacity = FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha, description='opacity')
         link((self.state, 'alpha'), (self.widget_opacity, 'value'))
@@ -26,7 +26,7 @@ class ScatterLayerStateWidget(VBox):
         self.widget_size = Size(state=self.state)
 
         self.widget_vector = Checkbox(description='show vectors', value=self.state.vector_visible)
-        link((self.state, 'vector_visible'), (self.widget_vector, 'value'), backwards=False)
+        link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
 
         self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', ui_name='vx', label='vx attribute')
         self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy', label='vy attribute')
