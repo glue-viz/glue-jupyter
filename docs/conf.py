@@ -32,11 +32,15 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode',
-    'nbsphinx']
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.todo',
+              'sphinx.ext.mathjax',
+              'sphinx.ext.viewcode',
+              'nbsphinx', 'numpydoc',
+              'sphinx_automodapi.automodapi',
+              'sphinxcontrib.spelling']
+
+numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -170,8 +174,17 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-
-
-
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_cache_limit = 10     # days to keep the cached inventories
+intersphinx_mapping = {
+    # 'sphinx': ('https://www.sphinx-doc.org/en/latest/', None),
+    'python': ('https://docs.python.org/3.7', None),
+    # 'matplotlib': ('https://matplotlib.org', None),
+    # 'numpy': ('https://docs.scipy.org/doc/numpy', None),
+    # 'astropy': ('http://docs.astropy.org/en/stable/', None),
+    # 'echo': ('https://echo.readthedocs.io/en/latest/', None),
+    'glue': ('http://docs.glueviz.org/en/stable/', None),
+}
+
+default_role = 'obj'
+nitpicky = True

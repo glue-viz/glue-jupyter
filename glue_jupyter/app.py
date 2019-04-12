@@ -7,16 +7,37 @@ from glue.core.link_helpers import LinkSame
 from glue.core.roi import PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.core.command import ApplySubsetState
-from glue.core.edit_subset_mode import AndMode, ReplaceMode
+from glue.core.edit_subset_mode import (NewMode, ReplaceMode, AndMode, OrMode,
+                                        XorMode, AndNotMode)
 
 from glue_jupyter.utils import _update_not_none
 from glue_jupyter.widgets.subset_select import SubsetSelect
 from glue_jupyter.widgets.subset_mode import SubsetMode
 
+__all__ = ['JupyterApplication']
 
-# not sure we need to inherit: from glue.core.application_base import Application
-# what would we gain that would be natural in the notebook?
+# TODO: move this to glue-core so that the subset mode can be set ot a string
+# there too
+SUBSET_MODES = {'new': NewMode, 'replace': ReplaceMode, 'and': AndMode,
+                'or': OrMode, 'xor': XorMode, 'not': AndNotMode}
+
+
 class JupyterApplication(Application):
+    """
+    The main Glue application object for the Jupyter environment.
+
+    This is used as the primary way to interact with glue, including loading
+    data, creating viewers, and adding links.
+
+    Parameters
+    ----------
+    data_collection : `~glue.core.data_collection.DataCollection`
+        A pre-existing data collection. By default, a new data collection is
+        created.
+    session : `~glue.core.session.Session`
+        A pre-existing session object. By default, a new session object is
+        created.
+    """
 
     def __init__(self, data_collection=None, session=None):
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
@@ -30,79 +51,86 @@ class JupyterApplication(Application):
         display(self.widget)
 
     def link(self, links):
+        """
+        Parse and add links.
+        """
         from glue.qglue import parse_links
         self.data_collection.add_link(parse_links(self.data_collection, links))
 
-    def add_link(self, data1, attribute1, data2, attribute2, function=None):
+    def add_link(self, data1, attribute1, data2, attribute2):
+        """
+        Add a simple identity link between two attributes.
+
+        Parameters
+        ----------
+        data1 : `~glue.core.data.Data`
+            The dataset containing the first attribute.
+        attribute1 : str or `~glue.core.component_id.ComponentID`
+            The first attribute to link.
+        data2 : `~glue.core.data.Data`
+            The dataset containing the first attribute.
+        attribute2 : str or `~glue.core.component_id.ComponentID`
+            The first attribute to link.
+        """
         # For now this assumes attribute1 and attribute2 are strings and single
         # attributes. In future we should generalize this while keeping the
         # simplest use case simple.
-        if function is not None:
-            raise NotImplementedError
         att1 = data1.id[attribute1]
         att2 = data2.id[attribute2]
         link = LinkSame(att1, att2)
         self.data_collection.add_link(link)
 
-    def subset_mode(self, mode):
+    def set_subset_mode(self, mode):
+        """
+        Set the current subset mode.
+
+        By default, selections in viewers update the current subset by
+        replacing the previous selection with the new selection. However it is
+        also possible to combine the current selection with previous selections
+        using boolean operations.
+
+        Parameters
+        ----------
+        mode : {'new', 'replace', 'and', 'or', 'xor', 'not'}
+            The selection mode to use.
+        """
+        if mode in SUBSET_MODES:
+            mode = SUBSET_MODES[mode]
         self.session.edit_subset_mode.mode = mode
 
-    def subset_mode_replace(self):
-        self.subset_mode(ReplaceMode)
-
-    def subset_mode_and(self):
-        self.subset_mode(AndMode)
-
-    def subset_lasso2d(self, x, y, xvalues, yvalues):
-        roi = PolygonalROI(xvalues, yvalues)
-        self.subset_roi([x, y], roi)
-
-    def subset_roi(self, components, roi, use_current=False):
-        subset_state = RoiSubsetState(components[0], components[1], roi)
-        cmd = ApplySubsetState(data_collection=self.data_collection,
-                               subset_state=subset_state,
-                               use_current=use_current)
-        self._session.command_stack.do(cmd)
-
-    def _roi_to_subset_state(self, components, roi):
-        return RoiSubsetState(components[0], components[1], roi)
-
-    def add_widget(self, widget, label=None, tab=None):
-        pass
-
-    # TODO: remove when https://github.com/glue-viz/glue/pull/1877 is merged
-    def new_data_viewer(self, viewer_class, data=None, state=None):
+    def histogram1d(self, x=None, data=None, widget='bqplot', color=None, x_min=None, x_max=None, n_bin=None, normalize=False, cumulative=False, viewer_state=None, layer_state=None):
         """
-        Create a new data viewer, add it to the UI,
-        and populate with data
+        Open an interactive histogram viewer.
 
+        Parameters
+        ----------
+        x : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the x axis.
+        data : `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
+        widget : {'bqplot', 'matplotlib'}
+            Whether to use bqplot or Matplotlib as the front-end.
+        color : str or tuple, optional
+            The color to use for the data. Note that this will have the
+            effect of setting the data color for all viewers.
+        x_min : float, optional
+            The lower value of the range to compute the histogram in.
+        x_max : float, optional
+            The upper value of the range to compute the histogram in.
+        n_bin : int, optional
+            The number of bins in the histogram.
+        normalize : bool, optional
+            Whether to normalize the histogram.
+        cumulative : bool, optional
+            Whether to show a cumulative histogram.
+        viewer_state : `~glue.viewers.common.state.ViewerState`
+            The initial state for the viewer (advanced).
+        layer_state : `~glue.viewers.common.state.LayerState`
+            The initial state for the data layer (advanced).
         """
-        from glue.core import BaseData
 
-        if viewer_class is None:
-            return
-
-        if state is not None:
-            c = viewer_class(self._session, state=state)
-        else:
-            c = viewer_class(self._session)
-        c.register_to_hub(self._session.hub)
-
-        if data is not None:
-            if isinstance(data, BaseData):
-                result = c.add_data(data)
-            elif isinstance(data, Subset):
-                result = c.add_subset(data)
-            if not result:
-                c.close(warn=False)
-                return
-
-        self.add_widget(c)
-        c.show()
-        return c
-
-
-    def histogram1d(self, x=None, data=None, widget='bqplot', color=None, x_min=None, x_max=None, hist_n_bin=None, normalize=False, cumulative=False, viewer_state=None, layer_state=None):
         if widget == 'bqplot':
             from .bqplot.histogram import BqplotHistogramView
             viewer_cls = BqplotHistogramView
@@ -111,21 +139,23 @@ class JupyterApplication(Application):
             viewer_cls = HistogramJupyterViewer
         else:
             raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
-        if data is None and len(self._data) != 1:
-            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
-        data = data or self._data[0]
 
-        state = viewer_cls._state_cls()
-        state.x_att_helper.append_data(data)
+        if data is None:
+            if len(self._data) != 1:
+                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
+            else:
+                data = self._data[0]
 
         viewer_state_obj = viewer_cls._state_cls()
         viewer_state_obj.x_att_helper.append_data(data)
         viewer_state = viewer_state or {}
+
         if x is not None:
             viewer_state['x_att'] = data.id[x]
+
         # x_min and x_max get set to the hist_x_min/max in glue.viewers.histogram.state
         # for this API it make more sense to call it x_min and x_max, and for consistency with the rest
-        _update_not_none(viewer_state, hist_x_min=x_min, hist_x_max=x_max, hist_n_bin=hist_n_bin,
+        _update_not_none(viewer_state, hist_x_min=x_min, hist_x_max=x_max, hist_n_bin=n_bin,
             normalize=normalize, cumulative=cumulative)
         viewer_state_obj.update_from_dict(viewer_state)
 
@@ -136,6 +166,33 @@ class JupyterApplication(Application):
         return view
 
     def scatter2d(self, x=None, y=None, data=None, widget='bqplot', color=None, size=None, viewer_state=None, layer_state=None):
+        """
+        Open an interactive 2d scatter plot viewer.
+
+        Parameters
+        ----------
+        x : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the x axis.
+        y : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the y axis.
+        data : `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
+        widget : {'bqplot', 'matplotlib'}
+            Whether to use bqplot or Matplotlib as the front-end.
+        color : str or tuple, optional
+            The color to use for the markers. Note that this will have the
+            effect of setting the data color for all viewers.
+        size : int or float
+            The size to use for the markers. Note that this will have the
+            effect of setting the marker size for all viewers.
+        viewer_state : `~glue.viewers.common.state.ViewerState`
+            The initial state for the viewer (advanced).
+        layer_state : `~glue.viewers.common.state.LayerState`
+            The initial state for the data layer (advanced).
+        """
+
         if widget == 'bqplot':
             from .bqplot.scatter import BqplotScatterView
             viewer_cls = BqplotScatterView
@@ -144,17 +201,23 @@ class JupyterApplication(Application):
             viewer_cls = ScatterJupyterViewer
         else:
             raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
-        if data is None and len(self._data) != 1:
-            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
-        data = data or self._data[0]
+
+        if data is None:
+            if len(self._data) != 1:
+                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
+            else:
+                data = self._data[0]
+
         viewer_state_obj = viewer_cls._state_cls()
         viewer_state_obj.x_att_helper.append_data(data)
         viewer_state_obj.y_att_helper.append_data(data)
         viewer_state = viewer_state or {}
+
         if x is not None:
             viewer_state['x_att'] = data.id[x]
         if x is not None:
             viewer_state['y_att'] = data.id[y]
+
         viewer_state_obj.update_from_dict(viewer_state)
 
         view = self.new_data_viewer(viewer_cls, data=data, state=viewer_state_obj)
@@ -164,10 +227,31 @@ class JupyterApplication(Application):
         return view
 
     def scatter3d(self, x=None, y=None, z=None, data=None):
+        """
+        Open an interactive 3d scatter plot viewer.
+
+        Parameters
+        ----------
+        x : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the x axis.
+        y : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the y axis.
+        z : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the z axis.
+        data : `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
+        """
+
         from .ipyvolume import IpyvolumeScatterView
-        if data is None and len(self._data) != 1:
-            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
-        data = data or self._data[0]
+
+        if data is None:
+            if len(self._data) != 1:
+                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
+            else:
+                data = self._data[0]
+
         view = self.new_data_viewer(IpyvolumeScatterView, data=data)
         if x is not None:
             x = data.id[x]
@@ -181,6 +265,25 @@ class JupyterApplication(Application):
         return view
 
     def imshow(self, x=None, y=None, data=None, widget='bqplot'):
+        """
+        Open an interactive image viewer.
+
+        Parameters
+        ----------
+        x : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the x axis. This should be one of the
+            pixel axis attributes.
+        y : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the y axis. This should be one of the
+            pixel axis attributes.
+        data : `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
+        widget : {'bqplot', 'matplotlib'}
+            Whether to use bqplot or Matplotlib as the front-end.
+        """
+
         if widget == 'bqplot':
             from .bqplot.image import BqplotImageView
             viewer_cls = BqplotImageView
@@ -189,21 +292,46 @@ class JupyterApplication(Application):
             viewer_cls = ImageJupyterViewer
         else:
             raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
-        data = data or self._data[0]
-        if data is None and len(self._data) != 1:
-            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
+
+        if data is None:
+            if len(self._data) != 1:
+                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
+            else:
+                data = self._data[0]
+
         if len(data.pixel_component_ids) < 2:
-            raise ValueError('There are less than 2 pixel components (not an image?)')
+            raise ValueError('Only data with two or more dimensions can be used '
+                             'as the initial dataset in the image viewer')
+
         view = self.new_data_viewer(viewer_cls, data=data)
+
         if x is not None:
             x = data.id[x]
             view.state.x_att = x
+
         if y is not None:
             y = data.id[y]
             view.state.y_att = y
+
         return view
 
     def profile1d(self, x=None, data=None, widget='bqplot'):
+        """
+        Open an interactive 1d profile viewer.
+
+        Parameters
+        ----------
+        x : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the x axis. This should be a pixel or
+            world coordinate `~glue.core.component_id.ComponentID`.
+        data : `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
+        widget : {'bqplot', 'matplotlib'}
+            Whether to use bqplot or Matplotlib as the front-end.
+        """
+
         if widget == 'bqplot':
             from .bqplot.profile import BqplotProfileView
             viewer_cls = BqplotProfileView
@@ -212,32 +340,116 @@ class JupyterApplication(Application):
             viewer_cls = ProfileJupyterViewer
         else:
             raise ValueError("Widget type should be 'matplotlib'")
-        data = data or self._data[0]
+
+        if data is None:
+            if len(self._data) != 1:
+                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
+            else:
+                data = self._data[0]
+
         view = self.new_data_viewer(viewer_cls, data=data)
+
         if x is not None:
             x = data.id[x]
             view.state.x_att = x
+
         return view
 
-    def volshow(self, x="Pixel Axis 2 [x]", y="Pixel Axis 1 [y]", z="Pixel Axis 0 [z]", data=None):
+    def volshow(self, x=None, y=None, z=None, data=None):
+        """
+        Open an interactive volume viewer.
+
+        Parameters
+        ----------
+        x : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the x axis. This should be one of the
+            pixel axis attributes.
+        y : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the y axis. This should be one of the
+            pixel axis attributes.
+        z : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the z axis. This should be one of the
+            pixel axis attributes.
+        data : `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
+        """
         from .ipyvolume import IpyvolumeVolumeView
-        data = data or self._data[0]
-        if data is None and len(self._data) != 1:
-            raise ValueError('There is more than 1 data set in the data collection, please pass a data argument')
+
+        if data is None:
+            if len(self._data) != 1:
+                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
+            else:
+                data = self._data[0]
+
         view = self.new_data_viewer(IpyvolumeVolumeView, data=data)
+
         if x is not None:
             x = data.id[x]
             view.state.x_att = x
+
         if y is not None:
             y = data.id[y]
             view.state.y_att = y
+
         if z is not None:
             z = data.id[z]
             view.state.z_att = z
+
         return view
 
-    def subset(self, name, state):
-        return self.data_collection.new_subset_group(name, state)
+    def subset(self, name, subset_state):
+        """
+        Create a new selection/subset.
+
+        Parameters
+        ----------
+        name : str
+            The name of the new subset.
+        subset_state : `~glue.core.subset.SubsetState`
+            The definition of the subset. See the documentation at
+            http://docs.glueviz.org/en/stable/python_guide/data_tutorial.html#defining-new-subsets
+            for more information about creating subsets programmatically.
+        """
+        return self.data_collection.new_subset_group(name, subset_state)
+
+    def subset_lasso2d(self, x_att, y_att, lasso_x, lasso_y):
+        """
+        Create a subset from a programmatic 2d lasso selection.
+
+        Parameters
+        ----------
+        x_att : `~glue.core.component_id.ComponentID`
+            The attribute corresponding to the x values being selected.
+        y_att : `~glue.core.component_id.ComponentID`
+            The attribute corresponding to the x values being selected.
+        lasso_x : iterable
+            The x values of the lasso.
+        lasso_y : iterable
+            The y values of the lasso.
+        """
+        roi = PolygonalROI(lasso_x, lasso_y)
+        self.subset_roi([x_att, y_att], roi)
+
+    def subset_roi(self, attributes, roi):
+        """
+        Create a subset from a region of interest.
+
+        Parameters
+        ----------
+        attributes : iterable
+            The attributes on the x and y axis
+        roi : `~glue.core.roi.Roi`
+            The region of interest to use to create the subset.
+        """
+
+        subset_state = RoiSubsetState(attributes[0], attributes[1], roi)
+        cmd = ApplySubsetState(data_collection=self.data_collection,
+                               subset_state=subset_state)
+        self._session.command_stack.do(cmd)
+
+    # Methods that we need to override to avoid the default behavior
 
     def _update_undo_redo_enabled(self, *args):
         pass  # TODO: if we want a gui for this, we need to update it here
@@ -246,3 +458,6 @@ class JupyterApplication(Application):
     def _choose_merge(*args, **kwargs):
         # Never suggest automatic merging
         return None, None
+
+    def add_widget(self, widget, label=None, tab=None):
+        pass

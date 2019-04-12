@@ -6,9 +6,9 @@ def test_subset_mode(app, datax, dataxyz, dataxz):
 
     # glue -> ui sync
     assert subset_mode.widget_selection_mode.value == 0
-    app.subset_mode_and()
+    app.set_subset_mode('and')
     assert subset_mode.widget_selection_mode.value == 2
-    app.subset_mode_replace()
+    app.set_subset_mode('replace')
     assert subset_mode.widget_selection_mode.value == 0
 
     # ui -> glue sync
