@@ -19,15 +19,15 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
 
     _layer_state_cls = ImageSubsetLayerState
 
-    def __init__(self, axes, viewer_state, layer_state=None, layer=None):
+    def __init__(self, view, viewer_state, layer_state=None, layer=None):
 
-        super(BqplotImageSubsetLayerArtist, self).__init__(axes, viewer_state,
+        super(BqplotImageSubsetLayerArtist, self).__init__(view, viewer_state,
                                                            layer_state=layer_state, layer=layer)
 
         self.subset_array = ImageSubsetArray(self._viewer_state, self)
 
-        self.image_artist = FRBImage(axes, self.subset_array)
-        self.axes.figure.marks = list(self.axes.figure.marks) + [self.image_artist]
+        self.image_artist = FRBImage(view, self.subset_array)
+        self.view.figure.marks = list(self.view.figure.marks) + [self.image_artist]
 
     def _update_data(self):
         self.image_artist.invalidate_cache()
