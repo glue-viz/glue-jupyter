@@ -203,8 +203,11 @@ class JupyterApplication(Application):
             view.state.y_att = y
         return view
 
-    def profile1d(self, x, data=None, widget='matplotlib'):
-        if widget == 'matplotlib':
+    def profile1d(self, x=None, data=None, widget='matplotlib'):
+        if widget == 'bqplot':
+            from .bqplot.profile import BqplotProfileView
+            viewer_cls = BqplotProfileView
+        elif widget == 'matplotlib':
             from .matplotlib.profile import ProfileJupyterViewer
             viewer_cls = ProfileJupyterViewer
         else:
