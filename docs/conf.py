@@ -190,7 +190,6 @@ intersphinx_mapping = {
 
 default_role = 'obj'
 nitpicky = True
-
 nitpick_ignore = [('py:class', 'ipywidgets.widgets.widget_box.Box'),
                   ('py:class', 'ipywidgets.widgets.widget_box.VBox'),
                   ('py:class', 'ipywidgets.widgets.widget.Widget'),
@@ -204,3 +203,5 @@ nitpick_ignore = [('py:class', 'ipywidgets.widgets.widget_box.Box'),
                   ('py:class', 'glue.viewers.image.layer_artist.BaseImageLayerArtist'),
                   ('py:class', 'glue_vispy_viewers.volume.layer_state.VolumeLayerState'),
                   ('py:class', 'glue_vispy_viewers.common.layer_state.VispyLayerState')]
+
+automodapi_inheritance_diagram = False
