@@ -99,9 +99,11 @@ def get_ioloop():
         return zmq.eventloop.ioloop.IOLoop.instance()
 
 
-def debounced(delay_seconds=0.5, method=False):
+def debounced(delay_seconds=0.5, method=False, wait_for_end=True):
+
     def wrapped(f):
         counters = collections.defaultdict(int)
+        last = collections.defaultdict(float)
 
         @functools.wraps(f)
         def execute(*args, **kwargs):
@@ -112,8 +114,9 @@ def debounced(delay_seconds=0.5, method=False):
             counters[key] += 1
 
             def debounced_execute(counter=counters[key]):
-                if counter == counters[key]:  # only execute if the counter wasn't changed in the meantime
+                if counter == counters[key] or (not wait_for_end and time.time() > last[key] + delay_seconds):  # only execute if the counter wasn't changed in the meantime
                     f(*args, **kwargs)
+                    last[key] = time.time()  # record end time of function
             ioloop = get_ioloop()
 
             def thread_safe():

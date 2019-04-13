@@ -33,7 +33,7 @@ class FRBImage(AstroImage):
         self.viewer.figure.axes[1].scale.observe(self.update, 'min')
         self.viewer.figure.axes[1].scale.observe(self.update, 'max')
 
-    @debounced(method=True)
+    @debounced(method=True, wait_for_end=False, delay_seconds=0.1)
     def update(self, *args, **kwargs):
 
         # Get current limits from the plot
