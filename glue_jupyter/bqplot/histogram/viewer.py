@@ -8,6 +8,8 @@ from .layer_artist import BqplotHistogramLayerArtist
 from .layer_style_widget import HistogramLayerStateWidget
 from .viewer_options_widget import HistogramViewerStateWidget
 
+__all__ = ['BqplotHistogramView']
+
 
 class BqplotHistogramView(BqplotBaseView):
 

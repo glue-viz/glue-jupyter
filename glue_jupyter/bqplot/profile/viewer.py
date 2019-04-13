@@ -8,6 +8,8 @@ from .layer_artist import BqplotProfileLayerArtist
 from .layer_style_widget import ProfileLayerStateWidget
 from .viewer_options_widget import ProfileViewerStateWidget
 
+__all__ = ['BqplotProfileView']
+
 
 class BqplotProfileView(BqplotBaseView):
 

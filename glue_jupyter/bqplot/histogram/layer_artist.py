@@ -11,6 +11,8 @@ from ...link import link
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
 
+__all__ = ['BqplotHistogramLayerArtist']
+
 
 class BqplotHistogramLayerArtist(LayerArtist):
 

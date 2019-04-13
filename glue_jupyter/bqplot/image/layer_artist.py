@@ -4,6 +4,8 @@ from glue.core.fixed_resolution_buffer import ARRAY_CACHE, PIXEL_CACHE
 
 from .frb_mark import FRBImage
 
+__all__ = ['BqplotImageLayerArtist', 'BqplotImageSubsetLayerArtist']
+
 
 class BqplotImageLayerArtist(ImageLayerArtist):
 

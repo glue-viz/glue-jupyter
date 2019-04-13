@@ -182,9 +182,25 @@ intersphinx_mapping = {
     # 'matplotlib': ('https://matplotlib.org', None),
     # 'numpy': ('https://docs.scipy.org/doc/numpy', None),
     # 'astropy': ('http://docs.astropy.org/en/stable/', None),
-    # 'echo': ('https://echo.readthedocs.io/en/latest/', None),
-    'glue': ('http://docs.glueviz.org/en/stable/', None),
+    'echo': ('https://echo.readthedocs.io/en/latest/', None),
+    'ipywidgets': ('https://ipywidgets.readthedocs.io/en/stable/', None),
+    'traitlets': ('https://traitlets.readthedocs.io/en/stable/', None),
+    'glue': ('http://docs.glueviz.org/en/latest/', None),
 }
 
 default_role = 'obj'
 nitpicky = True
+
+nitpick_ignore = [('py:class', 'ipywidgets.widgets.widget_box.Box'),
+                  ('py:class', 'ipywidgets.widgets.widget_box.VBox'),
+                  ('py:class', 'ipywidgets.widgets.widget.Widget'),
+                  ('py:class', 'ipywidgets.widgets.widget.LoggingHasTraits'),
+                  ('py:class', 'ipywidgets.widgets.domwidget.DOMWidget'),
+                  ('py:class', 'ipywidgets.widgets.widget_core.CoreWidget'),
+                  ('py:class', 'traitlets.traitlets.HasTraits'),
+                  ('py:class', 'traitlets.traitlets.HasDescriptors'),
+                  ('py:class', 'glue.external.echo.core.HasCallbackProperties'),
+                  ('py:class', 'glue.viewers.image.layer_artist.ImageLayerArtist'),
+                  ('py:class', 'glue.viewers.image.layer_artist.BaseImageLayerArtist'),
+                  ('py:class', 'glue_vispy_viewers.volume.layer_state.VolumeLayerState'),
+                  ('py:class', 'glue_vispy_viewers.common.layer_state.VispyLayerState')]

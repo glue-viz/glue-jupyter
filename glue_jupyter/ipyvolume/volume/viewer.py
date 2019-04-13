@@ -9,6 +9,8 @@ from ..scatter.layer_style_widget import Scatter3DLayerStateWidget
 from ..common.viewer_options_widget import Viewer3DStateWidget
 from ..common.viewer import IpyvolumeBaseView
 
+__all__ = ['IpyvolumeVolumeView']
+
 
 class IpyvolumeVolumeView(IpyvolumeBaseView):
 

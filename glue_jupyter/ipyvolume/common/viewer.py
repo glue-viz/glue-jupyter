@@ -12,9 +12,11 @@ from glue.core.subset import RoiSubsetState3d
 from glue.core.command import ApplySubsetState
 
 from ...view import IPyWidgetView
-from ...link import link, dlink
+from ...link import dlink
 
 from .viewer_options_widget import Viewer3DStateWidget
+
+__all__ = ['IpyvolumeBaseView']
 
 
 class IpyvolumeBaseView(IPyWidgetView):

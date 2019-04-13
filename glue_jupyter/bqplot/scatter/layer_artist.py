@@ -1,7 +1,6 @@
 import numpy as np
 import bqplot
 from ipyastroimage.astroimage import AstroImage
-import ipywidgets as widgets
 import ipywidgets.widgets.trait_types as tt
 
 from glue.core.data import Subset
@@ -15,6 +14,9 @@ from glue.external.echo import CallbackProperty
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
+
+
+__all__ = ['BqplotScatterLayerState', 'BqplotScatterLayerArtist']
 
 
 class BqplotScatterLayerState(ScatterLayerState):
