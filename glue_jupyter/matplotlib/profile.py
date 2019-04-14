@@ -7,6 +7,9 @@ from glue.viewers.profile.viewer import MatplotlibProfileMixin
 
 from .base import MatplotlibJupyterViewer
 
+from glue_jupyter.common.state_widgets.layer_profile import ProfileLayerStateWidget
+from glue_jupyter.common.state_widgets.viewer_profile import ProfileViewerStateWidget
+
 __all__ = ['ProfileJupyterViewer']
 
 
@@ -18,6 +21,8 @@ class ProfileJupyterViewer(MatplotlibProfileMixin, MatplotlibJupyterViewer):
     _state_cls = ProfileViewerState
     _data_artist_cls = ProfileLayerArtist
     _subset_artist_cls = ProfileLayerArtist
+    _options_cls = ProfileViewerStateWidget
+    _layer_style_widget_cls = ProfileLayerStateWidget
 
     def __init__(self, session, parent=None, state=None):
         super(ProfileJupyterViewer, self).__init__(session, parent=parent, state=state)

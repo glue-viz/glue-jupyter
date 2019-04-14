@@ -3,8 +3,9 @@ from glue.viewers.scatter.state import ScatterViewerState
 from ..common.viewer import BqplotBaseView
 
 from .layer_artist import BqplotScatterLayerArtist
-from .viewer_options_widget import ScatterViewerStateWidget
-from .layer_style_widget import ScatterLayerStateWidget
+
+from glue_jupyter.common.state_widgets.layer_scatter import ScatterLayerStateWidget
+from glue_jupyter.common.state_widgets.viewer_scatter import ScatterViewerStateWidget
 
 
 class BqplotScatterView(BqplotBaseView):

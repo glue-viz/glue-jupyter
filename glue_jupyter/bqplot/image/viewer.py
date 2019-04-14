@@ -7,13 +7,13 @@ from ...link import on_change
 
 from ..common.viewer import BqplotBaseView
 from ..scatter.layer_artist import BqplotScatterLayerArtist
-from ..scatter.layer_style_widget import ScatterLayerStateWidget
 
 from .layer_artist import BqplotImageLayerArtist, BqplotImageSubsetLayerArtist
 from .frb_mark import FRBImage
 
-from .layer_style_widget import ImageLayerStateWidget, ImageSubsetLayerStateWidget
-from .viewer_options_widget import ImageViewerStateWidget
+from glue_jupyter.common.state_widgets.layer_scatter import ScatterLayerStateWidget
+from glue_jupyter.common.state_widgets.layer_image import ImageLayerStateWidget, ImageSubsetLayerStateWidget
+from glue_jupyter.common.state_widgets.viewer_image import ImageViewerStateWidget
 
 
 class BqplotImageView(BqplotBaseView):
