@@ -1,6 +1,8 @@
 import functools
 import collections
 import time
+from threading import Thread
+from queue import Queue, Empty
 
 import PIL.Image
 import numpy as np
@@ -36,7 +38,6 @@ def reduce_size(data, max_size):
             slices1[axis] = slice(0, -1, 2)
             slices2 = [slice(None, None, None)] * 3
             slices2[axis] = slice(1, None, 2)
-            print(data.shape, data.__getitem__(slices1).shape, data.__getitem__(slices2).shape)
             data = (data[slices1])# + data.__getitem__(slices2))/2
             shape = data.shape
     return data
@@ -126,6 +127,59 @@ def debounced(delay_seconds=0.5, method=False, wait_for_end=True):
             else:
                 ioloop.add_callback(thread_safe)
         return execute
+    return wrapped
+
+
+def queue_to_list(q):
+    l = [q.get()]
+    while True:
+        try:
+            l.append(q.get_nowait())
+        except Empty:
+            return l
+
+
+class CallbackHandler(Thread):
+
+    def __init__(self, function, delay):
+        super().__init__()
+        self.function = function
+        self.work_queue = Queue()
+        self.delay = delay
+        self.last = 0
+
+    def run(self):
+
+        while True:
+
+            msgs = queue_to_list(self.work_queue)
+
+            if 'stop' in msgs:
+                return
+            elif len(msgs) > 0:
+                print("COMBINING {0} MESSAGES".format(len(msgs)))
+                now = time.time()
+                if now - self.last < self.delay:
+                    wait_time = self.delay - (now - self.last)
+                    time.sleep(wait_time)
+                args, kwargs = msgs[-1]
+                self.last = time.time()
+                self.function(*args, **kwargs)
+
+
+def thread_throttled(delay=0.1):
+
+    def wrapped(func):
+
+        handler = CallbackHandler(func, delay=delay)
+        handler.start()
+
+        @functools.wraps(func)
+        def execute(*args, **kwargs):
+            handler.work_queue.put((args, kwargs))
+
+        return execute
+
     return wrapped
 
 

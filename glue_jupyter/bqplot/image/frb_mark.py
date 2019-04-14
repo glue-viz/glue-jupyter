@@ -50,16 +50,16 @@ class FRBImage(AstroImage):
         # make it a parameter in future. Bqplot does allow us to constrain the
         # aspect ratio though so we could envisage trying to use that info
         # to make sure the ratio of the sizes is sensible..
-        ny, nx = 512, 512
+        ny, nx = 256, 256
 
         # Set up bounds
         bounds = [(ymin, ymax, ny), (xmin, xmax, nx)]
 
         # Get the array and assign it to the artist
+        image = self.array_maker(bounds=bounds)
+        if image is None:
+            image = np.zeros((1, 1, 3))
         with self.hold_sync():
-            image = self.array_maker(bounds=bounds)
-            if image is None:
-                image = np.array([[np.nan]])
             self.image = image
             self.x = (xmin, xmax)
             self.y = (ymin, ymax)
