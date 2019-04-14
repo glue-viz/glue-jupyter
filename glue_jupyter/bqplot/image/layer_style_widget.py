@@ -32,6 +32,8 @@ class ImageLayerStateWidget(VBox):
         self.widget_bias = FloatSlider(min=0, max=1, step=0.01, value=self.state.bias, description='bias')
         link((self.state, 'bias'), (self.widget_bias, 'value'))
 
+        self.widget_stretch = LinkedDropdown(self.state, 'stretch', label='stretch')
+
         self.widget_percentile = LinkedDropdown(self.state, 'percentile', ui_name='limits', label='percentile')
 
         self.widget_v_min = FloatText(description='min', value=self.state.v_min)
@@ -59,6 +61,7 @@ class ImageLayerStateWidget(VBox):
         children.append(self.widget_attribute)
         children.append(self.widget_contrast)
         children.append(self.widget_bias)
+        children.append(self.widget_stretch)
         children.append(self.widget_percentile)
         children.append(self.widget_v_min)
         children.append(self.widget_v_max)
