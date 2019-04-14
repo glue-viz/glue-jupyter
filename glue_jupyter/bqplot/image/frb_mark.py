@@ -28,12 +28,15 @@ class FRBImage(AstroImage):
 
         self.array_maker = array_maker
 
-        self.viewer.figure.axes[0].scale.observe(self.update, 'min')
-        self.viewer.figure.axes[0].scale.observe(self.update, 'max')
-        self.viewer.figure.axes[1].scale.observe(self.update, 'min')
-        self.viewer.figure.axes[1].scale.observe(self.update, 'max')
+        self.viewer.figure.axes[0].scale.observe(self.debounced_update, 'min')
+        self.viewer.figure.axes[0].scale.observe(self.debounced_update, 'max')
+        self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'min')
+        self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'max')
 
     @debounced(method=True)
+    def debounced_update(self, *args, **kwargs):
+        return self.update(self, *args, **kwargs)
+
     def update(self, *args, **kwargs):
 
         # Get current limits from the plot
@@ -50,19 +53,18 @@ class FRBImage(AstroImage):
         # make it a parameter in future. Bqplot does allow us to constrain the
         # aspect ratio though so we could envisage trying to use that info
         # to make sure the ratio of the sizes is sensible..
-        ny, nx = 512, 512
+        ny, nx = 256, 256
 
         # Set up bounds
         bounds = [(ymin, ymax, ny), (xmin, xmax, nx)]
 
         # Get the array and assign it to the artist
-        with self.hold_sync():
-            image = self.array_maker(bounds=bounds)
-            if image is None:
-                image = np.array([[np.nan]])
-            self.image = image
-            self.x = (xmin, xmax)
-            self.y = (ymin, ymax)
+        image = self.array_maker(bounds=bounds)
+        if image is not None:
+            with self.hold_sync():
+                self.image = image
+                self.x = (xmin, xmax)
+                self.y = (ymin, ymax)
 
     def invalidate_cache(self):
         self.update()
