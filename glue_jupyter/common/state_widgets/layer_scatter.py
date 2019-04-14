@@ -31,8 +31,10 @@ class ScatterLayerStateWidget(VBox):
         dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'), lambda value: None if value else 'none')
         dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
 
-        self.widget_bins = IntSlider(min=0, max=1024, value=self.state.bins, description='bin count')
-        link((self.state, 'bins'), (self.widget_bins, 'value'))
+        # TODO: the following shouldn't be necessary ideally
+        if hasattr(self.state, 'bins'):
+            self.widget_bins = IntSlider(min=0, max=1024, value=self.state.bins, description='bin count')
+            link((self.state, 'bins'), (self.widget_bins, 'value'))
 
         super().__init__([self.widget_visible, self.widget_opacity,
                           self.widget_size, self.widget_color,
