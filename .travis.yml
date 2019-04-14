@@ -29,6 +29,8 @@ script:
   - pytest --cov glue_jupyter glue_jupyter -p no:warnings
   - pip install astroquery pyyaml
   - python .validate-notebooks.py
+  - cd docs
+  - make html
 
 after_success:
   - codecov
