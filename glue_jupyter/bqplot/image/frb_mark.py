@@ -24,7 +24,7 @@ class FRBImage(AstroImage):
                        'y': self.viewer.scale_y,
                        'image': self.scale_image}
 
-        super().__init__(image=np.zeros((10, 10, 3)), scales=self.scales)
+        super().__init__(image=np.zeros((10, 10, 4), dtype=np.uint8), scales=self.scales)
 
         self.array_maker = array_maker
 
@@ -32,6 +32,8 @@ class FRBImage(AstroImage):
         self.viewer.figure.axes[0].scale.observe(self.update, 'max')
         self.viewer.figure.axes[1].scale.observe(self.update, 'min')
         self.viewer.figure.axes[1].scale.observe(self.update, 'max')
+
+        self.update()
 
     @debounced(method=True)
     def update(self, *args, **kwargs):
