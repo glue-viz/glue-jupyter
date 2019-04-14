@@ -26,9 +26,16 @@ install:
   - pip install -e .[test]
 
 script:
+
+  # Run test suite
   - pytest --cov glue_jupyter glue_jupyter -p no:warnings
+
+  # Check notebooks
   - pip install astroquery pyyaml
   - python .validate-notebooks.py
+
+  # Test documentation build
+  - pip install -e .[docs]
   - cd docs
   - make html
 
