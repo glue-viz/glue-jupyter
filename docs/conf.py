@@ -38,6 +38,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'nbsphinx', 'numpydoc',
               'sphinx_automodapi.automodapi',
+              'sphinx_automodapi.smart_resolver',
               'sphinxcontrib.spelling']
 
 numpydoc_show_class_members = False
