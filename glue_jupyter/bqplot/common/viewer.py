@@ -12,6 +12,8 @@ from ...view import IPyWidgetView
 from ...link import link, on_change
 from ...utils import float_or_none
 
+__all__ = ['BqplotBaseView']
+
 ICON_WIDTH = 20
 
 icon_brush = widgets.Image.from_file(glue.icons.icon_path('glue_square', icon_format='svg'), width=ICON_WIDTH)

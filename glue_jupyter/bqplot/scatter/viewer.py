@@ -6,6 +6,8 @@ from .layer_artist import BqplotScatterLayerArtist
 from .viewer_options_widget import ScatterViewerStateWidget
 from .layer_style_widget import ScatterLayerStateWidget
 
+__all__ = ['BqplotScatterView']
+
 
 class BqplotScatterView(BqplotBaseView):
 

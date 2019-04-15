@@ -5,6 +5,8 @@ from glue.core.subset import Subset
 
 from glue_jupyter.utils import _update_not_none
 
+__all__ = ['IPyWidgetView', 'IPyWidgetLayerArtistContainer']
+
 
 class IPyWidgetLayerArtistContainer(LayerArtistContainer):
 

@@ -10,6 +10,8 @@ from glue_vispy_viewers.common.layer_artist import VispyLayerArtist
 
 from ...link import link, on_change
 
+__all__ = ['IpyvolumeLayerState']
+
 
 class IpyvolumeLayerState(VolumeLayerState):
 

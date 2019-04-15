@@ -1,7 +1,7 @@
 # Sphinx & coverage
 build
-doc/_build
-doc/api
+docs/_build
+docs/api
 glue/tests/htmlcov
 *.coverage
 *htmlcov*

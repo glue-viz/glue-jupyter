@@ -17,6 +17,7 @@ from glue_jupyter.compat import LayerArtist
 
 from ...link import link
 
+__all__ = ['BqplotProfileLayerArtist']
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value

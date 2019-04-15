@@ -1,22 +1,29 @@
 from __future__ import absolute_import
 
 from ._version import __version__  # noqa
+from .app import JupyterApplication  # noqa
 
-# from glue.core.session import Session
-# from glue.viewers.scatter.layer_artist import ScatterLayerArtist
-
-
-def load(path):
-    from glue.core.data_factories import load_data
-    return load_data(path)
+__all__ = ['jglue', 'example_data_xyz', 'example_image', 'example_volume',
+           'JupyterApplication']
 
 
 def jglue(*args, **kwargs):
+    """
+    Create a new Jupyter-based glue application.
+
+    It is typically easiest to call this function without arguments and load
+    data and add links separately in subsequent calls. However, this function
+    can also take the same inputs as the `~glue.qglue.qglue` function.
+
+    Once this function is called, it will return a
+    `~glue_jupyter.JupyterApplication` object, which can then be used to
+    load data, set up links, and create visualizations. See the documentation
+    for that class for more details.
+    """
     show = kwargs.pop('show', False)
     from glue.core import DataCollection
     from glue.qglue import parse_data, parse_links
     from glue.core.data_factories import load_data
-    from .app import JupyterApplication
 
     links = kwargs.pop('links', None)
 
@@ -38,6 +45,10 @@ def jglue(*args, **kwargs):
 
 
 def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz'):
+    """
+    Create an example dataset with three attributes x, y, and z set to random
+    values.
+    """
     from glue.core import Data
     import numpy as np
     rng = np.random.RandomState(seed)
@@ -51,7 +62,9 @@ def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz'):
 
 
 def example_volume(shape=64, limits=[-4, 4]):
-    """Creates a test data set containing a ball"""
+    """
+    Creates a test 3-d dataset containing a ball.
+    """
     from glue.core import Data
     import ipyvolume as ipv
     ball_data = ipv.examples.ball(shape=shape, limits=limits, show=False, draw=False)
@@ -61,7 +74,9 @@ def example_volume(shape=64, limits=[-4, 4]):
 
 
 def example_image(shape=64, limits=[-4, 4]):
-    """Creates a test data set containing a ball"""
+    """
+    Creates a test 2-d dataset containing an image.
+    """
     from glue.core import Data, Coordinates
     import numpy as np
     x = np.linspace(-3, 3, num=shape)

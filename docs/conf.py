@@ -32,11 +32,15 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode',
-    'nbsphinx']
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.todo',
+              'sphinx.ext.mathjax',
+              'sphinx.ext.viewcode',
+              'nbsphinx', 'numpydoc',
+              'sphinx_automodapi.automodapi',
+              'sphinx_automodapi.smart_resolver']
+
+numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -170,8 +174,34 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-
-
-
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_cache_limit = 10     # days to keep the cached inventories
+intersphinx_mapping = {
+    # 'sphinx': ('https://www.sphinx-doc.org/en/latest/', None),
+    'python': ('https://docs.python.org/3.7', None),
+    # 'matplotlib': ('https://matplotlib.org', None),
+    # 'numpy': ('https://docs.scipy.org/doc/numpy', None),
+    # 'astropy': ('http://docs.astropy.org/en/stable/', None),
+    'echo': ('https://echo.readthedocs.io/en/latest/', None),
+    'ipywidgets': ('https://ipywidgets.readthedocs.io/en/stable/', None),
+    'traitlets': ('https://traitlets.readthedocs.io/en/stable/', None),
+    'glue': ('http://docs.glueviz.org/en/latest/', None),
+}
+
+default_role = 'obj'
+nitpicky = True
+nitpick_ignore = [('py:class', 'ipywidgets.widgets.widget_box.Box'),
+                  ('py:class', 'ipywidgets.widgets.widget_box.VBox'),
+                  ('py:class', 'ipywidgets.widgets.widget.Widget'),
+                  ('py:class', 'ipywidgets.widgets.widget.LoggingHasTraits'),
+                  ('py:class', 'ipywidgets.widgets.domwidget.DOMWidget'),
+                  ('py:class', 'ipywidgets.widgets.widget_core.CoreWidget'),
+                  ('py:class', 'traitlets.traitlets.HasTraits'),
+                  ('py:class', 'traitlets.traitlets.HasDescriptors'),
+                  ('py:class', 'glue.external.echo.core.HasCallbackProperties'),
+                  ('py:class', 'glue.viewers.image.layer_artist.ImageLayerArtist'),
+                  ('py:class', 'glue.viewers.image.layer_artist.BaseImageLayerArtist'),
+                  ('py:class', 'glue_vispy_viewers.volume.layer_state.VolumeLayerState'),
+                  ('py:class', 'glue_vispy_viewers.common.layer_state.VispyLayerState')]
+
+automodapi_inheritance_diagram = False

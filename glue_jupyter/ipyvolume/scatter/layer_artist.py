@@ -10,7 +10,7 @@ from glue.external.echo import CallbackProperty, SelectionCallbackProperty
 
 from ...link import link, on_change
 
-__all__ = ['IpyvolumeScatterLayerArtist']
+__all__ = ['Scatter3dLayerState', 'IpyvolumeScatterLayerArtist']
 
 
 class Scatter3dLayerState(ScatterLayerState):

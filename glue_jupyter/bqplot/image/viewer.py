@@ -15,6 +15,8 @@ from .frb_mark import FRBImage
 from .layer_style_widget import ImageLayerStateWidget, ImageSubsetLayerStateWidget
 from .viewer_options_widget import ImageViewerStateWidget
 
+__all__ = ['BqplotImageView']
+
 
 class BqplotImageView(BqplotBaseView):
 

@@ -11,7 +11,7 @@ def test_subset_select(app, datax, dataxyz, dataxz):
     assert not subset_select.widget_menu_item_select_multiple_checkbox.checked
     assert subset_select.widget_select.value == 'new'
 
-    # now we make a section
+    # now we make a selection
     app.subset_lasso2d(dataxyz.id['x'], dataxyz.id['y'], [0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])
 
     assert len(subset_select.widget_menu_items_subsets) == 1
