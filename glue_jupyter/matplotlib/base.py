@@ -10,10 +10,14 @@ from matplotlib.figure import Figure
 from glue.viewers.matplotlib.mpl_axes import init_mpl
 from glue.viewers.matplotlib.state import MatplotlibDataViewerState
 from glue.viewers.matplotlib.viewer import MatplotlibViewerMixin
+from glue.utils.matplotlib import DEFER_DRAW_BACKENDS
 
 from glue_jupyter.view import IPyWidgetView
 
 __all__ = ['MatplotlibJupyterViewer']
+
+# Register the Qt backend with defer_draw
+DEFER_DRAW_BACKENDS.append(FigureCanvasNbAgg)
 
 
 class MatplotlibJupyterViewer(MatplotlibViewerMixin, IPyWidgetView):
