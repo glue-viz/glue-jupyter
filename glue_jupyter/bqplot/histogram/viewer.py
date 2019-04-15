@@ -5,8 +5,8 @@ from glue.viewers.histogram.state import HistogramViewerState
 from ..common.viewer import BqplotBaseView
 
 from .layer_artist import BqplotHistogramLayerArtist
-from .layer_style_widget import HistogramLayerStateWidget
-from .viewer_options_widget import HistogramViewerStateWidget
+from glue_jupyter.common.state_widgets.layer_histogram import HistogramLayerStateWidget
+from glue_jupyter.common.state_widgets.viewer_histogram import HistogramViewerStateWidget
 
 __all__ = ['BqplotHistogramView']
 

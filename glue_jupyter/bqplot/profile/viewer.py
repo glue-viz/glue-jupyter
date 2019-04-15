@@ -5,8 +5,11 @@ from glue.viewers.profile.state import ProfileViewerState
 from ..common.viewer import BqplotBaseView
 
 from .layer_artist import BqplotProfileLayerArtist
-from .layer_style_widget import ProfileLayerStateWidget
-from .viewer_options_widget import ProfileViewerStateWidget
+
+from glue_jupyter.common.state_widgets.layer_profile import ProfileLayerStateWidget
+from glue_jupyter.common.state_widgets.viewer_profile import ProfileViewerStateWidget
+
+__all__ = ['BqplotProfileView']
 
 __all__ = ['BqplotProfileView']
 

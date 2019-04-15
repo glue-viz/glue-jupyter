@@ -7,6 +7,9 @@ from glue.viewers.histogram.viewer import MatplotlibHistogramMixin
 
 from .base import MatplotlibJupyterViewer
 
+from glue_jupyter.common.state_widgets.layer_histogram import HistogramLayerStateWidget
+from glue_jupyter.common.state_widgets.viewer_histogram import HistogramViewerStateWidget
+
 __all__ = ['HistogramJupyterViewer']
 
 
@@ -18,6 +21,8 @@ class HistogramJupyterViewer(MatplotlibHistogramMixin, MatplotlibJupyterViewer):
     _state_cls = HistogramViewerState
     _data_artist_cls = HistogramLayerArtist
     _subset_artist_cls = HistogramLayerArtist
+    _options_cls = HistogramViewerStateWidget
+    _layer_style_widget_cls = HistogramLayerStateWidget
 
     def __init__(self, session, parent=None, state=None):
         super(HistogramJupyterViewer, self).__init__(session, parent=parent, state=state)
