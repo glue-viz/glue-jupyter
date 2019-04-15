@@ -83,7 +83,6 @@ class BqplotBaseView(IPyWidgetView):
         )
         self.widget_button_interact.observe(self.change_action, "value")
 
-        self.widget_toolbar = self.widget_button_interact
         self.change_action()  # 'fire' manually for intial value
 
         link((self.state, 'x_min'), (self.scale_x, 'min'), float_or_none)
@@ -96,6 +95,7 @@ class BqplotBaseView(IPyWidgetView):
         self.create_tab()
         self.output_widget = widgets.Output()
         self.widget_toolbar = widgets.HBox([
+                        self.widget_button_interact,
                         self.session.application.widget_subset_select,
                         self.session.application.widget_subset_mode]
              )
@@ -109,14 +109,16 @@ class BqplotBaseView(IPyWidgetView):
         display(self.main_widget)
 
     def create_tab(self):
+
         self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
-        self.tab_general = widgets.VBox([self.widget_toolbar, self.widget_show_axes])
-        children = [self.tab_general]
+        link((self.state, 'show_axes'), (self.widget_show_axes, 'value'))
+
+        self.tab_general = widgets.VBox([self.widget_show_axes])
         self.tab_general.children += self._options_cls(self.state).children
+        children = [self.tab_general]
+
         self.tab = widgets.Tab(children)
         self.tab.set_title(0, "General")
-        self.tab.set_title(1, "Axes")
-        link((self.state, 'show_axes'), (self.widget_show_axes, 'value'))
 
     def _sync_show_axes(self):
         # TODO: if moved to state, this would not rely on the widget
