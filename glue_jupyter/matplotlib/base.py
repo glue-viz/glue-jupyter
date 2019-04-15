@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from ipywidgets import Tab, HBox, VBox, Output
+from ipywidgets import HTML, Tab, HBox, VBox, Output
 from IPython.display import display
 
 # from matplotlib.backends.backend_nbagg import FigureCanvasNbAgg, FigureManager
@@ -18,6 +18,10 @@ __all__ = ['MatplotlibJupyterViewer']
 
 # Register the Qt backend with defer_draw
 DEFER_DRAW_BACKENDS.append(FigureCanvasNbAgg)
+
+# By default, the Jupyter Matplotlib widget has a big clunky title bar, so
+# we apply custom CSS to remove it.
+REMOVE_TITLE_CSS = "<style> .output_wrapper .ui-dialog-titlebar { display: none; } </style>"
 
 
 class MatplotlibJupyterViewer(MatplotlibViewerMixin, IPyWidgetView):
@@ -41,7 +45,10 @@ class MatplotlibJupyterViewer(MatplotlibViewerMixin, IPyWidgetView):
         self.create_tab()
         self.output_widget = Output()
 
+        self.css_widget = HTML(REMOVE_TITLE_CSS)
+
         self.main_widget = VBox([
+                self.css_widget,
                 HBox([self.canvas, self.tab]),
                 self.output_widget
             ])
