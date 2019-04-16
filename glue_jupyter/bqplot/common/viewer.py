@@ -65,11 +65,7 @@ class BqplotBaseView(IPyWidgetView):
 
         self.create_tab()
         self.output_widget = widgets.Output()
-        self.widget_toolbar = widgets.HBox([
-                        self.toolbar,
-                        self.session.application.widget_subset_select,
-                        self.session.application.widget_subset_mode]
-             )
+
         self.main_widget = widgets.VBox([
                 self.widget_toolbar,
                 widgets.HBox([self.figure, self.tab]),
@@ -99,14 +95,6 @@ class BqplotBaseView(IPyWidgetView):
     @staticmethod
     def update_viewer_state(rec, context):
         print('update viewer state', rec, context)
-
-    def change_action(self, *ignore):
-        index = self.widget_button_interact.value
-        self.figure.interaction = self.widget_button_interact.value #self.interact_map[self.button_action.value]
-        if self.is2d:
-            self.interact_brush.selected_x = []
-            self.interact_brush_y.selected = []
-        self.interact_brush_x.selected = []
 
     def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py

@@ -24,6 +24,10 @@ class ScatterJupyterViewer(MatplotlibScatterMixin, MatplotlibJupyterViewer):
     _options_cls = ScatterViewerStateWidget
     _layer_style_widget_cls = ScatterLayerStateWidget
 
+    tools = ['select:rectangle', 'select:xrange',
+             'select:yrange', 'select:circle',
+             'select:polygon']
+
     def __init__(self, session, parent=None, state=None):
         super(ScatterJupyterViewer, self).__init__(session, parent=parent, state=state)
         MatplotlibScatterMixin.setup_callbacks(self)

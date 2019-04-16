@@ -1,3 +1,4 @@
+from ipywidgets import HBox
 from ipymaterialui import ToggleButtonGroup, ToggleButton
 
 from glue.viewers.common.viewer import Viewer
@@ -67,6 +68,10 @@ class IPyWidgetView(Viewer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.initialize_toolbar()
+        self.widget_toolbar = HBox([
+                        self.toolbar,
+                        self.session.application.widget_subset_select,
+                        self.session.application.widget_subset_mode])
 
     def add_data(self, data, color=None, alpha=None, **layer_state):
 

@@ -24,6 +24,8 @@ class HistogramJupyterViewer(MatplotlibHistogramMixin, MatplotlibJupyterViewer):
     _options_cls = HistogramViewerStateWidget
     _layer_style_widget_cls = HistogramLayerStateWidget
 
+    tools = ['select:xrange']
+
     def __init__(self, session, parent=None, state=None):
         super(HistogramJupyterViewer, self).__init__(session, parent=parent, state=state)
         MatplotlibHistogramMixin.setup_callbacks(self)
