@@ -26,6 +26,8 @@ class BqplotProfileView(BqplotBaseView):
     _subset_artist_cls = BqplotProfileLayerArtist
     _layer_style_widget_cls = ProfileLayerStateWidget
 
+    tools = ['bqplot:panzoom', 'bqplot:xrange']
+
     def _roi_to_subset_state(self, roi):
 
         x = roi.to_polygon()[0]

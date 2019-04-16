@@ -3,24 +3,21 @@ import ipywidgets as widgets
 import ipymaterialui as mui
 from IPython.display import display
 
+from bqplot.interacts import BrushSelector
 import glue.icons
 from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
+from glue.config import viewer_tool
 
 from ...view import IPyWidgetView
 from ...link import link, on_change
 from ...utils import float_or_none
 
+# Need to import this here to register viewer tools
+from . import tools  # noqa
+
 __all__ = ['BqplotBaseView']
-
-ICON_WIDTH = 20
-
-icon_brush = widgets.Image.from_file(glue.icons.icon_path('glue_square', icon_format='svg'), width=ICON_WIDTH)
-icon_pan = widgets.Image.from_file(glue.icons.icon_path('glue_move', icon_format='svg'), width=ICON_WIDTH)
-icon_brush_x = widgets.Image.from_file(glue.icons.icon_path('glue_xrange_select', icon_format='svg'), width=ICON_WIDTH)
-icon_brush_y = widgets.Image.from_file(glue.icons.icon_path('glue_yrange_select', icon_format='svg'), width=ICON_WIDTH)
-icon_brush_lasso = widgets.Image.from_file(glue.icons.icon_path('glue_lasso', icon_format='svg'), width=ICON_WIDTH)
 
 
 class BqplotBaseView(IPyWidgetView):
@@ -30,13 +27,15 @@ class BqplotBaseView(IPyWidgetView):
     is2d = True
 
     def __init__(self, session, state=None):
-        super(BqplotBaseView, self).__init__(session, state=state)
-        # session.hub.subscribe(self, SubsetCreateMessage,
-        #                       handler=self.receive_message)
 
         # if we allow padding, we sometimes get odd behaviour with the interacts
         self.scale_x = bqplot.LinearScale(min=0, max=1, allow_padding=False)
         self.scale_y = bqplot.LinearScale(min=0, max=1)
+
+        super(BqplotBaseView, self).__init__(session, state=state)
+        # session.hub.subscribe(self, SubsetCreateMessage,
+        #                       handler=self.receive_message)
+
         self.scales = {'x': self.scale_x, 'y': self.scale_y}
         self.axis_x = bqplot.Axis(
             scale=self.scale_x, grid_lines='solid', label='x')
@@ -57,34 +56,6 @@ class BqplotBaseView(IPyWidgetView):
         self._fig_margin_zero['left'] = 0
         self._fig_margin_zero['bottom'] = 0
 
-        self.interact_map = {}
-        self.interact_panzoom = bqplot.PanZoom(scales={'x': [self.scale_x], 'y': [self.scale_y]})
-
-        self.interacts = []
-        self.interacts.append((icon_pan, self.interact_panzoom))
-
-        if self.is2d:
-            self.interact_brush = bqplot.interacts.BrushSelector(x_scale=self.scale_x, y_scale=self.scale_y, color="green")
-            self.interact_brush.observe(self.update_brush, "brushing")
-            self.interacts.append((icon_brush, self.interact_brush))
-
-        self.interact_brush_x = bqplot.interacts.BrushIntervalSelector(scale=self.scale_x, color="green" )
-        self.interact_brush_x.observe(self.update_brush_x, "brushing")
-        self.interacts.append((icon_brush_x, self.interact_brush_x))
-
-        if self.is2d:
-            self.interact_brush_y = bqplot.interacts.BrushIntervalSelector(scale=self.scale_y, color="green", orientation='vertical')
-            self.interact_brush_y.observe(self.update_brush_y, "brushing")
-            self.interacts.append((icon_brush_y, self.interact_brush_y))
-
-
-        self.widget_button_interact = mui.ToggleButtonGroup(exclusive=True, value=self.interact_panzoom, style={'margin': '4px'},
-            children=[mui.ToggleButton(children=[icon], value=value) for k, (icon, value) in enumerate(self.interacts)]
-        )
-        self.widget_button_interact.observe(self.change_action, "value")
-
-        self.change_action()  # 'fire' manually for intial value
-
         link((self.state, 'x_min'), (self.scale_x, 'min'), float_or_none)
         link((self.state, 'x_max'), (self.scale_x, 'max'), float_or_none)
         link((self.state, 'y_min'), (self.scale_y, 'min'), float_or_none)
@@ -95,7 +66,7 @@ class BqplotBaseView(IPyWidgetView):
         self.create_tab()
         self.output_widget = widgets.Output()
         self.widget_toolbar = widgets.HBox([
-                        self.widget_button_interact,
+                        self.toolbar,
                         self.session.application.widget_subset_select,
                         self.session.application.widget_subset_mode]
              )
@@ -136,30 +107,6 @@ class BqplotBaseView(IPyWidgetView):
             self.interact_brush.selected_x = []
             self.interact_brush_y.selected = []
         self.interact_brush_x.selected = []
-
-    def update_brush(self, *ignore):
-        with self.output_widget:
-            if self.interact_brush.brushing is not None and self.interact_brush.selected_x is not None and len(self.interact_brush.selected_x):  # only select when we ended
-                x = self.interact_brush.selected_x
-                y = self.interact_brush.selected_y
-                roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
-                self.apply_roi(roi)
-
-    def update_brush_x(self, *ignore):
-        with self.output_widget:
-            if not self.interact_brush_x.brushing:  # only select when we ended
-                x = self.interact_brush_x.selected
-                if x is not None and len(x):
-                    roi = RangeROI(min=min(x), max=max(x), orientation='x')
-                    self.apply_roi(roi)
-
-    def update_brush_y(self, *ignore):
-        with self.output_widget:
-            if not self.interact_brush_y.brushing:  # only select when we ended
-                y = self.interact_brush_y.selected
-                if y is not None and len(y):
-                    roi = RangeROI(min=min(y), max=max(y), orientation='y')
-                    self.apply_roi(roi)
 
     def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py

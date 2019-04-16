@@ -1,3 +1,5 @@
+from ipymaterialui import ToggleButtonGroup, ToggleButton
+
 from glue.viewers.common.viewer import Viewer
 from glue.core.layer_artist import LayerArtistContainer
 from glue.core import message as msg
@@ -5,8 +7,47 @@ from glue.core.subset import Subset
 
 from glue_jupyter.utils import _update_not_none
 
+from glue_jupyter.common.toolbar import BasicJupyterToolbar
+
 __all__ = ['IPyWidgetView', 'IPyWidgetLayerArtistContainer']
 
+
+def get_viewer_tools(cls, tools=None, subtools=None):
+    """
+    Given a viewer class, find all the tools and subtools to include in the
+    viewer.
+
+    Parameters
+    ----------
+    cls : type
+        The viewer class for which to look for tools.
+    tools : list
+        The list to add the tools to - this is modified in-place.
+    subtools : dict
+        The dictionary to add the subtools to - this is modified in-place.
+    """
+
+    # TODO: mege with version in glue-core
+
+    if not issubclass(cls, IPyWidgetView):
+        return
+    if tools is None:
+        tools = []
+    if subtools is None:
+        subtools = {}
+    if cls.inherit_tools and cls is not IPyWidgetView:
+        for parent_cls in cls.__bases__:
+            get_viewer_tools(parent_cls, tools, subtools)
+    for tool_id in cls.tools:
+        if tool_id not in tools:
+            tools.append(tool_id)
+    for tool_id in cls.subtools:
+        if tool_id not in subtools:
+            subtools[tool_id] = []
+        for subtool_id in cls.subtools[tool_id]:
+            if subtool_id not in subtools[tool_id]:
+                subtools[tool_id].append(subtool_id)
+    return tools, subtools
 
 class IPyWidgetLayerArtistContainer(LayerArtistContainer):
 
@@ -18,6 +59,14 @@ class IPyWidgetLayerArtistContainer(LayerArtistContainer):
 class IPyWidgetView(Viewer):
 
     _layer_artist_container_cls = IPyWidgetLayerArtistContainer
+
+    inherit_tools = True
+    tools = []
+    subtools = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.initialize_toolbar()
 
     def add_data(self, data, color=None, alpha=None, **layer_state):
 
@@ -64,3 +113,21 @@ class IPyWidgetView(Viewer):
             label = label[:15] + '...'
 
         self.tab.set_title(len(self.tab.children)-1, label)
+
+    def initialize_toolbar(self):
+
+        from glue.config import viewer_tool
+
+        self.toolbar = BasicJupyterToolbar()
+
+        # Need to include tools and subtools declared by parent classes unless
+        # specified otherwise
+        tool_ids, subtool_ids = get_viewer_tools(self.__class__)
+
+        if subtool_ids:
+            raise ValueError('subtools are not yet supported in Jupyter viewers')
+
+        for tool_id in tool_ids:
+            mode_cls = viewer_tool.members[tool_id]
+            mode = mode_cls(self)
+            self.toolbar.add_tool(mode)
