@@ -3,7 +3,7 @@ import numpy as np
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
 
 from glue.config import viewer_tool
-from glue.viewers.common.qt.tool import CheckableTool
+from glue.viewers.common.tool import CheckableTool
 
 __all__ = []
 

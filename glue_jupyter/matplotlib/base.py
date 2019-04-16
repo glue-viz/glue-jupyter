@@ -3,16 +3,12 @@ from __future__ import absolute_import, division, print_function
 from ipywidgets import HTML, Tab, HBox, VBox, Output
 from IPython.display import display
 
-# from matplotlib.backends.backend_nbagg import FigureCanvasNbAgg, FigureManager
 from ipympl.backend_nbagg import FigureCanvasNbAgg, FigureManagerNbAgg
 from matplotlib.figure import Figure
 
 from glue.viewers.matplotlib.mpl_axes import init_mpl
 from glue.viewers.matplotlib.state import MatplotlibDataViewerState
 from glue.viewers.matplotlib.viewer import MatplotlibViewerMixin
-
-# Make sure Matplotlib-based tools are registered
-from glue.viewers.common.qt import toolbar_mode
 
 from glue.utils.matplotlib import DEFER_DRAW_BACKENDS
 
@@ -41,10 +37,8 @@ class MatplotlibJupyterViewer(MatplotlibViewerMixin, IPyWidgetView):
         self.canvas.manager = FigureManagerNbAgg(self.canvas, 0)
         self.figure, self.axes = init_mpl(self.figure, wcs=wcs)
 
-        # FIXME: for the tools to work
+        # FIXME: The following is required for now for the tools to work
         self.central_widget = self.figure
-        from mock import MagicMock
-        self.window_closed = MagicMock()
         self._axes = self.axes
 
         super(MatplotlibJupyterViewer, self).__init__(session, state=state)

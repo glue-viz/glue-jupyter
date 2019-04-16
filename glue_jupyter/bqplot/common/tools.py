@@ -2,7 +2,7 @@ from bqplot import PanZoom
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
 from glue.core.roi import RectangularROI, RangeROI
 from glue.config import viewer_tool
-from glue.viewers.common.qt.tool import CheckableTool
+from glue.viewers.common.tool import CheckableTool
 
 __all__ = []
 
