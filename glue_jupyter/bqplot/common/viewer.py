@@ -1,21 +1,13 @@
 import bqplot
 import ipywidgets as widgets
-import ipymaterialui as mui
 from IPython.display import display
 
-from bqplot.interacts import BrushSelector
-import glue.icons
 from glue.core.subset import roi_to_subset_state
-from glue.core.roi import RectangularROI, RangeROI
 from glue.core.command import ApplySubsetState
-from glue.config import viewer_tool
 
 from ...view import IPyWidgetView
 from ...link import link, on_change
 from ...utils import float_or_none
-
-# Need to import this here to register viewer tools
-from . import tools  # noqa
 
 __all__ = ['BqplotBaseView']
 

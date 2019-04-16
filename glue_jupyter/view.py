@@ -1,5 +1,4 @@
 from ipywidgets import HBox
-from ipymaterialui import ToggleButtonGroup, ToggleButton
 
 from glue.viewers.common.viewer import Viewer
 from glue.core.layer_artist import LayerArtistContainer
@@ -49,6 +48,7 @@ def get_viewer_tools(cls, tools=None, subtools=None):
             if subtool_id not in subtools[tool_id]:
                 subtools[tool_id].append(subtool_id)
     return tools, subtools
+
 
 class IPyWidgetLayerArtistContainer(LayerArtistContainer):
 
