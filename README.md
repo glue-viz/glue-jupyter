@@ -27,6 +27,12 @@ Notebooks with real data:
 
 For now, installing should be done using pip:
 
+    pip install git+https://github.com/glue-viz/glue-jupyter.git
+
+Or from source:
+
+    git clone https://github.com/glue-viz/glue-jupyter.git
+    cd glue-jupyter
     pip install -e .
 
 ### Testing
