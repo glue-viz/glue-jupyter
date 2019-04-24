@@ -28,6 +28,10 @@ class ImageJupyterViewer(MatplotlibImageMixin, MatplotlibJupyterViewer):
                                ImageSubsetLayerArtist: ImageSubsetLayerStateWidget,
                                ScatterLayerArtist: ScatterLayerStateWidget}
 
+    tools = ['select:rectangle', 'select:xrange',
+             'select:yrange', 'select:circle',
+             'select:polygon']
+
     def __init__(self, session, parent=None, state=None):
         super(ImageJupyterViewer, self).__init__(session, wcs=True, parent=parent, state=state)
         MatplotlibImageMixin.setup_callbacks(self)

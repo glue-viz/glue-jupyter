@@ -24,9 +24,11 @@ def test_histogram1d(app, dataxyz):
     assert s.layers[1].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
     assert s.layers[1].hist.tolist() == [0, 1, 1]
 
-    s.interact_brush_x.brushing = True
-    s.interact_brush_x.selected = [2.5, 3.5]
-    s.interact_brush_x.brushing = False
+    tool = s.toolbar.tools['bqplot:xrange']
+    tool.activate()
+    tool.interact.brushing = True
+    tool.interact.selected = [2.5, 3.5]
+    tool.interact.brushing = False
 
     assert len(s.layers) == 3
     assert s.layers[2].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
@@ -51,8 +53,9 @@ def test_interact(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     # s.widget_menu_select_x.value = True
     # s.widget_menu_select_x.click()# = True
-    s.widget_button_interact.value = s.interact_brush_x
-    assert s.figure.interaction == s.interact_brush_x
+    tool = s.toolbar.tools['bqplot:xrange']
+    s.toolbar.value = tool.tool_id
+    assert s.figure.interaction == tool.interact
 
 
 def test_scatter2d(app, dataxyz, dataxz):
@@ -128,10 +131,12 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
 
     # 1d x brushing
-    #s.button_action.value = 'brush x'
-    s.interact_brush_x.brushing = True
-    s.interact_brush_x.selected = [1.5, 3.5]
-    s.interact_brush_x.brushing = False
+    tool1d = s.toolbar.tools['bqplot:xrange']
+    tool1d.activate()
+    tool1d.interact.brushing = True
+    tool1d.interact.selected = [1.5, 3.5]
+    tool1d.interact.brushing = False
+
     assert len(s.layers) == 2
     assert s.layers[1].layer['x'].tolist() == [2, 3]
     assert s.layers[1].layer['y'].tolist() == [3, 4]
@@ -157,9 +162,12 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
 
     # 2d brushing
     # format of 'selected' (x1, y1), (x2, y2)
-    s.interact_brush.brushing = True
-    s.interact_brush.selected = [(2.5, 2.5), (3.5, 4.5)]
-    s.interact_brush.brushing = False
+    tool2d = s.toolbar.tools['bqplot:rectangle']
+    tool2d.activate()
+    tool2d.interact.brushing = True
+    tool2d.interact.selected = [(2.5, 2.5), (3.5, 4.5)]
+    tool2d.interact.brushing = False
+
     assert len(s.layers) == 2
     assert s.layers[1].layer['x'].tolist() == [3]
     assert s.layers[1].layer['y'].tolist() == [4]
@@ -170,9 +178,9 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     assert s.layers[1].scatter.selected == [2]
 
     # nothing should change when we change modes
-    s.widget_button_interact.value = s.interact_brush_x
+    s.toolbar.value = tool1d.tool_id
     assert s.layers[1].scatter.selected == [2]
-    s.widget_button_interact.value = s.interact_brush_y
+    s.toolbar.value = tool2d.tool_id
     assert s.layers[1].scatter.selected == [2]
 
 
@@ -201,9 +209,11 @@ def test_scatter2d_cmap_mode(app, dataxyz):
 def test_scatter2d_and_histogram(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     h = app.histogram1d('x', data=dataxyz)
-    s.interact_brush.brushing = True
-    s.interact_brush.selected = [(1.5, 3.5), (3.5, 5)]
-    s.interact_brush.brushing = False
+    tool = s.toolbar.tools['bqplot:rectangle']
+    tool.activate()
+    tool.interact.brushing = True
+    tool.interact.selected = [(1.5, 3.5), (3.5, 5)]
+    tool.interact.brushing = False
     assert len(s.layers) == 2
     import glue.core.subset
     assert isinstance(s.layers[1].layer.subset_state,
@@ -217,9 +227,12 @@ def test_imshow(app, data_image, dataxyz):
     v.add_data(dataxyz)
 
     assert len(v.layers) == 2
-    v.interact_brush.brushing = True
-    v.interact_brush.selected = [(1.5, 3.5), (300.5, 550)]
-    v.interact_brush.brushing = False
+
+    tool = v.toolbar.tools['bqplot:rectangle']
+    tool.activate()
+    tool.interact.brushing = True
+    tool.interact.selected = [(1.5, 3.5), (300.5, 550)]
+    tool.interact.brushing = False
 
     assert len(v.layers) == 4
 
