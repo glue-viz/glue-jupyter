@@ -38,6 +38,11 @@ script:
   - pip install -e .[docs]
   - cd docs
   - make html
+  - cd ..
+
+
+  # Publish documentation on gh-pages
+  - ./.deploy_docs.sh
 
 after_success:
   - codecov
