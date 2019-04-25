@@ -20,6 +20,9 @@ if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == master && $TRAVIS_OS_NA
 
     # Copy over built docs
     rsync -avz --delete --exclude .git/ $base_dir/docs/_build/html/ ./
+    
+    # Create nojekyll file so that _* folders work
+    touch .nojekyll
 
     # Commit changes
     git --version
