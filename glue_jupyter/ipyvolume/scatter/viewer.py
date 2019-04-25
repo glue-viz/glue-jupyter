@@ -1,4 +1,4 @@
-from glue_jupyter.common.state3d import ViewerState3DScatter
+from glue_jupyter.common.state3d import Scatter3DViewerState
 from .layer_artist import IpyvolumeScatterLayerArtist
 from .layer_style_widget import Scatter3DLayerStateWidget
 from ..common.viewer_options_widget import Viewer3DStateWidget
@@ -13,7 +13,7 @@ class IpyvolumeScatterView(IpyvolumeBaseView):
     allow_duplicate_subset = False
     large_data_size = 1e7
 
-    _state_cls = ViewerState3DScatter
+    _state_cls = Scatter3DViewerState
     _options_cls = Viewer3DStateWidget
     _data_artist_cls = IpyvolumeScatterLayerArtist
     _subset_artist_cls = IpyvolumeScatterLayerArtist

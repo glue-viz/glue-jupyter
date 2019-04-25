@@ -10,10 +10,10 @@ from glue_vispy_viewers.common.layer_artist import VispyLayerArtist
 
 from ...link import link, on_change
 
-__all__ = ['IpyvolumeLayerState']
+__all__ = ['VolumeLayerState']
 
 
-class IpyvolumeLayerState(VolumeLayerState):
+class VolumeLayerState(VolumeLayerState):
 
     opacity_scale = CallbackProperty()
     render_method = CallbackProperty()
@@ -27,7 +27,7 @@ class IpyvolumeLayerState(VolumeLayerState):
     data_max = CallbackProperty(1)
 
     def __init__(self, layer=None, **kwargs):
-        super(IpyvolumeLayerState, self).__init__(layer=layer, **kwargs)
+        super(VolumeLayerState, self).__init__(layer=layer, **kwargs)
         self.opacity_scale = 0.1
         self.render_method = 'NORMAL'
         self.lighting = True
@@ -55,7 +55,7 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
         self.layer = layer or layer_state.layer
         self.ipyvolume_viewer = ipyvolume_viewer
         self.figure = self.ipyvolume_viewer.figure
-        self.state = layer_state or IpyvolumeLayerState(layer=self.layer)
+        self.state = layer_state or VolumeLayerState(layer=self.layer)
         self.transfer_function = ipv.TransferFunction(rgba=_transfer_function_rgba(self.state.color))
         self.volume = ipv.Volume(extent_original=[[0,1]]*3, data_original=data0, tf=self.transfer_function, data_max_shape=128)
         self.figure.volumes = self.figure.volumes + [self.volume,]

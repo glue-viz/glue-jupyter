@@ -10,10 +10,10 @@ from glue.external.echo import CallbackProperty, SelectionCallbackProperty
 
 from ...link import link, on_change
 
-__all__ = ['Scatter3dLayerState', 'IpyvolumeScatterLayerArtist']
+__all__ = ['Scatter3DLayerState', 'IpyvolumeScatterLayerArtist']
 
 
-class Scatter3dLayerState(ScatterLayerState):
+class Scatter3DLayerState(ScatterLayerState):
 
     # FIXME: the following should be a SelectionCallbackProperty
     geo = CallbackProperty('sphere', docstring="Type of marker")
@@ -22,11 +22,11 @@ class Scatter3dLayerState(ScatterLayerState):
     def __init__(self, viewer_state=None, layer=None, **kwargs):
         self.vz_att_helper = ComponentIDComboHelper(self, 'vz_att',
                                                     numeric=True, categorical=False)
-        super(Scatter3dLayerState, self).__init__(viewer_state=viewer_state, layer=layer)
+        super(Scatter3DLayerState, self).__init__(viewer_state=viewer_state, layer=layer)
         # self.update_from_dict(kwargs)
 
     def _on_layer_change(self, layer=None):
-        super(Scatter3dLayerState, self)._on_layer_change(layer=layer)
+        super(Scatter3DLayerState, self)._on_layer_change(layer=layer)
         if self.layer is None:
             self.vz_att_helper.set_multiple_data([])
         else:
@@ -35,7 +35,7 @@ class Scatter3dLayerState(ScatterLayerState):
 
 class IpyvolumeScatterLayerArtist(LayerArtist):
 
-    _layer_state_cls = Scatter3dLayerState
+    _layer_state_cls = Scatter3DLayerState
 
     def __init__(self, view, viewer_state, layer, layer_state):
 

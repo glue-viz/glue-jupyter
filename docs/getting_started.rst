@@ -152,6 +152,8 @@ Viewer              Viewer state              Data layer state        Subset lay
 |profile_viewer|    |profile_viewer_state|    |profile_layer_state|   |profile_layer_state|
 |scatter_viewer|    |scatter_viewer_state|    |scatter_layer_state|   |scatter_layer_state|
 |image_viewer|      |image_viewer_state|      |image_data_state|      |image_subset_state|
+|scatter3d_viewer|  |scatter3d_viewer_state|  |scatter3d_layer_state| |scatter3d_layer_state|
+|volume_viewer|     |volume_viewer_state|     |volume_layer_state|    |volume_layer_state|
 =================== ========================= ======================= ========================
 
 .. |histogram_viewer| replace:: :meth:`~glue_jupyter.JupyterApplication.histogram1d`
@@ -171,4 +173,10 @@ Viewer              Viewer state              Data layer state        Subset lay
 .. |image_data_state| replace:: :class:`~glue.viewers.image.state.ImageLayerState`
 .. |image_subset_state| replace:: :class:`~glue.viewers.image.state.ImageSubsetLayerState`
 
-.. TODO: add 3D states
+.. |scatter3d_viewer| replace:: :meth:`~glue_jupyter.JupyterApplication.scatter3d`
+.. |scatter3d_viewer_state| replace:: :class:`~glue_jupyter.common.state3d.Scatter3DViewerState`
+.. |scatter3d_layer_state| replace:: :class:`~glue_jupyter.ipyvolume.scatter.Scatter3DLayerState`
+
+.. |volume_viewer| replace:: :meth:`~glue_jupyter.JupyterApplication.volshow`
+.. |volume_viewer_state| replace:: :class:`~glue_jupyter.common.state3d.VolumeViewerState`
+.. |volume_layer_state| replace:: :class:`~glue_jupyter.ipyvolume.volume.VolumeLayerState`
