@@ -131,14 +131,14 @@ We can find a complete list of layers with::
 In this example, there are two layers - one for the main dataset, and one for a
 subset of the data. We can access the first layer with::
 
-    >>> layer = histogram.state.layers[0]
+    >>> layer_state = histogram.state.layers[0]
 
 and the layer itself then has properties that can be changed, such as the
 color of the points (this is a property that is specific to the layer, not
 an overall property of the viewer)::
 
-    >>> layer.color = 'blue'
-    >>> layer.alpha = 0.5
+    >>> layer_state.color = 'blue'
+    >>> layer_state.alpha = 0.5
 
 In the following table, you can click on the name of one of the state classes
 to find out the complete list of viewer properties that can be changed for the
