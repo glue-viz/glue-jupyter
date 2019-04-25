@@ -4,7 +4,7 @@ from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.state_objects import StateAttributeLimitsHelper
 from glue.utils import nonpartial
 
-__all__ = ['ViewerState3D', 'ViewerState3DVolume', 'ViewerState3DScatter']
+__all__ = ['ViewerState3D', 'VolumeViewerState', 'Scatter3DViewerState']
 
 
 class ViewerState3D(ViewerState):
@@ -115,9 +115,9 @@ class ViewerState3D(ViewerState):
     #         self.z_min = z_min
     #         self.z_max = z_max
 
-class ViewerState3DVolume(ViewerState3D):
+class VolumeViewerState(ViewerState3D):
     def __init__(self, **kwargs):
-        super(ViewerState3DVolume, self).__init__()
+        super(VolumeViewerState, self).__init__()
         self.add_callback('layers', self._update_attributes)
         self.update_from_dict(kwargs)
 
@@ -142,11 +142,11 @@ class ViewerState3DVolume(ViewerState3D):
             type(self).z_att.set_choices(self, [z_cid])
 
 
-class ViewerState3DScatter(ViewerState3D):
+class Scatter3DViewerState(ViewerState3D):
 
     def __init__(self, **kwargs):
 
-        super(ViewerState3DScatter, self).__init__()
+        super(Scatter3DViewerState, self).__init__()
 
         self.x_att_helper = ComponentIDComboHelper(self, 'x_att', categorical=False)
         self.y_att_helper = ComponentIDComboHelper(self, 'y_att', categorical=False)

@@ -6,6 +6,8 @@ General
 
 .. automodapi:: glue_jupyter.app
 
+.. automodapi:: glue_jupyter.link
+
 .. automodapi:: glue_jupyter.view
 
 .. automodapi:: glue_jupyter.common.state3d
