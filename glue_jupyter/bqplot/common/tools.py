@@ -112,6 +112,6 @@ class BqplotYRangeMode(InteractCheckableTool):
         with self.viewer.output_widget:
             if self.interact.selected is not None:
                 y = self.interact.selected
-                if y is not None and len(x):
+                if y is not None and len(y):
                     roi = RangeROI(min=min(y), max=max(y), orientation='y')
                     self.viewer.apply_roi(roi)

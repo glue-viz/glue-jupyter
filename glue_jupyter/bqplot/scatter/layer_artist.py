@@ -69,8 +69,11 @@ class BqplotScatterLayerArtist(LayerArtist):
         # set initial values for the colormap
         self._on_change_cmap()
 
+        self.state.add_callback('visible', self._update_visibility)
+        self.state.add_callback('vector_visible', self._update_visibility)
+        self.state.add_callback('density_map', self._update_visibility)
+
         dlink((self.state, 'visible'), (self.scatter, 'visible'))
-        dlink((self.state, 'visible'), (self.quiver, 'visible'))
         dlink((self.state, 'visible'), (self.image, 'visible'))
 
         dlink((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x])
@@ -95,10 +98,13 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.scale_color.colors = colors
 
     def _on_change_density_map(self):
+        self._update_visibility()
+        self._update_scatter()
+
+    def _update_visibility(self, *args):
         self.image.visible = self.state.density_map
         self.scatter.visible = not self.state.density_map
-        self.quiver.visible = not self.state.density_map
-        self._update_scatter()
+        self.quiver.visible = not self.state.density_map and self.state.vector_visible
 
     def redraw(self):
         self.update()
