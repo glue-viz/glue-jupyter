@@ -10,7 +10,7 @@ recommend that you create a new environment::
 
 To install glue-jupyter along with all its dependencies, you can do::
 
-    pip install git+https://github.com/glue-viz/glue-jupyter
+    pip install git+https://github.com/glue-viz/glue-jupyter.git
 
 If you are interested in using glue-jupyter in Jupyter Lab, you will need to
 also install the following extensions manually::
@@ -20,8 +20,8 @@ also install the following extensions manually::
 
 as well as the following developer versions of Jupyter lab extensions::
 
-    git clone --branch scatter_webgl https://github.com/maartenbreddels/bqplot/
+    git clone --branch scatter_webgl https://github.com/maartenbreddels/bqplot.git
     jupyter labextension install bqplot/js
 
-    git clone https://github.com/glue-viz/ipyastroimage/
+    git clone https://github.com/glue-viz/ipyastroimage.git
     jupyter labextension install ipyastroimage/js
