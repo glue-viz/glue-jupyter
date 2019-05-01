@@ -40,8 +40,9 @@ class BqplotBaseView(IPyWidgetView):
         self.state.add_callback('x_att', update_axes)
         if self.is2d:
             self.state.add_callback('y_att', update_axes)
-        self.figure = bqplot.Figure(scales=self.scales, animation_duration=0, axes=[
-                                    self.axis_x, self.axis_y])
+        self.figure = bqplot.Figure(scales=self.scales, animation_duration=0,
+                                    axes=[self.axis_x, self.axis_y],
+                                    fig_margin={'left': 60, 'bottom': 60, 'top': 10, 'right': 10})
         self.figure.padding_y = 0
         self._fig_margin_default = self.figure.fig_margin
         self._fig_margin_zero = dict(self.figure.fig_margin)
