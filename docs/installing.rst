@@ -16,12 +16,10 @@ If you are interested in using glue-jupyter in Jupyter Lab, you will need to
 also install the following extensions manually::
 
     jupyter labextension install @jupyter-widgets/jupyterlab-manager \
-                                 ipyvolume jupyter-threejs jupyter-materialui
+                                 ipyvolume jupyter-threejs jupyter-materialui \
+                                 bqplot-image-gl
 
-as well as the following developer versions of Jupyter lab extensions::
+as well as the following developer version of bqplot::
 
-    git clone --branch scatter_webgl https://github.com/maartenbreddels/bqplot.git
+    git clone https://github.com/bloomberg/bqplot.git
     jupyter labextension install bqplot/js
-
-    git clone https://github.com/glue-viz/ipyastroimage.git
-    jupyter labextension install ipyastroimage/js
