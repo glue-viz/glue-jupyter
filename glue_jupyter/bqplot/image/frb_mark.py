@@ -5,7 +5,7 @@
 import numpy as np
 
 from bqplot import ColorScale
-from bqplot_image_gl.astroimage import ImageGL
+from bqplot_image_gl import ImageGL
 
 from ...utils import debounced
 

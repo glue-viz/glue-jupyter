@@ -1,6 +1,6 @@
 import numpy as np
 import bqplot
-from bqplot_image_gl.astroimage import ImageGL
+from bqplot_image_gl import ImageGL
 import ipywidgets.widgets.trait_types as tt
 
 from glue.core.data import Subset
