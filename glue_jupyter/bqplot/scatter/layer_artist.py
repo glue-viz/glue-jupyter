@@ -1,6 +1,6 @@
 import numpy as np
 import bqplot
-from ipyastroimage.astroimage import AstroImage
+from bqplot_image_gl import ImageGL
 import ipywidgets.widgets.trait_types as tt
 
 from glue.core.data import Subset
@@ -45,7 +45,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.quiver = bqplot.ScatterGL(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
 
         self.counts = None
-        self.image = AstroImage(scales=self.scales_image)
+        self.image = ImageGL(scales=self.scales_image)
         on_change([(self.state, 'density_map')])(self._on_change_density_map)
         on_change([(self.state, 'bins')])(self._update_scatter)
         self._viewer_state.add_global_callback(self._update_scatter)

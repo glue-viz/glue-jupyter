@@ -5,14 +5,14 @@
 import numpy as np
 
 from bqplot import ColorScale
-from ipyastroimage.astroimage import AstroImage
+from bqplot_image_gl import ImageGL
 
 from ...utils import debounced
 
 __all__ = ['FRBImage']
 
 
-class FRBImage(AstroImage):
+class FRBImage(ImageGL):
 
     def __init__(self, viewer, array_maker):
 
