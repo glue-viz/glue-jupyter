@@ -56,7 +56,7 @@ class BqplotRectangleMode(InteractCheckableTool):
         self.interact.observe(self.update_selection, "brushing")
 
     def update_selection(self, *args):
-        with self.viewer.output_widget:
+        with self.viewer._output_widget:
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
                 y = self.interact.selected_y
@@ -82,7 +82,7 @@ class BqplotXRangeMode(InteractCheckableTool):
         self.interact.observe(self.update_selection, "brushing")
 
     def update_selection(self, *args):
-        with self.viewer.output_widget:
+        with self.viewer._output_widget:
             if self.interact.selected is not None:
                 x = self.interact.selected
                 if x is not None and len(x):
@@ -109,7 +109,7 @@ class BqplotYRangeMode(InteractCheckableTool):
         self.interact.observe(self.update_selection, "brushing")
 
     def update_selection(self, *args):
-        with self.viewer.output_widget:
+        with self.viewer._output_widget:
             if self.interact.selected is not None:
                 y = self.interact.selected
                 if y is not None and len(y):

@@ -1,4 +1,6 @@
-from ipywidgets import HBox
+from ipywidgets import HBox, Tab, VBox, Output
+
+from IPython.display import display
 
 from glue.viewers.common.viewer import Viewer
 from glue.viewers.common.utils import get_viewer_tools
@@ -32,10 +34,74 @@ class IPyWidgetView(Viewer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.initialize_toolbar()
-        self.widget_toolbar = HBox([
-                        self.toolbar,
-                        self.session.application.widget_subset_select,
-                        self.session.application.widget_subset_mode])
+
+    @property
+    def toolbar_selection_tools(self):
+        """
+        The selection tools, e.g. rectangular or polygon selection.
+        """
+        return self.toolbar
+
+    @property
+    def toolbar_active_subset(self):
+        """
+        A dropdown providing control over the current active subset.
+        """
+        return self.session.application.widget_subset_select
+
+    @property
+    def toolbar_selection_mode(self):
+        """
+        Buttons providing control over logical selections.
+        """
+        return self.session.application.widget_subset_mode
+
+    @property
+    def figure_widget(self):
+        """
+        The main figure widget.
+        """
+        raise NotImplementedError()
+
+    @property
+    def output_widget(self):
+        """
+        A widget containing any textual output from the figures (including
+        errors).
+        """
+        return self._output_widget
+
+    @property
+    def layout(self):
+        """
+        The widget containing the final layout of the individual figure widgets.
+        """
+        return self._layout
+
+    def create_layout(self):
+
+        # Take all the different widgets and construct a standard layout
+        # for the viewers, based on ipywidgets HBox and VBox. This can be
+        # overriden in sub-classes to create alternate layouts.
+
+        self._layout_toolbar = HBox([self.toolbar_selection_tools,
+                                     self.toolbar_active_subset,
+                                     self.toolbar_selection_mode])
+
+        self._layout_viewer_options = self._options_cls(self.state)
+
+        self._layout_tab = Tab([self._layout_viewer_options])
+        self._layout_tab.set_title(0, "General")
+        self._layout_tab.set_title(1, "Layers")
+
+        self._output_widget = Output()
+
+        self._layout = VBox([self._layout_toolbar,
+                             HBox([self.figure_widget, self._layout_tab]),
+                             self._output_widget])
+
+    def show(self):
+        display(self._layout)
 
     def add_data(self, data, color=None, alpha=None, **layer_state):
 
@@ -66,6 +132,7 @@ class IPyWidgetView(Viewer):
         return cls(self, self.state, layer=layer, layer_state=layer_state)
 
     def _add_layer_tab(self, layer):
+        return
         if isinstance(self._layer_style_widget_cls, dict):
             layer_tab = self._layer_style_widget_cls[type(layer)](layer.state)
         else:

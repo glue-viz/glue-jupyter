@@ -45,27 +45,17 @@ class MatplotlibJupyterViewer(MatplotlibViewerMixin, IPyWidgetView):
 
         MatplotlibViewerMixin.setup_callbacks(self)
 
-        self.create_tab()
-        self.output_widget = Output()
-
+        # FIXME - include in figure widget?
         self.css_widget = HTML(REMOVE_TITLE_CSS)
 
-        self.main_widget = VBox([
-                self.css_widget,
-                self.widget_toolbar,
-                HBox([self.canvas, self.tab]),
-                self.output_widget
-            ])
+        self.create_layout()
 
-    def show(self):
-        display(self.main_widget)
+    @property
+    def figure_widget(self):
+        return self.canvas
 
     def get_layer_artist(self, cls, layer=None, layer_state=None):
         # TODO: this method should be defined on the base viewer class
         layer = super().get_layer_artist(cls, layer=layer, layer_state=layer_state)
         self._add_layer_tab(layer)
         return layer
-
-    def create_tab(self):
-        self.tab = Tab([self._options_cls(self.state)])
-        self.tab.set_title(0, "General")

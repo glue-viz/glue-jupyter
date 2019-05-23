@@ -1,6 +1,5 @@
 import bqplot
 import ipywidgets as widgets
-from IPython.display import display
 
 from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
@@ -56,29 +55,11 @@ class BqplotBaseView(IPyWidgetView):
 
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
-        self.create_tab()
-        self.output_widget = widgets.Output()
+        self.create_layout()
 
-        self.main_widget = widgets.VBox([
-                self.widget_toolbar,
-                widgets.HBox([self.figure, self.tab]),
-                self.output_widget
-            ])
-
-    def show(self):
-        display(self.main_widget)
-
-    def create_tab(self):
-
-        self.widget_show_axes = widgets.Checkbox(value=True, description="Show axes")
-        link((self.state, 'show_axes'), (self.widget_show_axes, 'value'))
-
-        self.tab_general = widgets.VBox([self.widget_show_axes])
-        self.tab_general.children += self._options_cls(self.state).children
-        children = [self.tab_general]
-
-        self.tab = widgets.Tab(children)
-        self.tab.set_title(0, "General")
+    @property
+    def figure_widget(self):
+        return self.figure
 
     def _sync_show_axes(self):
         # TODO: if moved to state, this would not rely on the widget
@@ -91,7 +72,7 @@ class BqplotBaseView(IPyWidgetView):
 
     def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
-        with self.output_widget:
+        with self._output_widget:
             if len(self.layers) > 0:
                 subset_state = self._roi_to_subset_state(roi)
                 cmd = ApplySubsetState(data_collection=self._data,
