@@ -39,7 +39,7 @@ class JupyterApplication(Application):
         created.
     """
 
-    def __init__(self, data_collection=None, session=None):
+    def __init__(self, data_collection=None, session=None, layout_factory=None):
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
         self.output = widgets.Output()
         self.widget_data_collection = widgets.SelectMultiple()

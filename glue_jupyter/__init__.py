@@ -4,7 +4,26 @@ from ._version import __version__  # noqa
 from .app import JupyterApplication  # noqa
 
 __all__ = ['jglue', 'example_data_xyz', 'example_image', 'example_volume',
-           'JupyterApplication']
+           'JupyterApplication', 'set_layout_factory', 'get_layout_factory']
+
+LAYOUT_FACTORY = None
+
+
+def set_layout_factory(func):
+    """
+    Set the function to use to generate the viewer layout. This should take a
+    viewer class and return a widget containing the viewer widgets laid out
+    in the desired way.
+    """
+    global LAYOUT_FACTORY
+    LAYOUT_FACTORY = func
+
+
+def get_layout_factory():
+    """
+    Get the current layout factory. Returns `None` if using the default.
+    """
+    return LAYOUT_FACTORY
 
 
 def jglue(*args, **kwargs):

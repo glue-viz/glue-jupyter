@@ -9,8 +9,8 @@ from glue.core import message as msg
 from glue.core.subset import Subset
 
 
+from glue_jupyter import get_layout_factory
 from glue_jupyter.utils import _update_not_none
-
 from glue_jupyter.common.toolbar import BasicJupyterToolbar
 from glue_jupyter.widgets.layer_options import LayerOptionsWidget
 
@@ -96,6 +96,12 @@ class IPyWidgetView(Viewer):
         return self._layout
 
     def create_layout(self):
+
+        # Check for a custom layout factory
+        layout_factory = get_layout_factory()
+        if layout_factory is not None:
+            self._layout = layout_factory(self)
+            return
 
         # Take all the different widgets and construct a standard layout
         # for the viewers, based on ipywidgets HBox and VBox. This can be
