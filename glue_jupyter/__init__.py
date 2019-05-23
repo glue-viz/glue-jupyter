@@ -32,7 +32,7 @@ def jglue(*args, **kwargs):
 
     It is typically easiest to call this function without arguments and load
     data and add links separately in subsequent calls. However, this function
-    can also take the same inputs as the `~glue.qglue.qglue` function.
+    can also take the same inputs as the `~glue.qglue` function.
 
     Once this function is called, it will return a
     `~glue_jupyter.JupyterApplication` object, which can then be used to
