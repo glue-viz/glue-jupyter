@@ -53,9 +53,3 @@ class MatplotlibJupyterViewer(MatplotlibViewerMixin, IPyWidgetView):
     @property
     def figure_widget(self):
         return self.canvas
-
-    def get_layer_artist(self, cls, layer=None, layer_state=None):
-        # TODO: this method should be defined on the base viewer class
-        layer = super().get_layer_artist(cls, layer=layer, layer_state=layer_state)
-        self._add_layer_tab(layer)
-        return layer

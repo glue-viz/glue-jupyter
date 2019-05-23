@@ -105,11 +105,6 @@ class BqplotBaseView(IPyWidgetView):
             self.scale_y.min = float(self.state.y_min)
             self.scale_y.max = float(self.state.y_max)
 
-    def get_layer_artist(self, cls, layer=None, layer_state=None):
-        layer = super().get_layer_artist(cls, layer=layer, layer_state=layer_state)
-        self._add_layer_tab(layer)
-        return layer
-
     def receive_message(self, message):
         print("Message received:")
         print("{0}".format(message))

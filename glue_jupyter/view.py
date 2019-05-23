@@ -12,6 +12,7 @@ from glue.core.subset import Subset
 from glue_jupyter.utils import _update_not_none
 
 from glue_jupyter.common.toolbar import BasicJupyterToolbar
+from glue_jupyter.widgets.layer_options import LayerOptionsWidget
 
 __all__ = ['IPyWidgetView', 'IPyWidgetLayerArtistContainer']
 
@@ -33,6 +34,7 @@ class IPyWidgetView(Viewer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.initialize_layer_options()
         self.initialize_toolbar()
 
     @property
@@ -72,6 +74,21 @@ class IPyWidgetView(Viewer):
         return self._output_widget
 
     @property
+    def viewer_options(self):
+        """
+        A widget containing the options for the current viewer.
+        """
+        return self._layout_viewer_options
+
+    @property
+    def layer_options(self):
+        """
+        A widget containing a layer selector and the options for the selected
+        layer.
+        """
+        return self._layout_layer_options
+
+    @property
     def layout(self):
         """
         The widget containing the final layout of the individual figure widgets.
@@ -90,7 +107,8 @@ class IPyWidgetView(Viewer):
 
         self._layout_viewer_options = self._options_cls(self.state)
 
-        self._layout_tab = Tab([self._layout_viewer_options])
+        self._layout_tab = Tab([self._layout_viewer_options,
+                                self._layout_layer_options])
         self._layout_tab.set_title(0, "General")
         self._layout_tab.set_title(1, "Layers")
 
@@ -131,24 +149,8 @@ class IPyWidgetView(Viewer):
     def get_layer_artist(self, cls, layer=None, layer_state=None):
         return cls(self, self.state, layer=layer, layer_state=layer_state)
 
-    def _add_layer_tab(self, layer):
-        return
-        if isinstance(self._layer_style_widget_cls, dict):
-            layer_tab = self._layer_style_widget_cls[type(layer)](layer.state)
-        else:
-            layer_tab = self._layer_style_widget_cls(layer.state)
-        self.tab.children = self.tab.children + (layer_tab, )
-        if isinstance(layer.layer, Subset):
-            label = '{data_label}:{subset_label}'.format(data_label=layer.layer.data.label, subset_label=layer.layer.label)
-        else:
-            label = layer.layer.label
-
-        # Long tab titles can cause issues
-        # (see https://github.com/jupyter-widgets/ipywidgets/issues/2366)
-        if len(label) > 15:
-            label = label[:15] + '...'
-
-        self.tab.set_title(len(self.tab.children)-1, label)
+    def initialize_layer_options(self):
+        self._layout_layer_options = LayerOptionsWidget(self)
 
     def initialize_toolbar(self):
 
