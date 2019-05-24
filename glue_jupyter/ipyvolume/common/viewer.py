@@ -27,13 +27,13 @@ class IpyvolumeBaseView(IPyWidgetView):
 
     def __init__(self, *args, **kwargs):
 
-        self.state = self._state_cls()
         self.figure = ipv.figure(animation_exponent=1.)
         self.figure.selector = ''
 
         super(IpyvolumeBaseView, self).__init__(*args, **kwargs)
 
-        self.create_tab()
+        # FIXME: hack for the movie maker to have access to the figure
+        self.state.figure = self.figure
 
         self.state.add_callback('x_min', self.limits_to_scales)
         self.state.add_callback('x_max', self.limits_to_scales)
@@ -42,12 +42,25 @@ class IpyvolumeBaseView(IPyWidgetView):
         if hasattr(self.state, 'z_min'):
             self.state.add_callback('z_min', self.limits_to_scales)
             self.state.add_callback('z_max', self.limits_to_scales)
-        self.output_widget = widgets.Output()
-        self.main_widget = widgets.VBox(
-            children=[self.widget_toolbar, widgets.HBox([ipv.gcc(), self.tab])])
 
-    def show(self):
-        display(self.main_widget)
+        self.state.add_callback('visible_axes', self._update_axes_visibility)
+
+        self._figure_widget = ipv.gcc()
+
+        self.create_layout()
+
+    def _update_axes_visibility(self, *args):
+        with self.figure:
+            if self.state.visible_axes:
+                ipv.style.axes_on()
+                ipv.style.box_on()
+            else:
+                ipv.style.axes_off()
+                ipv.style.box_off()
+
+    @property
+    def figure_widget(self):
+        return self._figure_widget
 
     def apply_roi(self, roi, use_current=False):
         if len(self.layers) > 0:
@@ -76,27 +89,3 @@ class IpyvolumeBaseView(IPyWidgetView):
 
     def redraw(self):
         pass
-
-    def create_tab(self):
-
-        def change(visible):
-            with self.figure:
-                if visible:
-                    ipv.style.axes_on()
-                    ipv.style.box_on()
-                else:
-                    ipv.style.axes_off()
-                    ipv.style.box_off()
-        self.state.add_callback('visible_axes', change)
-
-        self.widget_show_movie_maker = ToggleButton(value=False, description="Show movie maker")
-        self.movie_maker = ipv.moviemaker.MovieMaker(self.figure, self.figure.camera)
-        dlink((self.widget_show_movie_maker, 'value'), (self.movie_maker.widget_main.layout, 'display'), lambda value: None if value else 'none')
-
-        self.tab_general = VBox([])
-        self.tab_general.children += self._options_cls(self.state).children
-        self.tab_general.children += (self.widget_show_movie_maker, self.movie_maker.widget_main)
-        children = [self.tab_general]
-        self.tab = Tab(children)
-        self.tab.set_title(0, "General")
-        self.tab.set_title(1, "Axes")

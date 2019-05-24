@@ -1,4 +1,6 @@
-from ipywidgets import HBox
+from ipywidgets import HBox, Tab, VBox, Output
+
+from IPython.display import display
 
 from glue.viewers.common.viewer import Viewer
 from glue.viewers.common.utils import get_viewer_tools
@@ -7,9 +9,10 @@ from glue.core import message as msg
 from glue.core.subset import Subset
 
 
+from glue_jupyter import get_layout_factory
 from glue_jupyter.utils import _update_not_none
-
 from glue_jupyter.common.toolbar import BasicJupyterToolbar
+from glue_jupyter.widgets.layer_options import LayerOptionsWidget
 
 __all__ = ['IPyWidgetView', 'IPyWidgetLayerArtistContainer']
 
@@ -31,11 +34,98 @@ class IPyWidgetView(Viewer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.initialize_layer_options()
         self.initialize_toolbar()
-        self.widget_toolbar = HBox([
-                        self.toolbar,
-                        self.session.application.widget_subset_select,
-                        self.session.application.widget_subset_mode])
+
+    @property
+    def toolbar_selection_tools(self):
+        """
+        The selection tools, e.g. rectangular or polygon selection.
+        """
+        return self.toolbar
+
+    @property
+    def toolbar_active_subset(self):
+        """
+        A dropdown providing control over the current active subset.
+        """
+        return self.session.application.widget_subset_select
+
+    @property
+    def toolbar_selection_mode(self):
+        """
+        Buttons providing control over logical selections.
+        """
+        return self.session.application.widget_subset_mode
+
+    @property
+    def figure_widget(self):
+        """
+        The main figure widget.
+        """
+        raise NotImplementedError()
+
+    @property
+    def output_widget(self):
+        """
+        A widget containing any textual output from the figures (including
+        errors).
+        """
+        return self._output_widget
+
+    @property
+    def viewer_options(self):
+        """
+        A widget containing the options for the current viewer.
+        """
+        return self._layout_viewer_options
+
+    @property
+    def layer_options(self):
+        """
+        A widget containing a layer selector and the options for the selected
+        layer.
+        """
+        return self._layout_layer_options
+
+    @property
+    def layout(self):
+        """
+        The widget containing the final layout of the individual figure widgets.
+        """
+        return self._layout
+
+    def create_layout(self):
+
+        # Check for a custom layout factory
+        layout_factory = get_layout_factory()
+        if layout_factory is not None:
+            self._layout = layout_factory(self)
+            return
+
+        # Take all the different widgets and construct a standard layout
+        # for the viewers, based on ipywidgets HBox and VBox. This can be
+        # overriden in sub-classes to create alternate layouts.
+
+        self._layout_toolbar = HBox([self.toolbar_selection_tools,
+                                     self.toolbar_active_subset,
+                                     self.toolbar_selection_mode])
+
+        self._layout_viewer_options = self._options_cls(self.state)
+
+        self._layout_tab = Tab([self._layout_viewer_options,
+                                self._layout_layer_options])
+        self._layout_tab.set_title(0, "General")
+        self._layout_tab.set_title(1, "Layers")
+
+        self._output_widget = Output()
+
+        self._layout = VBox([self._layout_toolbar,
+                             HBox([self.figure_widget, self._layout_tab]),
+                             self._output_widget])
+
+    def show(self):
+        display(self._layout)
 
     def add_data(self, data, color=None, alpha=None, **layer_state):
 
@@ -65,23 +155,8 @@ class IPyWidgetView(Viewer):
     def get_layer_artist(self, cls, layer=None, layer_state=None):
         return cls(self, self.state, layer=layer, layer_state=layer_state)
 
-    def _add_layer_tab(self, layer):
-        if isinstance(self._layer_style_widget_cls, dict):
-            layer_tab = self._layer_style_widget_cls[type(layer)](layer.state)
-        else:
-            layer_tab = self._layer_style_widget_cls(layer.state)
-        self.tab.children = self.tab.children + (layer_tab, )
-        if isinstance(layer.layer, Subset):
-            label = '{data_label}:{subset_label}'.format(data_label=layer.layer.data.label, subset_label=layer.layer.label)
-        else:
-            label = layer.layer.label
-
-        # Long tab titles can cause issues
-        # (see https://github.com/jupyter-widgets/ipywidgets/issues/2366)
-        if len(label) > 15:
-            label = label[:15] + '...'
-
-        self.tab.set_title(len(self.tab.children)-1, label)
+    def initialize_layer_options(self):
+        self._layout_layer_options = LayerOptionsWidget(self)
 
     def initialize_toolbar(self):
 

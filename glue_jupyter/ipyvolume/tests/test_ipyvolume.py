@@ -28,10 +28,10 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.state.z_min == 5
     assert s.state.z_max == 7
 
-    assert len(s.tab.children) == 2
+    assert len(s.layer_options._layer_dropdown.options) == 1
     app.subset('test', dataxyz.id['x'] > 2)
     assert len(s.layers) == 2
-    assert len(s.tab.children) == 3
+    assert len(s.layer_options._layer_dropdown.options) == 2
     assert s.layers[1].layer['x'].tolist() == [3]
     assert s.layers[1].layer['y'].tolist() == [4]
     assert s.layers[1].layer['z'].tolist() == [7]
@@ -71,12 +71,12 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert layer.quiver.visible
 
 
-def test_scatter3d_cmap_mode(app,dataxyz):
+def test_scatter3d_cmap_mode(app, dataxyz):
 
     s = app.scatter3d('x', 'y', data=dataxyz)
     l1 = s.layers[0]
 
-    layer_widget = s.tab.children[-1]
+    layer_widget = s.layer_options.children[-1]
 
     assert l1.state.cmap_mode == 'Fixed', 'expected default value'
     assert l1.state.cmap_name == 'Gray'

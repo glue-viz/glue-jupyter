@@ -44,7 +44,7 @@ class IpyvolumeLassoMode(IPyVolumeCheckableTool):
             return
 
         if data['device']:
-            with self.viewer.output_widget:
+            with self.viewer._output_widget:
                 region = data['device']
                 vx, vy = zip(*region)
                 roi_2d = PolygonalROI(vx=vx, vy=vy)
@@ -68,7 +68,7 @@ class IpyvolumeCircleMode(IPyVolumeCheckableTool):
             return
 
         if data['device']:
-            with self.viewer.output_widget:
+            with self.viewer._output_widget:
                 x1, y1 = data['device']['begin']
                 x2, y2 = data['device']['end']
                 dx = x2 - x1
@@ -95,7 +95,7 @@ class IpyvolumeRectanglewMode(IPyVolumeCheckableTool):
             return
 
         if data['device']:
-            with self.viewer.output_widget:
+            with self.viewer._output_widget:
                 x1, y1 = data['device']['begin']
                 x2, y2 = data['device']['end']
                 x = [x1, x2]

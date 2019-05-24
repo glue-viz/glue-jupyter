@@ -28,9 +28,7 @@ class IpyvolumeVolumeView(IpyvolumeBaseView):
             cls = IpyvolumeScatterLayerArtist
         else:
             cls = IpyvolumeVolumeLayerArtist
-        layer = self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
-        self._add_layer_tab(layer)
-        return layer
+        return self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
 
     def get_subset_layer_artist(self, layer=None, layer_state=None):
         return self.get_data_layer_artist(layer, layer_state)
