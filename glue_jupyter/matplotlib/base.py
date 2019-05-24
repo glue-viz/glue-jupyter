@@ -45,11 +45,10 @@ class MatplotlibJupyterViewer(MatplotlibViewerMixin, IPyWidgetView):
 
         MatplotlibViewerMixin.setup_callbacks(self)
 
-        # FIXME - include in figure widget?
         self.css_widget = HTML(REMOVE_TITLE_CSS)
 
         self.create_layout()
 
     @property
     def figure_widget(self):
-        return self.canvas
+        return VBox([self.css_widget, self.canvas])
