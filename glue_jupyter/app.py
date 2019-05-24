@@ -99,11 +99,16 @@ class JupyterApplication(Application):
         self.session.edit_subset_mode.mode = mode
 
     def new_data_viewer(self, *args, **kwargs):
+        show = kwargs.pop('show', True)
         viewer = super().new_data_viewer(*args, **kwargs)
-        viewer.show()
+        if show:
+            viewer.show()
         return viewer
 
-    def histogram1d(self, x=None, data=None, widget='bqplot', color=None, x_min=None, x_max=None, n_bin=None, normalize=False, cumulative=False, viewer_state=None, layer_state=None):
+    def histogram1d(self, x=None, data=None, widget='bqplot', color=None,
+                    x_min=None, x_max=None, n_bin=None, normalize=False,
+                    cumulative=False, viewer_state=None, layer_state=None,
+                    show=True):
         """
         Open an interactive histogram viewer.
 
@@ -134,6 +139,10 @@ class JupyterApplication(Application):
             The initial state for the viewer (advanced).
         layer_state : `~glue.viewers.common.state.LayerState`
             The initial state for the data layer (advanced).
+        show : bool, optional
+            Whether to show the view immediately (`True`) or whether to only
+            show it later if the ``show()`` method is called explicitly
+            (`False`).
         """
 
         if widget == 'bqplot':
@@ -164,13 +173,15 @@ class JupyterApplication(Application):
             normalize=normalize, cumulative=cumulative)
         viewer_state_obj.update_from_dict(viewer_state)
 
-        view = self.new_data_viewer(viewer_cls, data=data, state=viewer_state_obj)
+        view = self.new_data_viewer(viewer_cls, data=data,
+                                    state=viewer_state_obj, show=show)
         layer_state = layer_state or {}
         _update_not_none(layer_state, color=color)
         view.layers[0].state.update_from_dict(layer_state)
         return view
 
-    def scatter2d(self, x=None, y=None, data=None, widget='bqplot', color=None, size=None, viewer_state=None, layer_state=None):
+    def scatter2d(self, x=None, y=None, data=None, widget='bqplot', color=None,
+                  size=None, viewer_state=None, layer_state=None, show=True):
         """
         Open an interactive 2d scatter plot viewer.
 
@@ -196,6 +207,10 @@ class JupyterApplication(Application):
             The initial state for the viewer (advanced).
         layer_state : `~glue.viewers.common.state.LayerState`
             The initial state for the data layer (advanced).
+        show : bool, optional
+            Whether to show the view immediately (`True`) or whether to only
+            show it later if the ``show()`` method is called explicitly
+            (`False`).
         """
 
         if widget == 'bqplot':
@@ -225,13 +240,14 @@ class JupyterApplication(Application):
 
         viewer_state_obj.update_from_dict(viewer_state)
 
-        view = self.new_data_viewer(viewer_cls, data=data, state=viewer_state_obj)
+        view = self.new_data_viewer(viewer_cls, data=data,
+                                    state=viewer_state_obj, show=show)
         layer_state = layer_state or {}
         _update_not_none(layer_state, color=color, size=size)
         view.layers[0].state.update_from_dict(layer_state)
         return view
 
-    def scatter3d(self, x=None, y=None, z=None, data=None):
+    def scatter3d(self, x=None, y=None, z=None, data=None, show=True):
         """
         Open an interactive 3d scatter plot viewer.
 
@@ -247,6 +263,10 @@ class JupyterApplication(Application):
             The initial dataset to show in the viewer. Additional
             datasets can be added later using the ``add_data`` method on
             the viewer object.
+        show : bool, optional
+            Whether to show the view immediately (`True`) or whether to only
+            show it later if the ``show()`` method is called explicitly
+            (`False`).
         """
 
         from .ipyvolume import IpyvolumeScatterView
@@ -257,7 +277,7 @@ class JupyterApplication(Application):
             else:
                 data = self._data[0]
 
-        view = self.new_data_viewer(IpyvolumeScatterView, data=data)
+        view = self.new_data_viewer(IpyvolumeScatterView, data=data, show=show)
         if x is not None:
             x = data.id[x]
             view.state.x_att = x
@@ -269,7 +289,7 @@ class JupyterApplication(Application):
             view.state.z_att = z
         return view
 
-    def imshow(self, x=None, y=None, data=None, widget='bqplot'):
+    def imshow(self, x=None, y=None, data=None, widget='bqplot', show=True):
         """
         Open an interactive image viewer.
 
@@ -287,6 +307,10 @@ class JupyterApplication(Application):
             the viewer object.
         widget : {'bqplot', 'matplotlib'}
             Whether to use bqplot or Matplotlib as the front-end.
+        show : bool, optional
+            Whether to show the view immediately (`True`) or whether to only
+            show it later if the ``show()`` method is called explicitly
+            (`False`).
         """
 
         if widget == 'bqplot':
@@ -308,7 +332,7 @@ class JupyterApplication(Application):
             raise ValueError('Only data with two or more dimensions can be used '
                              'as the initial dataset in the image viewer')
 
-        view = self.new_data_viewer(viewer_cls, data=data)
+        view = self.new_data_viewer(viewer_cls, data=data, show=show)
 
         if x is not None:
             x = data.id[x]
@@ -320,7 +344,7 @@ class JupyterApplication(Application):
 
         return view
 
-    def profile1d(self, x=None, data=None, widget='bqplot'):
+    def profile1d(self, x=None, data=None, widget='bqplot', show=True):
         """
         Open an interactive 1d profile viewer.
 
@@ -335,6 +359,10 @@ class JupyterApplication(Application):
             the viewer object.
         widget : {'bqplot', 'matplotlib'}
             Whether to use bqplot or Matplotlib as the front-end.
+        show : bool, optional
+            Whether to show the view immediately (`True`) or whether to only
+            show it later if the ``show()`` method is called explicitly
+            (`False`).
         """
 
         if widget == 'bqplot':
@@ -352,7 +380,7 @@ class JupyterApplication(Application):
             else:
                 data = self._data[0]
 
-        view = self.new_data_viewer(viewer_cls, data=data)
+        view = self.new_data_viewer(viewer_cls, data=data, show=show)
 
         if x is not None:
             x = data.id[x]
@@ -360,7 +388,7 @@ class JupyterApplication(Application):
 
         return view
 
-    def volshow(self, x=None, y=None, z=None, data=None):
+    def volshow(self, x=None, y=None, z=None, data=None, show=True):
         """
         Open an interactive volume viewer.
 
@@ -379,7 +407,11 @@ class JupyterApplication(Application):
             The initial dataset to show in the viewer. Additional
             datasets can be added later using the ``add_data`` method on
             the viewer object.
-        """
+        show : bool, optional
+            Whether to show the view immediately (`True`) or whether to only
+            show it later if the ``show()`` method is called explicitly
+            (`False`).
+         """
         from .ipyvolume import IpyvolumeVolumeView
 
         if data is None:
@@ -388,7 +420,7 @@ class JupyterApplication(Application):
             else:
                 data = self._data[0]
 
-        view = self.new_data_viewer(IpyvolumeVolumeView, data=data)
+        view = self.new_data_viewer(IpyvolumeVolumeView, data=data, show=show)
 
         if x is not None:
             x = data.id[x]
