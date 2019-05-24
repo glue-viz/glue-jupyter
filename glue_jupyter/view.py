@@ -36,6 +36,7 @@ class IPyWidgetView(Viewer):
         super().__init__(*args, **kwargs)
         self.initialize_layer_options()
         self.initialize_toolbar()
+        self._output_widget = Output()
 
     @property
     def toolbar_selection_tools(self):
@@ -97,6 +98,8 @@ class IPyWidgetView(Viewer):
 
     def create_layout(self):
 
+        self._layout_viewer_options = self._options_cls(self.state)
+
         # Check for a custom layout factory
         layout_factory = get_layout_factory()
         if layout_factory is not None:
@@ -111,14 +114,10 @@ class IPyWidgetView(Viewer):
                                      self.toolbar_active_subset,
                                      self.toolbar_selection_mode])
 
-        self._layout_viewer_options = self._options_cls(self.state)
-
         self._layout_tab = Tab([self._layout_viewer_options,
                                 self._layout_layer_options])
         self._layout_tab.set_title(0, "General")
         self._layout_tab.set_title(1, "Layers")
-
-        self._output_widget = Output()
 
         self._layout = VBox([self._layout_toolbar,
                              HBox([self.figure_widget, self._layout_tab]),
