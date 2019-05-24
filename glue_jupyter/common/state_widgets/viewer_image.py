@@ -13,6 +13,11 @@ class ImageViewerStateWidget(VBox):
 
         self.state = viewer_state
 
+        # Set checkbox for showing/hiding axes
+
+        self.widget_show_axes = Checkbox(value=True, description="Show axes")
+        link((self.widget_show_axes, 'value'), (self.state, 'show_axes'))
+
         # Set up dropdown for color mode
 
         self.widget_color_mode = LinkedDropdown(self.state, 'color_mode', label='mode')
@@ -41,4 +46,4 @@ class ImageViewerStateWidget(VBox):
 
         super().__init__([self.widget_color_mode, self.widget_reference_data,
                           self.widgets_aspect, self.widget_axis_x,
-                          self.widget_axis_y, self.sliders])
+                          self.widget_axis_y, self.sliders, self.widget_show_axes])

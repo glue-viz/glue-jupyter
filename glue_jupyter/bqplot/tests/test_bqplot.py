@@ -11,7 +11,6 @@ def test_histogram1d(app, dataxyz):
     assert s.state.x_att == 'y'
     assert len(s.layers) == 1
     assert s.layers[0].layer['y'].tolist() == [2, 3, 4]
-    print('updating histogram state')
     s.state.hist_x_min = 1.5
     s.state.hist_x_max = 4.5
     s.state.hist_n_bin = 3
@@ -258,12 +257,12 @@ def test_imshow_nonfloat(app):
 def test_show_axes(app, dataxyz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     assert s.state.show_axes
-    assert s.widget_show_axes.value
+    assert s.viewer_options.widget_show_axes.value
     margin_initial = s.figure.fig_margin
     s.state.show_axes = False
-    assert not s.widget_show_axes.value
+    assert not s.viewer_options.widget_show_axes.value
     assert s.figure.fig_margin != margin_initial
-    s.widget_show_axes.value = True
+    s.viewer_options.widget_show_axes.value = True
     assert s.state.show_axes
     assert s.figure.fig_margin == margin_initial
 
