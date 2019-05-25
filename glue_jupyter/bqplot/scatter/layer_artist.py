@@ -88,7 +88,7 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _on_change_cmap_mode_or_att(self, ignore=None):
         if self.state.cmap_mode == 'Linear':
-            self.scatter.color = self.layer.data[self.state.cmap_att].astype(np.float32)
+            self.scatter.color = self.layer.data[self.state.cmap_att].astype(np.float32).ravel()
         else:
             self.scatter.color = None
 
@@ -147,10 +147,10 @@ class BqplotScatterLayerArtist(LayerArtist):
         if self.state.density_map:
             pass
         else:
-            self.scatter.x = self.layer.data[self._viewer_state.x_att].astype(np.float32)
-            self.scatter.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
-            self.quiver.x = self.layer.data[self._viewer_state.x_att].astype(np.float32)
-            self.quiver.y = self.layer.data[self._viewer_state.y_att].astype(np.float32)
+            self.scatter.x = self.layer.data[self._viewer_state.x_att].astype(np.float32).ravel()
+            self.scatter.y = self.layer.data[self._viewer_state.y_att].astype(np.float32).ravel()
+            self.quiver.x = self.scatter.x
+            self.quiver.y = self.scatter.y
 
         if isinstance(self.layer, Subset):
 
@@ -181,15 +181,14 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.quiver.selected_style = {}
         self.quiver.unselected_style = {}
 
-
     def _update_quiver(self):
         if not self.state.vector_visible:
             return
         size = 50
         scale = 1
         self.quiver.default_size = int(size * scale * 4)
-        vx = self.layer.data[self.state.vx_att]
-        vy = self.layer.data[self.state.vy_att]
+        vx = self.layer.data[self.state.vx_att].ravel()
+        vy = self.layer.data[self.state.vy_att].ravel()
         length = np.sqrt(vx**2 + vy**2)
         self.scale_size_quiver.min = np.nanmin(length)
         self.scale_size_quiver.max = np.nanmax(length)
@@ -204,7 +203,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         scale = self.state.size_scaling
         if self.state.size_mode == 'Linear':
             self.scatter.default_size = int(scale * 25) # *50 seems to give similar sizes as the Qt Glue
-            self.scatter.size = self.layer.data[self.state.size_att]
+            self.scatter.size = self.layer.data[self.state.size_att].ravel()
             self.scale_size.min = float_or_none(self.state.size_vmin)
             self.scale_size.max = float_or_none(self.state.size_vmax)
             self._workaround_unselected_style()

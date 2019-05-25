@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 from glue.core import Data
 import glue_jupyter as gj
 
@@ -28,6 +29,11 @@ def datax():
 def data_unlinked():
     data = Data(a=[1, 2], label="unlinked data")
     return data
+
+
+@pytest.fixture
+def data_4d():
+    return Data(x=np.arange(120).reshape((4, 2, 3, 5)), label='Data 4D')
 
 
 @pytest.fixture
