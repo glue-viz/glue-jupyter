@@ -24,8 +24,8 @@ class Size(widgets.VBox):
         self.widget_size_vmin = widgets.FloatText(description='size min')
         self.widget_size_vmax = widgets.FloatText(description='size min')
         self.widget_size_v = widgets.VBox([self.widget_size_vmin, self.widget_size_vmax])
-        link((self.state, 'size_vmin'), (self.widget_size_vmin, 'value'))
-        link((self.state, 'size_vmax'), (self.widget_size_vmax, 'value'))
+        link((self.state, 'size_vmin'), (self.widget_size_vmin, 'value'), lambda value: value or 0)
+        link((self.state, 'size_vmax'), (self.widget_size_vmax, 'value'), lambda value: value or 1)
 
         dlink((self.widget_size_mode, 'value'), (self.widget_size.layout, 'display'),     lambda value: None if value == options[0] else 'none')
         dlink((self.widget_size_mode, 'value'), (self.widget_size_att.layout, 'display'), lambda value: None if value == options[1] else 'none')

@@ -148,9 +148,9 @@ class Scatter3DViewerState(ViewerState3D):
 
         super(Scatter3DViewerState, self).__init__()
 
-        self.x_att_helper = ComponentIDComboHelper(self, 'x_att', categorical=False)
-        self.y_att_helper = ComponentIDComboHelper(self, 'y_att', categorical=False)
-        self.z_att_helper = ComponentIDComboHelper(self, 'z_att', categorical=False)
+        self.x_att_helper = ComponentIDComboHelper(self, 'x_att', categorical=True)
+        self.y_att_helper = ComponentIDComboHelper(self, 'y_att', categorical=True)
+        self.z_att_helper = ComponentIDComboHelper(self, 'z_att', categorical=True)
 
         self.add_callback('layers', self._on_layers_change)
 

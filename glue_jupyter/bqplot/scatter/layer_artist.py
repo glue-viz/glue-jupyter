@@ -11,6 +11,7 @@ from glue_jupyter.compat import LayerArtist
 from ...link import dlink, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
 from glue.external.echo import CallbackProperty
+from glue.utils import ensure_numerical
 
 # FIXME: monkey patch ipywidget to accept anything
 tt.Color.validate = lambda self, obj, value: value
@@ -87,7 +88,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.update()
 
     def _on_change_cmap_mode_or_att(self, ignore=None):
-        if self.state.cmap_mode == 'Linear':
+        if self.state.cmap_mode == 'Linear' and self.state.cmap_att is not None:
             self.scatter.color = self.layer.data[self.state.cmap_att].astype(np.float32).ravel()
         else:
             self.scatter.color = None
@@ -147,8 +148,8 @@ class BqplotScatterLayerArtist(LayerArtist):
         if self.state.density_map:
             pass
         else:
-            self.scatter.x = self.layer.data[self._viewer_state.x_att].astype(np.float32).ravel()
-            self.scatter.y = self.layer.data[self._viewer_state.y_att].astype(np.float32).ravel()
+            self.scatter.x = ensure_numerical(self.layer.data[self._viewer_state.x_att]).astype(np.float32).ravel()
+            self.scatter.y = ensure_numerical(self.layer.data[self._viewer_state.y_att]).astype(np.float32).ravel()
             self.quiver.x = self.scatter.x
             self.quiver.y = self.scatter.y
 
@@ -182,8 +183,12 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.quiver.unselected_style = {}
 
     def _update_quiver(self):
-        if not self.state.vector_visible:
+
+        if (not self.state.vector_visible
+                or self.state.vx_att is None
+                or self.state.vy_att is None):
             return
+
         size = 50
         scale = 1
         self.quiver.default_size = int(size * scale * 4)
@@ -199,9 +204,10 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.quiver.rotation = angle
 
     def _update_size(self):
+
         size = self.state.size
         scale = self.state.size_scaling
-        if self.state.size_mode == 'Linear':
+        if self.state.size_mode == 'Linear' and self.state.size_att is not None:
             self.scatter.default_size = int(scale * 25) # *50 seems to give similar sizes as the Qt Glue
             self.scatter.size = self.layer.data[self.state.size_att].ravel()
             self.scale_size.min = float_or_none(self.state.size_vmin)

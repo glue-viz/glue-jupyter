@@ -7,7 +7,7 @@ from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.external.echo import CallbackProperty, SelectionCallbackProperty
-
+from glue.utils import ensure_numerical
 from ...link import link, on_change
 
 __all__ = ['Scatter3DLayerState', 'IpyvolumeScatterLayerArtist']
@@ -90,9 +90,9 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
     def update(self):
         # we don't use layer, but layer.data to get everything
-        self.scatter.x = self.layer.data[self._viewer_state.x_att].ravel()
-        self.scatter.y = self.layer.data[self._viewer_state.y_att].ravel()
-        self.scatter.z = self.layer.data[self._viewer_state.z_att].ravel()
+        self.scatter.x = ensure_numerical(self.layer.data[self._viewer_state.x_att]).ravel()
+        self.scatter.y = ensure_numerical(self.layer.data[self._viewer_state.y_att]).ravel()
+        self.scatter.z = ensure_numerical(self.layer.data[self._viewer_state.z_att]).ravel()
         self.quiver.x = self.scatter.x
         self.quiver.y = self.scatter.y
         self.quiver.z = self.scatter.z
