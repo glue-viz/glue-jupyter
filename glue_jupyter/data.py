@@ -1,4 +1,4 @@
-from urllib.request import urlretrieve
+from urllib.request import urlopen
 
 __all__ = ['require_data']
 
@@ -13,11 +13,12 @@ def require_data(file_path):
     Note that this should include forward slashes for paths even on Windows.
     """
 
-    # For now, this is a simple implementation using urlretrieve, but in future
-    # we could always extend it to allow using e.g. wget.
+    # We use urlopen instead of urlretrieve to have control over the timeout
 
     local_path = file_path.split('/')[-1]
 
-    urlretrieve(DATA_REPO + file_path, local_path)
+    request = urlopen(DATA_REPO + file_path, timeout=60)
+    with open(local_path, 'wb') as f:
+        f.write(request.read())
 
     print("Successfully downloaded data file to {0}".format(local_path))
