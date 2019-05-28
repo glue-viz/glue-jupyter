@@ -91,7 +91,6 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
         pass
 
     def update(self):
-        print("HERE1", self.state.data_min, self.state.data_max, self.state.vmin, self.state.vmax)
         if isinstance(self.layer, Subset):
             try:
                 mask = self.layer.to_mask()
@@ -125,7 +124,6 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
             self.volume.data_original = data
             self.volume.data_min = data_min
             self.volume.data_max = data_max
-        print("HERE2", self.state.data_min, self.state.data_max, self.state.vmin, self.state.vmax)
         self.state.data_min = self.state.vmin
         self.state.data_max = self.state.vmax
 

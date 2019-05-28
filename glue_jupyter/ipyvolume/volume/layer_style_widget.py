@@ -26,10 +26,6 @@ class Volume3DLayerStateWidget(VBox):
         self.widget_max_resolution = Dropdown(options=options, value=128, description='max resolution')
         link((self.state, 'max_resolution'), (self.widget_max_resolution, 'value'))
 
-        print(id(self.state.layer))
-        print(self.state.data_min)
-        print(self.state.data_max)
-
         if self.state.vmin is None:
             self.state.vmin = 0
 
