@@ -24,8 +24,6 @@ class BqplotBaseView(IPyWidgetView):
         self.scale_y = bqplot.LinearScale(min=0, max=1)
 
         super(BqplotBaseView, self).__init__(session, state=state)
-        # session.hub.subscribe(self, SubsetCreateMessage,
-        #                       handler=self.receive_message)
 
         self.scales = {'x': self.scale_x, 'y': self.scale_y}
         self.axis_x = bqplot.Axis(
@@ -66,10 +64,6 @@ class BqplotBaseView(IPyWidgetView):
         self.axis_x.visible = self.axis_y.visible = self.state.show_axes
         self.figure.fig_margin = self._fig_margin_default if self.state.show_axes else self._fig_margin_zero
 
-    @staticmethod
-    def update_viewer_state(rec, context):
-        print('update viewer state', rec, context)
-
     def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
         with self._output_widget:
@@ -104,11 +98,6 @@ class BqplotBaseView(IPyWidgetView):
         if self.state.y_min is not None and self.state.y_max is not None:
             self.scale_y.min = float(self.state.y_min)
             self.scale_y.max = float(self.state.y_max)
-
-    def receive_message(self, message):
-        print("Message received:")
-        print("{0}".format(message))
-        self.last_msg = message
 
     def redraw(self):
         pass
