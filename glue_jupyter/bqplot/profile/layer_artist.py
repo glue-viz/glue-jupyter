@@ -6,21 +6,17 @@ import warnings
 import numpy as np
 
 from glue.core import BaseData
-from glue.utils import defer_draw, nanmin, nanmax
+from glue.utils import defer_draw, nanmin, nanmax, color2hex
 from glue.viewers.profile.state import ProfileLayerState
 from glue.core.exceptions import IncompatibleAttribute, IncompatibleDataException
 
 import bqplot
-import ipywidgets.widgets.trait_types as tt
 
 from glue_jupyter.compat import LayerArtist
 
-from ...link import link
+from ...link import dlink
 
 __all__ = ['BqplotProfileLayerArtist']
-
-# FIXME: monkey patch ipywidget to accept anything
-tt.Color.validate = lambda self, obj, value: value
 
 
 class BqplotProfileLayerArtist(LayerArtist):
@@ -42,10 +38,10 @@ class BqplotProfileLayerArtist(LayerArtist):
 
         self.view.figure.marks = list(self.view.figure.marks) + [self.line_mark]
 
-        link((self.state, 'color'), (self.line_mark, 'colors'), lambda x: [x], lambda x: x[0])
-        link((self.state, 'alpha'), (self.line_mark, 'opacities'), lambda x: [x], lambda x: x[0])
+        dlink((self.state, 'color'), (self.line_mark, 'colors'), lambda x: [color2hex(x)])
+        dlink((self.state, 'alpha'), (self.line_mark, 'opacities'), lambda x: [x])
 
-        self.line_mark.colors = [self.state.color]
+        self.line_mark.colors = [color2hex(self.state.color)]
         self.line_mark.opacities = [self.state.alpha]
 
     def _calculate_profile(self, reset=False):

@@ -1,6 +1,7 @@
 import ipywidgets as widgets
 
 from glue.config import colormaps
+from glue.utils import color2hex
 
 from ..link import link, dlink
 from .linked_dropdown import LinkedDropdown
@@ -13,7 +14,7 @@ class Color(widgets.VBox):
         self.state = state
 
         self.widget_color = widgets.ColorPicker(description='color')
-        link((self.state, 'color'), (self.widget_color, 'value'))
+        link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
 
         cmap_mode_options = type(self.state).cmap_mode.get_choice_labels(self.state)
         self.widget_cmap_mode = widgets.RadioButtons(options=cmap_mode_options, description='cmap mode')

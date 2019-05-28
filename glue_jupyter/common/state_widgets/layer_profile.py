@@ -1,6 +1,8 @@
 from ipywidgets import Checkbox, ColorPicker, VBox, IntText, FloatText
-from ...widgets import LinkedDropdown
 
+from glue.utils import color2hex
+
+from ...widgets import LinkedDropdown
 from ...link import link
 
 __all__ = ['ProfileLayerStateWidget']
@@ -16,7 +18,7 @@ class ProfileLayerStateWidget(VBox):
         link((self.state, 'visible'), (self.widget_visible, 'value'))
 
         self.widget_color = ColorPicker(description='color')
-        link((self.state, 'color'), (self.widget_color, 'value'))
+        link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
 
         self.widget_linewidth = IntText(description='line width')
         link((self.state, 'linewidth'), (self.widget_linewidth, 'value'))

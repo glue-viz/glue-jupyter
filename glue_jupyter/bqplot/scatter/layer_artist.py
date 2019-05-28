@@ -1,7 +1,6 @@
 import numpy as np
 import bqplot
 from bqplot_image_gl import ImageGL
-import ipywidgets.widgets.trait_types as tt
 
 from glue.core.data import Subset
 from glue.viewers.scatter.state import ScatterLayerState
@@ -11,11 +10,7 @@ from glue_jupyter.compat import LayerArtist
 from ...link import dlink, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
 from glue.external.echo import CallbackProperty
-from glue.utils import ensure_numerical
-
-# FIXME: monkey patch ipywidget to accept anything
-tt.Color.validate = lambda self, obj, value: value
-
+from glue.utils import ensure_numerical, color2hex
 
 __all__ = ['BqplotScatterLayerState', 'BqplotScatterLayerArtist']
 
@@ -52,8 +47,8 @@ class BqplotScatterLayerArtist(LayerArtist):
         self._viewer_state.add_global_callback(self._update_scatter)
 
         self.view.figure.marks = list(self.view.figure.marks) + [self.image, self.scatter, self.quiver ]
-        dlink((self.state, 'color'), (self.scatter, 'colors'), lambda x: [x])
-        dlink((self.state, 'color'), (self.quiver, 'colors'), lambda x: [x])
+        dlink((self.state, 'color'), (self.scatter, 'colors'), lambda x: [color2hex(x)])
+        dlink((self.state, 'color'), (self.quiver, 'colors'), lambda x: [color2hex(x)])
         self.scatter.observe(self._workaround_unselected_style, 'colors')
         self.quiver.observe(self._workaround_unselected_style, 'colors')
 

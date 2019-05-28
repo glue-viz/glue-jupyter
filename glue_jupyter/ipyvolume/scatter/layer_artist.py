@@ -7,7 +7,8 @@ from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.external.echo import CallbackProperty, SelectionCallbackProperty
-from glue.utils import ensure_numerical
+from glue.utils import ensure_numerical, color2hex
+
 from ...link import link, on_change
 
 __all__ = ['Scatter3DLayerState', 'IpyvolumeScatterLayerArtist']
@@ -75,7 +76,7 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
             color_values = cmap(normalized_values).astype(np.float32)
             self.scatter.color = color_values
         else:
-            self.scatter.color = self.state.color
+            self.scatter.color = color2hex(self.state.color)
         # for ipyvolume we set all colors the same, and resize unselected points to 0
         self.quiver.color = self.scatter.color
         self.scatter.color_selected = self.scatter.color

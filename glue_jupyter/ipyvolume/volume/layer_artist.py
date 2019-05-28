@@ -8,7 +8,7 @@ from glue.core.data import Subset
 from glue.core.exceptions import IncompatibleAttribute
 from glue_vispy_viewers.common.layer_artist import VispyLayerArtist
 
-from ...link import link, on_change
+from ...link import link, dlink, on_change
 
 __all__ = ['VolumeLayerState']
 
@@ -67,18 +67,18 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
         #ipv.figure(self.ipyvolume_viewer.figure)
         self.last_shape = None
 
-        link((self.state, 'lighting'), (self.volume, 'lighting'))
-        link((self.state, 'render_method'), (self.volume, 'rendering_method'))
-        link((self.state, 'max_resolution'), (self.volume, 'data_max_shape'))
+        dlink((self.state, 'lighting'), (self.volume, 'lighting'))
+        dlink((self.state, 'render_method'), (self.volume, 'rendering_method'))
+        dlink((self.state, 'max_resolution'), (self.volume, 'data_max_shape'))
 
-        link((self.state, 'vmin'), (self.volume, 'show_min'))
-        link((self.state, 'vmax'), (self.volume, 'show_max'))
+        dlink((self.state, 'vmin'), (self.volume, 'show_min'))
+        dlink((self.state, 'vmax'), (self.volume, 'show_max'))
 
-        link((self.state, 'data_min'), (self.volume, 'data_min'))
-        link((self.state, 'data_max'), (self.volume, 'data_max'))
+        dlink((self.state, 'data_min'), (self.volume, 'data_min'))
+        dlink((self.state, 'data_max'), (self.volume, 'data_max'))
 
-        link((self.state, 'clamp_min'), (self.volume, 'clamp_min'))
-        link((self.state, 'clamp_max'), (self.volume, 'clamp_max'))
+        dlink((self.state, 'clamp_min'), (self.volume, 'clamp_min'))
+        dlink((self.state, 'clamp_max'), (self.volume, 'clamp_max'))
 
         link((self.state, 'opacity_scale'), (self.volume, 'opacity_scale'))
 
@@ -91,7 +91,7 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
         pass
 
     def update(self):
-        # print(self.layer)
+        print("HERE1", self.state.data_min, self.state.data_max, self.state.vmin, self.state.vmax)
         if isinstance(self.layer, Subset):
             try:
                 mask = self.layer.to_mask()
@@ -101,15 +101,10 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
                 return
             else:
                 self.enable()
-            # if self.state.subset_mode == 'outline':
-            #     data = mask.astype(np.float32)
-            # else:
             data = self.layer.data[self.state.attribute].astype(np.float32)
             data *= mask
         else:
             data = self.layer[self.state.attribute]
-        #data = self.layer.data[self.state.attribute].astype(np.float32)
-        #print(data, data.shape, self.state.attribute)
         finite_mask = np.isfinite(data)
         finite_data = data[finite_mask]
         finite_mask_normalized = finite_data - finite_data.min()
@@ -130,6 +125,7 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
             self.volume.data_original = data
             self.volume.data_min = data_min
             self.volume.data_max = data_max
+        print("HERE2", self.state.data_min, self.state.data_max, self.state.vmin, self.state.vmax)
         self.state.data_min = self.state.vmin
         self.state.data_max = self.state.vmax
 
