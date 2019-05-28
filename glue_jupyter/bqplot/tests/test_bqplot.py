@@ -187,7 +187,7 @@ def test_scatter2d_properties(app, dataxyz, dataxz):
     s = app.scatter2d('x', 'y', data=dataxyz)
     l1 = s.layers[0]
     l1.state.color = 'green'
-    assert l1.scatter.colors == ['green']
+    assert l1.scatter.colors == ['#008000']
 
 
 def test_scatter2d_cmap_mode(app, dataxyz):
