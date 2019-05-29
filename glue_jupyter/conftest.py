@@ -1,33 +1,40 @@
 import pytest
+import numpy as np
 from glue.core import Data
 import glue_jupyter as gj
 
 
 @pytest.fixture
 def dataxyz():
-    data = Data(x=[1, 2, 3], y=[2, 3, 4], z=[5, 6, 7], label="xyz data")
-    return data
+    return Data(x=[1, 2, 3], y=[2, 3, 4], z=[5, 6, 7], label="xyz data")
+
+
+@pytest.fixture
+def datacat():
+    return Data(a=['a', 'b', 'c'], b=['d', 'e', 'f'], label="categorical data")
 
 
 @pytest.fixture
 def dataxz():
     ox = 0
     oy = 1
-    data = Data(x=[1 + ox, 2 + ox, 3 + ox], z=[2 + oy, 3 + oy, 4 + oy], label="xy data")
-    return data
+    return Data(x=[1 + ox, 2 + ox, 3 + ox], z=[2 + oy, 3 + oy, 4 + oy], label="xy data")
 
 
 @pytest.fixture
 def datax():
     ox = 0
-    data = Data(x=[1 + ox, 2 + ox, 3 + ox], label="x data")
-    return data
+    return Data(x=[1 + ox, 2 + ox, 3 + ox], label="x data")
 
 
 @pytest.fixture
 def data_unlinked():
-    data = Data(a=[1, 2], label="unlinked data")
-    return data
+    return Data(a=[1, 2], label="unlinked data")
+
+
+@pytest.fixture
+def data_4d():
+    return Data(x=np.arange(120).reshape((4, 2, 3, 5)), label='Data 4D')
 
 
 @pytest.fixture

@@ -7,6 +7,7 @@ from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.external.echo import CallbackProperty, SelectionCallbackProperty
+from glue.utils import ensure_numerical, color2hex
 
 from ...link import link, on_change
 
@@ -70,12 +71,12 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
     def _update_color(self, ignore=None):
         cmap = self.state.cmap
         if self.state.cmap_mode == 'Linear':
-            values = self.layer.data[self.state.cmap_att].astype(np.float32)
+            values = self.layer.data[self.state.cmap_att].astype(np.float32).ravel()
             normalized_values = (values - self.state.cmap_vmin) / (self.state.cmap_vmax - self.state.cmap_vmin)
             color_values = cmap(normalized_values).astype(np.float32)
             self.scatter.color = color_values
         else:
-            self.scatter.color = self.state.color
+            self.scatter.color = color2hex(self.state.color)
         # for ipyvolume we set all colors the same, and resize unselected points to 0
         self.quiver.color = self.scatter.color
         self.scatter.color_selected = self.scatter.color
@@ -90,12 +91,12 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
     def update(self):
         # we don't use layer, but layer.data to get everything
-        self.scatter.x = self.layer.data[self._viewer_state.x_att]
-        self.scatter.y = self.layer.data[self._viewer_state.y_att]
-        self.scatter.z = self.layer.data[self._viewer_state.z_att]
-        self.quiver.x = self.layer.data[self._viewer_state.x_att]
-        self.quiver.y = self.layer.data[self._viewer_state.y_att]
-        self.quiver.z = self.layer.data[self._viewer_state.z_att]
+        self.scatter.x = ensure_numerical(self.layer.data[self._viewer_state.x_att]).ravel()
+        self.scatter.y = ensure_numerical(self.layer.data[self._viewer_state.y_att]).ravel()
+        self.scatter.z = ensure_numerical(self.layer.data[self._viewer_state.z_att]).ravel()
+        self.quiver.x = self.scatter.x
+        self.quiver.y = self.scatter.y
+        self.quiver.z = self.scatter.z
         if isinstance(self.layer, Subset):
 
             try:
@@ -118,16 +119,16 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
     def _update_quiver(self):
         with self.quiver.hold_sync():
-            self.quiver.vx = self.layer.data[self.state.vx_att]
-            self.quiver.vy = self.layer.data[self.state.vy_att]
-            self.quiver.vz = self.layer.data[self.state.vz_att]
+            self.quiver.vx = self.layer.data[self.state.vx_att].ravel()
+            self.quiver.vy = self.layer.data[self.state.vy_att].ravel()
+            self.quiver.vz = self.layer.data[self.state.vz_att].ravel()
 
 
     def _update_size(self):
         size = self.state.size
         scale = self.state.size_scaling / 5  # /5 seems to give similar sizes as the Qt Glue
         if self.state.size_mode == 'Linear':
-            size = self.layer.data[self.state.size_att]
+            size = self.layer.data[self.state.size_att].ravel()
             size = (size - self.state.size_vmin) / (self.state.size_vmax - self.state.size_vmin)
             size *= 5
         value = size * scale

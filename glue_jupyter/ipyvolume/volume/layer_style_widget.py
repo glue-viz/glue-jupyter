@@ -1,7 +1,9 @@
 from ipywidgets import (Checkbox, VBox, ColorPicker, Dropdown, FloatSlider,
                         FloatLogSlider)
 
-from ...link import link
+from glue.utils import color2hex
+
+from ...link import link, dlink
 
 __all__ = ['Volume3DLayerStateWidget']
 
@@ -29,16 +31,16 @@ class Volume3DLayerStateWidget(VBox):
 
         self.widget_data_min = FloatSlider(description='min', min=0, max=1, value=self.state.vmin, step=0.001)
         link((self.state, 'vmin'), (self.widget_data_min, 'value'))
-        link((self.state, 'data_min'), (self.widget_data_min, 'min'))
-        link((self.state, 'data_max'), (self.widget_data_min, 'max'))
+        dlink((self.state, 'data_min'), (self.widget_data_min, 'min'))
+        dlink((self.state, 'data_max'), (self.widget_data_min, 'max'))
 
         if self.state.vmax is None:
             self.state.vmax = 1
 
         self.widget_data_max = FloatSlider(description='max', min=0, max=1, value=self.state.vmax, step=0.001)
         link((self.state, 'vmax'), (self.widget_data_max, 'value'))
-        link((self.state, 'data_min'), (self.widget_data_max, 'min'))
-        link((self.state, 'data_max'), (self.widget_data_max, 'max'))
+        dlink((self.state, 'data_min'), (self.widget_data_max, 'min'))
+        dlink((self.state, 'data_max'), (self.widget_data_max, 'max'))
 
         self.widget_clamp_min = Checkbox(description='clamp minimum', value=self.state.clamp_min)
         link((self.state, 'clamp_min'), (self.widget_clamp_min, 'value'))
@@ -47,7 +49,7 @@ class Volume3DLayerStateWidget(VBox):
         link((self.state, 'clamp_max'), (self.widget_clamp_max, 'value'))
 
         self.widget_color = ColorPicker(value=self.state.color, description='color')
-        link((self.state, 'color'), (self.widget_color, 'value'))
+        link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
 
         if self.state.alpha is None:
             self.state.alpha = 1

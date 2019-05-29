@@ -21,7 +21,6 @@ class link(object):
         def sync(*ignore):
             old_value = getattr(target[0], target[1])
             new_value = f(getattr(source[0], source[1]))
-            #print('old/new', old_value, new_value)
             if new_value != old_value:
                 setattr(target[0], target[1], new_value)
 

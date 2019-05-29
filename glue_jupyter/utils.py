@@ -36,7 +36,6 @@ def reduce_size(data, max_size):
             slices1[axis] = slice(0, -1, 2)
             slices2 = [slice(None, None, None)] * 3
             slices2[axis] = slice(1, None, 2)
-            print(data.shape, data.__getitem__(slices1).shape, data.__getitem__(slices2).shape)
             data = (data[slices1])# + data.__getitem__(slices2))/2
             shape = data.shape
     return data

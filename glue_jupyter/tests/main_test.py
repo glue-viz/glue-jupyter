@@ -60,13 +60,13 @@ def test_layer_state(app, dataxyz):
     assert s.layers[0].state.size == 11
 
     s = app.histogram1d('x', data=dataxyz, layer_state=dict(color='green'))
-    assert s.layers[0].state.color == 'green'
+    assert s.layers[0].state.color == '#008000'
 
 
 def test_add_data_with_state(app, dataxz, dataxyz):
     s = app.scatter2d('x', 'z', data=dataxz, color='green')
     s.add_data(dataxyz, color='red', alpha=0.2, size=3.3)
-    assert s.layers[0].state.color == 'green'
+    assert s.layers[0].state.color == '#008000'
     assert s.layers[1].state.color == 'red'
     assert s.layers[1].state.alpha == 0.2
     assert s.layers[1].state.size == 3.3

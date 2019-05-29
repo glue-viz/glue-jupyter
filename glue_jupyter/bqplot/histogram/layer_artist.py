@@ -1,15 +1,12 @@
 import numpy as np
 import bqplot
-import ipywidgets.widgets.trait_types as tt
 
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.histogram.state import HistogramLayerState
 from glue_jupyter.compat import LayerArtist
+from glue.utils import color2hex
 
-from ...link import link
-
-# FIXME: monkey patch ipywidget to accept anything
-tt.Color.validate = lambda self, obj, value: value
+from ...link import link, dlink
 
 __all__ = ['BqplotHistogramLayerArtist']
 
@@ -30,8 +27,7 @@ class BqplotHistogramLayerArtist(LayerArtist):
 
         self.view.figure.marks = list(self.view.figure.marks) + [self.bars]
 
-        link((self.state, 'color'), (self.bars, 'colors'),
-             lambda x: [x], lambda x: x[0])
+        dlink((self.state, 'color'), (self.bars, 'colors'), lambda x: [color2hex(x)])
 
         #link((self.bars, 'default_opacities'), (self.state, 'alpha'), lambda x: x[0], lambda x: [x])
         #link((self.bars, 'default_size'), (self.state, 'size'))
