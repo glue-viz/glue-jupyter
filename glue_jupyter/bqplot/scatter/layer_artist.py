@@ -6,6 +6,7 @@ from glue.core.data import Subset
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
+from mpl_scatter_density.color import make_cmap
 
 from ...link import dlink, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
@@ -51,24 +52,17 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         self.view.figure.marks = (list(self.view.figure.marks)
                                   + [self.image, self.scatter, self.quiver])
-        dlink((self.state, 'color'), (self.scatter, 'colors'), lambda x: [color2hex(x)])
-        dlink((self.state, 'color'), (self.quiver, 'colors'), lambda x: [color2hex(x)])
         self.scatter.observe(self._workaround_unselected_style, 'colors')
         self.quiver.observe(self._workaround_unselected_style, 'colors')
 
-        on_change([(self.state, 'cmap_mode', 'cmap_att')])(self._on_change_cmap_mode_or_att)
-        on_change([(self.state, 'cmap')])(self._on_change_cmap)
-        dlink((self.state, 'cmap_vmin'), (self.scale_color, 'min'), float_or_none)
-        dlink((self.state, 'cmap_vmax'), (self.scale_color, 'max'), float_or_none)
-
+        on_change([(self.state, 'color', 'cmap_mode', 'cmap', 'cmap_vmin', 'cmap_vmax')])(self._update_color)
         on_change([(self.state, 'size', 'size_scaling', 'size_mode',
                     'size_vmin', 'size_vmax')])(self._update_size)
 
         viewer_state.add_callback('x_att', self._update_xy_att)
         viewer_state.add_callback('y_att', self._update_xy_att)
         self._update_size()
-        # set initial values for the colormap
-        self._on_change_cmap()
+        self._update_color()
 
         self.state.add_callback('visible', self._update_visibility)
         self.state.add_callback('vector_visible', self._update_visibility)
@@ -101,17 +95,6 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _update_xy_att(self, *args):
         self.update()
-
-    def _on_change_cmap_mode_or_att(self, ignore=None):
-        if self.state.cmap_mode == 'Linear' and self.state.cmap_att is not None:
-            self.scatter.color = self.layer.data[self.state.cmap_att].astype(np.float32).ravel()
-        else:
-            self.scatter.color = None
-
-    def _on_change_cmap(self, ignore=None):
-        cmap = self.state.cmap
-        colors = colormap_to_hexlist(cmap)
-        self.scale_color.colors = colors
 
     def _on_change_density_map(self):
         self._update_visibility()
@@ -171,6 +154,8 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.image.image = self.counts.T.astype(np.float32, copy=True)
         else:
             self.image.image = EMPTY_IMAGE
+
+        self._update_color()
 
     def update(self):
 
@@ -296,3 +281,30 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter.size = None
             self.scale_size.min = 0
             self.scale_size.max = 1
+
+    def _update_color(self):
+
+        if self.state.cmap_mode == 'Linear' and self.state.cmap_att is not None:
+
+            if self.state.density_map:
+                colors = colormap_to_hexlist(make_cmap(self.state.cmap))
+                # self.scale_image.colors = colors
+                # self.scale_color.colors = colors
+            else:
+                self.scatter.color = self.layer.data[self.state.cmap_att].astype(np.float32).ravel()
+                self.quiver.color = self.scatter.color
+
+        else:
+
+            if self.state.density_map:
+                cmap = make_cmap(self.state.color)
+                # self.scale_image.colors = colors
+                # self.scale_color.colors = colors
+                if self.counts is not None:
+                    print(self.counts)
+                    self.image.image = cmap(self.counts / np.nanmax(self.counts))
+            else:
+                self.scatter.color = None
+                self.quiver.color = None
+                self.scatter.colors = [color2hex(self.state.color)]
+                self.quiver.colors = [color2hex(self.state.color)]
