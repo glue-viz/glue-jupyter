@@ -3,7 +3,6 @@
 # default layout.
 
 import ipyvuetify as v
-from ipywidgets import Output
 
 from glue.config import viewer_tool
 
@@ -44,16 +43,16 @@ def vuetify_layout_factory(viewer):
 
     toolbar_selection_mode = SelectionModeMenu(viewer)
 
-    toolbar = v.Toolbar(dense=True,
+    toolbar = v.Toolbar(dense=True, class_='elevation-0',
                         children=[v.ToolbarItems(children=[toolbar_selection_tools,
                                                            toolbar_selection_mode,
                                                            toolbar_active_subset]),
                                   v.Spacer(),
                                   sidebar_button])
 
-    layout = v.Layout(row=True, wrap=True, children=[
+    layout = v.Layout(row=True, wrap=True, color='transparent', children=[
         toolbar,
-        v.Flex(x12=True, children=[viewer.figure_widget]),
+        v.Flex(x12=True, children=[viewer.figure_widget], color='transparent'),
         v.Flex(x12=True, children=[viewer.output_widget]),
         drawer
     ])
