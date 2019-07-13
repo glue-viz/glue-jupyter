@@ -18,7 +18,6 @@ class BasicJupyterToolbar(v.BtnToggle):
         self.output = viewer.output_widget
 
     def _change_tool(self, widget, event, data):
-
         with self.output:
 
             if self.active is not None:
@@ -32,5 +31,6 @@ class BasicJupyterToolbar(v.BtnToggle):
     def add_tool(self, tool):
         self.tools[tool.tool_id] = tool
         icon = Image.from_file(icon_path(tool.icon, icon_format='svg'), width=ICON_WIDTH)
-        button = v.Btn(icon=True, children=[icon], value=tool.tool_id)
-        self.children = list(self.children) + [button]
+        button = v.Btn(slot='activator', icon=True, children=[icon], value=tool.tool_id)
+        annotated = v.Tooltip(bottom=True, children=[button, tool.tool_tip])
+        self.children = list(self.children) + [annotated]
