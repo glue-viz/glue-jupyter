@@ -3,6 +3,7 @@ import ipyvuetify as v
 
 import glue.core.message as msg
 from glue.core.hub import HubListener
+from glue.utils.decorators import avoid_circular
 
 __all__ = ['SelectionModeMenu']
 
@@ -37,6 +38,7 @@ class SelectionModeMenu(v.Menu, HubListener):
 
         self._sync_ui_from_state(self.session.edit_subset_mode.mode)
 
+    @avoid_circular
     def _sync_state_from_ui(self, widget, event, data):
         with self.output:
             icon = widget.children[0].children[0]
@@ -51,6 +53,7 @@ class SelectionModeMenu(v.Menu, HubListener):
     def _on_edit_subset_msg(self, msg):
         self._sync_ui_from_state(msg.mode)
 
+    @avoid_circular
     def _sync_ui_from_state(self, mode):
         with self.output:
             if self.session.edit_subset_mode.mode != mode:

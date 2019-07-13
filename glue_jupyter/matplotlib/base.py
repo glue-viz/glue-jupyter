@@ -5,8 +5,7 @@ from IPython.display import display
 
 try:
     from ipympl.backend_nbagg import Canvas, FigureManager
-except ImportError:
-    # Prior to June 2019
+except ImportError:  # Prior to June 2019
     from ipympl.backend_nbagg import FigureCanvasNbAgg as Canvas, FigureManagerNbAgg as FigureManager
 
 from matplotlib.figure import Figure
