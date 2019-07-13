@@ -25,7 +25,7 @@ class BasicJupyterToolbar(v.BtnToggle):
                 self.tools[self.active].deactivate()
                 self.active = None
 
-            if data is not None:
+            if data:
                 self.tools[data].activate()
                 self.active = data
 
