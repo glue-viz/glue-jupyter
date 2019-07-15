@@ -235,7 +235,7 @@ class JupyterApplication(Application):
 
         if x is not None:
             viewer_state['x_att'] = data.id[x]
-        if x is not None:
+        if y is not None:
             viewer_state['y_att'] = data.id[y]
 
         viewer_state_obj.update_from_dict(viewer_state)
