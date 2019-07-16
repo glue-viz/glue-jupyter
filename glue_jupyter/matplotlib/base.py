@@ -3,7 +3,12 @@ from __future__ import absolute_import, division, print_function
 from ipywidgets import HTML, Tab, HBox, VBox, Output
 from IPython.display import display
 
-from ipympl.backend_nbagg import FigureCanvasNbAgg, FigureManagerNbAgg
+try:
+    from ipympl.backend_nbagg import Canvas, FigureManager
+except ImportError:
+    # Prior to June 2019
+    from ipympl.backend_nbagg import FigureCanvasNbAgg as Canvas, FigureManagerNbAgg as FigureManager
+
 from matplotlib.figure import Figure
 
 from glue.viewers.matplotlib.mpl_axes import init_mpl
@@ -17,7 +22,7 @@ from glue_jupyter.view import IPyWidgetView
 __all__ = ['MatplotlibJupyterViewer']
 
 # Register the Qt backend with defer_draw
-DEFER_DRAW_BACKENDS.append(FigureCanvasNbAgg)
+DEFER_DRAW_BACKENDS.append(Canvas)
 
 # By default, the Jupyter Matplotlib widget has a big clunky title bar, so
 # we apply custom CSS to remove it.
@@ -33,8 +38,8 @@ class MatplotlibJupyterViewer(MatplotlibViewerMixin, IPyWidgetView):
     def __init__(self, session, parent=None, wcs=None, state=None):
 
         self.figure = Figure()
-        self.canvas = FigureCanvasNbAgg(self.figure)
-        self.canvas.manager = FigureManagerNbAgg(self.canvas, 0)
+        self.canvas = Canvas(self.figure)
+        self.canvas.manager = FigureManager(self.canvas, 0)
         self.figure, self.axes = init_mpl(self.figure, wcs=wcs)
 
         # FIXME: The following is required for now for the tools to work
