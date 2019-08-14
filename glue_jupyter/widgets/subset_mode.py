@@ -14,7 +14,7 @@ icon_xor = widgets.Image.from_file(glue.icons.icon_path("glue_xor", icon_format=
 icon_andnot = widgets.Image.from_file(glue.icons.icon_path("glue_andnot", icon_format="svg"), width=ICON_WIDTH)
 
 
-class SubsetMode(mui.Html, HubListener):
+class SubsetMode(mui.ToggleButtonGroup, HubListener):
     """Widget that manages the subset mode (replace/add/and/xor/remove) state between UI and glue state.
 
     On glue's side, the state is in `session.edit_subset_mode.mode`. On the UI side, the state
@@ -32,15 +32,16 @@ class SubsetMode(mui.Html, HubListener):
             ("xor", icon_xor, XorMode),
             ("remove", icon_andnot, AndNotMode),
         ]
-        self.child = self.widget_selection_mode = mui.ToggleButtonGroup(
+        super(SubsetMode, self).__init__(
             exclusive=True,
             value=0,
             style={"margin": "4px"},
             children=[
                 mui.ToggleButton(children=[icon], value=k) for k, (label, icon, mode) in enumerate(self.selection_modes)
-            ],
+            ]
         )
-        self.widget_selection_mode.observe(self._sync_state_from_ui, "value")
+
+        self.observe(self._sync_state_from_ui, "value")
         self.session.hub.subscribe(self, msg.EditSubsetMessage, handler=self._on_edit_subset_msg)
         self._sync_ui_from_state(self.session.edit_subset_mode.mode)
 
@@ -54,7 +55,7 @@ class SubsetMode(mui.Html, HubListener):
         for i, (__, __, sel_mode) in enumerate(self.selection_modes):
             if mode == sel_mode:
                 index = i
-        self.widget_selection_mode.value = index
+        self.value = index
 
     def _sync_state_from_ui(self, change):
-        self.session.edit_subset_mode.mode = self.selection_modes[self.widget_selection_mode.value][2]
+        self.session.edit_subset_mode.mode = self.selection_modes[self.value][2]
