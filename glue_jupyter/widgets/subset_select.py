@@ -5,7 +5,7 @@ from glue.core import message as msg
 from glue.core.hub import HubListener
 
 
-class SubsetSelect(mui.Div, HubListener):
+class SubsetSelect(mui.Html, HubListener):
     """Widget responsible for selecting which subsets are active, sync state between UI and glue.
 
     On glue's side, the state is in `session.edit_subset_mode.edit_subset`. On the UI side, the state

@@ -14,7 +14,7 @@ icon_xor = widgets.Image.from_file(glue.icons.icon_path("glue_xor", icon_format=
 icon_andnot = widgets.Image.from_file(glue.icons.icon_path("glue_andnot", icon_format="svg"), width=ICON_WIDTH)
 
 
-class SubsetMode(mui.Div, HubListener):
+class SubsetMode(mui.Html, HubListener):
     """Widget that manages the subset mode (replace/add/and/xor/remove) state between UI and glue state.
 
     On glue's side, the state is in `session.edit_subset_mode.mode`. On the UI side, the state

@@ -95,7 +95,7 @@ class LinkedDropdown(Dropdown):
                     self.value = None
 
 
-class LinkedDropdownMaterial(mui.Div):
+class LinkedDropdownMaterial(mui.Html):
     """
     A dropdown widget that is automatically linked to a SelectionCallbackProperty
     and syncs changes both ways (Material UI version)
