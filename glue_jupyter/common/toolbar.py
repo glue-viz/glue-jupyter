@@ -30,4 +30,7 @@ class BasicJupyterToolbar(ToggleButtonGroup):
         icon = Image.from_file(icon_path(tool.icon, icon_format='svg'),
                                width=ICON_WIDTH)
         button = ToggleButton(children=[icon], value=tool.tool_id)
-        self.children += (button,)
+        if self.children is None:
+            self.children = (button,)
+        else:
+            self.children = tuple(self.children) + (button,)
