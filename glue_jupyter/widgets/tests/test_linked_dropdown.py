@@ -76,10 +76,10 @@ def test_component_material(app, dataxz, dataxyz):
     dropdown = LinkedDropdownMaterial(state, 'x_att', 'x test attribute')
 
     # simple sanity tests
-    assert dropdown.widget_input_label.description == 'x test attribute'
+    assert dropdown.widget_input_label.children[0] == 'x test attribute'
     items = getattr(type(state), 'x_att').get_choice_labels(state)
     assert len(dropdown.widget_select.children) == len(items)
-    assert [item.description for item in dropdown.widget_select.children] == ['x', 'z']
+    assert [item.children[0] for item in dropdown.widget_select.children] == ['x', 'z']
 
     # initial state
     assert str(state.x_att) == 'x'

@@ -122,7 +122,7 @@ class LinkedDropdownMaterial(mui.FormControl):
         self.widget_select = mui.Select(value=self._get_glue_selected_item_index(),
                                         children=self.menu_items, multiple=False)
 
-        self.widget_input_label = mui.InputLabel(description=label,
+        self.widget_input_label = mui.InputLabel(children=[label],
                                                  placeholder='No selection')
 
         super(LinkedDropdownMaterial, self).__init__(children=[self.widget_input_label,
