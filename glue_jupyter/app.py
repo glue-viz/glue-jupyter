@@ -1,7 +1,7 @@
 import ipywidgets as widgets
 from IPython.display import display
 
-
+from glue.core import Data
 from glue.core.application_base import Application
 from glue.core.link_helpers import LinkSame
 from glue.core.roi import PolygonalROI
@@ -10,7 +10,7 @@ from glue.core.command import ApplySubsetState
 from glue.core.edit_subset_mode import (NewMode, ReplaceMode, AndMode, OrMode,
                                         XorMode, AndNotMode)
 
-from glue_jupyter.utils import _update_not_none
+from glue_jupyter.utils import _update_not_none, validate_data_argument
 from glue_jupyter.widgets.subset_select import SubsetSelect
 from glue_jupyter.widgets.subset_mode import SubsetMode
 
@@ -105,7 +105,7 @@ class JupyterApplication(Application):
             viewer.show()
         return viewer
 
-    def histogram1d(self, x=None, data=None, widget='bqplot', color=None,
+    def histogram1d(self, *, data=None, x=None, widget='bqplot', color=None,
                     x_min=None, x_max=None, n_bin=None, normalize=False,
                     cumulative=False, viewer_state=None, layer_state=None,
                     show=True):
@@ -114,12 +114,12 @@ class JupyterApplication(Application):
 
         Parameters
         ----------
-        x : str or `~glue.core.component_id.ComponentID`, optional
-            The attribute to show on the x axis.
-        data : `~glue.core.data.Data`, optional
+        data : str or `~glue.core.data.Data`, optional
             The initial dataset to show in the viewer. Additional
             datasets can be added later using the ``add_data`` method on
             the viewer object.
+        x : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the x axis.
         widget : {'bqplot', 'matplotlib'}
             Whether to use bqplot or Matplotlib as the front-end.
         color : str or tuple, optional
@@ -154,11 +154,7 @@ class JupyterApplication(Application):
         else:
             raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
 
-        if data is None:
-            if len(self._data) != 1:
-                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
-            else:
-                data = self._data[0]
+        data = validate_data_argument(self.data_collection, data)
 
         viewer_state_obj = viewer_cls._state_cls()
         viewer_state_obj.x_att_helper.append_data(data)
@@ -180,21 +176,21 @@ class JupyterApplication(Application):
         view.layers[0].state.update_from_dict(layer_state)
         return view
 
-    def scatter2d(self, x=None, y=None, data=None, widget='bqplot', color=None,
+    def scatter2d(self, *, data=None, x=None, y=None, widget='bqplot', color=None,
                   size=None, viewer_state=None, layer_state=None, show=True):
         """
         Open an interactive 2d scatter plot viewer.
 
         Parameters
         ----------
+        data : str or `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
         x : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the x axis.
         y : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the y axis.
-        data : `~glue.core.data.Data`, optional
-            The initial dataset to show in the viewer. Additional
-            datasets can be added later using the ``add_data`` method on
-            the viewer object.
         widget : {'bqplot', 'matplotlib'}
             Whether to use bqplot or Matplotlib as the front-end.
         color : str or tuple, optional
@@ -222,11 +218,7 @@ class JupyterApplication(Application):
         else:
             raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
 
-        if data is None:
-            if len(self._data) != 1:
-                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
-            else:
-                data = self._data[0]
+        data = validate_data_argument(self.data_collection, data)
 
         viewer_state_obj = viewer_cls._state_cls()
         viewer_state_obj.x_att_helper.append_data(data)
@@ -247,22 +239,22 @@ class JupyterApplication(Application):
         view.layers[0].state.update_from_dict(layer_state)
         return view
 
-    def scatter3d(self, x=None, y=None, z=None, data=None, show=True):
+    def scatter3d(self, *, data=None, x=None, y=None, z=None, show=True):
         """
         Open an interactive 3d scatter plot viewer.
 
         Parameters
         ----------
+        data : str or `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
         x : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the x axis.
         y : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the y axis.
         z : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the z axis.
-        data : `~glue.core.data.Data`, optional
-            The initial dataset to show in the viewer. Additional
-            datasets can be added later using the ``add_data`` method on
-            the viewer object.
         show : bool, optional
             Whether to show the view immediately (`True`) or whether to only
             show it later if the ``show()`` method is called explicitly
@@ -271,11 +263,7 @@ class JupyterApplication(Application):
 
         from .ipyvolume import IpyvolumeScatterView
 
-        if data is None:
-            if len(self._data) != 1:
-                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
-            else:
-                data = self._data[0]
+        data = validate_data_argument(self.data_collection, data)
 
         view = self.new_data_viewer(IpyvolumeScatterView, data=data, show=show)
         if x is not None:
@@ -289,22 +277,22 @@ class JupyterApplication(Application):
             view.state.z_att = z
         return view
 
-    def imshow(self, x=None, y=None, data=None, widget='bqplot', show=True):
+    def imshow(self, *, data=None, x=None, y=None, widget='bqplot', show=True):
         """
         Open an interactive image viewer.
 
         Parameters
         ----------
+        data : str or `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
         x : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the x axis. This should be one of the
             pixel axis attributes.
         y : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the y axis. This should be one of the
             pixel axis attributes.
-        data : `~glue.core.data.Data`, optional
-            The initial dataset to show in the viewer. Additional
-            datasets can be added later using the ``add_data`` method on
-            the viewer object.
         widget : {'bqplot', 'matplotlib'}
             Whether to use bqplot or Matplotlib as the front-end.
         show : bool, optional
@@ -322,11 +310,7 @@ class JupyterApplication(Application):
         else:
             raise ValueError("Widget type should be 'bqplot' or 'matplotlib'")
 
-        if data is None:
-            if len(self._data) != 1:
-                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
-            else:
-                data = self._data[0]
+        data = validate_data_argument(self.data_collection, data)
 
         if len(data.pixel_component_ids) < 2:
             raise ValueError('Only data with two or more dimensions can be used '
@@ -344,19 +328,19 @@ class JupyterApplication(Application):
 
         return view
 
-    def profile1d(self, x=None, data=None, widget='bqplot', show=True):
+    def profile1d(self, *, data=None, x=None, widget='bqplot', show=True):
         """
         Open an interactive 1d profile viewer.
 
         Parameters
         ----------
-        x : str or `~glue.core.component_id.ComponentID`, optional
-            The attribute to show on the x axis. This should be a pixel or
-            world coordinate `~glue.core.component_id.ComponentID`.
-        data : `~glue.core.data.Data`, optional
+        data : str or `~glue.core.data.Data`, optional
             The initial dataset to show in the viewer. Additional
             datasets can be added later using the ``add_data`` method on
             the viewer object.
+        x : str or `~glue.core.component_id.ComponentID`, optional
+            The attribute to show on the x axis. This should be a pixel or
+            world coordinate `~glue.core.component_id.ComponentID`.
         widget : {'bqplot', 'matplotlib'}
             Whether to use bqplot or Matplotlib as the front-end.
         show : bool, optional
@@ -374,11 +358,7 @@ class JupyterApplication(Application):
         else:
             raise ValueError("Widget type should be 'matplotlib'")
 
-        if data is None:
-            if len(self._data) != 1:
-                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
-            else:
-                data = self._data[0]
+        data = validate_data_argument(self.data_collection, data)
 
         view = self.new_data_viewer(viewer_cls, data=data, show=show)
 
@@ -388,12 +368,16 @@ class JupyterApplication(Application):
 
         return view
 
-    def volshow(self, x=None, y=None, z=None, data=None, show=True):
+    def volshow(self, *, data=None, x=None, y=None, z=None, show=True):
         """
         Open an interactive volume viewer.
 
         Parameters
         ----------
+        data : str or `~glue.core.data.Data`, optional
+            The initial dataset to show in the viewer. Additional
+            datasets can be added later using the ``add_data`` method on
+            the viewer object.
         x : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the x axis. This should be one of the
             pixel axis attributes.
@@ -403,10 +387,6 @@ class JupyterApplication(Application):
         z : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the z axis. This should be one of the
             pixel axis attributes.
-        data : `~glue.core.data.Data`, optional
-            The initial dataset to show in the viewer. Additional
-            datasets can be added later using the ``add_data`` method on
-            the viewer object.
         show : bool, optional
             Whether to show the view immediately (`True`) or whether to only
             show it later if the ``show()`` method is called explicitly
@@ -414,11 +394,7 @@ class JupyterApplication(Application):
          """
         from .ipyvolume import IpyvolumeVolumeView
 
-        if data is None:
-            if len(self._data) != 1:
-                raise ValueError('There is more than one data set in the data collection, please pass a data argument')
-            else:
-                data = self._data[0]
+        data = validate_data_argument(self.data_collection, data)
 
         view = self.new_data_viewer(IpyvolumeVolumeView, data=data, show=show)
 

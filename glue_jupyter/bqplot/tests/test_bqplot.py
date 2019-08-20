@@ -7,7 +7,7 @@ DATA = os.path.join(os.path.dirname(__file__), 'data')
 
 
 def test_histogram1d(app, dataxyz):
-    s = app.histogram1d('y', data=dataxyz)
+    s = app.histogram1d(x='y', data=dataxyz)
     assert s.state.x_att == 'y'
     assert len(s.layers) == 1
     assert s.layers[0].layer['y'].tolist() == [2, 3, 4]
@@ -40,7 +40,7 @@ def test_histogram1d(app, dataxyz):
 
 def test_histogram1d_multiple_subsets(app, data_unlinked, datax):
     # Make sure that things work fine if an incompatible subset is added
-    viewer = app.histogram1d('x', data=datax)
+    viewer = app.histogram1d(x='x', data=datax)
     app.subset('test1', datax.id['x'] > 1)
     app.subset('test2', data_unlinked.id['a'] > 1)
     assert viewer.layers[0].enabled
@@ -49,7 +49,7 @@ def test_histogram1d_multiple_subsets(app, data_unlinked, datax):
 
 
 def test_interact(app, dataxyz):
-    s = app.scatter2d('x', 'y', data=dataxyz)
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
     # s.widget_menu_select_x.value = True
     # s.widget_menu_select_x.click()# = True
     tool = s.toolbar.tools['bqplot:xrange']
@@ -58,7 +58,7 @@ def test_interact(app, dataxyz):
 
 
 def test_scatter2d(app, dataxyz, dataxz):
-    s = app.scatter2d('x', 'y', data=dataxyz)
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
     assert s.state.x_att == 'x'
     assert s.state.y_att == 'y'
 
@@ -68,7 +68,7 @@ def test_scatter2d(app, dataxyz, dataxz):
     # assert s.state.y_max == 4
 
     # test when we swap x and x
-    s = app.scatter2d('y', 'x', data=dataxyz)
+    s = app.scatter2d(x='y', y='x', data=dataxyz)
     assert s.state.x_att == 'y'
     assert s.state.y_att == 'x'
     # assert s.state.y_min == 1
@@ -85,7 +85,7 @@ def test_scatter2d(app, dataxyz, dataxz):
 
 
 def test_scatter2d_density(app, dataxyz):
-    s = app.scatter2d('x', 'y', data=dataxyz)
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
     s.layers[0].state.points_mode = 'density'
     assert s.layers[0].state.density_map == True
 
@@ -99,7 +99,7 @@ def test_scatter2d_density(app, dataxyz):
 
 
 def test_scatter2d_subset(app, dataxyz, dataxz):
-    s = app.scatter2d('x', 'y', data=dataxyz)
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
     app.subset('test', dataxyz.id['x'] > 2)
     assert len(s.layers) == 2
     assert s.layers[1].layer['x'].tolist() == [3]
@@ -118,7 +118,7 @@ def test_scatter2d_subset(app, dataxyz, dataxz):
 
 def test_scatter2d_multiple_subsets(app, data_unlinked, dataxz):
     # Make sure that things work fine if an incompatible subset is added
-    viewer = app.scatter2d('x', 'z', data=dataxz)
+    viewer = app.scatter2d(x='x', y='z', data=dataxz)
     app.subset('test1', dataxz.id['x'] > 1)
     app.subset('test2', data_unlinked.id['a'] > 1)
     assert viewer.layers[0].enabled
@@ -127,7 +127,7 @@ def test_scatter2d_multiple_subsets(app, data_unlinked, dataxz):
 
 
 def test_scatter2d_brush(app, dataxyz, dataxz):
-    s = app.scatter2d('x', 'y', data=dataxyz)
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
 
     # 1d x brushing
     tool1d = s.toolbar.tools['bqplot:xrange']
@@ -184,14 +184,14 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
 
 
 def test_scatter2d_properties(app, dataxyz, dataxz):
-    s = app.scatter2d('x', 'y', data=dataxyz)
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
     l1 = s.layers[0]
     l1.state.color = 'green'
     assert l1.scatter.colors == ['#008000']
 
 
 def test_scatter2d_cmap_mode(app, dataxyz):
-    s = app.scatter2d('x', 'y', data=dataxyz)
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
     l1 = s.layers[0]
     assert l1.state.cmap_mode == 'Fixed', 'expected default value'
     assert l1.state.cmap_name == 'Gray'
@@ -206,8 +206,8 @@ def test_scatter2d_cmap_mode(app, dataxyz):
 
 
 def test_scatter2d_and_histogram(app, dataxyz):
-    s = app.scatter2d('x', 'y', data=dataxyz)
-    h = app.histogram1d('x', data=dataxyz)
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
+    h = app.histogram1d(x='x', data=dataxyz)
     tool = s.toolbar.tools['bqplot:rectangle']
     tool.activate()
     tool.interact.brushing = True
@@ -255,7 +255,7 @@ def test_imshow_nonfloat(app):
 
 
 def test_show_axes(app, dataxyz):
-    s = app.scatter2d('x', 'y', data=dataxyz)
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
     assert s.state.show_axes
     assert s.viewer_options.widget_show_axes.value
     margin_initial = s.figure.fig_margin

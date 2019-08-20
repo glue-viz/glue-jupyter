@@ -6,6 +6,7 @@ import PIL.Image
 import numpy as np
 from io import BytesIO as StringIO # python3
 
+from glue.core import Data
 
 def float_or_none(x):
     return float(x) if x is not None else None
@@ -129,3 +130,30 @@ def colormap_to_hexlist(cmap, N=256):
     x = np.linspace(0, 1, N)
     colors = ["#%02x%02x%02x" % tuple([int(k*255) for k in color]) for color in cmap(x)[:,:3]]
     return colors
+
+
+def validate_data_argument(data_collection, data):
+    """
+    Validate the data argument passed to the viewer functions and return
+    a glue data object.
+    """
+
+    if data is None:
+        if len(data_collection) != 1:
+            raise ValueError('There is more than one data set in the data collection, please pass a data argument')
+        else:
+            return data_collection[0]
+    elif isinstance(data, str):
+        if data in data_collection:
+            return data_collection[data]
+        else:
+            raise ValueError(f"'{data}' is not a valid dataset name. The "
+                                "following datasets are available:\n\n" +
+                                "\n".join([f"  * '{d.label}'" for d in data_collection]) )
+    elif not isinstance(data, Data):
+        raise TypeError('The data argument should either be a glue data '
+                        'object or the name of a dataset. The following '
+                        'datasets are available:\n\n' +
+                        '\n'.join([f"  * '{d.label}'" for d in data_collection]) )
+    else:
+        return data
