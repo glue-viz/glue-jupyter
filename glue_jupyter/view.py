@@ -128,11 +128,7 @@ class IPyWidgetView(Viewer):
 
     def add_data(self, data, color=None, alpha=None, **layer_state):
 
-        print(type(data))
-
         data = validate_data_argument(self._data, data)
-
-        print(type(data))
 
         result = super().add_data(data)
 
