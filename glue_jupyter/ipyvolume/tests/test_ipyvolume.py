@@ -16,7 +16,7 @@ xyzw2yxzw = np.array([
 
 
 def test_scatter3d(app, dataxyz, dataxz):
-    s = app.scatter3d('x', 'y', 'z', data=dataxyz)
+    s = app.scatter3d(x='x', y='y', z='z', data=dataxyz)
     assert s.state.x_att == 'x'
     assert s.state.y_att == 'y'
     # assert s.state.z_att == 'z'
@@ -73,7 +73,7 @@ def test_scatter3d(app, dataxyz, dataxz):
 
 def test_scatter3d_cmap_mode(app, dataxyz):
 
-    s = app.scatter3d('x', 'y', data=dataxyz)
+    s = app.scatter3d(x='x', y='y', data=dataxyz)
     l1 = s.layers[0]
 
     layer_widget = s.layer_options.children[-1]
@@ -109,7 +109,7 @@ def test_roi3d(dataxyz):
     assert roi.contains3d(dataxyz['x'], dataxyz['y'], dataxyz['z']).tolist() == [True, True, False]
 
 def test_lasso3d(app, dataxyz):
-    s = app.scatter3d('x', 'y', 'z', data=dataxyz)
+    s = app.scatter3d(x='x', y='y', z='z', data=dataxyz)
     s.figure.matrix_world = np.eye(4).ravel().tolist()
     s.figure.matrix_projection = np.eye(4).ravel().tolist()
     # similar to the roi3d test above, and this is the format that ipyvolume send back
@@ -141,7 +141,7 @@ def test_lasso3d(app, dataxyz):
 
 def test_scatter3d_multiple_subsets(app, data_unlinked, dataxyz):
     # Make sure that things work fine if an incompatible subset is added
-    viewer = app.scatter3d('x', 'y', 'z', data=dataxyz)
+    viewer = app.scatter3d(x='x', y='y', z='z', data=dataxyz)
     app.subset('test1', dataxyz.id['x'] > 1)
     app.subset('test2', data_unlinked.id['a'] > 1)
     assert viewer.layers[0].enabled
