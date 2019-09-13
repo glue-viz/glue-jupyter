@@ -16,6 +16,7 @@ dist
 
 # Other generated files
 glue/_githash.py
+.vscode
 
 # Other
 .pylintrc
