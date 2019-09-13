@@ -62,18 +62,20 @@ class SubsetSelect(v.Menu, HubListener):
         # this is called when the state in glue is changed, we sync the UI to reflect its state
 
         with self.output:
-
             items = [self.widget_menu_item_no_active]
-
-            for i, subset_group in enumerate(self.data_collection.subset_groups):
-                # TODO: could avoid re-creating widgets as we do for the material UI version
-                item = v.ListTile(children=[v.ListTileTitle(children=[subset_group.label])])
-                item.on_event('click', self._sync_state_from_ui)
-                items.append(item)
+            with self.main.hold_sync():
+                self.main.children = ["No selection (create new)"]
+                for subset_group in self.data_collection.subset_groups:
+                    # TODO: could avoid re-creating widgets as we do for the material UI version
+                    # we're using a triangular icon here, since in the UI it's close to a round icon, which is confusing
+                    item = v.ListTile(children=[
+                        v.ListTileAvatar(children=[v.Icon(children=['signal_cellular_4_bar'], color=subset_group.style.color)]),
+                        v.ListTileTitle(children=[subset_group.label])
+                    ])
+                    item.on_event('click', self._sync_state_from_ui)
+                    items.append(item)
+                    # TODO: this supports only a single active subset (it will actually only show the last)
+                    if subset_group in self.session.edit_subset_mode.edit_subset:
+                        self.main.children = item.children[:]
 
             self.subset_list.children = items
-
-            if self.session.edit_subset_mode.edit_subset:
-                self.main.children = [self.session.edit_subset_mode.edit_subset[0].label]
-            else:
-                self.main.children = ["No selection (create new)"]
