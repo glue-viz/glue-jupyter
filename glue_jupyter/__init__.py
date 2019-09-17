@@ -23,7 +23,11 @@ def get_layout_factory():
     """
     Get the current layout factory. Returns `None` if using the default.
     """
-    return LAYOUT_FACTORY
+    if LAYOUT_FACTORY is None:
+        from .vuetify_layout import vuetify_layout_factory
+        return vuetify_layout_factory
+    else:   
+        return LAYOUT_FACTORY
 
 
 def jglue(*args, **kwargs):

@@ -1,4 +1,4 @@
-from ipywidgets import HBox, Tab, VBox, Output
+from ipywidgets import Output
 
 from IPython.display import display
 
@@ -6,7 +6,6 @@ from glue.viewers.common.viewer import Viewer
 from glue.viewers.common.utils import get_viewer_tools
 from glue.core.layer_artist import LayerArtistContainer
 from glue.core import message as msg
-from glue.core.subset import Subset
 
 
 from glue_jupyter import get_layout_factory
@@ -102,26 +101,10 @@ class IPyWidgetView(Viewer):
 
         # Check for a custom layout factory
         layout_factory = get_layout_factory()
-        if layout_factory is not None:
+        if layout_factory is None:
+            raise ValueError('layout factory should be set with set_layout_factory')
+        else:
             self._layout = layout_factory(self)
-            return
-
-        # Take all the different widgets and construct a standard layout
-        # for the viewers, based on ipywidgets HBox and VBox. This can be
-        # overriden in sub-classes to create alternate layouts.
-
-        self._layout_toolbar = HBox([self.toolbar_selection_tools,
-                                     self.toolbar_active_subset,
-                                     self.toolbar_selection_mode])
-
-        self._layout_tab = Tab([self._layout_viewer_options,
-                                self._layout_layer_options])
-        self._layout_tab.set_title(0, "General")
-        self._layout_tab.set_title(1, "Layers")
-
-        self._layout = VBox([self._layout_toolbar,
-                             HBox([self.figure_widget, self._layout_tab]),
-                             self._output_widget])
 
     def show(self):
         display(self._layout)
