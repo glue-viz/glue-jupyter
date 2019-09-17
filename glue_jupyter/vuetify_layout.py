@@ -22,10 +22,15 @@ def vuetify_layout_factory(viewer):
     sidebar_button = v.ToolbarSideIcon()
     sidebar_button.on_event('click', on_click)
 
+    options_panel = v.ExpansionPanel(v_model=[True, True], expand=True,
+                                     children=[v.ExpansionPanelContent(children=[v.Html(tag='b', slot='header', children=['Viewer Options']),
+                                                                                 v.Card(children=[viewer.viewer_options])]),
+                                               v.ExpansionPanelContent(children=[v.Html(tag='b', slot='header', children=['Layer Options']),
+                                                                                 v.Card(children=[viewer.layer_options])])])
+
     drawer = v.NavigationDrawer(v_model=False, absolute=True, right=True,
                                 children=[sidebar_button,
-                                          viewer.viewer_options,
-                                          viewer.layer_options])
+                                          options_panel], width=350)
 
     toolbar_selection_tools = BasicJupyterToolbar(viewer)
 

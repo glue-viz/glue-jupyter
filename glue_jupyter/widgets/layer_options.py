@@ -13,7 +13,7 @@ class LayerOptionsWidget(VBox):
     def __init__(self, viewer):
 
         self.viewer = viewer
-        self._layer_dropdown = Dropdown(description="Layers")
+        self._layer_dropdown = Dropdown(description="Layer")
 
         self.viewer.state.add_callback('layers', self._update_ui_from_glue_state)
         self._update_ui_from_glue_state()
