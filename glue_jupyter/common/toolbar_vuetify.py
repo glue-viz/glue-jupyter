@@ -35,8 +35,14 @@ class BasicJupyterToolbar(v.BtnToggle):
     def add_tool(self, tool):
         self.tools[tool.tool_id] = tool
         icon = Image.from_file(icon_path(tool.icon, icon_format='svg'), width=ICON_WIDTH)
-        button = v.Btn(slot='activator', icon=True, children=[icon], value=tool.tool_id)
-        annotated = v.Tooltip(bottom=True, children=[button, tool.tool_tip])
+        button = v.Btn(v_on="tooltip.on", icon=True, children=[icon], value=tool.tool_id)
+        annotated = v.Tooltip(
+            bottom=True,
+            v_slots=[{
+                'name': 'activator',
+                'variable': 'tooltip',
+                'children': button}],
+            children=[tool.tool_tip])
         self.children = list(self.children) + [annotated]
 
 

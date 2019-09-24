@@ -19,18 +19,22 @@ def vuetify_layout_factory(viewer):
     def on_click(widget, event, data):
         drawer.v_model = not drawer.v_model
 
-    sidebar_button = v.ToolbarSideIcon()
+    sidebar_button = v.AppBarNavIcon()
     sidebar_button.on_event('click', on_click)
 
-    options_panel = v.ExpansionPanel(v_model=[True, True], expand=True,
-                                     children=[v.ExpansionPanelContent(children=[v.Html(tag='b', slot='header', children=['Viewer Options']),
-                                                                                 v.Card(children=[viewer.viewer_options])]),
-                                               v.ExpansionPanelContent(children=[v.Html(tag='b', slot='header', children=['Layer Options']),
-                                                                                 v.Card(children=[viewer.layer_options])])])
+    options_panel = v.ExpansionPanels(
+        v_model=[0, 1], multiple=True, accordion=True, style_='padding-left: 1px',
+        children=[
+            v.ExpansionPanel(children=[
+                v.ExpansionPanelHeader(class_='font-weight-bold', children=['Viewer Options']),
+                v.ExpansionPanelContent(children=[viewer.viewer_options])]),
+            v.ExpansionPanel(children=[
+                v.ExpansionPanelHeader(class_='font-weight-bold', children=['Layer Options']),
+                v.ExpansionPanelContent(children=[viewer.layer_options])])])
 
     drawer = v.NavigationDrawer(v_model=False, absolute=True, right=True,
                                 children=[sidebar_button,
-                                          options_panel], width=350)
+                                          options_panel], width=373)
 
     toolbar_selection_tools = BasicJupyterToolbar(viewer)
 

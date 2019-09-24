@@ -19,9 +19,9 @@ class SubsetSelect(v.Menu, HubListener):
         self.session = viewer.session
         self.data_collection = viewer.session.data_collection
 
-        self.main = v.Btn(children=["No selection (create new)"], slot='activator', flat=True)
+        self.main = v.Btn(children=["No selection (create new)"], v_on="menu.on", flat=True)
 
-        self.widget_menu_item_no_active = v.ListTile(children=[v.ListTileTitle(children=["No selection (create new)"])])
+        self.widget_menu_item_no_active = v.ListItem(children=[v.ListItemTitle(children=["No selection (create new)"])])
         self.widget_menu_item_no_active.on_event('click', self._sync_state_from_ui)
 
         self.subset_list = v.List(children=[self.widget_menu_item_no_active])
@@ -36,7 +36,12 @@ class SubsetSelect(v.Menu, HubListener):
         # manually trigger to set up the initial state
         self._sync_ui_from_state(self.session.edit_subset_mode.edit_subset)
 
-        self.children = [self.main, self.subset_list]
+        self.v_slots = [{
+            'name': 'activator',
+            'variable': 'menu',
+            'children': self.main
+        }]
+        self.children = [self.subset_list]
 
     def _on_edit_subset_msg(self, msg):
         self._sync_ui_from_state(msg.subset)
@@ -68,9 +73,9 @@ class SubsetSelect(v.Menu, HubListener):
                 for subset_group in self.data_collection.subset_groups:
                     # TODO: could avoid re-creating widgets as we do for the material UI version
                     # we're using a triangular icon here, since in the UI it's close to a round icon, which is confusing
-                    item = v.ListTile(children=[
-                        v.ListTileAvatar(children=[v.Icon(children=['signal_cellular_4_bar'], color=subset_group.style.color)]),
-                        v.ListTileTitle(children=[subset_group.label])
+                    item = v.ListItem(children=[
+                        v.ListItemAvatar(children=[v.Icon(children=['signal_cellular_4_bar'], color=subset_group.style.color)]),
+                        v.ListItemTitle(children=[subset_group.label])
                     ])
                     item.on_event('click', self._sync_state_from_ui)
                     items.append(item)
