@@ -21,15 +21,21 @@ class TableBase(v.VuetifyTemplate):
     items = traitlets.Any().tag(sync=True)  # the data, a list of dict
     headers = traitlets.Any().tag(sync=True)
     headers_selections = traitlets.Any().tag(sync=True)
-    pagination = traitlets.Any().tag(sync=True)
+    options = traitlets.Any().tag(sync=True)
+    items_per_page = traitlets.CInt(11).tag(sync=True)
     selections = traitlets.Any([]).tag(sync=True)
     selection_colors = traitlets.Any([]).tag(sync=True)
+    selection_enabled = traitlets.Bool(True).tag(sync=True)
 
     def _update(self):
         self._update_columns()
 
     def _update_columns(self):
         self.headers = self._get_headers()
+        self._update_items()
+
+    @traitlets.observe('items_per_page')
+    def _items_per_page(self, change):
         self._update_items()
 
     @traitlets.default('headers')
@@ -51,9 +57,9 @@ class TableBase(v.VuetifyTemplate):
     def _total_length(self):
         return len(self)
 
-    @traitlets.default('pagination')
-    def _pagination(self):
-        return {'descending': False, 'page': 1, 'rowsPerPage': 10, 'sortBy': None, 'totalItems': len(self)}
+    @traitlets.default('options')
+    def _options(self):
+        return {'descending': False, 'page': 1, 'itemsPerPage': 10, 'sortBy': None, 'totalItems': len(self)}
 
     def format(self, value):
         return value
@@ -65,11 +71,17 @@ class TableBase(v.VuetifyTemplate):
     def _items(self):
         return self._get_items()
 
-    @traitlets.observe('pagination')
-    def _on_change_pagination(self, change):
+    @traitlets.observe('options')
+    def _on_change_options(self, change):
         self.items = self._get_items()
 
-    template = traitlets.Unicode(TEMPLATE).tag(sync=True)
+    @traitlets.default('template')
+    def _template(self):
+        with open(os.path.join(os.path.dirname(__file__), "table.vue")) as f:
+            return f.read()
+
+    def vue_apply_filter(self, data):
+        pass
 
     def vue_select(self, data):
         is_checked, row = data['checked'], data['row']
@@ -93,8 +105,8 @@ class TableGlue(TableBase):
         return [{'text': k, 'value': k, 'sortable': False} for k in components]
 
     def _get_items(self):
-        page = self.pagination['page'] - 1
-        page_size = self.pagination['rowsPerPage']
+        page = self.options['page'] - 1
+        page_size = self.options['itemsPerPage']
         i1 = page * page_size
         i2 = min(len(self), (page + 1) * page_size)
 
