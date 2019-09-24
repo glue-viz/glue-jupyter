@@ -19,7 +19,7 @@ class SubsetSelect(v.Menu, HubListener):
         self.session = viewer.session
         self.data_collection = viewer.session.data_collection
 
-        self.main = v.Btn(children=["No selection (create new)"], v_on="menu.on", flat=True)
+        self.main = v.Btn(children=["No selection (create new)"], v_on="menu.on", text=True)
 
         self.widget_menu_item_no_active = v.ListItem(children=[v.ListItemTitle(children=["No selection (create new)"])])
         self.widget_menu_item_no_active.on_event('click', self._sync_state_from_ui)
