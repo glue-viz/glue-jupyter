@@ -59,10 +59,12 @@ def vuetify_layout_factory(viewer):
                                   v.Spacer(),
                                   sidebar_button])
 
-    layout = v.Layout(row=True, wrap=True, color='transparent', children=[
+    layout = v.Html(tag='div', children=[
         toolbar,
-        v.Flex(x12=True, children=[viewer.figure_widget], color='transparent'),
-        v.Flex(x12=True, children=[viewer.output_widget]),
+        v.Row(no_gutters=True, children=[
+            v.Col(cols=12, children=[viewer.figure_widget]),
+            v.Col(cols=12, children=[viewer.output_widget])
+        ]),
         drawer
     ])
 
