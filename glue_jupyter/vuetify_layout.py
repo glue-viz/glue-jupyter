@@ -34,7 +34,7 @@ def vuetify_layout_factory(viewer):
 
     drawer = v.NavigationDrawer(v_model=False, absolute=True, right=True,
                                 children=[sidebar_button,
-                                          options_panel], width=373)
+                                          options_panel], width="min-content")
 
     toolbar_selection_tools = BasicJupyterToolbar(viewer)
 
