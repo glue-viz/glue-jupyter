@@ -19,8 +19,8 @@ class SelectionModeMenu(v.Menu, HubListener):
 
         items = []
         for mode in self.modes:
-            item = v.ListTile(children=[v.ListTileAction(children=[mode[1]]),
-                                        v.ListTileTitle(children=[mode[0]])])
+            item = v.ListItem(children=[v.ListItemAction(children=[mode[1]]),
+                                        v.ListItemTitle(children=[mode[0]])])
             items.append(item)
 
         for item in items:
@@ -29,9 +29,15 @@ class SelectionModeMenu(v.Menu, HubListener):
         mylist = v.List(children=items)
 
         self.main = v.Btn(icon=True,
-                          children=[self.modes[0][1]], slot='activator')
+                          children=[self.modes[0][1]], v_on="menu.on")
 
-        super().__init__(children=[self.main, mylist])
+        super().__init__(
+            v_slots=[{
+                'name': 'activator',
+                'variable': 'menu',
+                'children': self.main
+            }],
+            children=[mylist])
 
         self.session.hub.subscribe(self, msg.EditSubsetMessage,
                                    handler=self._on_edit_subset_msg)
