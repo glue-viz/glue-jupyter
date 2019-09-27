@@ -28,6 +28,29 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
     selected = traitlets.List().tag(sync=True)
     available = traitlets.List().tag(sync=True)
     no_selection_text = traitlets.Unicode('No selection (create new)').tag(sync=True)
+    multiple = traitlets.Bool(False).tag(sync=True)
+    nr_of_full_names = traitlets.Int(2).tag(sync=True)
+
+    methods = traitlets.Unicode('''{
+        toSubsets(indices) {
+            return indices.map(i => this.available[i]);
+        },
+        deselect() {
+            this.multiple = false;
+            this.selected = [];
+        },
+        toggleSubset(index) {
+            this.selected = this.selected.includes(index)
+                ? this.selected.filter(x => x != index)
+                : this.selected.concat(index);
+            this.handleMultiple();
+        },
+        handleMultiple() {
+            if (!this.multiple && this.selected.length > 1) {
+                this.selected = [this.selected.pop()];
+            }
+        }
+    }''').tag(sync=True)
 
     template = load_template_as_traitlet(__file__, 'subset_select.vue')
 
@@ -38,7 +61,8 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
         self.data_collection = viewer.session.data_collection
 
         def sync_selected_from_state():
-            self.selected = [subset_to_dict(subset) for subset in self.edit_subset_mode.edit_subset]
+            self.selected = [self.data_collection.subset_groups.index(subset) for subset
+                             in self.edit_subset_mode.edit_subset]
 
         def sync_available_from_state():
             self.available = [subset_to_dict(subset) for subset in
@@ -56,6 +80,5 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
 
     @traitlets.observe('selected')
     def _sync_selected_from_ui(self, change):
-        selected_labels = [subset_dict['label'] for subset_dict in change['new']]
-        self.edit_subset_mode.edit_subset = [subset for subset in self.data_collection.subset_groups
-                                             if subset.label in selected_labels]
+        self.edit_subset_mode.edit_subset = [self.data_collection.subset_groups[index] for index in
+                                             change['new']]
