@@ -28,6 +28,11 @@ These two use cases describe a data-first and gui-first approach,
 respectively. This document will focus on detailing the design of the
 gui-first approach, depicted in the following diagram.
 
+.. note::
+    The ``.xml`` file in the ``img`` directory can be used to edit the
+    diagram using applications like, e.g., 
+    `draw.io <https://draw.io>`_.
+
 .. image:: img/glue-jupyter_diagram.png
 
 General user interface design
