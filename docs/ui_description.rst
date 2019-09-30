@@ -26,7 +26,9 @@ provide users a web-based gui to interact with and visualize their data
 while hiding the Jupyter context, e.g. a standalone web application.
 These two use cases describe a data-first and gui-first approach,
 respectively. This document will focus on detailing the design of the
-gui-first approach.
+gui-first approach, depicted in the following diagram.
+
+.. image:: img/glue-jupyter_diagram.png
 
 General user interface design
 -----------------------------
