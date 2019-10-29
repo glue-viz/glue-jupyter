@@ -1,0 +1,41 @@
+resources:
+  repositories:
+  - repository: OpenAstronomy
+    type: github
+    endpoint: glue-viz
+    name: OpenAstronomy/azure-pipelines-templates
+    ref: master
+
+jobs:
+
+- template: run-tox-env.yml@OpenAstronomy
+  parameters:
+
+    coverage: codecov
+
+    envs:
+
+    - linux: pep8
+      libraries: {}
+      coverage: 'false'
+
+    - linux: py36-test
+    - linux: py37-test
+    - linux: py38-test
+
+    - macosx: py36-test
+    - macosx: py37-test
+    - macosx: py38-test
+
+    - windows: py36-test
+    - windows: py37-test
+    - windows: py38-test
+
+    - linux: py38-notebooks
+    - macosx: py37-notebooks
+    - windows: py36-notebooks
+
+    - linux: py38-docs
+    - macosx: py37-docs
+    - windows: py36-docs
+

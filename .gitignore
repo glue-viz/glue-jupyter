@@ -42,3 +42,4 @@ glue/qt/glue_qt_resources.py
 .pytest_cache
 
 .ipynb_checkpoints
+.tox
