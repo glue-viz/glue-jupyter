@@ -21,14 +21,17 @@ class SubsetSelect(v.Menu, HubListener):
 
         self.main = v.Btn(children=["No selection (create new)"], v_on="menu.on", text=True)
 
-        self.widget_menu_item_no_active = v.ListItem(children=[v.ListItemTitle(children=["No selection (create new)"])])
+        title = v.ListItemTitle(children=["No selection (create new)"])
+        self.widget_menu_item_no_active = v.ListItem(children=[title])
         self.widget_menu_item_no_active.on_event('click', self._sync_state_from_ui)
 
         self.subset_list = v.List(children=[self.widget_menu_item_no_active])
 
         # state change events from glue come in from the hub
-        self.session.hub.subscribe(self, msg.EditSubsetMessage, handler=self._on_edit_subset_msg)
-        self.session.hub.subscribe(self, msg.SubsetCreateMessage, handler=self._on_subset_create_msg)
+        self.session.hub.subscribe(self, msg.EditSubsetMessage,
+                                   handler=self._on_edit_subset_msg)
+        self.session.hub.subscribe(self, msg.SubsetCreateMessage,
+                                   handler=self._on_subset_create_msg)
 
         # state changes from the UI via this observed trait
         self.on_event('change', self._sync_state_from_ui)
@@ -60,7 +63,8 @@ class SubsetSelect(v.Menu, HubListener):
             if index < 0:
                 self.session.edit_subset_mode.edit_subset = []
             else:
-                self.session.edit_subset_mode.edit_subset = [self.data_collection.subset_groups[index]]
+                group = self.data_collection.subset_groups[index]
+                self.session.edit_subset_mode.edit_subset = [group]
 
     def _sync_ui_from_state(self, subset_groups_selected):
 
@@ -71,15 +75,19 @@ class SubsetSelect(v.Menu, HubListener):
             with self.main.hold_sync():
                 self.main.children = ["No selection (create new)"]
                 for subset_group in self.data_collection.subset_groups:
-                    # TODO: could avoid re-creating widgets as we do for the material UI version
-                    # we're using a triangular icon here, since in the UI it's close to a round icon, which is confusing
+                    # TODO: could avoid re-creating widgets as we do for the
+                    # material UI version we're using a triangular icon here,
+                    # since in the UI it's close to a round icon, which is
+                    # confusing
                     item = v.ListItem(children=[
-                        v.ListItemAvatar(children=[v.Icon(children=['signal_cellular_4_bar'], color=subset_group.style.color)]),
+                        v.ListItemAvatar(children=[v.Icon(children=['signal_cellular_4_bar'],
+                                                          color=subset_group.style.color)]),
                         v.ListItemTitle(children=[subset_group.label])
                     ])
                     item.on_event('click', self._sync_state_from_ui)
                     items.append(item)
-                    # TODO: this supports only a single active subset (it will actually only show the last)
+                    # TODO: this supports only a single active subset (it will
+                    # actually only show the last)
                     if subset_group in self.session.edit_subset_mode.edit_subset:
                         self.main.children = item.children[:]
 

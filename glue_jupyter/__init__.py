@@ -36,7 +36,7 @@ def get_layout_factory():
     if LAYOUT_FACTORY is None:
         from .vuetify_layout import vuetify_layout_factory
         return vuetify_layout_factory
-    else:   
+    else:
         return LAYOUT_FACTORY
 
 

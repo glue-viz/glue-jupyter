@@ -1,7 +1,6 @@
 import ipywidgets as widgets
 from IPython.display import display
 
-from glue.core import Data
 from glue.core.application_base import Application
 from glue.core.link_helpers import LinkSame
 from glue.core.roi import PolygonalROI
@@ -105,7 +104,8 @@ class JupyterApplication(Application):
             viewer.show()
         return viewer
 
-    def table(self, *, data=None, x=None, widget='ipyvuetify',  viewer_state=None, layer_state=None, show=True):
+    def table(self, *, data=None, x=None, widget='ipyvuetify',  viewer_state=None,
+              layer_state=None, show=True):
         """
         Open an interactive table viewer.
 

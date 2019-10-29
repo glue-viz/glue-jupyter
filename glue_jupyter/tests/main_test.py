@@ -106,7 +106,8 @@ def test_state_widget_notebook():
 
 
 INVALID_TYPE_EXC = """
-The data argument should either be a glue data object or the name of a dataset. The following datasets are available:
+The data argument should either be a glue data object or the name of a dataset.
+The following datasets are available:
 
   * 'mydata1'
   * 'mydata2'

@@ -19,7 +19,7 @@ def ipywidgets_layout_factory(viewer):
                            viewer.toolbar_selection_mode])
 
     layout_tab = Tab([viewer.viewer_options,
-                      viewer.layer_options  ])
+                      viewer.layer_options])
     layout_tab.set_title(0, "General")
     layout_tab.set_title(1, "Layers")
 

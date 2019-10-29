@@ -147,7 +147,8 @@ def validate_data_argument(data_collection, data):
 
     if data is None:
         if len(data_collection) != 1:
-            raise ValueError('There is more than one data set in the data collection, please pass a data argument')
+            raise ValueError('There is more than one data set in the data '
+                             'collection, please pass a data argument')
         else:
             return data_collection[0]
     elif isinstance(data, str):
@@ -159,12 +160,12 @@ def validate_data_argument(data_collection, data):
             return data_collection[data]
         else:
             raise ValueError(f"'{data}' is not a valid dataset name. The "
-                                "following datasets are available:\n\n" +
-                                "\n".join([f"  * '{d.label}'" for d in data_collection]) )
+                             f"following datasets are available:\n\n" +
+                             f"\n".join([f"  * '{d.label}'" for d in data_collection]))
     elif not isinstance(data, Data):
         raise TypeError('The data argument should either be a glue data '
-                        'object or the name of a dataset. The following '
+                        'object or the name of a dataset.\nThe following '
                         'datasets are available:\n\n' +
-                        '\n'.join([f"  * '{d.label}'" for d in data_collection]) )
+                        '\n'.join([f"  * '{d.label}'" for d in data_collection]))
     else:
         return data

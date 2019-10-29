@@ -7,7 +7,6 @@ import ipyvuetify as v
 from glue.core.subset import ElementSubsetState
 from glue.core.data import Subset
 from glue.viewers.common.layer_artist import LayerArtist
-from glue.config import viewer_tool
 from ..view import IPyWidgetView
 
 
@@ -59,7 +58,8 @@ class TableBase(v.VuetifyTemplate):
 
     @traitlets.default('options')
     def _options(self):
-        return {'descending': False, 'page': 1, 'itemsPerPage': 10, 'sortBy': None, 'totalItems': len(self)}
+        return {'descending': False, 'page': 1, 'itemsPerPage': 10,
+                'sortBy': None, 'totalItems': len(self)}
 
     def format(self, value):
         return value

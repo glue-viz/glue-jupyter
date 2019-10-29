@@ -1,1 +1,1 @@
-from .viewer import TableViewer
+from .viewer import TableViewer  # noqa

@@ -29,6 +29,7 @@ class BqplotBaseView(IPyWidgetView):
             scale=self.scale_x, grid_lines='none', label='x')
         self.axis_y = bqplot.Axis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
                                   grid_lines='none', label='y')
+
         def update_axes(*ignore):
             self.axis_x.label = str(self.state.x_att)
             if self.is2d:
