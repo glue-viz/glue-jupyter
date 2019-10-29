@@ -105,6 +105,45 @@ class JupyterApplication(Application):
             viewer.show()
         return viewer
 
+    def table(self, *, data=None, x=None, widget='ipyvuetify',  viewer_state=None, layer_state=None, show=True):
+        """
+        Open an interactive table viewer.
+
+        Parameters
+        ----------
+        data : str or `~glue.core.data.Data`, optional
+            The dataset to show in the viewer.
+        widget : {'ipyvuetify', 'matplotlib'}
+            Whether to use ipyvuetify or ... as table viewer
+        viewer_state : `~glue.viewers.common.state.ViewerState`
+            The initial state for the viewer (advanced).
+        layer_state : `~glue.viewers.common.state.LayerState`
+            The initial state for the data layer (advanced).
+        show : bool, optional
+            Whether to show the view immediately (`True`) or whether to only
+            show it later if the ``show()`` method is called explicitly
+            (`False`).
+        """
+
+        if widget == 'ipyvuetify':
+            from .table import TableViewer
+            viewer_cls = TableViewer
+        else:
+            raise ValueError("Widget type should be 'ipyvuetify'")
+
+        data = validate_data_argument(self.data_collection, data)
+
+        viewer_state_obj = viewer_cls._state_cls()
+        viewer_state = viewer_state or {}
+
+        viewer_state_obj.update_from_dict(viewer_state)
+
+        view = self.new_data_viewer(viewer_cls, data=data,
+                                    state=viewer_state_obj, show=show)
+        layer_state = layer_state or {}
+        view.layers[0].state.update_from_dict(layer_state)
+        return view
+
     def histogram1d(self, *, data=None, x=None, widget='bqplot', color=None,
                     x_min=None, x_max=None, n_bin=None, normalize=False,
                     cumulative=False, viewer_state=None, layer_state=None,
