@@ -1,12 +1,20 @@
 from __future__ import absolute_import
 
+from pkg_resources import get_distribution, DistributionNotFound
+
 from IPython.display import display
 
-from ._version import __version__  # noqa
 from .app import JupyterApplication  # noqa
 
 __all__ = ['jglue', 'example_data_xyz', 'example_image', 'example_volume',
-           'JupyterApplication', 'set_layout_factory', 'get_layout_factory']
+           'JupyterApplication', 'set_layout_factory', 'get_layout_factory',
+           '__version__']
+
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    # package is not installed
+    pass
 
 LAYOUT_FACTORY = None
 

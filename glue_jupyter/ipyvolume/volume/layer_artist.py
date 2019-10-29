@@ -60,7 +60,7 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
         self.transfer_function = ipv.TransferFunction(rgba=_transfer_func_rgba(self.state.color))
         self.volume = ipv.Volume(extent_original=[[0, 1]] * 3, data_original=data0,
                                  tf=self.transfer_function, data_max_shape=128)
-        self.figure.volumes = self.figure.volumes + [self.volumes]
+        self.figure.volumes = self.figure.volumes + [self.volume]
         self._viewer_state = ipyvolume_viewer.state
         assert ipyvolume_viewer.state == state
         if self.state not in self._viewer_state.layers:

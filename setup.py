@@ -18,4 +18,4 @@ if LooseVersion(pip.__version__) < LooseVersion('18'):
                      "later (found {0})".format(pip.__version__))
     sys.exit(1)
 
-setup()
+setup(use_scm_version=True)
