@@ -2,7 +2,7 @@
 
 Sometimes known as "Glupyter"
 
-[![Build Status](https://travis-ci.org/glue-viz/glue-jupyter.svg?branch=master)](https://travis-ci.org/glue-viz/glue-jupyter)
+[![Build Status](https://dev.azure.com/glue-viz/glue-jupyter/_apis/build/status/glue-viz.glue-jupyter?branchName=master)](https://dev.azure.com/glue-viz/glue-jupyter/_build/latest?definitionId=7&branchName=master)
 
 ### About
 
