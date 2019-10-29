@@ -21,21 +21,18 @@ jobs:
 
     - linux: py36-test
     - linux: py37-test
-    - linux: py38-test
 
     - macosx: py36-test
     - macosx: py37-test
-    - macosx: py38-test
 
     - windows: py36-test
     - windows: py37-test
-    - windows: py38-test
 
-    - linux: py38-notebooks
+    - linux: py37-notebooks
     - macosx: py37-notebooks
     - windows: py36-notebooks
 
-    - linux: py38-docs
+    - linux: py37-docs
     - macosx: py37-docs
     - windows: py36-docs
 
