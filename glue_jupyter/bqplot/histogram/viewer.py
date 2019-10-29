@@ -26,7 +26,6 @@ class BqplotHistogramView(BqplotBaseView):
 
     tools = ['bqplot:panzoom', 'bqplot:xrange']
 
-
     def _roi_to_subset_state(self, roi):
         # TODO: copy paste from glue/viewers/histogram/qt/data_viewer.py
         # TODO Does subset get applied to all data or just visible data?

@@ -29,9 +29,6 @@ class BqplotHistogramLayerArtist(LayerArtist):
 
         dlink((self.state, 'color'), (self.bars, 'colors'), lambda x: [color2hex(x)])
 
-        #link((self.bars, 'default_opacities'), (self.state, 'alpha'), lambda x: x[0], lambda x: [x])
-        #link((self.bars, 'default_size'), (self.state, 'size'))
-
         self._viewer_state.add_global_callback(self._update_histogram)
         self.state.add_global_callback(self._update_histogram)
         self.bins = None
@@ -65,8 +62,6 @@ class BqplotHistogramLayerArtist(LayerArtist):
                 self.hist /= self.hist.max()
         elif self._viewer_state.normalize:
             self.hist /= (self.hist.sum() * dx)
-
-        bottom = 0 if not self._viewer_state.y_log else 1e-100
 
         # TODO this won't work for log ...
         centers = (self.bins[:-1] + self.bins[1:]) / 2
@@ -125,7 +120,8 @@ class BqplotHistogramLayerArtist(LayerArtist):
 
         changed = set() if force else self.pop_changed_properties()
 
-        if force or any(prop in changed for prop in ('layer', 'x_att', 'hist_x_min', 'hist_x_max', 'hist_n_bin', 'x_log')):
+        if force or any(prop in changed for prop in ('layer', 'x_att', 'hist_x_min',
+                                                     'hist_x_max', 'hist_n_bin', 'x_log')):
             self._calculate_histogram()
             force = True  # make sure scaling and visual attributes are updated
 

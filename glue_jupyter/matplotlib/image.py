@@ -9,7 +9,8 @@ from glue.viewers.image.viewer import MatplotlibImageMixin
 from .base import MatplotlibJupyterViewer
 
 from glue_jupyter.common.state_widgets.layer_scatter import ScatterLayerStateWidget
-from glue_jupyter.common.state_widgets.layer_image import ImageLayerStateWidget, ImageSubsetLayerStateWidget
+from glue_jupyter.common.state_widgets.layer_image import (ImageLayerStateWidget,
+                                                           ImageSubsetLayerStateWidget)
 from glue_jupyter.common.state_widgets.viewer_image import ImageViewerStateWidget
 
 __all__ = ['ImageJupyterViewer']

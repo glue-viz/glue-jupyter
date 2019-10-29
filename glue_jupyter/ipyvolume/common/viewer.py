@@ -1,15 +1,10 @@
 import ipyvolume as ipv
 import ipyvolume.moviemaker
-import ipywidgets as widgets
-from ipywidgets import VBox, Tab, ToggleButton
-
-from IPython.display import display
 
 from glue.core.subset import RoiSubsetState3d
 from glue.core.command import ApplySubsetState
 
 from ...view import IPyWidgetView
-from ...link import dlink
 
 from .viewer_options_widget import Viewer3DStateWidget
 

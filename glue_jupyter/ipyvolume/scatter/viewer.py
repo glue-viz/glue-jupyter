@@ -19,7 +19,6 @@ class IpyvolumeScatterView(IpyvolumeBaseView):
     _subset_artist_cls = IpyvolumeScatterLayerArtist
     _layer_style_widget_cls = Scatter3DLayerStateWidget
 
-
     def get_data_layer_artist(self, layer=None, layer_state=None):
         return self.get_layer_artist(self._data_artist_cls, layer=layer, layer_state=layer_state)
 

@@ -1,12 +1,12 @@
 from __future__ import absolute_import, division, print_function
 
-from ipywidgets import HTML, Tab, HBox, VBox, Output
-from IPython.display import display
+from ipywidgets import HTML, VBox
 
 try:
     from ipympl.backend_nbagg import Canvas, FigureManager
 except ImportError:  # Prior to June 2019
-    from ipympl.backend_nbagg import FigureCanvasNbAgg as Canvas, FigureManagerNbAgg as FigureManager
+    from ipympl.backend_nbagg import (FigureCanvasNbAgg as Canvas,
+                                      FigureManagerNbAgg as FigureManager)
 
 from matplotlib.figure import Figure
 

@@ -16,7 +16,8 @@ __all__ = ['BqplotScatterLayerState', 'BqplotScatterLayerArtist']
 
 
 class BqplotScatterLayerState(ScatterLayerState):
-    bins = CallbackProperty(128, docstring='The number of bins in each dimension for the density map')
+    bins = CallbackProperty(128, docstring='The number of bins in each dimension '
+                                           'for the density map')
 
 
 class BqplotScatterLayerArtist(LayerArtist):
@@ -33,12 +34,15 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.scale_color = bqplot.ColorScale()
         self.scale_size_quiver = bqplot.LinearScale(min=0, max=1)
         self.scale_rotation = bqplot.LinearScale(min=0, max=1)
-        self.scales = dict(self.view.scales, size=self.scale_size, rotation=self.scale_rotation, color=self.scale_color)
+        self.scales = dict(self.view.scales, size=self.scale_size,
+                           rotation=self.scale_rotation, color=self.scale_color)
         self.scale_image = bqplot.ColorScale()
-        self.scales_quiver = dict(self.view.scales, size=self.scale_size_quiver, rotation=self.scale_rotation)
-        self.scales_image  = dict(self.view.scales, image=self.scale_image)
+        self.scales_quiver = dict(self.view.scales, size=self.scale_size_quiver,
+                                  rotation=self.scale_rotation)
+        self.scales_image = dict(self.view.scales, image=self.scale_image)
         self.scatter = bqplot.ScatterGL(scales=self.scales, x=[0, 1], y=[0, 1])
-        self.quiver = bqplot.ScatterGL(scales=self.scales_quiver, x=[0, 1], y=[0, 1], visible=False, marker='arrow')
+        self.quiver = bqplot.ScatterGL(scales=self.scales_quiver, x=[0, 1], y=[0, 1],
+                                       visible=False, marker='arrow')
 
         self.counts = None
         self.image = ImageGL(scales=self.scales_image)
@@ -46,7 +50,8 @@ class BqplotScatterLayerArtist(LayerArtist):
         on_change([(self.state, 'bins')])(self._update_scatter)
         self._viewer_state.add_global_callback(self._update_scatter)
 
-        self.view.figure.marks = list(self.view.figure.marks) + [self.image, self.scatter, self.quiver ]
+        self.view.figure.marks = (list(self.view.figure.marks)
+                                  + [self.image, self.scatter, self.quiver])
         dlink((self.state, 'color'), (self.scatter, 'colors'), lambda x: [color2hex(x)])
         dlink((self.state, 'color'), (self.quiver, 'colors'), lambda x: [color2hex(x)])
         self.scatter.observe(self._workaround_unselected_style, 'colors')
@@ -57,7 +62,8 @@ class BqplotScatterLayerArtist(LayerArtist):
         dlink((self.state, 'cmap_vmin'), (self.scale_color, 'min'), float_or_none)
         dlink((self.state, 'cmap_vmax'), (self.scale_color, 'max'), float_or_none)
 
-        on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
+        on_change([(self.state, 'size', 'size_scaling', 'size_mode',
+                    'size_vmin', 'size_vmax')])(self._update_size)
 
         viewer_state.add_callback('x_att', self._update_xy_att)
         viewer_state.add_callback('y_att', self._update_xy_att)
@@ -126,7 +132,10 @@ class BqplotScatterLayerArtist(LayerArtist):
             range_x = [self.view.scale_x.min, self.view.scale_x.max]
             range_y = [self.view.scale_y.min, self.view.scale_y.max]
             range = [range_x, range_y]
-            self.counts = data.compute_histogram([self._viewer_state.y_att, self._viewer_state.x_att], subset_state=subset_state, bins=bins, range=range)
+            self.counts = data.compute_histogram([self._viewer_state.y_att,
+                                                  self._viewer_state.x_att],
+                                                 subset_state=subset_state,
+                                                 bins=bins, range=range)
             self.scale_image.min = 0
             self.scale_image.max = np.nanmax(self.counts)
             with self.image.hold_sync():
@@ -143,8 +152,10 @@ class BqplotScatterLayerArtist(LayerArtist):
         if self.state.density_map:
             pass
         else:
-            self.scatter.x = ensure_numerical(self.layer.data[self._viewer_state.x_att]).astype(np.float32).ravel()
-            self.scatter.y = ensure_numerical(self.layer.data[self._viewer_state.y_att]).astype(np.float32).ravel()
+            self.scatter.x = (ensure_numerical(self.layer.data[self._viewer_state.x_att])
+                              .astype(np.float32).ravel())
+            self.scatter.y = (ensure_numerical(self.layer.data[self._viewer_state.y_att])
+                              .astype(np.float32).ravel())
             self.quiver.x = self.scatter.x
             self.quiver.y = self.scatter.y
 
@@ -203,7 +214,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         size = self.state.size
         scale = self.state.size_scaling
         if self.state.size_mode == 'Linear' and self.state.size_att is not None:
-            self.scatter.default_size = int(scale * 25) # *50 seems to give similar sizes as the Qt Glue
+            self.scatter.default_size = int(scale * 25)
             self.scatter.size = self.layer.data[self.state.size_att].ravel()
             self.scale_size.min = float_or_none(self.state.size_vmin)
             self.scale_size.max = float_or_none(self.state.size_vmax)

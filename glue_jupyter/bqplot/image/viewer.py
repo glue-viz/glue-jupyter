@@ -12,7 +12,8 @@ from .layer_artist import BqplotImageLayerArtist, BqplotImageSubsetLayerArtist
 from .frb_mark import FRBImage
 
 from glue_jupyter.common.state_widgets.layer_scatter import ScatterLayerStateWidget
-from glue_jupyter.common.state_widgets.layer_image import ImageLayerStateWidget, ImageSubsetLayerStateWidget
+from glue_jupyter.common.state_widgets.layer_image import (ImageLayerStateWidget,
+                                                           ImageSubsetLayerStateWidget)
 from glue_jupyter.common.state_widgets.viewer_image import ImageViewerStateWidget
 
 __all__ = ['BqplotImageView']

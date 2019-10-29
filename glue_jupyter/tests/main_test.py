@@ -35,7 +35,9 @@ def test_default_components(app, datax, dataxz, dataxyz):
 
 
 def test_viewer_state(app, dataxyz):
-    s = app.scatter2d(x='x', y='y', data=dataxyz, viewer_state=dict(x_att=dataxyz.id['y'], y_att=dataxyz.id['z'], x_min=-1, x_max=1))
+    s = app.scatter2d(x='x', y='y', data=dataxyz, viewer_state=dict(x_att=dataxyz.id['y'],
+                                                                    y_att=dataxyz.id['z'],
+                                                                    x_min=-1, x_max=1))
     # direct argument have preference over the viewer_state
     assert s.state.x_att is dataxyz.id['x']
     assert s.state.y_att is dataxyz.id['y']
@@ -43,12 +45,14 @@ def test_viewer_state(app, dataxyz):
     assert s.state.x_max == 1
 
     # was testing with x_min, but it gets reset to hist_x_min
-    s = app.histogram1d(x='y', data=dataxyz, viewer_state=dict(x_att=dataxyz.id['z'], hist_x_min=-1, hist_x_max=1))
+    s = app.histogram1d(x='y', data=dataxyz, viewer_state=dict(x_att=dataxyz.id['z'],
+                                                               hist_x_min=-1, hist_x_max=1))
     assert s.state.x_att is dataxyz.id['y']
     assert s.state.hist_x_min == -1
     assert s.state.hist_x_max == 1
 
-    # x_min is used for the API, this sets viewer.state.hist_x_min/max which sets again viewer.state.x_min
+    # x_min is used for the API, this sets viewer.state.hist_x_min/max which
+    # sets again viewer.state.x_min
     s = app.histogram1d(x='y', data=dataxyz, x_min=-2, x_max=2)
     assert s.state.x_att is dataxyz.id['y']
     assert s.state.hist_x_min == -2

@@ -32,7 +32,6 @@ class ViewerState3D(ViewerState):
     # clip_data = CallbackProperty(False)
     # native_aspect = CallbackProperty(False)
 
-
     limits_cache = CallbackProperty()
 
     # def _update_priority(self, name):
@@ -115,7 +114,9 @@ class ViewerState3D(ViewerState):
     #         self.z_min = z_min
     #         self.z_max = z_max
 
+
 class VolumeViewerState(ViewerState3D):
+
     def __init__(self, **kwargs):
         super(VolumeViewerState, self).__init__()
         self.add_callback('layers', self._update_attributes)

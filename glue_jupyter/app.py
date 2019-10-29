@@ -202,10 +202,11 @@ class JupyterApplication(Application):
         if x is not None:
             viewer_state['x_att'] = data.id[x]
 
-        # x_min and x_max get set to the hist_x_min/max in glue.viewers.histogram.state
-        # for this API it make more sense to call it x_min and x_max, and for consistency with the rest
+        # x_min and x_max get set to the hist_x_min/max in
+        # glue.viewers.histogram.state for this API it make more sense to call
+        # it x_min and x_max, and for consistency with the rest
         _update_not_none(viewer_state, hist_x_min=x_min, hist_x_max=x_max, hist_n_bin=n_bin,
-            normalize=normalize, cumulative=cumulative)
+                         normalize=normalize, cumulative=cumulative)
         viewer_state_obj.update_from_dict(viewer_state)
 
         view = self.new_data_viewer(viewer_cls, data=data,

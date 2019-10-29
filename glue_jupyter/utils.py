@@ -3,9 +3,10 @@ import collections
 import time
 from distutils.version import LooseVersion
 
+import matplotlib
 import PIL.Image
 import numpy as np
-from io import BytesIO as StringIO # python3
+from io import BytesIO as StringIO
 
 from glue import __version__ as glue_version
 from glue.core import Data
@@ -27,10 +28,10 @@ def rgba_to_png_data(rgba):
 
 def scalar_to_png_data(I, colormap='viridis'):
     mask = ~np.isfinite(I)
-    I = np.ma.masked_array(I, mask)
+    intensity = np.ma.masked_array(I, mask)
     colormap = matplotlib.cm.get_cmap(colormap)
     colormap.set_bad(alpha=0)
-    data = colormap(I, bytes=True)
+    data = colormap(intensity, bytes=True)
     return rgba_to_png_data(data)
 
 
@@ -42,7 +43,7 @@ def reduce_size(data, max_size):
             slices1[axis] = slice(0, -1, 2)
             slices2 = [slice(None, None, None)] * 3
             slices2[axis] = slice(1, None, 2)
-            data = (data[slices1])# + data.__getitem__(slices2))/2
+            data = data[slices1]
             shape = data.shape
     return data
 
@@ -117,13 +118,14 @@ def debounced(delay_seconds=0.5, method=False):
             counters[key] += 1
 
             def debounced_execute(counter=counters[key]):
-                if counter == counters[key]:  # only execute if the counter wasn't changed in the meantime
+                # only execute if the counter wasn't changed in the meantime
+                if counter == counters[key]:
                     f(*args, **kwargs)
             ioloop = get_ioloop()
 
             def thread_safe():
                 ioloop.add_timeout(time.time() + delay_seconds, debounced_execute)
-            if ioloop is None: # not IPython, maybe unittest
+            if ioloop is None:  # not IPython, maybe unittest
                 debounced_execute()
             else:
                 ioloop.add_callback(thread_safe)
@@ -133,7 +135,7 @@ def debounced(delay_seconds=0.5, method=False):
 
 def colormap_to_hexlist(cmap, N=256):
     x = np.linspace(0, 1, N)
-    colors = ["#%02x%02x%02x" % tuple([int(k*255) for k in color]) for color in cmap(x)[:,:3]]
+    colors = ["#%02x%02x%02x" % tuple([int(k * 255) for k in color]) for color in cmap(x)[:, :3]]
     return colors
 
 

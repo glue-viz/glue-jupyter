@@ -1,12 +1,13 @@
 import ipywidgets as widgets
 import glue.external.echo.selection
 
+
 def _is_traitlet(obj):
     return hasattr(obj, 'observe')
 
+
 def _is_echo(link):
     return hasattr(getattr(type(link[0]), link[1]), 'add_callback')
-
 
 
 class link(object):
@@ -34,6 +35,7 @@ class link(object):
         if sync_directly:
             sync()
 
+
 class dlink(link):
     def __init__(self, source, target, f1=lambda x: x):
         self.source = source
@@ -49,6 +51,7 @@ def _assign(object, value):
         object, trait = object
     setattr(object, trait, value)
 
+
 def calculation(inputs, output=None, initial_calulation=True):
     def decorator(f):
         def calculate(*ignore_args):
@@ -61,6 +64,7 @@ def calculation(inputs, output=None, initial_calulation=True):
         if initial_calulation:
             calculate()
     return decorator
+
 
 def on_change(inputs, initial_call=False, once=False):
     def decorator(f):
@@ -83,12 +87,12 @@ def on_change(inputs, initial_call=False, once=False):
             f()
     return decorator
 
+
 def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='value'):
 
-    helper = getattr(state, state_attr + '_helper')
-
     def update(*ignore):
-        options = [k for k in getattr(type(state), state_attr).get_choices(state) if not isinstance(k, glue.external.echo.selection.ChoiceSeparator)]
+        options = [k for k in getattr(type(state), state_attr).get_choices(state)
+                   if not isinstance(k, glue.external.echo.selection.ChoiceSeparator)]
         display_func = getattr(type(state), state_attr).get_display_func(state)
         value = getattr(state, state_attr)
         widget.options = [(display_func(options[k]), k) for k in range(len(options))]
@@ -101,7 +105,8 @@ def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='v
     getattr(type(state), state_attr).add_callback(state, update)
 
     def update_state(change):
-        options = [k for k in getattr(type(state), state_attr).get_choices(state) if not isinstance(k, glue.external.echo.selection.ChoiceSeparator)]
+        options = [k for k in getattr(type(state), state_attr).get_choices(state)
+                   if not isinstance(k, glue.external.echo.selection.ChoiceSeparator)]
         if change.new is not None:
             setattr(state, state_attr, options[change.new])
 

@@ -7,11 +7,16 @@ from glue.core.edit_subset_mode import OrMode, AndNotMode, AndMode, XorMode, Rep
 from glue.core.hub import HubListener
 
 ICON_WIDTH = 20
-icon_replace = widgets.Image.from_file(glue.icons.icon_path("glue_replace", icon_format="svg"), width=ICON_WIDTH)
-icon_or = widgets.Image.from_file(glue.icons.icon_path("glue_or", icon_format="svg"), width=ICON_WIDTH)
-icon_and = widgets.Image.from_file(glue.icons.icon_path("glue_and", icon_format="svg"), width=ICON_WIDTH)
-icon_xor = widgets.Image.from_file(glue.icons.icon_path("glue_xor", icon_format="svg"), width=ICON_WIDTH)
-icon_andnot = widgets.Image.from_file(glue.icons.icon_path("glue_andnot", icon_format="svg"), width=ICON_WIDTH)
+icon_replace = widgets.Image.from_file(glue.icons.icon_path("glue_replace", icon_format="svg"),
+                                       width=ICON_WIDTH)
+icon_or = widgets.Image.from_file(glue.icons.icon_path("glue_or", icon_format="svg"),
+                                  width=ICON_WIDTH)
+icon_and = widgets.Image.from_file(glue.icons.icon_path("glue_and", icon_format="svg"),
+                                   width=ICON_WIDTH)
+icon_xor = widgets.Image.from_file(glue.icons.icon_path("glue_xor", icon_format="svg"),
+                                   width=ICON_WIDTH)
+icon_andnot = widgets.Image.from_file(glue.icons.icon_path("glue_andnot", icon_format="svg"),
+                                      width=ICON_WIDTH)
 
 
 class SubsetMode(mui.ToggleButtonGroup, HubListener):
@@ -37,7 +42,8 @@ class SubsetMode(mui.ToggleButtonGroup, HubListener):
             value=0,
             style={"margin": "4px"},
             children=[
-                mui.ToggleButton(children=[icon], value=k) for k, (label, icon, mode) in enumerate(self.selection_modes)
+                mui.ToggleButton(children=[icon], value=k)
+                for k, (label, icon, mode) in enumerate(self.selection_modes)
             ]
         )
 

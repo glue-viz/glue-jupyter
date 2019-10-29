@@ -6,11 +6,13 @@ from glue.core.hub import HubListener
 
 
 class SubsetSelect(mui.Select, HubListener):
-    """Widget responsible for selecting which subsets are active, sync state between UI and glue.
+    """
+    Widget responsible for selecting which subsets are active, sync state
+    between UI and glue.
 
-    On glue's side, the state is in `session.edit_subset_mode.edit_subset`. On the UI side, the state
-    is in `widget_select.value` (which gets synced to the menu items manually).
-
+    On glue's side, the state is in `session.edit_subset_mode.edit_subset`. On
+    the UI side, the state is in `widget_select.value` (which gets synced to
+    the menu items manually).
     """
 
     def __init__(self, session):
@@ -38,8 +40,10 @@ class SubsetSelect(mui.Select, HubListener):
         self.widget_menu_item_select_multiple_checkbox.observe(self._switch_multiple, "checked")
 
         # state change events from glue come in from the hub
-        self.session.hub.subscribe(self, msg.EditSubsetMessage, handler=self._on_edit_subset_msg)
-        self.session.hub.subscribe(self, msg.SubsetCreateMessage, handler=self._on_subset_create_msg)
+        self.session.hub.subscribe(self, msg.EditSubsetMessage,
+                                   handler=self._on_edit_subset_msg)
+        self.session.hub.subscribe(self, msg.SubsetCreateMessage,
+                                   handler=self._on_subset_create_msg)
 
         # state changes from the UI via this observed trait
         self.observe(self._sync_state_from_ui, "value")
@@ -65,7 +69,8 @@ class SubsetSelect(mui.Select, HubListener):
             subsets = []
             value = self.value
             # sync value to menu items, and collect selected subsets
-            for item, subset in zip(self.widget_menu_items_subsets, self.data_collection.subset_groups):
+            for item, subset in zip(self.widget_menu_items_subsets,
+                                    self.data_collection.subset_groups):
                 if self.widget_menu_item_select_multiple_checkbox.checked:
                     selected = item.value in value
                 else:
@@ -96,7 +101,8 @@ class SubsetSelect(mui.Select, HubListener):
             if self.session.edit_subset_mode._edit_subset != subset_groups_selected:
                 self.session.edit_subset_mode._edit_subset = subset_groups_selected
             # truncate list when needed
-            self.widget_menu_items_subsets = self.widget_menu_items_subsets[: len(self.data_collection.subset_groups)]
+            trunc = len(self.data_collection.subset_groups)
+            self.widget_menu_items_subsets = self.widget_menu_items_subsets[:trunc]
             self._updating_subset_menu_items = True
             try:
                 values = []

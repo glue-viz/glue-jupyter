@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from IPython.display import display
+
 from ._version import __version__  # noqa
 from .app import JupyterApplication  # noqa
 
@@ -63,7 +65,7 @@ def jglue(*args, **kwargs):
 
     japp = JupyterApplication(dc)
     if show:
-        display(app)
+        display(japp)
     return japp
 
 
@@ -105,8 +107,8 @@ def example_image(shape=64, limits=[-4, 4]):
     x = np.linspace(-3, 3, num=shape)
     X, Y = np.meshgrid(x, x)
     rho = 0.8
-    I = np.exp(-X**2-Y**2-2*X*Y*rho)
+    intensity = np.exp(-X**2-Y**2-2*X*Y*rho)
     data = Data()
     data.coords = Coordinates()
-    data.add_component(I, label='intensity')
+    data.add_component(intensity, label='intensity')
     return data

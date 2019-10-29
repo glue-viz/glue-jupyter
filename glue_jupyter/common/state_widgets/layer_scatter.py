@@ -16,7 +16,8 @@ class ScatterLayerStateWidget(VBox):
         self.widget_visible = Checkbox(description='visible', value=self.state.visible)
         link((self.state, 'visible'), (self.widget_visible, 'value'))
 
-        self.widget_opacity = FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha, description='opacity')
+        self.widget_opacity = FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha,
+                                          description='opacity')
         link((self.state, 'alpha'), (self.widget_opacity, 'value'))
 
         self.widget_color = Color(state=self.state)
@@ -25,15 +26,20 @@ class ScatterLayerStateWidget(VBox):
         self.widget_vector = Checkbox(description='show vectors', value=self.state.vector_visible)
         link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
 
-        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', ui_name='vx', label='vx attribute')
-        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy', label='vy attribute')
+        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', ui_name='vx',
+                                              label='vx attribute')
+        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy',
+                                              label='vy attribute')
 
-        dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'), lambda value: None if value else 'none')
-        dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
+        dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'),
+              lambda value: None if value else 'none')
+        dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'),
+              lambda value: None if value else 'none')
 
         # TODO: the following shouldn't be necessary ideally
         if hasattr(self.state, 'bins'):
-            self.widget_bins = IntSlider(min=0, max=1024, value=self.state.bins, description='bin count')
+            self.widget_bins = IntSlider(min=0, max=1024, value=self.state.bins,
+                                         description='bin count')
             link((self.state, 'bins'), (self.widget_bins, 'value'))
 
         super().__init__([self.widget_visible, self.widget_opacity,

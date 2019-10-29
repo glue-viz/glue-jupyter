@@ -52,7 +52,7 @@ def test_subset_select(app, datax, dataxyz, dataxz):
     assert subset_select.widget_menu_item_no_active.selected is False
 
     subset_select.widget_menu_item_no_active.selected = True
-    assert app.session.edit_subset_mode.edit_subset == [], 'should have triggered nothing to be selected'
+    assert app.session.edit_subset_mode.edit_subset == []
     assert subset_select.widget_menu_items_subsets[0].selected is False
 
     app.subset_lasso2d(dataxyz.id['x'], dataxyz.id['y'], [0.5, 2.5, 2.5, 0.5], [1, 1, 3.5, 3.5])

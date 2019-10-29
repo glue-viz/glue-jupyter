@@ -130,7 +130,8 @@ class IPyWidgetView(Viewer):
         # TODO: move improvement here to glue-core
         if message.subset in self._layer_artist_container:
             for layer_artist in self._layer_artist_container[message.subset]:
-                if isinstance(message, msg.SubsetUpdateMessage) and message.attribute not in ['subset_state']:
+                if (isinstance(message, msg.SubsetUpdateMessage) and
+                        message.attribute not in ['subset_state']):
                     pass
                 else:
                     layer_artist.update()

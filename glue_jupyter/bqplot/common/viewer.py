@@ -1,5 +1,4 @@
 import bqplot
-import ipywidgets as widgets
 
 from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
@@ -34,6 +33,7 @@ class BqplotBaseView(IPyWidgetView):
             self.axis_x.label = str(self.state.x_att)
             if self.is2d:
                 self.axis_y.label = str(self.state.y_att)
+
         self.state.add_callback('x_att', update_axes)
         if self.is2d:
             self.state.add_callback('y_att', update_axes)
@@ -62,7 +62,8 @@ class BqplotBaseView(IPyWidgetView):
     def _sync_show_axes(self):
         # TODO: if moved to state, this would not rely on the widget
         self.axis_x.visible = self.axis_y.visible = self.state.show_axes
-        self.figure.fig_margin = self._fig_margin_default if self.state.show_axes else self._fig_margin_zero
+        self.figure.fig_margin = (self._fig_margin_default if self.state.show_axes
+                                  else self._fig_margin_zero)
 
     def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
@@ -78,16 +79,13 @@ class BqplotBaseView(IPyWidgetView):
         # TODO: copy paste from glue/viewers/image/qt/data_viewer.py#L66
 
         # next lines don't work.. comp has no datetime?
-        #x_date = any(comp.datetime for comp in self.state._get_x_components())
-        #y_date = any(comp.datetime for comp in self.state._get_y_components())
+        # x_date = any(comp.datetime for comp in self.state._get_x_components())
+        # y_date = any(comp.datetime for comp in self.state._get_y_components())
 
-        #if x_date or y_date:
+        # if x_date or y_date:
         #    roi = roi.transformed(xfunc=mpl_to_datetime64 if x_date else None,
         #                          yfunc=mpl_to_datetime64 if y_date else None)
         if self.is2d:
-            x_comp = self.state.x_att
-            y_comp = self.state.y_att
-
             return roi_to_subset_state(roi, x_att=self.state.x_att, y_att=self.state.y_att)
 
     def limits_to_scales(self, *args):

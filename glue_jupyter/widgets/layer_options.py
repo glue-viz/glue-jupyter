@@ -54,9 +54,10 @@ class LayerOptionsWidget(VBox):
         if layer_artist is None:
             return
 
-        if isinstance(self.viewer._layer_style_widget_cls, dict):
-            layer_panel = self.viewer._layer_style_widget_cls[type(layer_artist)](layer_artist.state)
+        widget_cls = self.viewer._layer_style_widget_cls
+        if isinstance(widget_cls, dict):
+            layer_panel = widget_cls[type(layer_artist)](layer_artist.state)
         else:
-            layer_panel = self.viewer._layer_style_widget_cls(layer_artist.state)
+            layer_panel = widget_cls(layer_artist.state)
 
         self.children = self.children[:1] + (layer_panel,)

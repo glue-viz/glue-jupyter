@@ -46,15 +46,18 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
         self.view = view
 
-        self.scatter = ipyvolume.Scatter(x=[0, 1], y=[0, 1], z=[0,1], color='green',
-            color_selected='orange', size_selected=7, size=5, geo='box')
-        self.quiver = ipyvolume.Scatter(x=[0, 1], y=[0, 1], z=[0,1], color='green',
-            color_selected='orange', size_selected=7, size=5, geo='arrow', visible=False)
+        self.scatter = ipyvolume.Scatter(x=[0, 1], y=[0, 1], z=[0, 1], color='green',
+                                         color_selected='orange', size_selected=7, size=5,
+                                         geo='box')
+        self.quiver = ipyvolume.Scatter(x=[0, 1], y=[0, 1], z=[0, 1], color='green',
+                                        color_selected='orange', size_selected=7, size=5,
+                                        geo='arrow', visible=False)
         self.view.figure.scatters = list(self.view.figure.scatters) + [self.scatter, self.quiver]
-        #link((self.scatter, 'selected'), (self.quiver, 'selected'))
 
-        on_change([(self.state, 'cmap_mode', 'cmap_att', 'cmap_vmin', 'cmap_vmax', 'cmap', 'color')])(self._update_color)
-        on_change([(self.state, 'size', 'size_scaling', 'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
+        on_change([(self.state, 'cmap_mode', 'cmap_att',
+                    'cmap_vmin', 'cmap_vmax', 'cmap', 'color')])(self._update_color)
+        on_change([(self.state, 'size', 'size_scaling',
+                    'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
 
         viewer_state.add_callback('x_att', self._update_xyz_att)
         viewer_state.add_callback('y_att', self._update_xyz_att)
@@ -63,7 +66,8 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
         link((self.state, 'visible'), (self.scatter.material, 'visible'))
 
-        on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att', 'vz_att')])(self._update_quiver)
+        on_change([(self.state, 'vector_visible', 'vx_att',
+                    'vy_att', 'vz_att')])(self._update_quiver)
         link((self.state, 'vector_visible'), (self.quiver, 'visible'))
 
         link((self.state, 'geo'), (self.scatter, 'geo'))
@@ -72,7 +76,8 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
         cmap = self.state.cmap
         if self.state.cmap_mode == 'Linear':
             values = self.layer.data[self.state.cmap_att].astype(np.float32).ravel()
-            normalized_values = (values - self.state.cmap_vmin) / (self.state.cmap_vmax - self.state.cmap_vmin)
+            normalized_values = ((values - self.state.cmap_vmin)
+                                 / (self.state.cmap_vmax - self.state.cmap_vmin))
             color_values = cmap(normalized_values).astype(np.float32)
             self.scatter.color = color_values
         else:
@@ -87,7 +92,6 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
     def redraw(self):
         pass
-        #self.update()
 
     def update(self):
         # we don't use layer, but layer.data to get everything
@@ -122,7 +126,6 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
             self.quiver.vx = self.layer.data[self.state.vx_att].ravel()
             self.quiver.vy = self.layer.data[self.state.vy_att].ravel()
             self.quiver.vz = self.layer.data[self.state.vz_att].ravel()
-
 
     def _update_size(self):
         size = self.state.size

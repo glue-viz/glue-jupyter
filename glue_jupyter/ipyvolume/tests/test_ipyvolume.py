@@ -49,7 +49,6 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.layers[1].scatter.z.tolist() == [1, 2, 3]
     assert s.layers[1].scatter.selected == [2]
 
-
     size_previous = s.layers[0].scatter.size
     s.layers[0].state.size_mode = 'Linear'
     assert s.layers[0].scatter.size is not size_previous
@@ -86,8 +85,8 @@ def test_scatter3d_cmap_mode(app, dataxyz):
     l1.state.cmap_mode = 'Linear'
     assert layer_widget.widget_color.widget_cmap_mode.label == 'Linear'
     assert l1.state.cmap_name == 'Gray'
-    l1.state.cmap_vmin  = 0
-    l1.state.cmap_vmax  = 10
+    l1.state.cmap_vmin = 0
+    l1.state.cmap_vmax = 10
     assert l1.scatter.color.shape == (3, 4)
     assert l1.scatter.color is not None
 
@@ -99,7 +98,9 @@ def test_scatter3d_cmap_mode(app, dataxyz):
     assert layer_widget.widget_color.widget_cmap.label == 'Gray'
     assert l1.state.cmap_name == 'Gray'
 
+
 def test_roi3d(dataxyz):
+
     roi_2d = PolygonalROI(vx=[0.5, 2.5, 2.5, 0.5], vy=[1, 1, 3.5, 3.5])
     roi = Projected3dROI(roi_2d, projection_matrix=np.eye(4))
     assert roi.contains(dataxyz['x'], dataxyz['y']).tolist() == [True, True, False]
@@ -107,6 +108,7 @@ def test_roi3d(dataxyz):
     roi_2d = PolygonalROI(vx=[1.5, 3.5, 3.5, 1.5], vy=[4, 4, 6.5, 6.5])
     roi = Projected3dROI(roi_2d, projection_matrix=xyzw2yxzw)
     assert roi.contains3d(dataxyz['x'], dataxyz['y'], dataxyz['z']).tolist() == [True, True, False]
+
 
 def test_lasso3d(app, dataxyz):
     s = app.scatter3d(x='x', y='y', z='z', data=dataxyz)
@@ -129,7 +131,6 @@ def test_lasso3d(app, dataxyz):
     assert s.layers[1].layer['y'].tolist() == [3, 4]
     assert s.layers[1].layer['z'].tolist() == [6, 7]
 
-
     data = {'type': 'rectangle', 'device': {'begin': [0, 0], 'end': [2.1, 3.1]}}
     # fake the callback
     s.figure._selection_handlers(data)
@@ -147,7 +148,6 @@ def test_scatter3d_multiple_subsets(app, data_unlinked, dataxyz):
     assert viewer.layers[0].enabled
     assert viewer.layers[1].enabled
     assert not viewer.layers[2].enabled
-
 
 
 def test_volshow(app, data_volume, dataxyz):

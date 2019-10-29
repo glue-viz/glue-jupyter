@@ -30,9 +30,12 @@ class Scatter3DLayerStateWidget(VBox):
         self.widget_vector_z = LinkedDropdown(self.state, 'vz_att', label='vz')
 
         link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
-        dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'), lambda value: None if value else 'none')
-        dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'), lambda value: None if value else 'none')
-        dlink((self.widget_vector, 'value'), (self.widget_vector_z.layout, 'display'), lambda value: None if value else 'none')
+        dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'),
+              lambda value: None if value else 'none')
+        dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'),
+              lambda value: None if value else 'none')
+        dlink((self.widget_vector, 'value'), (self.widget_vector_z.layout, 'display'),
+              lambda value: None if value else 'none')
 
         link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
 

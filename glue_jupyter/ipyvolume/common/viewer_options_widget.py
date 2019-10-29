@@ -28,7 +28,9 @@ class Viewer3DStateWidget(VBox):
 
         if hasattr(self.state, 'figure'):
             self.widget_show_movie_maker = ToggleButton(value=False, description="Show movie maker")
-            self.movie_maker = ipv.moviemaker.MovieMaker(self.state.figure, self.state.figure.camera)
+            self.movie_maker = ipv.moviemaker.MovieMaker(self.state.figure,
+                                                         self.state.figure.camera)
             dlink((self.widget_show_movie_maker, 'value'),
-                  (self.movie_maker.widget_main.layout, 'display'), lambda value: None if value else 'none')
+                  (self.movie_maker.widget_main.layout, 'display'),
+                  lambda value: None if value else 'none')
             self.children += (self.widget_show_movie_maker, self.movie_maker.widget_main)
