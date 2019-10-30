@@ -1,94 +1,84 @@
 import ipyvuetify as v
 
+import os
+import traitlets
 from glue.core import message as msg
 from glue.core.hub import HubListener
 
 __all__ = ['SubsetSelect']
 
 
-class SubsetSelect(v.Menu, HubListener):
+def load_template_as_traitlet(path, filename):
+    with open(os.path.join(os.path.dirname(path), filename)) as f:
+        return traitlets.Unicode(f.read()).tag(sync=True)
+
+
+def subset_to_dict(subset):
+    return {
+        'label': subset.label,
+        'color': subset.style.color
+    }
+
+
+class SubsetSelect(v.VuetifyTemplate, HubListener):
     """
     Widget responsible for selecting which subsets are active, sync state between UI and glue.
     """
 
+    selected = traitlets.List().tag(sync=True)
+    available = traitlets.List().tag(sync=True)
+    no_selection_text = traitlets.Unicode('No selection (create new)').tag(sync=True)
+    multiple = traitlets.Bool(False).tag(sync=True)
+    nr_of_full_names = traitlets.Int(2).tag(sync=True)
+
+    methods = traitlets.Unicode('''{
+        toSubsets(indices) {
+            return indices.map(i => this.available[i]);
+        },
+        deselect() {
+            this.multiple = false;
+            this.selected = [];
+        },
+        toggleSubset(index) {
+            this.selected = this.selected.includes(index)
+                ? this.selected.filter(x => x != index)
+                : this.selected.concat(index);
+            this.handleMultiple();
+        },
+        handleMultiple() {
+            if (!this.multiple && this.selected.length > 1) {
+                this.selected = [this.selected.pop()];
+            }
+        }
+    }''').tag(sync=True)
+
+    template = load_template_as_traitlet(__file__, 'subset_select.vue')
+
     def __init__(self, viewer):
+        super().__init__()
 
-        super().__init__(children=[])
-
-        self.output = viewer.output_widget
-        self.session = viewer.session
+        self.edit_subset_mode = viewer.session.edit_subset_mode
         self.data_collection = viewer.session.data_collection
 
-        self.main = v.Btn(children=["No selection (create new)"], v_on="menu.on", text=True)
+        def sync_selected_from_state():
+            self.selected = [self.data_collection.subset_groups.index(subset) for subset
+                             in self.edit_subset_mode.edit_subset]
 
-        title = v.ListItemTitle(children=["No selection (create new)"])
-        self.widget_menu_item_no_active = v.ListItem(children=[title])
-        self.widget_menu_item_no_active.on_event('click', self._sync_state_from_ui)
-
-        self.subset_list = v.List(children=[self.widget_menu_item_no_active])
+        def sync_available_from_state():
+            self.available = [subset_to_dict(subset) for subset in
+                              self.data_collection.subset_groups]
 
         # state change events from glue come in from the hub
-        self.session.hub.subscribe(self, msg.EditSubsetMessage,
-                                   handler=self._on_edit_subset_msg)
-        self.session.hub.subscribe(self, msg.SubsetCreateMessage,
-                                   handler=self._on_subset_create_msg)
-
-        # state changes from the UI via this observed trait
-        self.on_event('change', self._sync_state_from_ui)
+        viewer.session.hub.subscribe(self, msg.EditSubsetMessage,
+                                     handler=lambda _: sync_selected_from_state())
+        viewer.session.hub.subscribe(self, msg.SubsetCreateMessage,
+                                     handler=lambda _: sync_available_from_state())
 
         # manually trigger to set up the initial state
-        self._sync_ui_from_state(self.session.edit_subset_mode.edit_subset)
+        sync_selected_from_state()
+        sync_available_from_state()
 
-        self.v_slots = [{
-            'name': 'activator',
-            'variable': 'menu',
-            'children': self.main
-        }]
-        self.children = [self.subset_list]
-
-    def _on_edit_subset_msg(self, msg):
-        self._sync_ui_from_state(msg.subset)
-
-    def _on_subset_create_msg(self, msg):
-        self._sync_ui_from_state(self.session.edit_subset_mode.edit_subset)
-
-    def _sync_state_from_ui(self, widget, event, data):
-
-        # triggered when ui's value changes
-
-        with self.output:
-
-            index = self.subset_list.children.index(widget) - 1
-
-            if index < 0:
-                self.session.edit_subset_mode.edit_subset = []
-            else:
-                group = self.data_collection.subset_groups[index]
-                self.session.edit_subset_mode.edit_subset = [group]
-
-    def _sync_ui_from_state(self, subset_groups_selected):
-
-        # this is called when the state in glue is changed, we sync the UI to reflect its state
-
-        with self.output:
-            items = [self.widget_menu_item_no_active]
-            with self.main.hold_sync():
-                self.main.children = ["No selection (create new)"]
-                for subset_group in self.data_collection.subset_groups:
-                    # TODO: could avoid re-creating widgets as we do for the
-                    # material UI version we're using a triangular icon here,
-                    # since in the UI it's close to a round icon, which is
-                    # confusing
-                    item = v.ListItem(children=[
-                        v.ListItemAvatar(children=[v.Icon(children=['signal_cellular_4_bar'],
-                                                          color=subset_group.style.color)]),
-                        v.ListItemTitle(children=[subset_group.label])
-                    ])
-                    item.on_event('click', self._sync_state_from_ui)
-                    items.append(item)
-                    # TODO: this supports only a single active subset (it will
-                    # actually only show the last)
-                    if subset_group in self.session.edit_subset_mode.edit_subset:
-                        self.main.children = item.children[:]
-
-            self.subset_list.children = items
+    @traitlets.observe('selected')
+    def _sync_selected_from_ui(self, change):
+        self.edit_subset_mode.edit_subset = [self.data_collection.subset_groups[index] for index in
+                                             change['new']]
