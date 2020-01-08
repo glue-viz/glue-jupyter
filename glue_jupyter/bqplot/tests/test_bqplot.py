@@ -89,13 +89,13 @@ def test_scatter2d_density(app, dataxyz):
     s.layers[0].state.points_mode = 'density'
     assert s.layers[0].state.density_map is True
 
-    s.state.x_min == 1
-    s.state.x_max == 3
-    s.state.y_min == 2
-    s.state.y_max == 4
+    s.state.x_min == 0.9
+    s.state.x_max == 3.1
+    s.state.y_min == 1.9
+    s.state.y_max == 5.1
     assert s.layers[0].state.density_map is True
     s.layers[0].state.bins = 2
-    assert s.layers[0].image.image.tolist() == [[0, 1], [0, 0]]
+    assert s.layers[0].image.image.tolist() == [[2.0, 0], [0, 1.0]]
 
 
 def test_scatter2d_subset(app, dataxyz, dataxz):

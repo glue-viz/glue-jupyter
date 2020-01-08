@@ -132,12 +132,12 @@ class BqplotScatterLayerArtist(LayerArtist):
             range_x = [self.view.scale_x.min, self.view.scale_x.max]
             range_y = [self.view.scale_y.min, self.view.scale_y.max]
             range = [range_x, range_y]
-            self.counts = data.compute_histogram([self._viewer_state.y_att,
-                                                  self._viewer_state.x_att],
+            self.counts = data.compute_histogram([self._viewer_state.x_att,
+                                                  self._viewer_state.y_att],
                                                  subset_state=subset_state,
                                                  bins=bins, range=range)
             self.scale_image.min = 0
-            self.scale_image.max = np.nanmax(self.counts)
+            self.scale_image.max = np.nanmax(self.counts).item()
             with self.image.hold_sync():
                 self.image.x = range_x
                 self.image.y = range_y
