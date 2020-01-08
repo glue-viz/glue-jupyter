@@ -6,7 +6,25 @@ resources:
     name: OpenAstronomy/azure-pipelines-templates
     ref: master
 
+trigger:
+  branches:
+    include:
+    - '*'
+  tags:
+    include:
+    - 'v*'
+
 jobs:
+
+- template: publish.yml@OpenAstronomy
+  parameters:
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/v') }}:
+      pypi_connection_name: 'pypi_endpoint'
+    test_extras: test
+    test_command: pytest --pyargs glue_jupyter
+    targets:
+    - sdist
+    - wheels_universal
 
 - template: run-tox-env.yml@OpenAstronomy
   parameters:
