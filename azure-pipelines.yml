@@ -15,24 +15,23 @@ jobs:
 
     envs:
 
-    - linux: pep8
+    - linux: codestyle
       libraries: {}
       coverage: 'false'
 
     - linux: py36-test
     - linux: py37-test
 
-    - macosx: py36-test
-    - macosx: py37-test
+    - macos: py36-test
+    - macos: py37-test
 
     - windows: py36-test
     - windows: py37-test
 
     - linux: py37-notebooks
-    - macosx: py37-notebooks
+    - macos: py37-notebooks
     - windows: py36-notebooks
 
     - linux: py37-docs
-    - macosx: py37-docs
+    - macos: py37-docs
     - windows: py36-docs
-
