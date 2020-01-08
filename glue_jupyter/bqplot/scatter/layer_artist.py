@@ -141,7 +141,7 @@ class BqplotScatterLayerArtist(LayerArtist):
             with self.image.hold_sync():
                 self.image.x = range_x
                 self.image.y = range_y
-                self.image.image = self.counts.T.copy(np.float32)
+                self.image.image = self.counts.T.astype(np.float32, copy=True)
 
     def _update_scatter(self, **changes):
         self.update_histogram()
