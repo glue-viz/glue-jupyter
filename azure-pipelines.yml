@@ -16,6 +16,16 @@ trigger:
 
 jobs:
 
+- template: publish.yml@OpenAstronomy
+  parameters:
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/v') }}:
+      pypi_connection_name: 'pypi_endpoint'
+    test_extras: test
+    test_command: pytest --pyargs glue_jupyter
+    targets:
+    - sdist
+    - wheels_universal
+
 - template: run-tox-env.yml@OpenAstronomy
   parameters:
 
@@ -43,13 +53,3 @@ jobs:
     - linux: py37-docs
     - macos: py37-docs
     - windows: py36-docs
-
-- template: publish.yml@OpenAstronomy
-  parameters:
-    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/v') }}:
-      pypi_connection_name: 'pypi_endpoint'
-    test_extras: test
-    test_command: pytest --pyargs glue_jupyter
-    targets:
-    - sdist
-    - wheels_universal
