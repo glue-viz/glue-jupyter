@@ -75,7 +75,10 @@ class MultiSliceWidgetHelper(object):
                     self._sliders.append(None)
                     continue
 
-                label = self.viewer_state.reference_data.world_component_ids[i].label
+                if self.viewer_state.reference_data.coords is None:
+                    label = self.viewer_state.reference_data.pixel_component_ids[i].label
+                else:
+                    label = self.viewer_state.reference_data.world_component_ids[i].label
                 slider = IntSlider(min=0, max=self.data.shape[i]-1, description=label)
 
                 slider.observe(self.sync_state_from_sliders, 'value')
