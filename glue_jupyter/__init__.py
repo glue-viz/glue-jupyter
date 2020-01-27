@@ -110,13 +110,12 @@ def example_image(shape=64, limits=[-4, 4]):
     """
     Creates a test 2-d dataset containing an image.
     """
-    from glue.core import Data, Coordinates
+    from glue.core import Data
     import numpy as np
     x = np.linspace(-3, 3, num=shape)
     X, Y = np.meshgrid(x, x)
     rho = 0.8
     intensity = np.exp(-X**2-Y**2-2*X*Y*rho)
     data = Data()
-    data.coords = Coordinates()
     data.add_component(intensity, label='intensity')
     return data
