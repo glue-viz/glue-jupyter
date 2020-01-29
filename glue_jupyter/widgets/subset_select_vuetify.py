@@ -54,11 +54,11 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
 
     template = load_template_as_traitlet(__file__, 'subset_select.vue')
 
-    def __init__(self, viewer):
+    def __init__(self, session=None):
         super().__init__()
 
-        self.edit_subset_mode = viewer.session.edit_subset_mode
-        self.data_collection = viewer.session.data_collection
+        self.edit_subset_mode = session.edit_subset_mode
+        self.data_collection = session.data_collection
 
         def sync_selected_from_state():
             self.selected = [self.data_collection.subset_groups.index(subset) for subset
@@ -69,10 +69,10 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
                               self.data_collection.subset_groups]
 
         # state change events from glue come in from the hub
-        viewer.session.hub.subscribe(self, msg.EditSubsetMessage,
-                                     handler=lambda _: sync_selected_from_state())
-        viewer.session.hub.subscribe(self, msg.SubsetCreateMessage,
-                                     handler=lambda _: sync_available_from_state())
+        session.hub.subscribe(self, msg.EditSubsetMessage,
+                              handler=lambda _: sync_selected_from_state())
+        session.hub.subscribe(self, msg.SubsetCreateMessage,
+                              handler=lambda _: sync_available_from_state())
 
         # manually trigger to set up the initial state
         sync_selected_from_state()

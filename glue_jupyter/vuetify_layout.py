@@ -48,9 +48,10 @@ def vuetify_layout_factory(viewer):
         mode = mode_cls(viewer)
         toolbar_selection_tools.add_tool(mode)
 
-    toolbar_active_subset = SubsetSelect(viewer)
+    toolbar_active_subset = SubsetSelect(session=viewer.session)
 
-    toolbar_selection_mode = SelectionModeMenu(viewer)
+    toolbar_selection_mode = SelectionModeMenu(session=viewer.session,
+                                               output_widget=viewer.output_widget)
 
     toolbar = v.Toolbar(dense=True, class_='elevation-0',
                         children=[v.ToolbarItems(children=[toolbar_selection_tools,

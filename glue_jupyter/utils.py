@@ -1,3 +1,4 @@
+import sys
 import functools
 import collections
 import time
@@ -12,6 +13,14 @@ from glue import __version__ as glue_version
 from glue.core import Data
 
 GLUE_LT_016 = LooseVersion(glue_version) < LooseVersion('0.16')
+
+if sys.version_info[:2] < (3, 7):
+    from contextlib import contextmanager  # noqa
+    @contextmanager
+    def nullcontext():
+        yield None
+else:
+    from contextlib import nullcontext  # noqa
 
 
 def float_or_none(x):
