@@ -10,7 +10,7 @@ from glue.core import message as msg
 
 from glue_jupyter import get_layout_factory
 from glue_jupyter.utils import _update_not_none, validate_data_argument
-from glue_jupyter.common.toolbar import BasicJupyterToolbar
+from glue_jupyter.common.toolbar_vuetify import BasicJupyterToolbar
 from glue_jupyter.widgets.layer_options import LayerOptionsWidget
 
 __all__ = ['IPyWidgetView', 'IPyWidgetLayerArtistContainer']
@@ -33,9 +33,9 @@ class IPyWidgetView(Viewer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._output_widget = Output()
         self.initialize_layer_options()
         self.initialize_toolbar()
-        self._output_widget = Output()
 
     @property
     def toolbar_selection_tools(self):
@@ -147,7 +147,7 @@ class IPyWidgetView(Viewer):
 
         from glue.config import viewer_tool
 
-        self.toolbar = BasicJupyterToolbar()
+        self.toolbar = BasicJupyterToolbar(self)
 
         # Need to include tools and subtools declared by parent classes unless
         # specified otherwise
