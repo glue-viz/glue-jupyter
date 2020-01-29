@@ -68,7 +68,7 @@ class SelectionModeMenu(v.Menu, HubListener):
 
     @avoid_circular
     def _sync_state_from_ui(self, widget, event, data):
-        with self.output:
+        with self.output or nullcontext():
             icon = widget.children[0].children[0]
             self.main.children = [icon]
             for mode in self.modes:
@@ -83,7 +83,7 @@ class SelectionModeMenu(v.Menu, HubListener):
 
     @avoid_circular
     def _sync_ui_from_state(self, mode):
-        with self.output:
+        with self.output or nullcontext():
             if self.session.edit_subset_mode.mode != mode:
                 self.session.edit_subset_mode.mode = mode
             for m in self.modes:
