@@ -89,6 +89,7 @@ class SelectionModeMenu(v.Menu, HubListener):
             for m in self.modes:
                 if mode is m[2]:
                     icon = m[1]
+                    break
             else:
                 icon = self.modes[0][1]
             self.main.children = [icon]

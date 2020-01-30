@@ -82,3 +82,11 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
     def _sync_selected_from_ui(self, change):
         self.edit_subset_mode.edit_subset = [self.data_collection.subset_groups[index] for index in
                                              change['new']]
+
+    @traitlets.observe('multiple')
+    def _switch_multiple(self, change):
+        if not self.multiple:
+            with self.hold_sync():
+                if len(self.selected) > 1:
+                    # take the first item of the selected items as the single selected item
+                    self.selected = self.selected[:1]

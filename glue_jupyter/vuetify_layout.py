@@ -4,13 +4,6 @@
 
 import ipyvuetify as v
 
-from glue.config import viewer_tool
-
-from glue_jupyter.view import get_viewer_tools
-from glue_jupyter.common.toolbar_vuetify import BasicJupyterToolbar
-from glue_jupyter.widgets.subset_mode_vuetify import SelectionModeMenu
-from glue_jupyter.widgets.subset_select_vuetify import SubsetSelect
-
 __all__ = ['vuetify_layout_factory']
 
 
@@ -36,27 +29,10 @@ def vuetify_layout_factory(viewer):
                                 children=[sidebar_button,
                                           options_panel], width="min-content")
 
-    toolbar_selection_tools = BasicJupyterToolbar(viewer)
-
-    tool_ids, subtool_ids = get_viewer_tools(viewer.__class__)
-
-    if subtool_ids:
-        raise ValueError('subtools are not yet supported in Jupyter viewers')
-
-    for tool_id in tool_ids:
-        mode_cls = viewer_tool.members[tool_id]
-        mode = mode_cls(viewer)
-        toolbar_selection_tools.add_tool(mode)
-
-    toolbar_active_subset = SubsetSelect(session=viewer.session)
-
-    toolbar_selection_mode = SelectionModeMenu(session=viewer.session,
-                                               output_widget=viewer.output_widget)
-
     toolbar = v.Toolbar(dense=True, class_='elevation-0',
-                        children=[v.ToolbarItems(children=[toolbar_selection_tools,
-                                                           toolbar_selection_mode,
-                                                           toolbar_active_subset]),
+                        children=[v.ToolbarItems(children=[viewer.toolbar_selection_tools,
+                                                           viewer.toolbar_selection_mode,
+                                                           viewer.toolbar_active_subset]),
                                   v.Spacer(),
                                   sidebar_button])
 

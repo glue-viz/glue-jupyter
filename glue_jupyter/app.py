@@ -10,8 +10,8 @@ from glue.core.edit_subset_mode import (NewMode, ReplaceMode, AndMode, OrMode,
                                         XorMode, AndNotMode)
 
 from glue_jupyter.utils import _update_not_none, validate_data_argument
-from glue_jupyter.widgets.subset_select import SubsetSelect
-from glue_jupyter.widgets.subset_mode import SubsetMode
+from glue_jupyter.widgets.subset_select_vuetify import SubsetSelect
+from glue_jupyter.widgets.subset_mode_vuetify import SelectionModeMenu
 
 __all__ = ['JupyterApplication']
 
@@ -42,8 +42,8 @@ class JupyterApplication(Application):
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
         self.output = widgets.Output()
         self.widget_data_collection = widgets.SelectMultiple()
-        self.widget_subset_select = SubsetSelect(self.session)
-        self.widget_subset_mode = SubsetMode(self.session)
+        self.widget_subset_select = SubsetSelect(session=self.session)
+        self.widget_subset_mode = SelectionModeMenu(session=self.session)
         self.widget = widgets.VBox(children=[self.widget_subset_mode, self.output])
 
     def _ipython_display_(self):
