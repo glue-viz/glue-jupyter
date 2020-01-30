@@ -2,7 +2,7 @@ from ipywidgets import Dropdown
 from glue.external.echo.selection import ChoiceSeparator
 from glue.utils import avoid_circular
 
-__all__ = ['LinkedDropdown', 'LinkedDropdownMaterial']
+__all__ = ['LinkedDropdown']
 
 
 def get_choices(state, attribute_name):
