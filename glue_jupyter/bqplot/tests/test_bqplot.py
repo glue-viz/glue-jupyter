@@ -53,7 +53,7 @@ def test_interact(app, dataxyz):
     # s.widget_menu_select_x.value = True
     # s.widget_menu_select_x.click()# = True
     tool = s.toolbar.tools['bqplot:xrange']
-    s.toolbar.value = tool.tool_id
+    s.toolbar.active_tool = tool
     assert s.figure.interaction == tool.interact
 
 
@@ -177,9 +177,9 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     assert s.layers[1].scatter.selected == [2]
 
     # nothing should change when we change modes
-    s.toolbar.value = tool1d.tool_id
+    s.toolbar.active_tool = tool1d
     assert s.layers[1].scatter.selected == [2]
-    s.toolbar.value = tool2d.tool_id
+    s.toolbar.active_tool = tool2d
     assert s.layers[1].scatter.selected == [2]
 
 
