@@ -45,5 +45,5 @@ first install Jupyter Lab (if not already installed)::
 then install the following extensions manually::
 
     jupyter labextension install @jupyter-widgets/jupyterlab-manager \
-                                 ipyvolume jupyter-threejs jupyter-materialui \
+                                 ipyvolume jupyter-threejs \
                                  bqplot bqplot-image-gl jupyter-vuetify

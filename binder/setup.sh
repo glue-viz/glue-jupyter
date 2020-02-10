@@ -14,7 +14,7 @@ pip install . jupyterlab astroquery --user
 # Install Jupyter Lab widgets extensions
 
 jupyter labextension install @jupyter-widgets/jupyterlab-manager \
-                             ipyvolume jupyter-threejs jupyter-materialui \
+                             ipyvolume jupyter-threejs \
                              bqplot bqplot-image-gl jupyter-vuetify --no-build
 
 # Re-build Jupyter Lab
