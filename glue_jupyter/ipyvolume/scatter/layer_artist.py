@@ -17,7 +17,7 @@ __all__ = ['Scatter3DLayerState', 'IpyvolumeScatterLayerArtist']
 class Scatter3DLayerState(ScatterLayerState):
 
     # FIXME: the following should be a SelectionCallbackProperty
-    geo = CallbackProperty('sphere', docstring="Type of marker")
+    geo = CallbackProperty('diamond', docstring="Type of marker")
     vz_att = SelectionCallbackProperty(docstring="The attribute to use for the z vector arrow")
 
     def __init__(self, viewer_state=None, layer=None, **kwargs):
