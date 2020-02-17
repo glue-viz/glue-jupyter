@@ -37,16 +37,16 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert s.layers[1].layer['z'].tolist() == [7]
 
     assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
-    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
-    assert s.layers[1].scatter.z.tolist() == [5, 6, 7]
+    assert s.layers[1].scatter.z.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
     assert s.layers[1].scatter.selected == [2]
 
     s.state.x_att = dataxyz.id['y']
     s.state.y_att = dataxyz.id['z']
     s.state.z_att = dataxyz.id['x']
     assert s.layers[1].scatter.x.tolist() == [2, 3, 4]
-    assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
-    assert s.layers[1].scatter.z.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.z.tolist() == [5, 6, 7]
+    assert s.layers[1].scatter.y.tolist() == [1, 2, 3]
     assert s.layers[1].scatter.selected == [2]
 
     size_previous = s.layers[0].scatter.size
