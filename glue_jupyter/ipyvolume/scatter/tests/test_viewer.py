@@ -32,3 +32,22 @@ def test_non_hex_colors(app, dataxyz):
     viewer.layer_options._layer_dropdown.value = viewer.layers[1]
     dataxyz.subsets[0].style.color = '0.5'
     dataxyz.subsets[0].style.color = 'purple'
+
+
+def test_labels(app, dataxyz):
+    # test the syncing of attributes to labels
+    app.add_data(dataxyz)
+    scatter = app.scatter3d(data=dataxyz)
+    assert scatter.state.x_att.label == 'x'
+    assert scatter.figure.xlabel == 'x'
+    assert scatter.state.y_att.label == 'y'
+    assert scatter.figure.zlabel == 'y'
+    assert scatter.state.z_att.label == 'z'
+    assert scatter.figure.ylabel == 'z'
+
+    scatter.state.x_att = dataxyz.id['y']
+    assert scatter.figure.xlabel == 'y'
+    scatter.state.y_att = dataxyz.id['z']
+    assert scatter.figure.zlabel == 'z'
+    scatter.state.z_att = dataxyz.id['x']
+    assert scatter.figure.ylabel == 'x'
