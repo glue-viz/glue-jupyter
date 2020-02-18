@@ -96,11 +96,11 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
     def update(self):
         # we don't use layer, but layer.data to get everything
         self.scatter.x = ensure_numerical(self.layer.data[self._viewer_state.x_att]).ravel()
-        self.scatter.y = ensure_numerical(self.layer.data[self._viewer_state.y_att]).ravel()
-        self.scatter.z = ensure_numerical(self.layer.data[self._viewer_state.z_att]).ravel()
+        self.scatter.z = ensure_numerical(self.layer.data[self._viewer_state.y_att]).ravel()
+        self.scatter.y = ensure_numerical(self.layer.data[self._viewer_state.z_att]).ravel()
         self.quiver.x = self.scatter.x
-        self.quiver.y = self.scatter.y
-        self.quiver.z = self.scatter.z
+        self.quiver.z = self.scatter.y
+        self.quiver.y = self.scatter.z
         if isinstance(self.layer, Subset):
 
             try:
@@ -124,8 +124,8 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
     def _update_quiver(self):
         with self.quiver.hold_sync():
             self.quiver.vx = self.layer.data[self.state.vx_att].ravel()
-            self.quiver.vy = self.layer.data[self.state.vy_att].ravel()
-            self.quiver.vz = self.layer.data[self.state.vz_att].ravel()
+            self.quiver.vz = self.layer.data[self.state.vy_att].ravel()
+            self.quiver.vy = self.layer.data[self.state.vz_att].ravel()
 
     def _update_size(self):
         size = self.state.size
