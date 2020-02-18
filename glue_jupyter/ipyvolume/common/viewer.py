@@ -5,6 +5,7 @@ from glue.core.subset import RoiSubsetState3d
 from glue.core.command import ApplySubsetState
 
 from ...view import IPyWidgetView
+from ...link import dlink
 
 from .viewer_options_widget import Viewer3DStateWidget
 
@@ -29,6 +30,15 @@ class IpyvolumeBaseView(IPyWidgetView):
 
         # FIXME: hack for the movie maker to have access to the figure
         self.state.figure = self.figure
+
+        # note that for ipyvolume, we use axis in the order x, z, y in order to have
+        # the z axis of glue pointing up
+        def attribute_to_label(attribute):
+            return 'null' if attribute is None else attribute.label
+
+        dlink((self.state, 'x_att'), (self.figure, 'xlabel'), attribute_to_label)
+        dlink((self.state, 'y_att'), (self.figure, 'zlabel'), attribute_to_label)
+        dlink((self.state, 'z_att'), (self.figure, 'ylabel'), attribute_to_label)
 
         self.state.add_callback('x_min', self.limits_to_scales)
         self.state.add_callback('x_max', self.limits_to_scales)
