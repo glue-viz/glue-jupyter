@@ -79,11 +79,13 @@ class link_vuetify_generic:
     def update_state(self, *ignore_args):
         if not self.connected:
             return
-        if getattr(self.state(), self.attribute) == self.widget().v_model:
-            return
         if self.function_to_state:
+            if getattr(self.state(), self.attribute) == self.function_to_state()(self.widget().v_model):
+                return
             setattr(self.state(), self.attribute, self.function_to_state()(self.widget().v_model))
         else:
+            if getattr(self.state(), self.attribute) == self.widget().v_model:
+                return
             setattr(self.state(), self.attribute, self.widget().v_model)
 
     @avoid_circular

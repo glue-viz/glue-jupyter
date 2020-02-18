@@ -6,6 +6,14 @@ from .vuetify_helpers import link_vuetify_checkbox, link_vuetify_generic
 __all__ = ['HistogramViewerStateWidget']
 
 
+def model_to_bool(x):
+    return x == 0
+
+
+def bool_to_model(x):
+    return 0 if x else None
+
+
 class HistogramViewerStateWidget(v.Container):
 
     def __init__(self, viewer_state):
@@ -20,15 +28,15 @@ class HistogramViewerStateWidget(v.Container):
                                                             children=['normalize'])])
         self._link_cumulative = link_vuetify_generic('change', self.button_normalize,
                                                      self.state, 'normalize',
-                                                     function_to_state=lambda x: x == 0,
-                                                     function_to_widget=lambda x: 0 if x else None)
+                                                     function_to_state=model_to_bool,
+                                                     function_to_widget=bool_to_model)
 
         self.button_cumulative = v.BtnToggle(children=[v.Btn(small=True, class_='ma-2',
                                                              children=['cumulative'])])
         self._link_cumulative = link_vuetify_generic('change', self.button_cumulative,
                                                      self.state, 'cumulative',
-                                                     function_to_state=lambda x: x == 0,
-                                                     function_to_widget=lambda x: 0 if x else None)
+                                                     function_to_state=model_to_bool,
+                                                     function_to_widget=bool_to_model)
 
         self.widget_x_axis = LinkedDropdownVuetify(self.state, 'x_att', label='x axis')
 
