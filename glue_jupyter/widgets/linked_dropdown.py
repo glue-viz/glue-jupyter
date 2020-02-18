@@ -1,3 +1,4 @@
+import ipyvuetify as v
 from ipywidgets import Dropdown
 from glue.external.echo.selection import ChoiceSeparator
 from glue.utils import avoid_circular
@@ -94,3 +95,78 @@ class LinkedDropdown(Dropdown):
                         self.value = None
                 else:
                     self.value = None
+
+
+
+class LinkedDropdownVuetify(v.Select):
+    """
+    A dropdown widget that is automatically linked to a SelectionCallbackProperty
+    and syncs changes both ways.
+
+    * On glue's side the state is in state.<attribute_name>.
+    * On the UI the state is in widget_select.value which holds the index of the selected item.
+    * Indices are (for the moment) calculated from a list of choices (ignoring separators)
+    """
+
+    def __init__(self, state, attribute_name, ui_name=None, label=None):
+
+        if label is None:
+            label = ui_name
+
+        super().__init__(label=label)
+
+        self.state = state
+        self.attribute_name = attribute_name
+
+        self._update_options()
+
+        self.state.add_callback(self.attribute_name, self._update_ui_from_glue_state)
+        self.on_event('change', self._update_glue_state_from_ui)
+
+        # Set initial UI state to match SelectionCallbackProperty
+        self._update_ui_from_glue_state()
+
+    def _update_options(self):
+        self._choices, self._labels = get_choices(self.state, self.attribute_name)
+        self._choice_id = {choice: ichoice for ichoice, choice in enumerate(self._choices)}
+        value = self.v_model
+        self.items = [{'text': label, 'value': self._choice_id[choice]}
+                       for (label, choice) in zip(self._labels, self._choices)]
+        if value is not None:
+            self.v_model = value
+
+    @avoid_circular
+    def _update_glue_state_from_ui(self, *ignore_args):
+        """
+        Update the SelectionCallbackProperty based on the UI.
+        """
+        setattr(self.state, self.attribute_name, self._choices[self.v_model])
+
+    @avoid_circular
+    def _update_ui_from_glue_state(self, *ignore_args):
+        """
+        Update the UI based on the SelectionCallbackProperty.
+        """
+        value = getattr(self.state, self.attribute_name)
+
+        # If we are here, the SelectionCallbackProperty has been changed, and
+        # this can be due to the options or the selection changing so we need
+        # to update the options.
+        self._update_options()
+
+        if len(self._choices) > 0:
+            value = getattr(self.state, self.attribute_name)
+            for choice in self._choices:
+                if choice is value:
+                    self.v_model = self._choice_id[value]
+                    break
+            else:
+                if isinstance(value, str):
+                    for i, label in enumerate(self._labels):
+                        if label == value:
+                            self.v_model = i
+                            break
+                    else:
+                        self.v_model = None
+                else:
+                    self.v_model = None
