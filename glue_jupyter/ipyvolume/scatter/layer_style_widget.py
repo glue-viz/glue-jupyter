@@ -16,7 +16,7 @@ class Scatter3DLayerStateWidget(VBox):
         self.widget_visible = Checkbox(description='visible', value=self.state.visible)
         link((self.state, 'visible'), (self.widget_visible, 'value'))
 
-        self.widget_marker = ToggleButtons(options=['sphere', 'box', 'diamond'])
+        self.widget_marker = ToggleButtons(options=['sphere', 'box', 'diamond', 'circle_2d'])
         link((self.state, 'geo'), (self.widget_marker, 'value'))
 
         self.widget_size = Size(state=self.state)
