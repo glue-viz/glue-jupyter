@@ -1,47 +1,36 @@
 import ipyvuetify as v
-
-from ...widgets.linked_dropdown import LinkedDropdownVuetify
-from .vuetify_helpers import link_vuetify_checkbox, link_vuetify_generic
+import traitlets
+from ...vuetify_helpers import load_template, link_glue
+from ...widgets.linked_dropdown import get_choices
 
 __all__ = ['HistogramViewerStateWidget']
 
 
-def model_to_bool(x):
-    return x == 0
-
-
-def bool_to_model(x):
-    return 0 if x else None
-
-
-class HistogramViewerStateWidget(v.Container):
+class HistogramViewerStateWidget(v.VuetifyTemplate):
+    template = load_template('viewer_histogram.vue', __file__)
+    x_axis = traitlets.List().tag(sync=True)
+    selected_axes = traitlets.Unicode().tag(sync=True)
+    normalize = traitlets.Bool().tag(sync=True)
+    cumulative = traitlets.Bool().tag(sync=True)
+    show_axes = traitlets.Bool().tag(sync=True)
 
     def __init__(self, viewer_state):
+        super().__init__()
 
-        self.state = viewer_state
+        def update_choices(*args):
+            self.x_axis = get_choices(viewer_state, 'x_att')[1]
 
-        self.widget_show_axes = v.Checkbox(label='Show axes', v_model=True)
-        self._link_checkbox = link_vuetify_checkbox(self.widget_show_axes,
-                                                    self.state, 'show_axes')
+        viewer_state.add_callback('x_att', update_choices)
+        update_choices()
 
-        self.button_normalize = v.BtnToggle(children=[v.Btn(small=True, class_='ma-2',
-                                                            children=['normalize'])])
-        self._link_cumulative = link_vuetify_generic('change', self.button_normalize,
-                                                     self.state, 'normalize',
-                                                     function_to_state=model_to_bool,
-                                                     function_to_widget=bool_to_model)
+        def get_choice_for_label(label):
+            for choice in get_choices(viewer_state, 'x_att')[0]:
+                if choice.label == label:
+                    return choice
 
-        self.button_cumulative = v.BtnToggle(children=[v.Btn(small=True, class_='ma-2',
-                                                             children=['cumulative'])])
-        self._link_cumulative = link_vuetify_generic('change', self.button_cumulative,
-                                                     self.state, 'cumulative',
-                                                     function_to_state=model_to_bool,
-                                                     function_to_widget=bool_to_model)
-
-        self.widget_x_axis = LinkedDropdownVuetify(self.state, 'x_att', label='x axis')
-
-        super().__init__(row=True,
-                         children=[self.widget_x_axis,
-                                   self.button_normalize,
-                                   self.button_cumulative,
-                                   self.widget_show_axes])
+        link_glue(self, 'selected_axes', viewer_state, 'x_att',
+                  from_glue_fn = lambda x: x.label,
+                  to_glue_fn = get_choice_for_label)
+        link_glue(self, 'cumulative', viewer_state)
+        link_glue(self, 'normalize', viewer_state)
+        link_glue(self, 'show_axes', viewer_state)

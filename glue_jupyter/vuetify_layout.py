@@ -16,7 +16,7 @@ def vuetify_layout_factory(viewer):
     sidebar_button.on_event('click', on_click)
 
     options_panel = v.ExpansionPanels(
-        v_model=[0, 1], multiple=True, accordion=True, style_='padding-left: 1px',
+        v_model=[0, 1], multiple=True, accordion=True, style_='padding-left: 1px; min-width: 200px',
         children=[
             v.ExpansionPanel(children=[
                 v.ExpansionPanelHeader(class_='font-weight-bold', children=['Viewer Options']),
