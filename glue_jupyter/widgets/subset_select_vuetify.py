@@ -30,6 +30,7 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
     no_selection_text = traitlets.Unicode('No selection (create new)').tag(sync=True)
     multiple = traitlets.Bool(False).tag(sync=True)
     nr_of_full_names = traitlets.Int(2).tag(sync=True)
+    show_allow_multiple_subsets = traitlets.Bool(False).tag(sync=True)
 
     methods = traitlets.Unicode('''{
         toSubsets(indices) {
