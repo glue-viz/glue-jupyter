@@ -91,9 +91,10 @@ class BqplotProfileLayerArtist(LayerArtist):
             with self.line_mark.hold_sync():
                 self.line_mark.x = x
                 self.line_mark.y = y
-                self.line_mark.visible = self.state.visible
         else:
-            self.line_mark.visible = False
+            with self.line_mark.hold_sync():
+                self.line_mark.x = [0.]
+                self.line_mark.y = [0.]
 
         if not self._viewer_state.normalize and len(y) > 0:
 
