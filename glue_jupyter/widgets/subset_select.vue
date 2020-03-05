@@ -46,7 +46,7 @@
                 </v-list-item-content>
             </v-list-item>
 
-            <v-switch v-model="multiple" label="Allow multiple subsets" @click="handleMultiple" class="px-4"></v-switch>
+            <v-switch v-if="show_allow_multiple_subsets" v-model="multiple" label="Allow multiple subsets" @click="handleMultiple" class="px-4"></v-switch>
         </v-list>
     </v-menu>
 </template>
