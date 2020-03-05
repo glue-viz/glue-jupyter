@@ -11,7 +11,7 @@ ICON_WIDTH = 20
 
 
 class BasicJupyterToolbar(v.BtnToggle):
-    active_tool = traitlets.Instance(glue.viewers.common.tool.Tool)
+    active_tool = traitlets.Instance(glue.viewers.common.tool.Tool, allow_none=True)
 
     def __init__(self, viewer):
         self.output = viewer.output_widget
@@ -23,14 +23,18 @@ class BasicJupyterToolbar(v.BtnToggle):
         with self.output:
             if change.new is not None:
                 self.active_tool = self.tools[change.new]
+            else:
+                self.active_tool = None
 
     @traitlets.observe('active_tool')
     def _on_change_active_tool(self, change):
-        with self.output:
-            if change.old:
-                change.old.deactivate()
-            if change.new:
-                change.new.activate()
+        if change.old:
+            change.old.deactivate()
+        if change.new:
+            change.new.activate()
+            self.v_model = change.new.tool_id
+        else:
+            self.v_model = None
 
     def add_tool(self, tool):
         self.tools[tool.tool_id] = tool
