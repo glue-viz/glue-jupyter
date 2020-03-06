@@ -182,6 +182,29 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     s.toolbar.active_tool = tool2d
     assert s.layers[1].scatter.selected == [2]
 
+    # 2d brushing
+    # format of 'selected' (x1, y1), (x2, y2)
+    tool_circle = s.toolbar.tools['bqplot:circle']
+    tool_circle.activate()
+    tool_circle.interact.brushing = True
+    tool_circle.interact.selected = [(2.5, 2.5), (3.5, 4.5)]
+    tool_circle.interact.brushing = False
+
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [3]
+    assert s.layers[1].layer['y'].tolist() == [4]
+    assert s.layers[1].layer['z'].tolist() == [7]
+
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.selected == [2]
+
+    # nothing should change when we change modes
+    s.toolbar.active_tool = tool1d
+    assert s.layers[1].scatter.selected == [2]
+    s.toolbar.active_tool = tool_circle
+    assert s.layers[1].scatter.selected == [2]
+
 
 def test_scatter2d_properties(app, dataxyz, dataxz):
     s = app.scatter2d(x='x', y='y', data=dataxyz)

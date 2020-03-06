@@ -1,8 +1,9 @@
 from bqplot import PanZoom
-from bqplot.interacts import BrushSelector, BrushIntervalSelector
-from glue.core.roi import RectangularROI, RangeROI
+from bqplot.interacts import BrushSelector, BrushIntervalSelector, BrushEllipseSelector
+from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI
 from glue.config import viewer_tool
 from glue.viewers.common.tool import CheckableTool
+import numpy as np
 
 __all__ = []
 
@@ -61,6 +62,44 @@ class BqplotRectangleMode(InteractCheckableTool):
                 x = self.interact.selected_x
                 y = self.interact.selected_y
                 roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
+                self.viewer.apply_roi(roi)
+
+
+@viewer_tool
+class BqplotCircleMode(InteractCheckableTool):
+
+    icon = 'glue_circle'
+    tool_id = 'bqplot:circle'
+    action_text = 'Circular ROI'
+    tool_tip = 'Define a circular region of interest'
+
+    def __init__(self, viewer, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+
+        self.interact = BrushEllipseSelector(x_scale=self.viewer.scale_x,
+                                             y_scale=self.viewer.scale_y,
+                                             pixel_aspect=1)
+
+        self.interact.observe(self.update_selection, "brushing")
+
+    def update_selection(self, *args):
+        with self.viewer._output_widget:
+            if self.interact.selected_x is not None and self.interact.selected_y is not None:
+                x = self.interact.selected_x
+                y = self.interact.selected_y
+                # similar to https://github.com/glue-viz/glue/blob/b14ccffac6a5271c2869ead9a562a2e66232e397/glue/core/roi.py#L1275-L1297
+                # We should now check if the radius in data coordinates is the same
+                # along x and y, as if so then we can return a circle, otherwise we
+                # should return an ellipse.
+                xc = x.mean()
+                yc = y.mean()
+                rx = abs(x[1] - x[0])/2
+                ry = abs(y[1] - y[0])/2
+                if np.allclose(rx, ry):
+                    roi = CircularROI(xc=xc, yc=yc, radius=rx)
+                else:
+                    roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
                 self.viewer.apply_roi(roi)
 
 
