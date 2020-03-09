@@ -54,8 +54,10 @@ class LinkedDropdown(Dropdown):
         self._choices, self._labels = get_choices(self.state, self.attribute_name)
         value = self.value
         self.options = list(zip(self._labels, self._choices))
-        if value is not None:
+        if value is not None and any(value is choice for choice in self._choices):
             self.value = value
+        else:
+            self.value = None
 
     @avoid_circular
     def _update_glue_state_from_ui(self, change):
