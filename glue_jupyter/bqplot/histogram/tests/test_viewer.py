@@ -17,5 +17,8 @@ def test_remove(app, dataxz, dataxyz):
     s = app.histogram1d(data=dataxyz)
     s.add_data(dataxz)
     app.data_collection.new_subset_group(subset_state=dataxz.id['x'] > 1, label='test')
+    assert len(s.figure.marks) == 4
     s.remove_data(dataxyz)
+    assert len(s.figure.marks) == 2
     s.remove_data(dataxz)
+    assert len(s.figure.marks) == 0

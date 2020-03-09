@@ -85,6 +85,15 @@ class BqplotScatterLayerArtist(LayerArtist):
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
         dlink((self.state, 'vector_visible'), (self.quiver, 'visible'))
 
+    def remove(self):
+        self.view.figure.marks.remove(self.image)
+        self.image = None
+        self.view.figure.marks.remove(self.scatter)
+        self.scatter = None
+        self.view.figure.marks.remove(self.quiver)
+        self.quiver = None
+        return super().remove()
+
     def _update_xy_att(self, *args):
         self.update()
 
@@ -149,8 +158,11 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def update(self):
 
-        if (self._viewer_state.x_att is None or
-            self._viewer_state.y_att is None or
+        if (self.image is None or
+                self.scatter is None or
+                self.quiver is None or
+                self._viewer_state.x_att is None or
+                self._viewer_state.y_att is None or
                 self.state.layer is None):
             return
 
@@ -229,7 +241,3 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter.size = None
             self.scale_size.min = 0
             self.scale_size.max = 1
-
-    def remove(self):
-        print("REMOVE")
-        return super().remove()

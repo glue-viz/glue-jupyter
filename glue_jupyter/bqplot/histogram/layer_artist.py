@@ -35,6 +35,11 @@ class BqplotHistogramLayerArtist(LayerArtist):
 
         link((self.state, 'visible'), (self.bars, 'visible'))
 
+    def remove(self):
+        self.view.figure.marks.remove(self.bars)
+        self.bars = None
+        return super().remove()
+
     def _update_xy_att(self, *args):
         self.update()
 
@@ -111,7 +116,8 @@ class BqplotHistogramLayerArtist(LayerArtist):
 
         # TODO: comes from glue/viewers/histogram/layer_artist.py
 
-        if (self._viewer_state.hist_x_min is None or
+        if (self.bars is None or
+                self._viewer_state.hist_x_min is None or
                 self._viewer_state.hist_x_max is None or
                 self._viewer_state.hist_n_bin is None or
                 self._viewer_state.x_att is None or
