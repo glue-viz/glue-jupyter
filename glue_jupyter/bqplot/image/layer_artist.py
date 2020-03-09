@@ -22,8 +22,8 @@ class BqplotImageLayerArtist(ImageLayerArtist):
     # remove them.
 
     def remove(self):
-        self.uuid = None
         super().remove()
+        self.uuid = None
 
     def _update_image(self, *args, **kwargs):
         if self.uuid is None:
