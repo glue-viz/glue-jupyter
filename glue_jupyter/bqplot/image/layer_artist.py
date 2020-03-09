@@ -48,7 +48,7 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
 
     def _update_image(self, force=False, **kwargs):
 
-        if self.state.layer is None:
+        if self.subset_array is None or self.state.layer is None:
             return
 
         changed = set() if force else self.pop_changed_properties()
@@ -66,6 +66,7 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         self.image_artist.invalidate_cache()
         ARRAY_CACHE.pop(self.state.uuid, None)
         PIXEL_CACHE.pop(self.state.uuid, None)
+        self.subset_array = None
 
     def enable(self, redraw=True):
         if self.enabled:

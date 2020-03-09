@@ -16,5 +16,6 @@ def test_non_hex_colors(app, data_image):
 def test_remove(app, data_image, data_volume):
     s = app.imshow(data=data_image)
     s.add_data(data_volume)
+    app.data_collection.new_subset_group(subset_state=data_image.id['intensity'] > 1, label='test')
     s.remove_data(data_image)
     s.remove_data(data_volume)
