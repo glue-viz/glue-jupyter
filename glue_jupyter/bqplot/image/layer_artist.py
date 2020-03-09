@@ -16,6 +16,32 @@ class BqplotImageLayerArtist(ImageLayerArtist):
     def redraw(self):
         pass
 
+    # The following four methods are a patch for an issue that is fixed
+    # in glue-core with https://github.com/glue-viz/glue/pull/2099.
+    # Once glue v0.16 is the minimum dependency of glue-jupyter we can
+    # remove them.
+
+    def remove(self):
+        self.uuid = None
+        super().remove()
+
+    def _update_image(self, *args, **kwargs):
+        if self.uuid is None:
+            return
+        super()._update_image(*args, **kwargs)
+
+    def get_image_shape(self, *args, **kwargs):
+        if self.uuid is None:
+            return None
+        else:
+            return super().get_image_shape(*args, **kwargs)
+
+    def get_image_data(self, *args, **kwargs):
+        if self.uuid is None:
+            return None
+        else:
+            return super().get_image_data(*args, **kwargs)
+
 
 class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
 
