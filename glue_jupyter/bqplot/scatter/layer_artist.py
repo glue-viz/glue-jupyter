@@ -149,6 +149,11 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def update(self):
 
+        if (self._viewer_state.x_att is None or
+            self._viewer_state.y_att is None or
+                self.state.layer is None):
+            return
+
         if self.state.density_map:
             pass
         else:
@@ -224,3 +229,7 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter.size = None
             self.scale_size.min = 0
             self.scale_size.max = 1
+
+    def remove(self):
+        print("REMOVE")
+        return super().remove()
