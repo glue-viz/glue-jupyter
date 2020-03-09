@@ -11,3 +11,10 @@ def test_non_hex_colors(app, dataxyz):
     viewer.layer_options._layer_dropdown.value = viewer.layers[1]
     dataxyz.subsets[0].style.color = '0.5'
     dataxyz.subsets[0].style.color = 'purple'
+
+
+def test_remove(app, dataxz, dataxyz):
+    s = app.histogram1d(data=dataxyz)
+    s.add_data(dataxz)
+    s.remove_data(dataxyz)
+    s.remove_data(dataxz)

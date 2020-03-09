@@ -11,3 +11,10 @@ def test_non_hex_colors(app, data_image):
     viewer.layer_options._layer_dropdown.value = viewer.layers[1]
     data_image.subsets[0].style.color = '0.5'
     data_image.subsets[0].style.color = 'purple'
+
+
+def test_remove(app, data_image, data_volume):
+    s = app.imshow(data=data_image)
+    s.add_data(data_volume)
+    s.remove_data(data_image)
+    s.remove_data(data_volume)
