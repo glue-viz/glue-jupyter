@@ -36,8 +36,10 @@ class BqplotHistogramLayerArtist(LayerArtist):
         link((self.state, 'visible'), (self.bars, 'visible'))
 
     def remove(self):
-        self.view.figure.marks.remove(self.bars)
+        marks = self.view.figure.marks[:]
+        marks.remove(self.bars)
         self.bars = None
+        self.view.figure.marks = marks
         return super().remove()
 
     def _update_xy_att(self, *args):

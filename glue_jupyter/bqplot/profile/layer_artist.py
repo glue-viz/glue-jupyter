@@ -45,8 +45,10 @@ class BqplotProfileLayerArtist(LayerArtist):
         self.line_mark.opacities = [self.state.alpha]
 
     def remove(self):
-        self.view.figure.marks.remove(self.line_mark)
+        marks = self.view.figure.marks[:]
+        marks.remove(self.line_mark)
         self.line_mark = None
+        self.view.figure.marks = marks
         return super().remove()
 
     def _calculate_profile(self, reset=False):

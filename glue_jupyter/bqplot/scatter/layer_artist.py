@@ -86,12 +86,14 @@ class BqplotScatterLayerArtist(LayerArtist):
         dlink((self.state, 'vector_visible'), (self.quiver, 'visible'))
 
     def remove(self):
-        self.view.figure.marks.remove(self.image)
+        marks = self.view.figure.marks[:]
+        marks.remove(self.image)
         self.image = None
-        self.view.figure.marks.remove(self.scatter)
+        marks.remove(self.scatter)
         self.scatter = None
-        self.view.figure.marks.remove(self.quiver)
+        marks.remove(self.quiver)
         self.quiver = None
+        self.view.figure.marks = marks
         return super().remove()
 
     def _update_xy_att(self, *args):
