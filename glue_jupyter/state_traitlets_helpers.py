@@ -1,6 +1,7 @@
 import json
 from functools import partial
 import traitlets
+from traitlets.utils.bunch import Bunch
 from glue.core.state_objects import State
 from glue.core import Data, Subset, ComponentID
 
@@ -40,9 +41,9 @@ class GlueState(traitlets.Any):
         state.add_global_callback(partial(self.on_state_change, obj=obj))
 
     def on_state_change(self, *args, obj=None, **kwargs):
-        obj.notify_change({'name': self.name,
-                           'type': 'change',
-                           'value': self.get(obj)})
+        obj.notify_change(Bunch({'name': self.name,
+                                 'type': 'change',
+                                 'value': self.get(obj)}))
 
     # NOTE: the following two methods are implemented as methods on the trait
     # because we need update_state_from_json to have an unambiguous reference
