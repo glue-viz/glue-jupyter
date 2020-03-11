@@ -1,5 +1,6 @@
 import ipyvuetify as v
 import traitlets
+from ...state_traitlets_helpers import GlueState
 from ...vuetify_helpers import load_template, link_glue
 from ...widgets.linked_dropdown import get_choices
 
@@ -13,9 +14,12 @@ class HistogramViewerStateWidget(v.VuetifyTemplate):
     normalize = traitlets.Bool().tag(sync=True)
     cumulative = traitlets.Bool().tag(sync=True)
     show_axes = traitlets.Bool().tag(sync=True)
+    glue_state = GlueState().tag(sync=True)
 
     def __init__(self, viewer_state):
         super().__init__()
+
+        self.glue_state = viewer_state
 
         def update_choices(*args):
             self.x_axis = get_choices(viewer_state, 'x_att')[1]

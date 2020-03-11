@@ -33,13 +33,17 @@
     module.exports = {
         computed: {
             modeSet() {
-                return [this.normalize && 'normalize', this.cumulative && 'cumulative']
+                // return [this.normalize && 'normalize', this.cumulative && 'cumulative']
+                return [this.glue_state.normalize && 'normalize', this.glue_state.cumulative && 'cumulative']
             }
         },
         methods: {
             modeSetChange(v) {
-                this.normalize = v.includes('normalize');
-                this.cumulative = v.includes('cumulative');
+                // this.normalize = v.includes('normalize');
+                // this.cumulative = v.includes('cumulative');
+                this.glue_state.normalize = v.includes('normalize');
+                this.glue_state.cumulative = v.includes('cumulative');
+                console.log('glue', this.glue_state);
             }
         }
     }
