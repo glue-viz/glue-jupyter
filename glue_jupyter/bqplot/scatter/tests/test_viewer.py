@@ -34,3 +34,14 @@ def test_non_hex_colors(app, dataxyz):
     viewer.layer_options._layer_dropdown.value = viewer.layers[1]
     dataxyz.subsets[0].style.color = '0.5'
     dataxyz.subsets[0].style.color = 'purple'
+
+
+def test_remove(app, dataxz, dataxyz):
+    s = app.scatter2d(data=dataxyz)
+    s.add_data(dataxz)
+    app.data_collection.new_subset_group(subset_state=dataxz.id['x'] > 1, label='test')
+    assert len(s.figure.marks) == 12
+    s.remove_data(dataxyz)
+    assert len(s.figure.marks) == 6
+    s.remove_data(dataxz)
+    assert len(s.figure.marks) == 0

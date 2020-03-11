@@ -11,6 +11,8 @@ from ...utils import debounced
 
 __all__ = ['FRBImage']
 
+EMPTY_IMAGE = np.zeros((10, 10, 4), dtype=np.uint8)
+
 
 class FRBImage(ImageGL):
 
@@ -24,7 +26,7 @@ class FRBImage(ImageGL):
                        'y': self.viewer.scale_y,
                        'image': self.scale_image}
 
-        super().__init__(image=np.zeros((10, 10, 4), dtype=np.uint8), scales=self.scales)
+        super().__init__(image=EMPTY_IMAGE, scales=self.scales)
 
         self.array_maker = array_maker
 
@@ -67,6 +69,8 @@ class FRBImage(ImageGL):
                 self.image = image
                 self.x = (xmin, xmax)
                 self.y = (ymin, ymax)
+        else:
+            self.image = EMPTY_IMAGE
 
     def invalidate_cache(self):
         self.update()

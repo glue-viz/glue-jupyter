@@ -85,6 +85,17 @@ class BqplotScatterLayerArtist(LayerArtist):
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
         dlink((self.state, 'vector_visible'), (self.quiver, 'visible'))
 
+    def remove(self):
+        marks = self.view.figure.marks[:]
+        marks.remove(self.image)
+        self.image = None
+        marks.remove(self.scatter)
+        self.scatter = None
+        marks.remove(self.quiver)
+        self.quiver = None
+        self.view.figure.marks = marks
+        return super().remove()
+
     def _update_xy_att(self, *args):
         self.update()
 
@@ -148,6 +159,14 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.update()
 
     def update(self):
+
+        if (self.image is None or
+                self.scatter is None or
+                self.quiver is None or
+                self._viewer_state.x_att is None or
+                self._viewer_state.y_att is None or
+                self.state.layer is None):
+            return
 
         if self.state.density_map:
             pass

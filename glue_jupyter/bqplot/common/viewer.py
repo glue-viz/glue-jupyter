@@ -24,6 +24,11 @@ class BqplotBaseView(IPyWidgetView):
 
         super(BqplotBaseView, self).__init__(session, state=state)
 
+        # Remove the following two lines once glue v0.16 is required - see
+        # https://github.com/glue-viz/glue/pull/2099/files for more information.
+        self.state.remove_callback('layers', self._sync_layer_artist_container)
+        self.state.add_callback('layers', self._sync_layer_artist_container, priority=10000)
+
         self.scales = {'x': self.scale_x, 'y': self.scale_y}
         self.axis_x = bqplot.Axis(
             scale=self.scale_x, grid_lines='none', label='x')

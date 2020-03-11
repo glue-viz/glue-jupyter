@@ -16,6 +16,32 @@ class BqplotImageLayerArtist(ImageLayerArtist):
     def redraw(self):
         pass
 
+    # The following four methods are a patch for an issue that is fixed
+    # in glue-core with https://github.com/glue-viz/glue/pull/2099.
+    # Once glue v0.16 is the minimum dependency of glue-jupyter we can
+    # remove them.
+
+    def remove(self):
+        super().remove()
+        self.uuid = None
+
+    def _update_image(self, *args, **kwargs):
+        if self.uuid is None:
+            return
+        super()._update_image(*args, **kwargs)
+
+    def get_image_shape(self, *args, **kwargs):
+        if self.uuid is None:
+            return None
+        else:
+            return super().get_image_shape(*args, **kwargs)
+
+    def get_image_data(self, *args, **kwargs):
+        if self.uuid is None:
+            return None
+        else:
+            return super().get_image_data(*args, **kwargs)
+
 
 class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
 
@@ -48,7 +74,7 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
 
     def _update_image(self, force=False, **kwargs):
 
-        if self.state.layer is None:
+        if self.subset_array is None or self.state.layer is None:
             return
 
         changed = set() if force else self.pop_changed_properties()
@@ -66,6 +92,11 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         self.image_artist.invalidate_cache()
         ARRAY_CACHE.pop(self.state.uuid, None)
         PIXEL_CACHE.pop(self.state.uuid, None)
+        self.subset_array = None
+        marks = self.view.figure.marks[:]
+        marks.remove(self.image_artist)
+        self.image_artist = None
+        self.view.figure.marks = marks
 
     def enable(self, redraw=True):
         if self.enabled:

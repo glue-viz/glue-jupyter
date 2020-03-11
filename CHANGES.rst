@@ -10,6 +10,9 @@
 * Fixed a bug that caused profiles of subsets to not be hidden if an
   existing subset was emptied. [#162]
 
+* Fixed a bug that caused exceptions when trying to remove data from
+  bqplot viewers. [#166]
+
 0.1 (2020-01-08)
 ================
 

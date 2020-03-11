@@ -44,6 +44,13 @@ class BqplotProfileLayerArtist(LayerArtist):
         self.line_mark.colors = [color2hex(self.state.color)]
         self.line_mark.opacities = [self.state.alpha]
 
+    def remove(self):
+        marks = self.view.figure.marks[:]
+        marks.remove(self.line_mark)
+        self.line_mark = None
+        self.view.figure.marks = marks
+        return super().remove()
+
     def _calculate_profile(self, reset=False):
         try:
             self._calculate_profile_thread(reset=reset)
@@ -142,7 +149,8 @@ class BqplotProfileLayerArtist(LayerArtist):
 
         # TODO: we need to factor the following code into a common method.
 
-        if (self._viewer_state.x_att is None or
+        if (self.line_mark is None or
+                self._viewer_state.x_att is None or
                 self.state.attribute is None or
                 self.state.layer is None):
             return
