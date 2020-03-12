@@ -38,24 +38,26 @@ def test_to_json():
     widget = Widget1()
     assert widget.latest_json is None
     widget.state = CustomState()
-    assert widget.latest_json == r'{"a": 1, "b": 2, "sub": []}'
+    assert widget.latest_json == {"a": 1, "b": 2, "sub": {}}
     widget.state.sub.append(CustomSubState())
-    assert widget.latest_json == r'{"a": 1, "b": 2, "sub": [{"c": 3}]}'
+    assert widget.latest_json == {"a": 1, "b": 2, "sub": {'0': {"c": 3}}}
     widget.state.sub[0].c = 4
-    assert widget.latest_json == r'{"a": 1, "b": 2, "sub": [{"c": 4}]}'
+    assert widget.latest_json == {"a": 1, "b": 2, "sub": {'0': {"c": 4}}}
     widget.state.b = 5
-    assert widget.latest_json == r'{"a": 1, "b": 5, "sub": [{"c": 4}]}'
+    assert widget.latest_json == {"a": 1, "b": 5, "sub": {'0': {"c": 4}}}
 
 
 def test_from_json():
     widget = Widget1()
     widget.state = CustomState()
     widget.state.sub.append(CustomSubState())
-    assert widget.latest_json == r'{"a": 1, "b": 2, "sub": [{"c": 3}]}'
+    assert widget.latest_json == {"a": 1, "b": 2, "sub": {'0': {"c": 3}}}
     widget.set_state_from_json({"a": 3})
-    assert widget.latest_json == r'{"a": 3, "b": 2, "sub": [{"c": 3}]}'
-    widget.set_state_from_json({"sub": [{"c": 2}]})
-    assert widget.latest_json == r'{"a": 3, "b": 2, "sub": [{"c": 2}]}'
+    assert widget.state.a == 3
+    assert widget.latest_json == {"a": 3, "b": 2, "sub": {'0': {"c": 3}}}
+    widget.set_state_from_json({"sub": {0: {"c": 2}}})
+    assert widget.state.sub[0].c == 2
+    assert widget.latest_json == {"a": 3, "b": 2, "sub": {'0': {"c": 2}}}
 
 
 def test_to_json_data():
@@ -63,4 +65,6 @@ def test_to_json_data():
     widget = Widget1()
     widget.state = CustomState()
     widget.state.a = Data(label='test')
-    assert widget.latest_json == r'{"a": "test", "b": 2, "sub": []}'
+    assert widget.latest_json == {"a": "611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4",
+                                  "b": 2,
+                                  "sub": {}}
