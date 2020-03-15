@@ -99,11 +99,10 @@ class GlueState(traitlets.Any):
     # inheriting from GlueState rather than overwriting the tag.
 
     def convert_state_to_json(self, state, widget):
-        import json as js
         if state is None:
             return {}
         else:
-            return js.loads(json.dumps(state_to_dict(state), cls=GlueStateJSONEncoder))
+            return json.loads(json.dumps(state_to_dict(state), cls=GlueStateJSONEncoder))
 
     def update_state_from_json(self, json, widget):
         state = getattr(widget, self.name)

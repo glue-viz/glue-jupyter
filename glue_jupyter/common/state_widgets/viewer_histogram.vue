@@ -26,24 +26,20 @@
             </v-btn-toggle>
         </div>
 
-        <v-switch v-model="show_axes" label="Show axes" hide-details/>
+        <v-switch v-model="glue_state.show_axes" label="Show axes" hide-details/>
     </div>
 </template>
 <script>
     module.exports = {
         computed: {
             modeSet() {
-                // return [this.normalize && 'normalize', this.cumulative && 'cumulative']
                 return [this.glue_state.normalize && 'normalize', this.glue_state.cumulative && 'cumulative']
             }
         },
         methods: {
             modeSetChange(v) {
-                // this.normalize = v.includes('normalize');
-                // this.cumulative = v.includes('cumulative');
                 this.glue_state.normalize = v.includes('normalize');
                 this.glue_state.cumulative = v.includes('cumulative');
-                console.log('glue', this.glue_state);
             }
         }
     }
