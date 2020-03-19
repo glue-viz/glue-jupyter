@@ -37,19 +37,19 @@ jobs:
       libraries: {}
       coverage: 'false'
 
-    - linux: py36-test-devdeps
-    - linux: py37-test-devdeps
+    - linux: py36-test
+    - linux: py37-test
 
-    - macos: py36-test-devdeps
-    - macos: py37-test-devdeps
+    - macos: py36-test
+    - macos: py37-test
 
-    - windows: py36-test-devdeps
-    - windows: py37-test-devdeps
+    - windows: py36-test
+    - windows: py37-test
 
-    - linux: py37-notebooks-devdeps
-    - macos: py37-notebooks-devdeps
-    - windows: py36-notebooks-devdeps
+    - linux: py37-notebooks
+    - macos: py37-notebooks
+    - windows: py36-notebooks
 
-    - linux: py37-docs-devdeps
-    - macos: py37-docs-devdeps
-    - windows: py36-docs-devdeps
+    - linux: py37-docs
+    - macos: py37-docs
+    - windows: py36-docs
