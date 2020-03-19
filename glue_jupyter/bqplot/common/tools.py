@@ -97,11 +97,13 @@ class BqplotCircleMode(InteractCheckableTool):
                 yc = y.mean()
                 rx = abs(x[1] - x[0])/2
                 ry = abs(y[1] - y[0])/2
+                print(rx, ry)
                 if np.allclose(rx, ry):
                     roi = CircularROI(xc=xc, yc=yc, radius=rx)
                 else:
                     roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
                 self.viewer.apply_roi(roi)
+                print(roi)
 
 
 @viewer_tool
