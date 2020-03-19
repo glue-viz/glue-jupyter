@@ -1,7 +1,7 @@
 <template>
     <div>
         <div>
-            <v-select :items="x_axis" label="x axis" v-model="selected_axes"/>
+            <v-select :items="x_att_items" label="x axis" v-model="x_att_selected"/>
         </div>
         <div>
             <v-btn-toggle dense multiple :value="modeSet" @change="modeSetChange">
