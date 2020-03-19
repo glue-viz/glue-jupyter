@@ -1,6 +1,8 @@
 0.2 (unreleased)
 ================
 
+* De-select selection tools after a selection has been made. [#164]
+
 * Removed ipymaterialui widgets and fix cases where these widgets were
   used over ipyvuetify widgets. [#143]
 
