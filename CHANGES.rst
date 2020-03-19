@@ -13,6 +13,8 @@
 * Fixed a bug that caused exceptions when trying to remove data from
   bqplot viewers. [#166]
 
+- Added circular selection to scatter and image viewer. [#165]
+
 0.1 (2020-01-08)
 ================
 
