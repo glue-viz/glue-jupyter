@@ -7,6 +7,7 @@ from glue.viewers.common.tool import CheckableTool
 __all__ = []
 
 ICON_WIDTH = 20
+INTERACT_COLOR = '#cbcbcb'
 
 
 class InteractCheckableTool(CheckableTool):
@@ -51,7 +52,7 @@ class BqplotRectangleMode(InteractCheckableTool):
 
         self.interact = BrushSelector(x_scale=self.viewer.scale_x,
                                       y_scale=self.viewer.scale_y,
-                                      color="green")
+                                      color=INTERACT_COLOR)
 
         self.interact.observe(self.update_selection, "brushing")
 
@@ -62,6 +63,7 @@ class BqplotRectangleMode(InteractCheckableTool):
                 y = self.interact.selected_y
                 roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
                 self.viewer.apply_roi(roi)
+                self.viewer.toolbar.active_tool = None
 
 
 @viewer_tool
@@ -77,7 +79,7 @@ class BqplotXRangeMode(InteractCheckableTool):
         super().__init__(viewer, **kwargs)
 
         self.interact = BrushIntervalSelector(scale=self.viewer.scale_x,
-                                              color="green")
+                                              color=INTERACT_COLOR)
 
         self.interact.observe(self.update_selection, "brushing")
 
@@ -88,6 +90,7 @@ class BqplotXRangeMode(InteractCheckableTool):
                 if x is not None and len(x):
                     roi = RangeROI(min=min(x), max=max(x), orientation='x')
                     self.viewer.apply_roi(roi)
+                    self.viewer.toolbar.active_tool = None
 
 
 @viewer_tool
@@ -104,7 +107,7 @@ class BqplotYRangeMode(InteractCheckableTool):
 
         self.interact = BrushIntervalSelector(scale=self.viewer.scale_y,
                                               orientation='vertical',
-                                              color="green")
+                                              color=INTERACT_COLOR)
 
         self.interact.observe(self.update_selection, "brushing")
 
@@ -115,3 +118,4 @@ class BqplotYRangeMode(InteractCheckableTool):
                 if y is not None and len(y):
                     roi = RangeROI(min=min(y), max=max(y), orientation='y')
                     self.viewer.apply_roi(roi)
+                    self.viewer.toolbar.active_tool = None
