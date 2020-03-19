@@ -22,4 +22,5 @@ class BqplotScatterView(BqplotBaseView):
     _subset_artist_cls = BqplotScatterLayerArtist
     _layer_style_widget_cls = ScatterLayerStateWidget
 
-    tools = ['bqplot:panzoom', 'bqplot:rectangle', 'bqplot:xrange', 'bqplot:yrange']
+    tools = ['bqplot:panzoom', 'bqplot:rectangle', 'bqplot:circle',
+             'bqplot:xrange', 'bqplot:yrange']

@@ -1,7 +1,9 @@
 import os
 import nbformat
 import numpy as np
+from numpy.testing import assert_allclose
 from nbconvert.preprocessors import ExecutePreprocessor
+from glue.core.roi import EllipticalROI
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -182,6 +184,29 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     s.toolbar.active_tool = tool2d
     assert s.layers[1].scatter.selected == [2]
 
+    # 2d brushing
+    # format of 'selected' (x1, y1), (x2, y2)
+    tool_circle = s.toolbar.tools['bqplot:circle']
+    tool_circle.activate()
+    tool_circle.interact.brushing = True
+    tool_circle.interact.selected = [(2.5, 2.5), (3.5, 4.5)]
+    tool_circle.interact.brushing = False
+
+    assert len(s.layers) == 2
+    assert s.layers[1].layer['x'].tolist() == [3]
+    assert s.layers[1].layer['y'].tolist() == [4]
+    assert s.layers[1].layer['z'].tolist() == [7]
+
+    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
+    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
+    assert s.layers[1].scatter.selected == [2]
+
+    # nothing should change when we change modes
+    s.toolbar.active_tool = tool1d
+    assert s.layers[1].scatter.selected == [2]
+    s.toolbar.active_tool = tool_circle
+    assert s.layers[1].scatter.selected == [2]
+
 
 def test_scatter2d_properties(app, dataxyz, dataxz):
     s = app.scatter2d(x='x', y='y', data=dataxyz)
@@ -234,6 +259,25 @@ def test_imshow(app, data_image, dataxyz):
     tool.interact.brushing = False
 
     assert len(v.layers) == 4
+
+
+def test_imshow_circular_brush(app, data_image):
+
+    v = app.imshow(data=data_image)
+    v.state.aspect = 'auto'
+
+    tool = v.toolbar.tools['bqplot:circle']
+    tool.activate()
+    tool.interact.brushing = True
+    tool.interact.selected = [(1.5, 3.5), (300.5, 550)]
+    tool.interact.brushing = False
+
+    roi = data_image.subsets[0].subset_state.roi
+    assert isinstance(roi, EllipticalROI)
+    assert_allclose(roi.xc, 151.00)
+    assert_allclose(roi.yc, 276.75)
+    assert_allclose(roi.radius_x, 149.5)
+    assert_allclose(roi.radius_y, 273.25)
 
 
 def test_imshow_equal_aspect(app, data_image):
