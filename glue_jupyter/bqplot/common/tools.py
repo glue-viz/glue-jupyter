@@ -89,7 +89,8 @@ class BqplotCircleMode(InteractCheckableTool):
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
                 y = self.interact.selected_y
-                # similar to https://github.com/glue-viz/glue/blob/b14ccffac6a5271c2869ead9a562a2e66232e397/glue/core/roi.py#L1275-L1297
+                # similar to https://github.com/glue-viz/glue/blob/b14ccffac6a5
+                # 271c2869ead9a562a2e66232e397/glue/core/roi.py#L1275-L1297
                 # We should now check if the radius in data coordinates is the same
                 # along x and y, as if so then we can return a circle, otherwise we
                 # should return an ellipse.
