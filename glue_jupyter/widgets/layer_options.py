@@ -18,6 +18,7 @@ class LayerOptionsWidget(v.VuetifyTemplate):
     template = load_template('layeroptions.vue', __file__)
     layers = traitlets.List().tag(sync=True, **widgets.widget_serialization)
     selected = traitlets.Int(0).tag(sync=True)
+    color_menu_open = traitlets.Bool(False).tag(sync=True)
 
     def __init__(self, viewer):
         super().__init__()
