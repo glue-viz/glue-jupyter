@@ -10,7 +10,7 @@
                     hide-details
             >
                 <template slot="selection" slot-scope="data">
-                    <div>
+                    <div class="single-line">
                         <v-menu>
                             <template v-slot:activator="{ on }">
                                 <span class="glue-color-menu"
@@ -28,7 +28,7 @@
                     </div>
                 </template>
                 <template slot="item" slot-scope="data">
-                    <div>
+                    <div class="single-line">
                         <span class="glue-color-menu"
                               :style=`background:${data.item.color}`
                         >&nbsp;</span>
@@ -51,5 +51,11 @@
         font-size: 16px;
         padding-left: 16px;
         border: 2px solid rgba(0,0,0,0.54);
+    }
+
+    .single-line {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 </style>
