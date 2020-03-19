@@ -9,6 +9,7 @@ __all__ = []
 ICON_WIDTH = 20
 INTERACT_COLOR = '#cbcbcb'
 
+
 class InteractCheckableTool(CheckableTool):
 
     def __init__(self, viewer):
