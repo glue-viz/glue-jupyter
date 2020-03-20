@@ -61,23 +61,26 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
         self.edit_subset_mode = session.edit_subset_mode
         self.data_collection = session.data_collection
 
-        def sync_selected_from_state():
-            self.selected = [self.data_collection.subset_groups.index(subset) for subset
-                             in self.edit_subset_mode.edit_subset]
-
-        def sync_available_from_state():
-            self.available = [subset_to_dict(subset) for subset in
-                              self.data_collection.subset_groups]
 
         # state change events from glue come in from the hub
         session.hub.subscribe(self, msg.EditSubsetMessage,
-                              handler=lambda _: sync_selected_from_state())
+                              handler=lambda _: self._sync_selected_from_state())
         session.hub.subscribe(self, msg.SubsetCreateMessage,
-                              handler=lambda _: sync_available_from_state())
+                              handler=lambda _: self._sync_available_from_state())
+        session.hub.subscribe(self, msg.SubsetDeleteMessage,
+                              handler=lambda _: self._sync_available_from_state())
 
         # manually trigger to set up the initial state
-        sync_selected_from_state()
-        sync_available_from_state()
+        self._sync_selected_from_state()
+        self._sync_available_from_state()
+
+    def _sync_selected_from_state(self):
+        self.selected = [self.data_collection.subset_groups.index(subset) for subset
+                         in self.edit_subset_mode.edit_subset]
+
+    def _sync_available_from_state(self):
+        self.available = [subset_to_dict(subset) for subset in
+                          self.data_collection.subset_groups]
 
     @traitlets.observe('selected')
     def _sync_selected_from_ui(self, change):
@@ -93,4 +96,4 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
                     self.selected = self.selected[:1]
 
     def vue_remove_subset(self, index):
-        print(f'remove: {index}')
+        self.data_collection.remove_subset_group(self.data_collection.subset_groups[index])
