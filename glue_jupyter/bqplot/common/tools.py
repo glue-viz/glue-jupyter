@@ -81,7 +81,8 @@ class BqplotCircleMode(InteractCheckableTool):
 
         self.interact = BrushEllipseSelector(x_scale=self.viewer.scale_x,
                                              y_scale=self.viewer.scale_y,
-                                             pixel_aspect=1)
+                                             pixel_aspect=1,
+                                             color=INTERACT_COLOR)
 
         self.interact.observe(self.update_selection, "brushing")
 
