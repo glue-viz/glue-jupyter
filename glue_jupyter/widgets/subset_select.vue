@@ -42,7 +42,12 @@
                     <v-icon :color="subset.color">signal_cellular_4_bar</v-icon>
                 </v-list-item-icon>
                 <v-list-item-content>
-                    <v-list-item-title>{{ subset.label }}</v-list-item-title>
+                    <v-list-item-title>
+                        {{ subset.label }}
+                        <v-btn icon @click.stop="remove_subset(index)">
+                            <v-icon>mdi-delete</v-icon>
+                        </v-btn>
+                    </v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
 

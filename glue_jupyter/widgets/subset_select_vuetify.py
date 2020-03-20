@@ -91,3 +91,6 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
                 if len(self.selected) > 1:
                     # take the first item of the selected items as the single selected item
                     self.selected = self.selected[:1]
+
+    def vue_remove_subset(self, index):
+        print(f'remove: {index}')
