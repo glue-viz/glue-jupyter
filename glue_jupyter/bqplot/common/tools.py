@@ -65,7 +65,6 @@ class BqplotRectangleMode(InteractCheckableTool):
                 y = self.interact.selected_y
                 roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
                 self.viewer.apply_roi(roi)
-                self.viewer.toolbar.active_tool = None
 
 
 @viewer_tool
@@ -105,7 +104,6 @@ class BqplotCircleMode(InteractCheckableTool):
                 else:
                     roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
                 self.viewer.apply_roi(roi)
-                self.viewer.toolbar.active_tool = None
 
 
 @viewer_tool
@@ -132,7 +130,6 @@ class BqplotXRangeMode(InteractCheckableTool):
                 if x is not None and len(x):
                     roi = RangeROI(min=min(x), max=max(x), orientation='x')
                     self.viewer.apply_roi(roi)
-                    self.viewer.toolbar.active_tool = None
 
 
 @viewer_tool
@@ -160,4 +157,3 @@ class BqplotYRangeMode(InteractCheckableTool):
                 if y is not None and len(y):
                     roi = RangeROI(min=min(y), max=max(y), orientation='y')
                     self.viewer.apply_roi(roi)
-                    self.viewer.toolbar.active_tool = None
