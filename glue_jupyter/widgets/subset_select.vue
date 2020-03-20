@@ -44,7 +44,7 @@
                 <v-list-item-content>
                     <v-list-item-title>
                         {{ subset.label }}
-                        <v-btn icon @click.stop="remove_subset(index)">
+                        <v-btn icon @click="remove_subset(index)">
                             <v-icon>mdi-delete</v-icon>
                         </v-btn>
                     </v-list-item-title>
