@@ -61,7 +61,6 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
         self.edit_subset_mode = session.edit_subset_mode
         self.data_collection = session.data_collection
 
-
         # state change events from glue come in from the hub
         session.hub.subscribe(self, msg.EditSubsetMessage,
                               handler=lambda _: self._sync_selected_from_state())
