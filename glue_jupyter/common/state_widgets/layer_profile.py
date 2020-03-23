@@ -1,45 +1,26 @@
-from ipywidgets import Checkbox, ColorPicker, VBox, IntText, FloatText
-
-from glue.utils import color2hex
-
-from ...widgets import LinkedDropdown
-from ...link import link
+from ipyvuetify import VuetifyTemplate
+import traitlets
+from ...state_traitlets_helpers import GlueState
+from ...vuetify_helpers import load_template, link_glue_choices
 
 __all__ = ['ProfileLayerStateWidget']
 
 
-class ProfileLayerStateWidget(VBox):
+class ProfileLayerStateWidget(VuetifyTemplate):
+    template = load_template('layer_profile.vue', __file__)
+
+    glue_state = GlueState().tag(sync=True)
+
+    attribute_items = traitlets.List().tag(sync=True)
+    attribute_selected = traitlets.Int().tag(sync=True)
+
+    percentile_items = traitlets.List().tag(sync=True)
+    percentile_selected = traitlets.Int().tag(sync=True)
 
     def __init__(self, layer_state):
+        super().__init__()
 
-        self.state = layer_state
+        self.glue_state = layer_state
 
-        self.widget_visible = Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (self.widget_visible, 'value'))
-
-        self.widget_color = ColorPicker(description='color')
-        link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
-
-        self.widget_linewidth = IntText(description='line width')
-        link((self.state, 'linewidth'), (self.widget_linewidth, 'value'))
-
-        self.widget_attribute = LinkedDropdown(self.state, 'attribute', label='attribute')
-
-        if self.state.v_min is None:
-            self.state.v_min = 0
-
-        self.widget_v_min = FloatText(description='vmin')
-        link((self.state, 'v_min'), (self.widget_v_min, 'value'))
-
-        if self.state.v_max is None:
-            self.state.v_max = 1
-
-        self.widget_v_max = FloatText(description='vmax')
-        link((self.state, 'v_max'), (self.widget_v_max, 'value'))
-
-        self.widget_percentile = LinkedDropdown(self.state, 'percentile', label='percentile')
-
-        super().__init__([self.widget_visible, self.widget_color,
-                          self.widget_linewidth, self.widget_attribute,
-                          self.widget_v_min, self.widget_v_max,
-                          self.widget_percentile])
+        link_glue_choices(self, layer_state, 'attribute')
+        link_glue_choices(self, layer_state, 'percentile')
