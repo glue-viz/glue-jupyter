@@ -6,6 +6,7 @@ from traitlets.utils.bunch import Bunch
 from glue.core.state_objects import State
 from glue.core import Data, Subset, ComponentID
 from glue.external.echo import CallbackList
+from matplotlib.colors import Colormap
 
 
 MAGIC_IGNORE = '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4'
@@ -62,6 +63,8 @@ class GlueStateJSONEncoder(json.JSONEncoder):
             return state_to_dict(obj)
         elif isinstance(obj, (Data, Subset, ComponentID)):
             return MAGIC_IGNORE
+        elif isinstance(obj, Colormap):
+            return obj.name
         return json.JSONEncoder.default(self, obj)
 
 
