@@ -1,49 +1,77 @@
-from ipywidgets import VBox, Checkbox
+from glue.viewers.image.state import AggregateSlice
+import ipyvuetify as v
+import traitlets
+from ...state_traitlets_helpers import GlueState
+from ...vuetify_helpers import load_template, link_glue_choices
 
-from ...link import link
-from ...widgets.linked_dropdown import LinkedDropdown
-from ...common.slice_helpers import MultiSliceWidgetHelper
 
 __all__ = ['ImageViewerStateWidget']
 
 
-class ImageViewerStateWidget(VBox):
+class ImageViewerStateWidget(v.VuetifyTemplate):
+    template = load_template('viewer_image.vue', __file__)
+
+    glue_state = GlueState().tag(sync=True)
+
+    color_mode_items = traitlets.List().tag(sync=True)
+    color_mode_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    reference_data_items = traitlets.List().tag(sync=True)
+    reference_data_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    x_att_world_items = traitlets.List().tag(sync=True)
+    x_att_world_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    y_att_world_items = traitlets.List().tag(sync=True)
+    y_att_world_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    sliders = traitlets.List().tag(sync=True)
 
     def __init__(self, viewer_state):
+        super().__init__()
 
-        self.state = viewer_state
-
-        # Set checkbox for showing/hiding axes
-
-        self.widget_show_axes = Checkbox(value=True, description="Show axes")
-        link((self.widget_show_axes, 'value'), (self.state, 'show_axes'))
+        self.viewer_state = viewer_state
+        self.glue_state = viewer_state
 
         # Set up dropdown for color mode
 
-        self.widget_color_mode = LinkedDropdown(self.state, 'color_mode', label='mode')
-
-        # Set up checkbox for aspect ratio
-
-        self.widgets_aspect = Checkbox(description='Equal aspect ratio')
-        aspect_mapping = {'equal': True, 'auto': False}
-        aspect_mapping_inverse = {True: 'equal', False: 'auto'}
-        link((self.state, 'aspect'), (self.widgets_aspect, 'value'),
-             lambda x: aspect_mapping[x], lambda x: aspect_mapping_inverse[x])
+        link_glue_choices(self, viewer_state, 'color_mode')
 
         # Set up dropdown for reference data
 
-        self.widget_reference_data = LinkedDropdown(self.state, 'reference_data', label='reference')
+        link_glue_choices(self, viewer_state, 'reference_data')
 
         # Set up dropdowns for main attributes
 
-        self.widget_axis_x = LinkedDropdown(self.state, 'x_att_world', label='x axis')
-        self.widget_axis_y = LinkedDropdown(self.state, 'y_att_world', label='y axis')
+        link_glue_choices(self, viewer_state, 'x_att_world')
+        link_glue_choices(self, viewer_state, 'y_att_world')
 
         # Set up sliders for remaining dimensions
 
-        self.sliders = VBox()
-        self.sliders_helper = MultiSliceWidgetHelper(self.state, self.sliders)
+        for prop in ['x_att', 'y_att', 'slices', 'reference_data']:
+            viewer_state.add_callback(prop, self._sync_sliders_from_state)
 
-        super().__init__([self.widget_color_mode, self.widget_reference_data,
-                          self.widgets_aspect, self.widget_axis_x,
-                          self.widget_axis_y, self.sliders, self.widget_show_axes])
+        self._sync_sliders_from_state()
+
+    def _sync_sliders_from_state(self, *not_used):
+        data = self.viewer_state.reference_data
+
+        if not data:
+            return
+
+        def used_on_axis(i):
+            return i in [self.viewer_state.x_att.axis, self.viewer_state.y_att.axis]
+
+        new_slices = []
+        for i in range(data.ndim):
+            if not used_on_axis(i) and isinstance(self.viewer_state.slices[i], AggregateSlice):
+                new_slices.append(self.viewer_state.slices[i].center)
+            else:
+                new_slices.append(self.viewer_state.slices[i])
+        self.viewer_state.slices = tuple(new_slices)
+
+        self.sliders = [{
+            'index': i,
+            'label': data.world_component_ids[i].label if data.coords else data.pixel_component_ids[i].label,
+            'max': data.shape[i]-1,
+        } for i in range(data.ndim) if not used_on_axis(i)]
