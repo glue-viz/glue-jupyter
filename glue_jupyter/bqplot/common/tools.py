@@ -282,7 +282,7 @@ class ROIClickAndDrag(InteractCheckableTool):
             if layer.visible and isinstance(subset_state, RoiSubsetState):
                 roi = subset_state.roi
                 if roi.contains(x, y):
-                    if isinstance(roi, EllipticalROI):
+                    if isinstance(roi, (EllipticalROI, CircularROI)):
                         self._active_tool = BqplotCircleMode(self.viewer, roi=roi,
                                                              finalize_callback=self.release)
                         self.viewer.figure.interaction = self._active_tool.interact
