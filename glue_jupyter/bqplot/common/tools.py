@@ -87,8 +87,16 @@ class BqplotCircleMode(InteractCheckableTool):
 
         self.interact = BrushEllipseSelector(x_scale=self.viewer.scale_x,
                                              y_scale=self.viewer.scale_y,
-                                             pixel_aspect=1,
-                                             color=INTERACT_COLOR)
+                                             pixel_aspect=1)
+
+        # Workaround for bug that causes the `color` trait to not be recognized
+        style = self.interact.style.copy()
+        style['fill'] = INTERACT_COLOR
+        border_style = self.interact.border_style.copy()
+        border_style['fill'] = INTERACT_COLOR
+        border_style['stroke'] = INTERACT_COLOR
+        self.interact.style = style
+        self.interact.border_style = border_style
 
         self.interact.observe(self.update_selection, "brushing")
 
