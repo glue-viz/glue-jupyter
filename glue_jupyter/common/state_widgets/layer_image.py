@@ -1,4 +1,4 @@
-from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox, Dropdown
+from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox
 from glue.config import colormaps
 from glue.utils import color2hex
 

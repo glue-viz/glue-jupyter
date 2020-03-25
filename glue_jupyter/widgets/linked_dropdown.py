@@ -97,7 +97,6 @@ class LinkedDropdown(Dropdown):
                     self.value = None
 
 
-
 class LinkedDropdownVuetify(v.Select):
     """
     A dropdown widget that is automatically linked to a SelectionCallbackProperty
@@ -131,7 +130,7 @@ class LinkedDropdownVuetify(v.Select):
         self._choice_id = {choice: ichoice for ichoice, choice in enumerate(self._choices)}
         value = self.v_model
         self.items = [{'text': label, 'value': self._choice_id[choice]}
-                       for (label, choice) in zip(self._labels, self._choices)]
+                      for (label, choice) in zip(self._labels, self._choices)]
         if value is not None:
             self.v_model = value
 

@@ -9,7 +9,7 @@ __all__ = ['HistogramViewerStateWidget']
 class HistogramViewerStateWidget(v.VuetifyTemplate):
     template = load_template('viewer_histogram.vue', __file__)
     x_att_items = traitlets.List().tag(sync=True)
-    x_att_selected = traitlets.Int().tag(sync=True)
+    x_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
     glue_state = GlueState().tag(sync=True)
 
     def __init__(self, viewer_state):

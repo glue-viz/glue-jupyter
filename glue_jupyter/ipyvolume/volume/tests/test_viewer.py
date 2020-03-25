@@ -8,6 +8,6 @@ def test_non_hex_colors(app, data_volume):
     data_volume.style.color = 'indigo'
 
     app.subset('test', data_volume.main_components[0] > 1)
-    viewer.layer_options._layer_dropdown.value = viewer.layers[1]
+    viewer.layer_options.selected = 1
     data_volume.subsets[0].style.color = '0.5'
     data_volume.subsets[0].style.color = 'purple'

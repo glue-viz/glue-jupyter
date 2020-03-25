@@ -9,8 +9,8 @@ def load_template(file_name, path=None):
         return traitlets.Unicode(f.read()).tag(sync=True)
 
 
-def link_glue(widget, widget_prop, state, glue_prop = None, from_glue_fn = lambda x: x,
-              to_glue_fn = lambda x:x):
+def link_glue(widget, widget_prop, state, glue_prop=None, from_glue_fn=lambda x: x,
+              to_glue_fn=lambda x: x):
 
     if not glue_prop:
         glue_prop = widget_prop
@@ -29,8 +29,8 @@ def link_glue(widget, widget_prop, state, glue_prop = None, from_glue_fn = lambd
 
 def link_glue_choices(widget, state, prop):
     """
-    Links the choices of state.prop to the traitlet widget.{prop}_items, the selected value to the traitlet
-    widget.{prop}_selected.
+    Links the choices of state.prop to the traitlet widget.{prop}_items, the
+    selected value to the traitlet widget.{prop}_selected.
     """
 
     def update_choices(*args):

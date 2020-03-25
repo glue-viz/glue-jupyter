@@ -72,6 +72,7 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
 
         self.sliders = [{
             'index': i,
-            'label': data.world_component_ids[i].label if data.coords else data.pixel_component_ids[i].label,
+            'label': (data.world_component_ids[i].label if data.coords
+                      else data.pixel_component_ids[i].label),
             'max': data.shape[i]-1,
         } for i in range(data.ndim) if not used_on_axis(i)]

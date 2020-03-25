@@ -29,7 +29,7 @@ def test_non_hex_colors(app, dataxyz):
     dataxyz.style.color = 'indigo'
 
     app.subset('test', dataxyz.id['x'] > 1)
-    viewer.layer_options._layer_dropdown.value = viewer.layers[1]
+    viewer.layer_options.selected = 1
     dataxyz.subsets[0].style.color = '0.5'
     dataxyz.subsets[0].style.color = 'purple'
 

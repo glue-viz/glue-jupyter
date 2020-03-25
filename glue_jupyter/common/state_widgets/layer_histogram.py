@@ -4,6 +4,7 @@ import traitlets
 
 __all__ = ['HistogramLayerStateWidget']
 
+
 class HistogramLayerStateWidget(v.VuetifyTemplate):
     template = traitlets.Unicode('<span></span>').tag(sync=True)
 

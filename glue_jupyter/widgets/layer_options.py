@@ -41,7 +41,7 @@ class LayerOptionsWidget(v.VuetifyTemplate):
 
             return {
                 'index': index,
-                'color': layer_artist.state.color,
+                'color': getattr(layer_artist.state, 'color', ''),
                 'label': label,
                 'visible': layer_artist.state.visible,
                 'layer_panel': widgetCache.get_or_create(layer_artist, make_layer_panel),

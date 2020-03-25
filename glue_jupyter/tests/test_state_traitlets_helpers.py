@@ -3,7 +3,6 @@ from glue.core import Data
 from glue.core.state_objects import State, CallbackProperty
 from glue.external.echo import ListCallbackProperty
 from glue_jupyter.state_traitlets_helpers import GlueState
-from glue.viewers.histogram.state import HistogramViewerState, HistogramLayerState
 
 
 class Widget1(traitlets.HasTraits):
