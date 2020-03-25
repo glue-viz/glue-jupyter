@@ -1,4 +1,3 @@
-import ipyvuetify as v
 from ipywidgets import Dropdown
 from glue.external.echo.selection import ChoiceSeparator
 from glue.utils import avoid_circular
