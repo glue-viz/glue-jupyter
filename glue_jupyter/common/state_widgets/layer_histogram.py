@@ -1,22 +1,15 @@
-from ipywidgets import Checkbox, ColorPicker, VBox
+import ipyvuetify as v
 
-from glue.utils import color2hex
-
-from ...link import link
+import traitlets
 
 __all__ = ['HistogramLayerStateWidget']
 
 
-class HistogramLayerStateWidget(VBox):
+class HistogramLayerStateWidget(v.VuetifyTemplate):
+    template = traitlets.Unicode('<span></span>').tag(sync=True)
 
     def __init__(self, layer_state):
+        super().__init__()
 
-        self.state = layer_state
-
-        self.widget_visible = Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (self.widget_visible, 'value'))
-
-        self.widget_color = ColorPicker(description='color')
-        link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
-
-        super().__init__([self.widget_visible, self.widget_color])
+    def cleanup(self):
+        pass

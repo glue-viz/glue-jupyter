@@ -1,29 +1,20 @@
-from ipywidgets import VBox, ToggleButton, Checkbox
-
-from ...widgets.linked_dropdown import LinkedDropdown
-from ...link import link
+import ipyvuetify as v
+import traitlets
+from ...state_traitlets_helpers import GlueState
+from ...vuetify_helpers import load_template, link_glue_choices
 
 __all__ = ['HistogramViewerStateWidget']
 
 
-class HistogramViewerStateWidget(VBox):
+class HistogramViewerStateWidget(v.VuetifyTemplate):
+    template = load_template('viewer_histogram.vue', __file__)
+    x_att_items = traitlets.List().tag(sync=True)
+    x_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
+    glue_state = GlueState().tag(sync=True)
 
     def __init__(self, viewer_state):
+        super().__init__()
 
-        self.state = viewer_state
+        self.glue_state = viewer_state
 
-        self.widget_show_axes = Checkbox(value=True, description="Show axes")
-        link((self.widget_show_axes, 'value'), (self.state, 'show_axes'))
-
-        self.button_normalize = ToggleButton(value=False, description='normalize',
-                                             tooltip='Normalize histogram')
-        link((self.button_normalize, 'value'), (self.state, 'normalize'))
-
-        self.button_cumulative = ToggleButton(value=False, description='cumulative',
-                                              tooltip='Cumulative histogram')
-        link((self.button_cumulative, 'value'), (self.state, 'cumulative'))
-
-        self.widget_x_axis = LinkedDropdown(self.state, 'x_att', label='x axis')
-
-        super().__init__([self.widget_x_axis, self.button_normalize,
-                          self.button_cumulative, self.widget_show_axes])
+        link_glue_choices(self, viewer_state, 'x_att')
