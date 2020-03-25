@@ -1,7 +1,7 @@
-from bqplot import PanZoom, Lines
+from bqplot import PanZoom
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
 from bqplot_image_gl.interacts import BrushEllipseSelector, MouseInteraction
-from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI
+from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
 from glue.viewers.common.tool import CheckableTool
@@ -283,10 +283,12 @@ class ROIClickAndDrag(InteractCheckableTool):
                 roi = subset_state.roi
                 if roi.contains(x, y):
                     if isinstance(roi, EllipticalROI):
-                        self._active_tool = BqplotCircleMode(self.viewer, roi=roi, finalize_callback=self.release)
+                        self._active_tool = BqplotCircleMode(self.viewer, roi=roi,
+                                                             finalize_callback=self.release)
                         self.viewer.figure.interaction = self._active_tool.interact
                     elif isinstance(roi, RectangularROI):
-                        self._active_tool = BqplotRectangleMode(self.viewer, roi=roi, finalize_callback=self.release)
+                        self._active_tool = BqplotRectangleMode(self.viewer, roi=roi,
+                                                                finalize_callback=self.release)
                         self.viewer.figure.interaction = self._active_tool.interact
                     else:
                         raise TypeError(f"Unexpected ROI type: {type(roi)}")
