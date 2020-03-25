@@ -62,6 +62,8 @@ class BqplotRectangleMode(InteractCheckableTool):
             self.update_from_roi(roi)
 
         self.interact.observe(self.update_selection, "brushing")
+        self.interact.observe(self.on_selection_change, "selected_x")
+        self.interact.observe(self.on_selection_change, "selected_y")
         self.finalize_callback = finalize_callback
 
     def update_selection(self, *args):
@@ -86,6 +88,14 @@ class BqplotRectangleMode(InteractCheckableTool):
                 self.interact.selected_y = [np.min(roi.vy), np.max(roi.vy)]
             else:
                 raise TypeError(f'Cannot initialize a BqplotRectangleMode from a {type(roi)}')
+            # FIXME: the brush selector does not actually update unless the
+            # widget is resized/refreshed, see
+            # https://github.com/bloomberg/bqplot/issues/1067
+
+    def on_selection_change(self, *args):
+        if self.interact.selected_x is None or self.interact.selected_y is None:
+            if self.finalize_callback is not None:
+                self.finalize_callback()
 
     def activate(self):
         with self.viewer._output_widget:
@@ -123,6 +133,8 @@ class BqplotCircleMode(InteractCheckableTool):
             self.update_from_roi(roi)
 
         self.interact.observe(self.update_selection, "brushing")
+        self.interact.observe(self.on_selection_change, "selected_x")
+        self.interact.observe(self.on_selection_change, "selected_y")
         self.finalize_callback = finalize_callback
 
     def update_selection(self, *args):
@@ -158,6 +170,11 @@ class BqplotCircleMode(InteractCheckableTool):
             raise TypeError(f'Cannot initialize a BqplotCircleMode from a {type(roi)}')
         self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
         self.interact.selected_y = [roi.yc - ry, roi.yc + ry]
+
+    def on_selection_change(self, *args):
+        if self.interact.selected_x is None or self.interact.selected_y is None:
+            if self.finalize_callback is not None:
+                self.finalize_callback()
 
     def activate(self):
         with self.viewer._output_widget:
@@ -258,7 +275,6 @@ class ROIClickAndDrag(InteractCheckableTool):
             self.press(x, y)
 
     def press(self, x, y):
-        roi_index = 0
         for layer in self.viewer.layers:
             if not isinstance(layer, BqplotImageSubsetLayerArtist):
                 continue
@@ -276,7 +292,6 @@ class ROIClickAndDrag(InteractCheckableTool):
                         raise TypeError(f"Unexpected ROI type: {type(roi)}")
                     self._edit_subset_mode.edit_subset = [layer.state.layer.group]
                     break
-            roi_index += 1
         else:
             self._selected = False
 
