@@ -50,7 +50,7 @@ class BqplotRectangleMode(InteractCheckableTool):
     action_text = 'Rectangular ROI'
     tool_tip = 'Define a rectangular region of interest'
 
-    def __init__(self, viewer, **kwargs):
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
         super().__init__(viewer, **kwargs)
 
@@ -58,15 +58,34 @@ class BqplotRectangleMode(InteractCheckableTool):
                                       y_scale=self.viewer.scale_y,
                                       color=INTERACT_COLOR)
 
+        if roi is not None:
+            self.update_from_roi(roi)
+
         self.interact.observe(self.update_selection, "brushing")
+        self.finalize_callback = finalize_callback
 
     def update_selection(self, *args):
+        if self.interact.brushing:
+            return
         with self.viewer._output_widget:
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
                 y = self.interact.selected_y
                 roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
                 self.viewer.apply_roi(roi)
+                if self.finalize_callback is not None:
+                    self.finalize_callback()
+
+    def update_from_roi(self, roi):
+        with self.viewer._output_widget:
+            if isinstance(roi, RectangularROI):
+                self.interact.selected_x = [roi.xmin, roi.xmax]
+                self.interact.selected_y = [roi.ymin, roi.ymax]
+            elif isinstance(roi, PolygonalROI):
+                self.interact.selected_x = [np.min(roi.vx), np.max(roi.vx)]
+                self.interact.selected_y = [np.min(roi.vy), np.max(roi.vy)]
+            else:
+                raise TypeError(f'Cannot initialize a BqplotRectangleMode from a {type(roi)}')
 
     def activate(self):
         with self.viewer._output_widget:
@@ -83,7 +102,7 @@ class BqplotCircleMode(InteractCheckableTool):
     action_text = 'Circular ROI'
     tool_tip = 'Define a circular region of interest'
 
-    def __init__(self, viewer, roi=None, callback=None, **kwargs):
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
         super().__init__(viewer, **kwargs)
 
@@ -104,7 +123,7 @@ class BqplotCircleMode(InteractCheckableTool):
             self.update_from_roi(roi)
 
         self.interact.observe(self.update_selection, "brushing")
-        self.callback = callback
+        self.finalize_callback = finalize_callback
 
     def update_selection(self, *args):
         if self.interact.brushing:
@@ -127,8 +146,8 @@ class BqplotCircleMode(InteractCheckableTool):
                 else:
                     roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
                 self.viewer.apply_roi(roi)
-                if self.callback is not None:
-                    self.callback()
+                if self.finalize_callback is not None:
+                    self.finalize_callback()
 
     def update_from_roi(self, roi):
         if isinstance(roi, CircularROI):
@@ -248,8 +267,13 @@ class ROIClickAndDrag(InteractCheckableTool):
                 roi = subset_state.roi
                 if roi.contains(x, y):
                     if isinstance(roi, EllipticalROI):
-                        self._active_tool = BqplotCircleMode(self.viewer, roi=roi, callback=self.release)
+                        self._active_tool = BqplotCircleMode(self.viewer, roi=roi, finalize_callback=self.release)
                         self.viewer.figure.interaction = self._active_tool.interact
+                    elif isinstance(roi, RectangularROI):
+                        self._active_tool = BqplotRectangleMode(self.viewer, roi=roi, finalize_callback=self.release)
+                        self.viewer.figure.interaction = self._active_tool.interact
+                    else:
+                        raise TypeError(f"Unexpected ROI type: {type(roi)}")
                     self._edit_subset_mode.edit_subset = [layer.state.layer.group]
                     break
             roi_index += 1
