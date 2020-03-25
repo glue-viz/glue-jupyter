@@ -1,9 +1,11 @@
-from bqplot import PanZoom
+from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
-from bqplot_image_gl.interacts import BrushEllipseSelector
+from bqplot_image_gl.interacts import BrushEllipseSelector, MouseInteraction
 from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI
+from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
 from glue.viewers.common.tool import CheckableTool
+from glue_jupyter.bqplot.image.layer_artist import BqplotImageSubsetLayerArtist
 import numpy as np
 
 __all__ = []
@@ -81,7 +83,7 @@ class BqplotCircleMode(InteractCheckableTool):
     action_text = 'Circular ROI'
     tool_tip = 'Define a circular region of interest'
 
-    def __init__(self, viewer, **kwargs):
+    def __init__(self, viewer, roi=None, callback=None, **kwargs):
 
         super().__init__(viewer, **kwargs)
 
@@ -98,9 +100,15 @@ class BqplotCircleMode(InteractCheckableTool):
         self.interact.style = style
         self.interact.border_style = border_style
 
+        if roi is not None:
+            self.update_from_roi(roi)
+
         self.interact.observe(self.update_selection, "brushing")
+        self.callback = callback
 
     def update_selection(self, *args):
+        if self.interact.brushing:
+            return
         with self.viewer._output_widget:
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
@@ -119,6 +127,18 @@ class BqplotCircleMode(InteractCheckableTool):
                 else:
                     roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
                 self.viewer.apply_roi(roi)
+                if self.callback is not None:
+                    self.callback()
+
+    def update_from_roi(self, roi):
+        if isinstance(roi, CircularROI):
+            rx = ry = roi.radius
+        elif isinstance(roi, EllipticalROI):
+            rx, ry = roi.radius_x, roi.radius_y
+        else:
+            raise TypeError(f'Cannot initialize a BqplotCircleMode from a {type(roi)}')
+        self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
+        self.interact.selected_y = [roi.yc - ry, roi.yc + ry]
 
     def activate(self):
         with self.viewer._output_widget:
@@ -188,3 +208,53 @@ class BqplotYRangeMode(InteractCheckableTool):
         with self.viewer._output_widget:
             self.interact.selected = None
         super().activate()
+
+
+# The following is deliberately not a viewer_tool, it is an 'invisible' mode
+# that can be activated when other tools are inactive.
+
+
+class ROIClickAndDrag(InteractCheckableTool):
+    """
+    A tool that enables clicking and dragging of existing ROIs.
+    """
+
+    def __init__(self, viewer, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+
+        self.viewer = viewer
+        self._edit_subset_mode = viewer.session.edit_subset_mode
+        self.interact = MouseInteraction(x_scale=self.viewer.scale_x,
+                                         y_scale=self.viewer.scale_y)
+
+        self.interact.on_msg(self.on_msg)
+        self._active_tool = None
+
+    def on_msg(self, interact, msg, buffers):
+        name = msg['event']
+        domain = msg['domain']
+        x, y = domain['x'], domain['y']
+        if name == 'dragstart':
+            self.press(x, y)
+
+    def press(self, x, y):
+        roi_index = 0
+        for layer in self.viewer.layers:
+            if not isinstance(layer, BqplotImageSubsetLayerArtist):
+                continue
+            subset_state = layer.state.layer.subset_state
+            if layer.visible and isinstance(subset_state, RoiSubsetState):
+                roi = subset_state.roi
+                if roi.contains(x, y):
+                    if isinstance(roi, EllipticalROI):
+                        self._active_tool = BqplotCircleMode(self.viewer, roi=roi, callback=self.release)
+                        self.viewer.figure.interaction = self._active_tool.interact
+                    self._edit_subset_mode.edit_subset = [layer.state.layer.group]
+                    break
+            roi_index += 1
+        else:
+            self._selected = False
+
+    def release(self):
+        self.viewer.figure.interaction = self.interact
