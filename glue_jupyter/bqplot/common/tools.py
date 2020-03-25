@@ -66,6 +66,12 @@ class BqplotRectangleMode(InteractCheckableTool):
                 roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
                 self.viewer.apply_roi(roi)
 
+    def activate(self):
+        with self.viewer._output_widget:
+            self.interact.selected_x = None
+            self.interact.selected_y = None
+        super().activate()
+
 
 @viewer_tool
 class BqplotCircleMode(InteractCheckableTool):
@@ -106,6 +112,12 @@ class BqplotCircleMode(InteractCheckableTool):
                     roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
                 self.viewer.apply_roi(roi)
 
+    def activate(self):
+        with self.viewer._output_widget:
+            self.interact.selected_x = None
+            self.interact.selected_y = None
+        super().activate()
+
 
 @viewer_tool
 class BqplotXRangeMode(InteractCheckableTool):
@@ -131,6 +143,11 @@ class BqplotXRangeMode(InteractCheckableTool):
                 if x is not None and len(x):
                     roi = RangeROI(min=min(x), max=max(x), orientation='x')
                     self.viewer.apply_roi(roi)
+
+    def activate(self):
+        with self.viewer._output_widget:
+            self.interact.selected = None
+        super().activate()
 
 
 @viewer_tool
@@ -158,3 +175,8 @@ class BqplotYRangeMode(InteractCheckableTool):
                 if y is not None and len(y):
                     roi = RangeROI(min=min(y), max=max(y), orientation='y')
                     self.viewer.apply_roi(roi)
+
+    def activate(self):
+        with self.viewer._output_widget:
+            self.interact.selected = None
+        super().activate()
