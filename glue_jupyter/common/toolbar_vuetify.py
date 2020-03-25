@@ -16,6 +16,11 @@ class BasicJupyterToolbar(v.BtnToggle):
     def __init__(self, viewer):
         self.output = viewer.output_widget
         self.tools = {}
+        if viewer._default_mouse_mode_cls is not None:
+            self._default_mouse_mode = viewer._default_mouse_mode_cls(viewer)
+            self._default_mouse_mode.activate()
+        else:
+            self._default_mouse_mode = None
         super().__init__(v_model=None, class_='transparent')
 
     @traitlets.observe('v_model')
@@ -30,11 +35,16 @@ class BasicJupyterToolbar(v.BtnToggle):
     def _on_change_active_tool(self, change):
         if change.old:
             change.old.deactivate()
+        else:
+            if self._default_mouse_mode is not None:
+                self._default_mouse_mode.deactivate()
         if change.new:
             change.new.activate()
             self.v_model = change.new.tool_id
         else:
             self.v_model = None
+            if self._default_mouse_mode is not None:
+                self._default_mouse_mode.activate()
 
     def add_tool(self, tool):
         self.tools[tool.tool_id] = tool

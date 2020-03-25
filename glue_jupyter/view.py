@@ -26,6 +26,7 @@ class IPyWidgetLayerArtistContainer(LayerArtistContainer):
 class IPyWidgetView(Viewer):
 
     _layer_artist_container_cls = IPyWidgetLayerArtistContainer
+    _default_mouse_mode_cls = None
 
     inherit_tools = True
     tools = []

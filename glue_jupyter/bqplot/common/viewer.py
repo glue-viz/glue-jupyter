@@ -6,6 +6,7 @@ from glue.core.command import ApplySubsetState
 from ...view import IPyWidgetView
 from ...link import link, on_change
 from ...utils import float_or_none
+from .tools import ROIClickAndDrag
 
 __all__ = ['BqplotBaseView']
 
@@ -15,6 +16,7 @@ class BqplotBaseView(IPyWidgetView):
     allow_duplicate_data = False
     allow_duplicate_subset = False
     is2d = True
+    _default_mouse_mode_cls = ROIClickAndDrag
 
     def __init__(self, session, state=None):
 
@@ -22,18 +24,27 @@ class BqplotBaseView(IPyWidgetView):
         self.scale_x = bqplot.LinearScale(min=0, max=1, allow_padding=False)
         self.scale_y = bqplot.LinearScale(min=0, max=1)
 
+        self.scales = {'x': self.scale_x, 'y': self.scale_y}
+        self.axis_x = bqplot.Axis(
+            scale=self.scale_x, grid_lines='none', label='x')
+        self.axis_y = bqplot.Axis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
+                                  grid_lines='none', label='y')
+
+        self.figure = bqplot.Figure(scales=self.scales, animation_duration=0,
+                                    axes=[self.axis_x, self.axis_y],
+                                    fig_margin={'left': 60, 'bottom': 60, 'top': 10, 'right': 10})
+        self.figure.padding_y = 0
+        self._fig_margin_default = self.figure.fig_margin
+        self._fig_margin_zero = dict(self.figure.fig_margin)
+        self._fig_margin_zero['left'] = 0
+        self._fig_margin_zero['bottom'] = 0
+
         super(BqplotBaseView, self).__init__(session, state=state)
 
         # Remove the following two lines once glue v0.16 is required - see
         # https://github.com/glue-viz/glue/pull/2099/files for more information.
         self.state.remove_callback('layers', self._sync_layer_artist_container)
         self.state.add_callback('layers', self._sync_layer_artist_container, priority=10000)
-
-        self.scales = {'x': self.scale_x, 'y': self.scale_y}
-        self.axis_x = bqplot.Axis(
-            scale=self.scale_x, grid_lines='none', label='x')
-        self.axis_y = bqplot.Axis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
-                                  grid_lines='none', label='y')
 
         def update_axes(*ignore):
             self.axis_x.label = str(self.state.x_att)
@@ -43,14 +54,6 @@ class BqplotBaseView(IPyWidgetView):
         self.state.add_callback('x_att', update_axes)
         if self.is2d:
             self.state.add_callback('y_att', update_axes)
-        self.figure = bqplot.Figure(scales=self.scales, animation_duration=0,
-                                    axes=[self.axis_x, self.axis_y],
-                                    fig_margin={'left': 60, 'bottom': 60, 'top': 10, 'right': 10})
-        self.figure.padding_y = 0
-        self._fig_margin_default = self.figure.fig_margin
-        self._fig_margin_zero = dict(self.figure.fig_margin)
-        self._fig_margin_zero['left'] = 0
-        self._fig_margin_zero['bottom'] = 0
 
         link((self.state, 'x_min'), (self.scale_x, 'min'), float_or_none)
         link((self.state, 'x_max'), (self.scale_x, 'max'), float_or_none)
