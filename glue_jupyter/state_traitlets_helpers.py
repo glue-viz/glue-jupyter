@@ -7,7 +7,7 @@ from glue.core.state_objects import State
 from glue.core import Data, Subset, ComponentID
 from glue.external.echo import CallbackList
 from matplotlib.colors import Colormap
-
+from matplotlib.cm import get_cmap
 
 MAGIC_IGNORE = '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4'
 
@@ -49,8 +49,11 @@ def update_state_from_dict(state, changes):
                         else:
                             callback_list[i] = changes[name][i]
             else:
-                if changes[name] != MAGIC_IGNORE:
-                    setattr(state, name, changes[name])
+                if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:
+                    if 'cmap' in name:
+                        setattr(state, name, get_cmap(changes[name]))
+                    else:
+                        setattr(state, name, changes[name])
 
 
 class GlueStateJSONEncoder(json.JSONEncoder):
