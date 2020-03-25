@@ -5,7 +5,6 @@ from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, 
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
 from glue.viewers.common.tool import CheckableTool
-from glue_jupyter.bqplot.image.layer_artist import BqplotImageSubsetLayerArtist
 import numpy as np
 
 __all__ = []
@@ -275,6 +274,7 @@ class ROIClickAndDrag(InteractCheckableTool):
             self.press(x, y)
 
     def press(self, x, y):
+        from glue_jupyter.bqplot.image.layer_artist import BqplotImageSubsetLayerArtist
         for layer in self.viewer.layers:
             if not isinstance(layer, BqplotImageSubsetLayerArtist):
                 continue
