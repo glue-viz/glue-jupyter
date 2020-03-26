@@ -54,10 +54,11 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
         self._sync_sliders_from_state()
 
     def _sync_sliders_from_state(self, *not_used):
-        data = self.viewer_state.reference_data
 
-        if not data:
+        if not self.viewer_state.reference_data is None or self.viewer_state.slices is None:
             return
+
+        data = self.viewer_state.reference_data
 
         def used_on_axis(i):
             return i in [self.viewer_state.x_att.axis, self.viewer_state.y_att.axis]
