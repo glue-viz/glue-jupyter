@@ -55,7 +55,7 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
 
     def _sync_sliders_from_state(self, *not_used):
 
-        if not self.viewer_state.reference_data is None or self.viewer_state.slices is None:
+        if self.viewer_state.reference_data is None or self.viewer_state.slices is None:
             return
 
         data = self.viewer_state.reference_data
