@@ -171,3 +171,18 @@ def test_data_names(app, viewer_name):
     with pytest.raises(ValueError) as exc:
         hist.add_data(data='mydata3')
     assert exc.value.args[0] == INVALID_NAME_EXC.strip()
+
+
+def test_no_data(dataxz, dataxyz):
+
+    app = gj.jglue()
+
+    with pytest.raises(ValueError, match='No dataset is present'):
+        app.scatter2d()
+
+    app.add_data(dataxz)
+    app.scatter2d()
+
+    app.add_data(dataxyz)
+    with pytest.raises(ValueError, match='There is more than one dataset'):
+        app.scatter2d()

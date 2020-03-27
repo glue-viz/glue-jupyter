@@ -156,10 +156,10 @@ def validate_data_argument(data_collection, data):
 
     if data is None:
         if len(data_collection) == 0:
-            raise ValueError('No data is present in the data collection, '
+            raise ValueError('No dataset is present in the data collection, '
                              'load or add a dataset before creating a data viewer')
         elif len(data_collection) > 1:
-            raise ValueError('There is more than one data set in the data '
+            raise ValueError('There is more than one dataset in the data '
                              'collection, please pass a data argument')
         else:
             return data_collection[0]
