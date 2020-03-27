@@ -58,6 +58,9 @@ def jglue(*args, **kwargs):
     from glue.qglue import parse_data, parse_links
     from glue.core.data_factories import load_data
 
+    from glue.main import load_plugins
+    load_plugins(require_qt_plugins=False)
+
     links = kwargs.pop('links', None)
 
     dc = DataCollection()

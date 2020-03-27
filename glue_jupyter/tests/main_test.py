@@ -6,6 +6,7 @@ import numpy as np
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from glue.core import Data
+from glue.core.autolinking import find_possible_links
 
 import glue_jupyter as gj
 from glue_jupyter.utils import GLUE_LT_016
@@ -186,3 +187,32 @@ def test_no_data(dataxz, dataxyz):
     app.add_data(dataxyz)
     with pytest.raises(ValueError, match='There is more than one dataset'):
         app.scatter2d()
+
+
+def test_plugins():
+
+    # Make sure that glue plugins are correctly loaded, by checking that the
+    # WCS autolinker works.
+
+    from astropy.wcs import WCS
+
+    app = gj.jglue()
+
+    data1 = Data(label='test1')
+    data1.coords = WCS(naxis=2)
+    data1.coords.wcs.ctype = 'RA---TAN', 'DEC--TAN'
+    data1.coords.wcs.set()
+    data1['x'] = np.ones((2, 3))
+
+    data2 = Data(label='test1')
+    data2.coords = WCS(naxis=2)
+    data2.coords.wcs.ctype = 'GLON-CAR', 'GLAT-CAR'
+    data2.coords.wcs.set()
+    data2['y'] = np.ones((2, 3))
+
+    app.add_data(data1=data1)
+    app.add_data(data2=data2)
+
+    links = find_possible_links(app.data_collection)
+
+    assert 'Astronomy WCS' in links
