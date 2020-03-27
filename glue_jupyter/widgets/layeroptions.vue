@@ -46,7 +46,7 @@
             </v-select>
         </div>
         <div>
-            <jupyter-widget :widget="layers[selected].layer_panel"></jupyter-widget>
+            <jupyter-widget v-if="layers && layers[selected]" :widget="layers[selected].layer_panel"></jupyter-widget>
         </div>
     </div>
 </template>
