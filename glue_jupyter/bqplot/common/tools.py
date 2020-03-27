@@ -286,7 +286,7 @@ class ROIClickAndDrag(InteractCheckableTool):
                         self._active_tool = BqplotCircleMode(self.viewer, roi=roi,
                                                              finalize_callback=self.release)
                         self.viewer.figure.interaction = self._active_tool.interact
-                    elif isinstance(roi, RectangularROI):
+                    elif isinstance(roi, (PolygonalROI, RectangularROI)):
                         self._active_tool = BqplotRectangleMode(self.viewer, roi=roi,
                                                                 finalize_callback=self.release)
                         self.viewer.figure.interaction = self._active_tool.interact
