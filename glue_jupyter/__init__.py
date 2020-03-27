@@ -58,8 +58,13 @@ def jglue(*args, **kwargs):
     from glue.qglue import parse_data, parse_links
     from glue.core.data_factories import load_data
 
-    from glue.main import load_plugins
-    load_plugins(require_qt_plugins=False)
+    try:
+        from glue.main import load_plugins
+        load_plugins()
+    except Exception:  # Compatibility with glue <0.16
+        from glue.main import REQUIRED_PLUGINS
+        REQUIRED_PLUGINS.clear()
+        load_plugins()
 
     links = kwargs.pop('links', None)
 
