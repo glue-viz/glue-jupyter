@@ -17,7 +17,11 @@
 
 * Added circular selection to scatter and image viewer. [#165]
 
-* Make it possible to remove subsets from the UI
+* Make sure glue plugins are loaded when calling ``jglue``. [#171]
+
+* Make it possible to remove subsets from the UI. [#169]
+
+* Implement click-and-drag for selections in image viewer. [#170]
 
 0.1 (2020-01-08)
 ================
