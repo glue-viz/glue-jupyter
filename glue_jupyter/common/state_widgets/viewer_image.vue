@@ -42,7 +42,7 @@
     }
 </script>
 <style id="viewer_image">
-    .vuetify-styles .v-subheader.slider-label {
+    .v-subheader.slider-label {
         font-size: 12px;
         height: 16px;
     }
