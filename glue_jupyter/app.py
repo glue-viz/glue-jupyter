@@ -39,7 +39,17 @@ class JupyterApplication(Application):
     """
 
     def __init__(self, data_collection=None, session=None):
+
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
+
+        try:
+            from glue.main import load_plugins
+            load_plugins()
+        except Exception:  # Compatibility with glue <0.16
+            from glue.main import REQUIRED_PLUGINS
+            REQUIRED_PLUGINS.clear()
+            load_plugins()
+
         self.output = widgets.Output()
         self.widget_data_collection = widgets.SelectMultiple()
         self.widget_subset_select = SubsetSelect(session=self.session)
