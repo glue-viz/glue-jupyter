@@ -53,22 +53,17 @@ def jglue(*args, **kwargs):
     load data, set up links, and create visualizations. See the documentation
     for that class for more details.
     """
+
     show = kwargs.pop('show', False)
-    from glue.core import DataCollection
+
     from glue.qglue import parse_data, parse_links
     from glue.core.data_factories import load_data
 
-    try:
-        from glue.main import load_plugins
-        load_plugins()
-    except Exception:  # Compatibility with glue <0.16
-        from glue.main import REQUIRED_PLUGINS
-        REQUIRED_PLUGINS.clear()
-        load_plugins()
+    japp = JupyterApplication()
 
     links = kwargs.pop('links', None)
 
-    dc = DataCollection()
+    dc = japp.data_collection
     for label, data in kwargs.items():
         if isinstance(data, str):
             data = load_data(data)
@@ -79,7 +74,6 @@ def jglue(*args, **kwargs):
     if links is not None:
         dc.add_link(parse_links(dc, links))
 
-    japp = JupyterApplication(dc)
     if show:
         display(japp)
     return japp
