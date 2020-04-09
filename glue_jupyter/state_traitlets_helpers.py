@@ -68,6 +68,12 @@ class GlueStateJSONEncoder(json.JSONEncoder):
             return MAGIC_IGNORE
         elif isinstance(obj, Colormap):
             return obj.name
+
+        # JSON cannot serialized native numpy types, so check if the object
+        #  is a numpy dtype, and if it is, convert to python type
+        if hasattr(obj, 'dtype'):
+            return obj.item()
+
         return json.JSONEncoder.default(self, obj)
 
 
