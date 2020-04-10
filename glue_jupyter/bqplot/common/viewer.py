@@ -48,26 +48,22 @@ class BqplotBaseView(IPyWidgetView):
 
         def update_axes(*ignore):
             try: 
-                # Define label with units
-                self.axis_x.label = str(self.state.x_att) + 
-                                    str(" [" + 
-                                        self.state.reference_data.get_component(
-                                            self.state.x_att_world
-                                        ).units + 
-                                        "]")
+                # Extract units from data
+                x_unit = self.state.reference_data.get_component(self.state.x_att_world).units
             except AttributeError:
                 # If no data loaded yet, ignore units
-                self.axis_x.label = str(self.state.x_att)
+                x_unit = ""
+            finally:
+                # Append units to axis label
+                self.axis_x.label = str(self.state.x_att) + " " + str(x_unit)
             if self.is2d:
+                self.axis_y.label = str(self.state.y_att)
                 try: 
-                    self.axis_y.label = str(self.state.y_att) + 
-                                        str(" [" + 
-                                            self.state.reference_data.get_component(
-                                                self.state.y_att_world
-                                            ).units + 
-                                            "]")
+                    y_unit = self.state.reference_data.get_component(self.state.y_att_world).units
                 except AttributeError:
-                    self.axis_y.label = str(self.state.y_att)
+                    y_unit = ""
+                finally:
+                    self.axis_y.label = str(self.state.y_att) + " " + str(y_unit)
 
         self.state.add_callback('x_att', update_axes)
         if self.is2d:
