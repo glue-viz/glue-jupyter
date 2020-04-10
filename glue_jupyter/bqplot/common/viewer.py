@@ -47,7 +47,7 @@ class BqplotBaseView(IPyWidgetView):
         self.state.add_callback('layers', self._sync_layer_artist_container, priority=10000)
 
         def update_axes(*ignore):
-            try: 
+            try:
                 # Extract units from data
                 x_unit = self.state.reference_data.get_component(self.state.x_att_world).units
             except AttributeError:
@@ -58,7 +58,7 @@ class BqplotBaseView(IPyWidgetView):
                 self.axis_x.label = str(self.state.x_att) + " " + str(x_unit)
             if self.is2d:
                 self.axis_y.label = str(self.state.y_att)
-                try: 
+                try:
                     y_unit = self.state.reference_data.get_component(self.state.y_att_world).units
                 except AttributeError:
                     y_unit = ""
