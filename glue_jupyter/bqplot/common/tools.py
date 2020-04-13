@@ -143,17 +143,12 @@ class BqplotCircleMode(InteractCheckableTool):
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
                 y = self.interact.selected_y
-                # similar to https://github.com/glue-viz/glue/blob/b14ccffac6a5
-                # 271c2869ead9a562a2e66232e397/glue/core/roi.py#L1275-L1297
-                # We should now check if the radius in data coordinates is the same
-                # along x and y, as if so then we can return a circle, otherwise we
-                # should return an ellipse.
                 xc = x.mean()
                 yc = y.mean()
                 rx = abs(x[1] - x[0])/2
                 ry = abs(y[1] - y[0])/2
-                if np.allclose(rx, ry):
-                    roi = CircularROI(xc=xc, yc=yc, radius=rx)
+                if self.interact.pixel_aspect == 1:
+                    roi = CircularROI(xc=xc, yc=yc, radius=np.mean((rx, ry)))
                 else:
                     roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
                 self.viewer.apply_roi(roi)
