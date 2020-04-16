@@ -5,7 +5,7 @@ from collections import defaultdict
 from traitlets.utils.bunch import Bunch
 from glue.core.state_objects import State
 from glue.core import Data, Subset, ComponentID
-from glue.external.echo import CallbackList
+from glue.external.echo import CallbackList, CallbackDict
 from matplotlib.colors import Colormap
 from matplotlib.cm import get_cmap
 
@@ -24,6 +24,9 @@ def state_to_dict(state):
             if isinstance(item, CallbackList):
                 item = {index: state_to_dict(value) if isinstance(value, State) else value
                         for index, value in enumerate(item)}
+            elif isinstance(item, CallbackDict):
+                item = {key: state_to_dict(value) if isinstance(value, State) else value
+                        for key, value in item.items()}
             changes[name] = item
     return changes
 
@@ -48,6 +51,15 @@ def update_state_from_dict(state, changes):
                             callback_list[i].update_from_dict(changes[name][i])
                         else:
                             callback_list[i] = changes[name][i]
+            elif isinstance(getattr(state, name), CallbackDict):
+                callback_dict = getattr(state, name)
+
+                for k in callback_dict:
+                    if k in changes[name]:
+                        if isinstance(callback_dict[k], State):
+                            callback_dict[k].update_from_dict(changes[name][k])
+                        else:
+                            callback_dict[k] = changes[name][k]
             else:
                 if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:
                     if 'cmap' in name:
