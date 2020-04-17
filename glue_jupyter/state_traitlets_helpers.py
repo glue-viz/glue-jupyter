@@ -22,8 +22,8 @@ def state_to_dict(state):
         if not name.startswith('_') and state.is_callback_property(name):
             item = getattr(state, name)
             if isinstance(item, CallbackList):
-                item = {index: state_to_dict(value) if isinstance(value, State) else value
-                        for index, value in enumerate(item)}
+                item = [state_to_dict(value) if isinstance(value, State) else value
+                        for value in item]
             elif isinstance(item, CallbackDict):
                 item = {key: state_to_dict(value) if isinstance(value, State) else value
                         for key, value in item.items()}
@@ -45,6 +45,7 @@ def update_state_from_dict(state, changes):
         for name in groups[priority]:
             if isinstance(getattr(state, name), CallbackList):
                 callback_list = getattr(state, name)
+
                 for i in range(len(callback_list)):
                     if i in changes[name]:
                         if isinstance(callback_list[i], State):
@@ -57,6 +58,8 @@ def update_state_from_dict(state, changes):
                 for k in callback_dict:
                     if k in changes[name]:
                         if isinstance(callback_dict[k], State):
+                            print("Updating from dict")
+                            print(changes[name][k])
                             callback_dict[k].update_from_dict(changes[name][k])
                         else:
                             callback_dict[k] = changes[name][k]
