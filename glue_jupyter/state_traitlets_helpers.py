@@ -94,6 +94,8 @@ class GlueStateJSONEncoder(json.JSONEncoder):
 
 class GlueState(traitlets.Any):
 
+    _block_on_state_change = False
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tag(to_json=self.convert_state_to_json,
@@ -115,6 +117,8 @@ class GlueState(traitlets.Any):
         state.add_global_callback(partial(self.on_state_change, obj=obj))
 
     def on_state_change(self, *args, obj=None, **kwargs):
+        if self._block_on_state_change:
+            return
         obj.notify_change(Bunch({'name': self.name,
                                  'type': 'change',
                                  'value': self.get(obj),
@@ -133,5 +137,9 @@ class GlueState(traitlets.Any):
 
     def update_state_from_json(self, json, widget):
         state = getattr(widget, self.name)
-        update_state_from_dict(state, json)
+        self._block_on_state_change = True
+        try:
+            update_state_from_dict(state, json)
+        finally:
+            self._block_on_state_change = False
         return state
