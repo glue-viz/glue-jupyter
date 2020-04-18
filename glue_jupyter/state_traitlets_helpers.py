@@ -1,5 +1,4 @@
 import json
-from functools import partial
 import traitlets
 from collections import defaultdict
 from traitlets.utils.bunch import Bunch
@@ -46,10 +45,10 @@ def update_state_from_dict(state, changes):
             if isinstance(getattr(state, name), CallbackList):
                 callback_list = getattr(state, name)
                 for i in range(len(callback_list)):
-                        if isinstance(callback_list[i], State):
-                            callback_list[i].update_from_dict(changes[name][i])
-                        else:
-                            callback_list[i] = changes[name][i]
+                    if isinstance(callback_list[i], State):
+                        callback_list[i].update_from_dict(changes[name][i])
+                    else:
+                        callback_list[i] = changes[name][i]
             elif isinstance(getattr(state, name), CallbackDict):
                 callback_dict = getattr(state, name)
 
