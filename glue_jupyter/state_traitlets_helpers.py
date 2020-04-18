@@ -88,6 +88,16 @@ class GlueStateJSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+class PartialCallback:
+
+    def __init__(self, func, obj):
+        self.func = func
+        self.obj = obj
+
+    def __call__(self, *args, **kwargs):
+        return self.func(*args, obj=self.obj, **kwargs)
+
+
 class GlueState(traitlets.Any):
 
     _block_on_state_change = False
@@ -110,7 +120,7 @@ class GlueState(traitlets.Any):
 
     def set(self, obj, state):
         super().set(obj, state)
-        state.add_global_callback(partial(self.on_state_change, obj=obj))
+        state.add_global_callback(PartialCallback(self.on_state_change, obj=obj))
 
     def on_state_change(self, *args, obj=None, **kwargs):
         if self._block_on_state_change:
@@ -138,4 +148,11 @@ class GlueState(traitlets.Any):
             update_state_from_dict(state, json)
         finally:
             self._block_on_state_change = False
+        # In some cases changes to the state may have caused other attributes
+        # in the glue state to change, so we do need to call on_state_change
+        # once. We don't have a reference to 'obj' here so we have to do a bit
+        # of hackery.
+        for callback in state._global_callbacks:
+            if isinstance(callback, PartialCallback):
+                callback()
         return state
