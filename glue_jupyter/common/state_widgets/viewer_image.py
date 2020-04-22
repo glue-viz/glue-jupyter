@@ -82,6 +82,6 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
                                            data,
                                            pixel_axis=data.ndim - 1 - i,
                                            world_axis=data.ndim - 1 - i
-                                           )[self.glue_state.slices[i]] if data
+                                           )[self.glue_state.slices[i]] if data.coords
                       else '')
         } for i in range(data.ndim) if not used_on_axis(i)]
