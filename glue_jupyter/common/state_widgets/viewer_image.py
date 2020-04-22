@@ -79,6 +79,7 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
             'max': data.shape[i]-1,
             'unit': (data.get_component(data.world_component_ids[i]).units if data.coords
                       else ''),
+            'world_value': ("%0.4E" % world_axis(data.coords,
                                            data,
                                            pixel_axis=data.ndim - 1 - i,
                                            world_axis=data.ndim - 1 - i
