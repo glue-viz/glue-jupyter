@@ -1,11 +1,10 @@
 import json
-from functools import partial
 import traitlets
 from collections import defaultdict
 from traitlets.utils.bunch import Bunch
 from glue.core.state_objects import State
 from glue.core import Data, Subset, ComponentID
-from glue.external.echo import CallbackList
+from glue.external.echo import CallbackList, CallbackDict
 from matplotlib.colors import Colormap
 from matplotlib.cm import get_cmap
 
@@ -22,8 +21,11 @@ def state_to_dict(state):
         if not name.startswith('_') and state.is_callback_property(name):
             item = getattr(state, name)
             if isinstance(item, CallbackList):
-                item = {index: state_to_dict(value) if isinstance(value, State) else value
-                        for index, value in enumerate(item)}
+                item = [state_to_dict(value) if isinstance(value, State) else value
+                        for value in item]
+            elif isinstance(item, CallbackDict):
+                item = {key: state_to_dict(value) if isinstance(value, State) else value
+                        for key, value in item.items()}
             changes[name] = item
     return changes
 
@@ -43,11 +45,19 @@ def update_state_from_dict(state, changes):
             if isinstance(getattr(state, name), CallbackList):
                 callback_list = getattr(state, name)
                 for i in range(len(callback_list)):
-                    if i in changes[name]:
-                        if isinstance(callback_list[i], State):
-                            callback_list[i].update_from_dict(changes[name][i])
+                    if isinstance(callback_list[i], State):
+                        callback_list[i].update_from_dict(changes[name][i])
+                    else:
+                        callback_list[i] = changes[name][i]
+            elif isinstance(getattr(state, name), CallbackDict):
+                callback_dict = getattr(state, name)
+
+                for k in callback_dict:
+                    if k in changes[name]:
+                        if isinstance(callback_dict[k], State):
+                            callback_dict[k].update_from_dict(changes[name][k])
                         else:
-                            callback_list[i] = changes[name][i]
+                            callback_dict[k] = changes[name][k]
             else:
                 if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:
                     if 'cmap' in name:
@@ -77,7 +87,19 @@ class GlueStateJSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+class PartialCallback:
+
+    def __init__(self, func, obj):
+        self.func = func
+        self.obj = obj
+
+    def __call__(self, *args, **kwargs):
+        return self.func(*args, obj=self.obj, **kwargs)
+
+
 class GlueState(traitlets.Any):
+
+    _block_on_state_change = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -97,9 +119,11 @@ class GlueState(traitlets.Any):
 
     def set(self, obj, state):
         super().set(obj, state)
-        state.add_global_callback(partial(self.on_state_change, obj=obj))
+        state.add_global_callback(PartialCallback(self.on_state_change, obj=obj))
 
     def on_state_change(self, *args, obj=None, **kwargs):
+        if self._block_on_state_change:
+            return
         obj.notify_change(Bunch({'name': self.name,
                                  'type': 'change',
                                  'value': self.get(obj),
@@ -118,5 +142,16 @@ class GlueState(traitlets.Any):
 
     def update_state_from_json(self, json, widget):
         state = getattr(widget, self.name)
-        update_state_from_dict(state, json)
+        self._block_on_state_change = True
+        try:
+            update_state_from_dict(state, json)
+        finally:
+            self._block_on_state_change = False
+        # In some cases changes to the state may have caused other attributes
+        # in the glue state to change, so we do need to call on_state_change
+        # once. We don't have a reference to 'obj' here so we have to do a bit
+        # of hackery.
+        for callback in state._global_callbacks:
+            if isinstance(callback, PartialCallback):
+                callback()
         return state
