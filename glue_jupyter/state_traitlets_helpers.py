@@ -46,18 +46,20 @@ def update_state_from_dict(state, changes):
                 callback_list = getattr(state, name)
                 for i in range(len(callback_list)):
                     if isinstance(callback_list[i], State):
-                        callback_list[i].update_from_dict(changes[name][i])
+                        update_state_from_dict(callback_list[i], changes[name][i])
                     else:
-                        callback_list[i] = changes[name][i]
+                        if changes[name][i] != MAGIC_IGNORE and callback_list[i] != changes[name][i]:
+                            callback_list[i] = changes[name][i]
             elif isinstance(getattr(state, name), CallbackDict):
                 callback_dict = getattr(state, name)
 
                 for k in callback_dict:
                     if k in changes[name]:
                         if isinstance(callback_dict[k], State):
-                            callback_dict[k].update_from_dict(changes[name][k])
+                            update_state_from_dict(callback_dict[k], changes[name][k])
                         else:
-                            callback_dict[k] = changes[name][k]
+                            if changes[name][k] != MAGIC_IGNORE and callback_dict[k] != changes[name][k]:
+                                callback_dict[k] = changes[name][k]
             else:
                 if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:
                     if 'cmap' in name:

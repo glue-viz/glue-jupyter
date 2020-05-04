@@ -67,3 +67,20 @@ def test_to_json_data():
     assert widget.latest_json == {"a": "611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4",
                                   "b": 2,
                                   "sub": []}
+
+
+def test_from_json_nested_ignore():
+    # Regression test for a bug that cause the MAGIC_IGNORE value to be set on
+    # the glue state if it existed in a nested structure.
+    widget = Widget1()
+    widget.state = CustomState()
+    widget.state.sub.append(CustomSubState())
+    widget.state.sub[0].c = Data(label='test')
+    widget.state.sub.append(Data(label='test'))
+    assert widget.latest_json == {"a": 1, "b": 2, "sub": [{'c': '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4'},
+                                                          '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4']}
+    widget.set_state_from_json(widget.latest_json)
+    assert widget.state.a == 1
+    assert widget.state.b == 2
+    assert isinstance(widget.state.sub[0].c, Data)
+    assert isinstance(widget.state.sub[1], Data)
