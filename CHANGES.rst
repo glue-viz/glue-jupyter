@@ -23,6 +23,8 @@
 
 * Implement click-and-drag for selections in image viewer. [#170]
 
+* Fixed behavior of equal aspect ratio in image viewer. [#184]
+
 0.1 (2020-01-08)
 ================
 

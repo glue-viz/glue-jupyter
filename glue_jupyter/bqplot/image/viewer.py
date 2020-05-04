@@ -55,9 +55,11 @@ class BqplotImageView(BqplotBaseView):
             if self.state.aspect == 'equal':
                 self.figure.max_aspect_ratio = 1
                 self.figure.min_aspect_ratio = 1
+                self.state._set_axes_aspect_ratio(1)
             else:
                 self.figure.min_aspect_ratio = bqplot.Figure.min_aspect_ratio.default_value
                 self.figure.max_aspect_ratio = bqplot.Figure.max_aspect_ratio.default_value
+                self.state._set_axes_aspect_ratio(None)
 
     def get_data_layer_artist(self, layer=None, layer_state=None):
         if layer.ndim == 1:
