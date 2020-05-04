@@ -14,7 +14,7 @@
                         <v-menu v-model="color_menu_open">
                             <template v-slot:activator="{ on }">
                                 <span class="glue-color-menu"
-                                      :style=`background:${data.item.color}`
+                                      :style="`background:${data.item.color}`"
                                       @click.stop="on.click"
                                 >&nbsp;</span>
                             </template>
@@ -35,7 +35,7 @@
                 <template slot="item" slot-scope="data">
                     <div class="single-line">
                         <span class="glue-color-menu"
-                              :style=`background:${data.item.color}`
+                              :style="`background:${data.item.color}`"
                         >&nbsp;</span>
                         <v-icon style="padding: 0 4px" @click.stop="toggle_visible(data.item.index)">
                             mdi-eye{{ data.item.visible ? '' : '-off' }}
