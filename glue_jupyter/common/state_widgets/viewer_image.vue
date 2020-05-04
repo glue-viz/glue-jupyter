@@ -23,7 +23,7 @@
             <v-select label="y axis" :items="y_att_world_items" v-model="y_att_world_selected" hide-details style="margin-bottom: 16px" />
         </div>
         <div v-for="slider of sliders">
-            <v-subheader class="pl-0 slider-label">{{ slider.label }}: {{ glue_state.slices[slider.index] }}</v-subheader>
+            <v-subheader class="pl-0 slider-label">{{ slider.label }}: {{ glue_state.slices[slider.index] }} ({{  slider.world_value  }} {{ slider.unit }})</v-subheader>
             <v-slider :max="slider.max" v-model="glue_state.slices[slider.index]" hide-details  />
         </div>
     </div>
