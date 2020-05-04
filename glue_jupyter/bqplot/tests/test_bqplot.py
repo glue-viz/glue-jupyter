@@ -3,6 +3,7 @@ import nbformat
 import numpy as np
 from numpy.testing import assert_allclose
 from nbconvert.preprocessors import ExecutePreprocessor
+from glue.core import Data
 from glue.core.roi import EllipticalROI
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
@@ -281,16 +282,32 @@ def test_imshow_circular_brush(app, data_image):
 
 
 def test_imshow_equal_aspect(app, data_image):
-    assert data_image in app.data_collection
-    v = app.imshow(data=data_image)
+    data = Data(array=np.random.random((100, 5)))
+    app.data_collection.append(data)
+    v = app.imshow(data=data)
     assert v.figure.min_aspect_ratio == 1
     assert v.figure.max_aspect_ratio == 1
+    assert v.scale_x.min == -48.0
+    assert v.scale_x.max == +52.0
+    assert v.scale_y.min == -0.5
+    assert v.scale_y.max == +99.5
     v.state.aspect = 'auto'
     assert v.figure.min_aspect_ratio == 0.01
     assert v.figure.max_aspect_ratio == 100
+    # NOTE: the limits don't actually change automatically, because if user
+    # is zoomed in they might not want to automatically zoom all the way out
+    # again.
+    assert v.scale_x.min == -48.0
+    assert v.scale_x.max == +52.0
+    assert v.scale_y.min == -0.5
+    assert v.scale_y.max == +99.5
     v.state.aspect = 'equal'
     assert v.figure.min_aspect_ratio == 1
     assert v.figure.max_aspect_ratio == 1
+    assert v.scale_x.min == -48.0
+    assert v.scale_x.max == +52.0
+    assert v.scale_y.min == -0.5
+    assert v.scale_y.max == +99.5
 
 
 def test_imshow_nonfloat(app):
