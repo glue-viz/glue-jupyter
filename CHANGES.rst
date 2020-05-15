@@ -25,6 +25,12 @@
 
 * Fixed behavior of equal aspect ratio in image viewer. [#184]
 
+* Fixed a bug that caused the image viewer to raise an error when changing
+  the reference data from a 3-d to a 2-d dataset. [#188]
+
+* Fixed a bug that caused profiles to not be shown in the profile viewer
+  when changing the reference data. [#188]
+
 0.1 (2020-01-08)
 ================
 
