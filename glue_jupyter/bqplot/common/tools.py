@@ -156,7 +156,6 @@ class BqplotCircleMode(InteractCheckableTool):
                     roi = CircularROI(xc=xc, yc=yc, radius=rx)
                 else:
                     roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
-                print(roi)
                 self.viewer.apply_roi(roi)
                 if self.finalize_callback is not None:
                     self.finalize_callback()
