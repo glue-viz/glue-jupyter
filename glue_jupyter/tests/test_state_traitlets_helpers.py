@@ -77,8 +77,10 @@ def test_from_json_nested_ignore():
     widget.state.sub.append(CustomSubState())
     widget.state.sub[0].c = Data(label='test')
     widget.state.sub.append(Data(label='test'))
-    assert widget.latest_json == {"a": 1, "b": 2, "sub": [{'c': '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4'},
-                                                          '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4']}
+    assert widget.latest_json == {"a": 1,
+                                  "b": 2,
+                                  "sub": [{'c': '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4'},
+                                          '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4']}
     widget.set_state_from_json(widget.latest_json)
     assert widget.state.a == 1
     assert widget.state.b == 2
