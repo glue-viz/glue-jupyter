@@ -16,9 +16,11 @@ GLUE_LT_016 = LooseVersion(glue_version) < LooseVersion('0.16')
 
 if sys.version_info[:2] < (3, 7):
     from contextlib import contextmanager  # noqa
+
     @contextmanager
     def nullcontext():
         yield None
+
 else:
     from contextlib import nullcontext  # noqa
 
@@ -35,9 +37,9 @@ def rgba_to_png_data(rgba):
     return f.getvalue()
 
 
-def scalar_to_png_data(I, colormap='viridis'):
-    mask = ~np.isfinite(I)
-    intensity = np.ma.masked_array(I, mask)
+def scalar_to_png_data(data, colormap='viridis'):
+    mask = ~np.isfinite(data)
+    intensity = np.ma.masked_array(data, mask)
     colormap = matplotlib.cm.get_cmap(colormap)
     colormap.set_bad(alpha=0)
     data = colormap(intensity, bytes=True)
@@ -173,7 +175,7 @@ def validate_data_argument(data_collection, data):
         else:
             raise ValueError(f"'{data}' is not a valid dataset name. The "
                              f"following datasets are available:\n\n" +
-                             f"\n".join([f"  * '{d.label}'" for d in data_collection]))
+                             "\n".join([f"  * '{d.label}'" for d in data_collection]))
     elif not isinstance(data, Data):
         raise TypeError('The data argument should either be a glue data '
                         'object or the name of a dataset.\nThe following '

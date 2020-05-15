@@ -48,7 +48,8 @@ def update_state_from_dict(state, changes):
                     if isinstance(callback_list[i], State):
                         update_state_from_dict(callback_list[i], changes[name][i])
                     else:
-                        if changes[name][i] != MAGIC_IGNORE and callback_list[i] != changes[name][i]:
+                        if (changes[name][i] != MAGIC_IGNORE and
+                                callback_list[i] != changes[name][i]):
                             callback_list[i] = changes[name][i]
             elif isinstance(getattr(state, name), CallbackDict):
                 callback_dict = getattr(state, name)
@@ -58,7 +59,8 @@ def update_state_from_dict(state, changes):
                         if isinstance(callback_dict[k], State):
                             update_state_from_dict(callback_dict[k], changes[name][k])
                         else:
-                            if changes[name][k] != MAGIC_IGNORE and callback_dict[k] != changes[name][k]:
+                            if (changes[name][k] != MAGIC_IGNORE and
+                                    callback_dict[k] != changes[name][k]):
                                 callback_dict[k] = changes[name][k]
             else:
                 if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:

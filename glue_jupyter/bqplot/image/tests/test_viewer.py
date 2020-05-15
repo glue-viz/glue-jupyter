@@ -22,3 +22,9 @@ def test_remove(app, data_image, data_volume):
     assert len(s.figure.marks) == 2
     s.remove_data(data_volume)
     assert len(s.figure.marks) == 1
+
+
+def test_change_reference(app, data_image, data_volume):
+    im = app.imshow(data=data_volume)
+    im.add_data(data_image)
+    im.state.reference_data = data_image
