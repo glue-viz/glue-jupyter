@@ -161,6 +161,7 @@ class BqplotProfileLayerArtist(LayerArtist):
                                                      'function', 'normalize',
                                                      'v_min', 'v_max')):
             self._calculate_profile(reset=force)
+            force = True
 
         if force or any(prop in changed for prop in ('alpha', 'color', 'zorder',
                                                      'visible', 'linewidth')):
