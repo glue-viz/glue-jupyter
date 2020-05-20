@@ -6,12 +6,13 @@
 
 FROM ubuntu:18.04
 FROM node:latest
+FROM python:3.6
 
 # Set up Python 3.6
 
-RUN apt update
-RUN apt install -y python3 python3-pip git
-RUN pip3 install --upgrade pip
+#RUN apt update
+#RUN apt install -y python3 python3-pip git
+#RUN pip3 install --upgrade pip
 
 # Set up user as required by mybinder docs:
 
