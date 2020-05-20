@@ -19,6 +19,9 @@ ENV NB_USER jovyan
 ENV NB_UID 1000
 ENV HOME /home/${NB_USER}
 
+#node creates a user with a default id of 1000, so we change it here
+RUN groupmod -g 999 node && usermod -u 999 -g 999 node
+
 RUN adduser --disabled-password \
     --gecos "Default user" \
     --uid ${NB_UID} \
