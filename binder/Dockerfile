@@ -5,7 +5,7 @@
 # https://mybinder.readthedocs.io/en/latest/tutorials/dockerfile.html#preparing-your-dockerfile
 
 FROM ubuntu:18.04
-FROM node:latest
+FROM node:10
 FROM python:3.6
 
 # Set up Python 3.6
