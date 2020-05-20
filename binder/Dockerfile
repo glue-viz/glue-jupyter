@@ -9,7 +9,8 @@ FROM ubuntu:18.04
 # Set up Python 3.6
 
 RUN apt update
-RUN apt install -y python3 python3-pip git nodejs>=10.0.0 npm
+RUN apt install -y python3 python3-pip git
+RUN conda install node npm
 RUN pip3 install --upgrade pip
 
 # Set up user as required by mybinder docs:
