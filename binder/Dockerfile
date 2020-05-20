@@ -5,12 +5,12 @@
 # https://mybinder.readthedocs.io/en/latest/tutorials/dockerfile.html#preparing-your-dockerfile
 
 FROM ubuntu:18.04
+FROM node:10
 
 # Set up Python 3.6
 
 RUN apt update
 RUN apt install -y python3 python3-pip git
-RUN conda install node npm
 RUN pip3 install --upgrade pip
 
 # Set up user as required by mybinder docs:
