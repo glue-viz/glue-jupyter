@@ -5,23 +5,20 @@
 # https://mybinder.readthedocs.io/en/latest/tutorials/dockerfile.html#preparing-your-dockerfile
 
 FROM ubuntu:18.04
-FROM node:10
-FROM python:3.6
 
 # Set up Python 3.6
 
-#RUN apt update
-#RUN apt install -y python3 python3-pip git
-#RUN pip3 install --upgrade pip
+RUN apt update
+RUN apt install -y python3 python3-pip git
+RUN pip3 install --upgrade pip
+RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+RUN sudo apt-get install -y nodejs
 
 # Set up user as required by mybinder docs:
 
 ENV NB_USER jovyan
 ENV NB_UID 1000
 ENV HOME /home/${NB_USER}
-
-#node creates a user with a default id of 1000, so we change it here
-#RUN groupmod -g 999 node && usermod -u 999 -g 999 node
 
 RUN adduser --disabled-password \
     --gecos "Default user" \
