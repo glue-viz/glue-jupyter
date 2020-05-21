@@ -11,6 +11,7 @@ FROM ubuntu:18.04
 RUN apt update
 RUN apt install -y python3 python3-pip git
 RUN pip3 install --upgrade pip
+RUN apt install curl
 RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 RUN sudo apt-get install -y nodejs
 
