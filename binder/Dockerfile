@@ -12,7 +12,7 @@ RUN apt update
 RUN apt install -y python3 python3-pip git
 RUN pip3 install --upgrade pip
 RUN apt install curl -y
-RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN sudo apt-get install -y nodejs
 
 # Set up user as required by mybinder docs:
