@@ -42,6 +42,36 @@ class BqplotPanZoomMode(InteractCheckableTool):
 
 
 @viewer_tool
+class BqplotPanZoomXMode(InteractCheckableTool):
+
+    icon = 'glue_move'
+    tool_id = 'bqplot:panzoom_x'
+    action_text = 'Pan and Zoom'
+    tool_tip = 'Interactively pan and zoom x axis only'
+
+    def __init__(self, viewer, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+
+        self.interact = PanZoom(scales={'x': [self.viewer.scale_x]})
+
+
+@viewer_tool
+class BqplotPanZoomYMode(InteractCheckableTool):
+
+    icon = 'glue_move'
+    tool_id = 'bqplot:panzoom_y'
+    action_text = 'Pan and Zoom'
+    tool_tip = 'Interactively pan and zoom y axis only'
+
+    def __init__(self, viewer, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+
+        self.interact = PanZoom(scales={'y': [self.viewer.scale_y]})
+
+
+@viewer_tool
 class BqplotRectangleMode(InteractCheckableTool):
 
     icon = 'glue_square'
