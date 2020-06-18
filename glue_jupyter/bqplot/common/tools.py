@@ -44,7 +44,7 @@ class BqplotPanZoomMode(InteractCheckableTool):
 @viewer_tool
 class BqplotPanZoomXMode(InteractCheckableTool):
 
-    icon = 'glue_move'
+    icon = 'glue_move_x'
     tool_id = 'bqplot:panzoom_x'
     action_text = 'Pan and Zoom'
     tool_tip = 'Interactively pan and zoom x axis only'
@@ -59,7 +59,7 @@ class BqplotPanZoomXMode(InteractCheckableTool):
 @viewer_tool
 class BqplotPanZoomYMode(InteractCheckableTool):
 
-    icon = 'glue_move'
+    icon = 'glue_move_y'
     tool_id = 'bqplot:panzoom_y'
     action_text = 'Pan and Zoom'
     tool_tip = 'Interactively pan and zoom y axis only'
