@@ -1,5 +1,7 @@
+import os
 import ipywidgets as widgets
 from IPython.display import display
+import ipyvue
 
 from glue.core.application_base import Application
 from glue.core.link_helpers import LinkSame
@@ -19,6 +21,10 @@ __all__ = ['JupyterApplication']
 # there too
 SUBSET_MODES = {'new': NewMode, 'replace': ReplaceMode, 'and': AndMode,
                 'or': OrMode, 'xor': XorMode, 'not': AndNotMode}
+
+ipyvue.register_component_from_file(
+    None, 'glue-float-field', os.path.join(os.path.dirname(__file__), 'widgets',
+                                           'glue_float_field.vue'))
 
 
 class JupyterApplication(Application):
