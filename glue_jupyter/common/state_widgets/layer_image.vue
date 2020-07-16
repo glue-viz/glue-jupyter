@@ -22,10 +22,10 @@
             <v-select label="percentile" :items="percentile_items" v-model="percentile_selected" hide-details />
         </div>
         <div>
-            <v-text-field label="min" v-model.number="glue_state.v_min" type="number" hide-details />
+            <glue-float-field label="min" :value.sync="glue_state.v_min" />
         </div>
         <div>
-            <v-text-field label="max" v-model.number="glue_state.v_max" type="number" hide-details />
+            <glue-float-field label="max" :value.sync="glue_state.v_max" />
         </div>
         <div v-if="color_mode === 'Colormaps'">
             <v-select label="colormap" :items="colormap_items" :value="glue_state.cmap" @change="set_colormap" />
