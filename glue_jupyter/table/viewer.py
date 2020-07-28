@@ -28,10 +28,12 @@ class TableBase(v.VuetifyTemplate):
 
     def _update(self):
         self._update_columns()
+        self._update_items()
+        self.total_length = len(self)
+        self.options = {**self.options, 'totalItems': self.total_length}
 
     def _update_columns(self):
         self.headers = self._get_headers()
-        self._update_items()
 
     @traitlets.observe('items_per_page')
     def _items_per_page(self, change):
@@ -97,14 +99,24 @@ class TableGlue(TableBase):
     data = traitlets.Any()  # Glue data object
     apply_filter = traitlets.Any()  # callback
 
+    @traitlets.observe('data')
+    def _on_data_change(self, change):
+        self._update()
+
     def __len__(self):
+        if self.data is None:
+            return 0
         return self.data.shape[0]
 
     def _get_headers(self):
+        if self.data is None:
+            return []
         components = [str(k) for k in self.data.main_components + self.data.derived_components]
         return [{'text': k, 'value': k, 'sortable': False} for k in components]
 
     def _get_items(self):
+        if self.data is None:
+            return []
         page = self.options['page'] - 1
         page_size = self.options['itemsPerPage']
         i1 = page * page_size
@@ -132,7 +144,7 @@ class TableLayerArtist(LayerArtist):
     def __init__(self, table_viewer, viewer_state, layer_state=None, layer=None):
         self._table_viewer = table_viewer
         super(TableLayerArtist, self).__init__(viewer_state, layer_state=layer_state, layer=layer)
-        self.redraw()
+        self._table_viewer.widget_table.data = layer.data
 
     def _refresh(self):
         self._table_viewer.redraw()
@@ -145,6 +157,13 @@ class TableLayerArtist(LayerArtist):
 
     def clear(self):
         self._refresh()
+
+    def remove(self):
+        data = None
+        if self._table_viewer.layers:
+            last_layer = self._table_viewer.layers[-1]
+            data = last_layer.layer.data
+        self._table_viewer.widget_table.data = data
 
 
 class TableLayerStateWidget(widgets.VBox):
@@ -173,10 +192,7 @@ class TableViewer(IPyWidgetView):
 
     def __init__(self, session, state=None):
         super(TableViewer, self).__init__(session, state=state)
-        self.widget_table = None
-
-    def create_table(self, data):
-        self.widget_table = TableGlue(data=data, apply_filter=self.apply_filter)
+        self.widget_table = TableGlue(data=None, apply_filter=self.apply_filter)
         self.create_layout()
 
     def redraw(self):
@@ -191,11 +207,6 @@ class TableViewer(IPyWidgetView):
         subset_state = ElementSubsetState(indices=selected_rows, data=self.layers[0].layer)
         mode = self.session.edit_subset_mode
         mode.update(self._data, subset_state, focus_data=self.layers[0].layer)
-
-    def add_data(self, data, color=None, alpha=None, **layer_state):
-        self.create_table(data)
-        result = super().add_data(data, color=color, alpha=alpha, **layer_state)
-        return result
 
     @property
     def figure_widget(self):
