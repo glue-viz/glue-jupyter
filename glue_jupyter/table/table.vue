@@ -30,7 +30,7 @@
         </thead>
       </template>
       <template v-slot:item="props">
-        <tr>
+        <tr @click="on_row_clicked(props.item.__row__)" :class="{'highlightedRow': props.item.__row__ === highlighted}">
           <td style="padding: 0 10px" class="text-xs-left">
             <i>{{ props.item.__row__ }}</i>
           </td>
@@ -61,3 +61,10 @@
     </v-data-table>
   </v-slide-x-transition>
 </template>
+
+
+<style scoped>
+.highlightedRow {
+    background-color: #E3F2FD;
+}
+</style>

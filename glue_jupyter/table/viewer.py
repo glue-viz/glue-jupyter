@@ -25,6 +25,7 @@ class TableBase(v.VuetifyTemplate):
     selections = traitlets.Any([]).tag(sync=True)
     selection_colors = traitlets.Any([]).tag(sync=True)
     selection_enabled = traitlets.Bool(True).tag(sync=True)
+    highlighted = traitlets.Int(None, allow_none=True).tag(sync=True)
 
     def _update(self):
         self._update_columns()
@@ -93,6 +94,9 @@ class TableBase(v.VuetifyTemplate):
             self.checked = copy
         if is_checked and row not in self.checked:
             self.checked = self.checked + [row]
+
+    def vue_on_row_clicked(self, index):
+        self.highlighted = index
 
 
 class TableGlue(TableBase):
