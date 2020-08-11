@@ -1,6 +1,12 @@
+import numpy as np
+
+from glue_jupyter.bqplot.image.state import BqplotImageLayerState
+
 from glue.viewers.image.layer_artist import BaseImageLayerArtist, ImageLayerArtist, ImageSubsetArray
 from glue.viewers.image.state import ImageSubsetLayerState
 from glue.core.fixed_resolution_buffer import ARRAY_CACHE, PIXEL_CACHE
+
+from bqplot_image_gl import Contour
 
 from .frb_mark import FRBImage
 
@@ -8,6 +14,15 @@ __all__ = ['BqplotImageLayerArtist', 'BqplotImageSubsetLayerArtist']
 
 
 class BqplotImageLayerArtist(ImageLayerArtist):
+
+    _layer_state_cls = BqplotImageLayerState
+
+    def __init__(self, view, *args, **kwargs):
+        super().__init__(view, *args, **kwargs)
+        self.view = view
+        self.contour_artist = Contour(image=self.view._composite_image.image,
+                                      scales=self.view._composite_image.scales)
+        self.view.figure.marks = list(self.view.figure.marks) + [self.contour_artist]
 
     def enable(self):
         if self.enabled:
@@ -42,6 +57,30 @@ class BqplotImageLayerArtist(ImageLayerArtist):
         else:
             return super().get_image_data(*args, **kwargs)
 
+    def _update_visual_attributes(self, redraw=True):
+
+        if not self.enabled:
+            return
+
+        super()._update_visual_attributes(redraw=redraw)
+
+        self.contour_artist.visible = self.state.visible and self.state.contour_visible
+
+        # TODO: change visual appearance of contour artist
+
+    def _update_contour(self):
+        # TODO: make it possible to customize number of contours
+        # TODO: make it possible (maybe) to have different vmin/vmax for contour than for image
+        self.contour_artist.image = self.image_artist.image
+        self.contour_artist.level = np.linspace(self.state.v_min, self.state.v_max, 10)
+
+    def _update_image(self, force=False, **kwargs):
+
+        super()._update_image(force=force, **kwargs)
+
+        # TODO: Determine under what conditions to update contours
+        self._update_contour()
+
 
 class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
 
@@ -59,7 +98,7 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         self.subset_array = ImageSubsetArray(self._viewer_state, self)
 
         self.image_artist = FRBImage(view, self.subset_array)
-        self.view.figure.marks = list(self.view.figure.marks) + [self.image_artist]
+        self.view.figure.marks = list(self.view.figure.marks) + [self.image_artist, self.contour_artist]
 
     def _update_data(self):
         self.image_artist.invalidate_cache()

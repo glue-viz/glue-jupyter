@@ -17,6 +17,8 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
 
     glue_state = GlueState().tag(sync=True)
 
+    # TODO: expose toggle to turn on image and/or contour
+
     attribute_items = traitlets.List().tag(sync=True)
     attribute_selected = traitlets.Int(allow_none=True).tag(sync=True)
 
