@@ -1,14 +1,13 @@
 import os
 
-import traitlets
-import ipywidgets as widgets
 import ipyvuetify as v
-
-from glue.core.subset import ElementSubsetState
+import ipywidgets as widgets
+import traitlets
 from glue.core.data import Subset
+from glue.core.subset import ElementSubsetState
 from glue.viewers.common.layer_artist import LayerArtist
-from ..view import IPyWidgetView
 
+from ..view import IPyWidgetView
 
 with open(os.path.join(os.path.dirname(__file__), "table.vue")) as f:
     TEMPLATE = f.read()
@@ -25,6 +24,7 @@ class TableBase(v.VuetifyTemplate):
     selections = traitlets.Any([]).tag(sync=True)
     selection_colors = traitlets.Any([]).tag(sync=True)
     selection_enabled = traitlets.Bool(True).tag(sync=True)
+    highlighted = traitlets.Int(None, allow_none=True).tag(sync=True)
 
     def _update(self):
         self._update_columns()
@@ -93,6 +93,9 @@ class TableBase(v.VuetifyTemplate):
             self.checked = copy
         if is_checked and row not in self.checked:
             self.checked = self.checked + [row]
+
+    def vue_on_row_clicked(self, index):
+        self.highlighted = index
 
 
 class TableGlue(TableBase):
