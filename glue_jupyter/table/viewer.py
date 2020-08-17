@@ -1,14 +1,13 @@
 import os
 
-import traitlets
-import ipywidgets as widgets
 import ipyvuetify as v
-
-from glue.core.subset import ElementSubsetState
+import ipywidgets as widgets
+import traitlets
 from glue.core.data import Subset
+from glue.core.subset import ElementSubsetState
 from glue.viewers.common.layer_artist import LayerArtist
-from ..view import IPyWidgetView
 
+from ..view import IPyWidgetView
 
 with open(os.path.join(os.path.dirname(__file__), "table.vue")) as f:
     TEMPLATE = f.read()
