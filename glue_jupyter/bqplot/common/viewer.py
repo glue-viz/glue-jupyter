@@ -4,8 +4,8 @@ from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
 
 from ...view import IPyWidgetView
-from ...link import link, on_change
-from ...utils import float_or_none
+from ...link import dlink, on_change
+from ...utils import float_or_none, debounced
 from .tools import ROIClickAndDrag
 
 __all__ = ['BqplotBaseView']
@@ -69,14 +69,34 @@ class BqplotBaseView(IPyWidgetView):
         if self.is2d:
             self.state.add_callback('y_att', update_axes)
 
-        link((self.state, 'x_min'), (self.scale_x, 'min'), float_or_none)
-        link((self.state, 'x_max'), (self.scale_x, 'max'), float_or_none)
-        link((self.state, 'y_min'), (self.scale_y, 'min'), float_or_none)
-        link((self.state, 'y_max'), (self.scale_y, 'max'), float_or_none)
+        self.scale_x.observe(self.update_glue_scales, names=['min', 'max'])
+        self.scale_y.observe(self.update_glue_scales, names=['min', 'max'])
+
+        dlink((self.state, 'x_min'), (self.scale_x, 'min'), float_or_none)
+        dlink((self.state, 'x_max'), (self.scale_x, 'max'), float_or_none)
+        dlink((self.state, 'y_min'), (self.scale_y, 'min'), float_or_none)
+        dlink((self.state, 'y_max'), (self.scale_y, 'max'), float_or_none)
 
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
         self.create_layout()
+
+    @debounced(delay_seconds=0.5, method=True)
+    def update_glue_scales(self, *ignored):
+        # To prevent glue from calling _adjust_limit_aspect() as each value comes in, we wait for
+        # all values to be set and then update the glue-state atomically.
+        #
+        # If this is not done, the _adjust_limit_aspect() starts calculating with one of the new
+        # values, which changes x_min, x_max, y_min and y_max, which gets synced to the front-end,
+        # which causes another change resulting in a short feedback loop that ends with the values
+        # being different than originally set.
+
+        state = self.state.as_dict()
+        state['x_min'] = self.scale_x.min
+        state['x_max'] = self.scale_x.max
+        state['y_min'] = self.scale_y.min
+        state['y_max'] = self.scale_y.max
+        self.state.update_from_dict(state)
 
     @property
     def figure_widget(self):
