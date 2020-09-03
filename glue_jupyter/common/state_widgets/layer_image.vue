@@ -55,15 +55,15 @@
             <div v-if="!has_contour || glue_state.bitmap_visible">
                 <div>
                     <v-subheader class="pl-0 slider-label">opacity</v-subheader>
-                    <v-slider max="1" step="0.01" :value="glue_state.alpha" @end="setAlpha" hide-details />
+                    <glue-throttled-slider wait="300" max="1" step="0.01" :value.sync="glue_state.alpha" hide-details />
                 </div>
                 <div>
                     <v-subheader class="pl-0 slider-label">contrast</v-subheader>
-                    <v-slider max="4" step="0.01" :value="glue_state.contrast" @end="setContrast" hide-details />
+                    <glue-throttled-slider wait="300" max="4" step="0.01" :value.sync="glue_state.contrast" hide-details />
                 </div>
                 <div>
                     <v-subheader class="pl-0 slider-label">bias</v-subheader>
-                    <v-slider max="1" step="0.01" :value="glue_state.bias" @end="setBias" hide-details />
+                    <glue-throttled-slider wait="300" max="1" step="0.01" :value.sync="glue_state.bias" hide-details />
                 </div>
                 <div>
                     <v-select label="stretch" :items="stretch_items" v-model="stretch_selected" hide-details />
