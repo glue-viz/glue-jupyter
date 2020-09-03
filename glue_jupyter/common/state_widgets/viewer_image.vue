@@ -24,8 +24,7 @@
         </div>
         <div v-for="slider of sliders">
             <v-subheader class="pl-0 slider-label">{{ slider.label }}: {{ glue_state.slices[slider.index] }} ({{  slider.world_value  }} {{ slider.unit }})</v-subheader>
-            <v-slider :max="slider.max" :value="glue_state.slices[slider.index]"
-                      @input="throttled_set_slice(slider.index, $event)" hide-details  />
+            <glue-throttled-slider wait="300" :max="slider.max" :value.sync="glue_state.slices[slider.index]" hide-details />
         </div>
     </div>
 </template>
@@ -34,14 +33,6 @@
         created() {
             this.EQUAL = 'equal';
             this.AUTO = 'auto';
-
-            this.throttled_set_slice = _.throttle(
-                function(index, value) {
-                    /* change a copy of the array so a change is detected */
-                    const newValue = this.glue_state.slices.concat();
-                    newValue[index] = value;
-                    this.glue_state.slices = newValue;
-                }, 300);
         },
         methods: {
             setEqualAspect(value) {

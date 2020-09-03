@@ -22,9 +22,10 @@ __all__ = ['JupyterApplication']
 SUBSET_MODES = {'new': NewMode, 'replace': ReplaceMode, 'and': AndMode,
                 'or': OrMode, 'xor': XorMode, 'not': AndNotMode}
 
-ipyvue.register_component_from_file(
-    None, 'glue-float-field', os.path.join(os.path.dirname(__file__), 'widgets',
-                                           'glue_float_field.vue'))
+for name in ['glue-float-field', 'glue-throttled-slider']:
+    file = f'{name.replace("-", "_")}.vue'
+    ipyvue.register_component_from_file(
+        None, name, os.path.join(os.path.dirname(__file__), 'widgets', file))
 
 
 class JupyterApplication(Application):
