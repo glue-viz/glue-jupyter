@@ -5,7 +5,7 @@ from glue.core.command import ApplySubsetState
 
 from ...view import IPyWidgetView
 from ...link import dlink, on_change
-from ...utils import float_or_none, debounced
+from ...utils import float_or_none, debounced, get_ioloop
 from .tools import ROIClickAndDrag
 
 __all__ = ['BqplotBaseView']
@@ -91,12 +91,17 @@ class BqplotBaseView(IPyWidgetView):
         # which causes another change resulting in a short feedback loop that ends with the values
         # being different than originally set.
 
-        state = self.state.as_dict()
-        state['x_min'] = self.scale_x.min
-        state['x_max'] = self.scale_x.max
-        state['y_min'] = self.scale_y.min
-        state['y_max'] = self.scale_y.max
-        self.state.update_from_dict(state)
+        # In the unit tests @debounced does not work and will lead to unrelated failing tests. The
+        # updating of glue-state to widgets isn't tested anyway, so skip this code when we don't
+        # detect an ioloop.
+        # TODO: come up with a better solution for this problem
+        if get_ioloop():
+            state = self.state.as_dict()
+            state['x_min'] = self.scale_x.min
+            state['x_max'] = self.scale_x.max
+            state['y_min'] = self.scale_y.min
+            state['y_max'] = self.scale_y.max
+            self.state.update_from_dict(state)
 
     @property
     def figure_widget(self):
