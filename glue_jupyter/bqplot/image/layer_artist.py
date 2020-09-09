@@ -1,10 +1,10 @@
-import numpy as np
+import skimage.measure
 
 from glue_jupyter.bqplot.image.state import BqplotImageLayerState
-
 from glue.viewers.image.layer_artist import BaseImageLayerArtist, ImageLayerArtist, ImageSubsetArray
 from glue.viewers.image.state import ImageSubsetLayerState
 from glue.core.fixed_resolution_buffer import ARRAY_CACHE, PIXEL_CACHE
+from ...link import link
 
 from bqplot_image_gl import Contour
 
@@ -19,10 +19,17 @@ class BqplotImageLayerArtist(ImageLayerArtist):
 
     def __init__(self, view, *args, **kwargs):
         super().__init__(view, *args, **kwargs)
+        # TODO: we should probably use a lru cache to avoid having a 'memleak'
+        self._contour_line_cache = {}
         self.view = view
-        self.contour_artist = Contour(image=self.view._composite_image.image,
-                                      scales=self.view._composite_image.scales)
+        self.contour_artist = Contour(contour_lines=[], label_steps=1000,
+                                      scales=self.view._composite_image.scales,
+                                      color=self.state.contour_colors,
+                                      visible=self.state.visible and self.state.contour_visible)
         self.view.figure.marks = list(self.view.figure.marks) + [self.contour_artist]
+        link((self.state, 'contour_colors'), (self.contour_artist, 'color'))
+        link((self.state, 'levels'), (self.contour_artist, 'level'))
+        link((self.state, 'labels'), (self.contour_artist, 'label'))
 
     def enable(self):
         if self.enabled:
@@ -38,12 +45,10 @@ class BqplotImageLayerArtist(ImageLayerArtist):
 
     def remove(self):
         super().remove()
+        marks = list(self.view.figure.marks)
+        marks.remove(self.contour_artist)
+        self.view.figure.marks = marks
         self.uuid = None
-
-    def _update_image(self, *args, **kwargs):
-        if self.uuid is None:
-            return
-        super()._update_image(*args, **kwargs)
 
     def get_image_shape(self, *args, **kwargs):
         if self.uuid is None:
@@ -57,29 +62,82 @@ class BqplotImageLayerArtist(ImageLayerArtist):
         else:
             return super().get_image_data(*args, **kwargs)
 
-    def _update_visual_attributes(self, redraw=True):
+    def _update_visual_attributes(self):
+        # TODO: this is a copy of the super method, adding in the bitmap_visible state
 
         if not self.enabled:
             return
 
-        super()._update_visual_attributes(redraw=redraw)
+        if self._viewer_state.color_mode == 'Colormaps':
+            color = self.state.cmap
+        else:
+            color = self.state.color
 
+        self.composite.set(self.uuid,
+                           clim=(self.state.v_min, self.state.v_max),
+                           visible=self.state.visible and self.state.bitmap_visible,
+                           zorder=self.state.zorder,
+                           color=color,
+                           contrast=self.state.contrast,
+                           bias=self.state.bias,
+                           alpha=self.state.alpha,
+                           stretch=self.state.stretch)
+
+        self.composite_image.invalidate_cache()
+
+        was_visble = self.contour_artist.visible
         self.contour_artist.visible = self.state.visible and self.state.contour_visible
+        if not was_visble and self.contour_artist.visible:
+            # switching from invisible to visible may leave the contour lines in an inconsistemt
+            # state, since we don't update them when invisible, so we have to update them
+            self._update_contour_lines()
+        self.redraw()
 
-        # TODO: change visual appearance of contour artist
+    def _update_contour_lines(self):
+        if not self.contour_artist.visible:
+            return  # don't compute if not visible
+        contour_data = self.get_image_data()
+        if contour_data is None:
+            self.contour_artist.contour_lines = []
+            return
 
-    def _update_contour(self):
-        # TODO: make it possible to customize number of contours
-        # TODO: make it possible (maybe) to have different vmin/vmax for contour than for image
-        self.contour_artist.image = self.image_artist.image
-        self.contour_artist.level = np.linspace(self.state.v_min, self.state.v_max, 10)
+        for level in self.state.levels:
+            if level not in self._contour_line_cache:
+                contour_line_set = skimage.measure.find_contours(contour_data.T, level)
+                contour_line_set = [k for k in contour_line_set]
+                self._contour_line_cache[level] = contour_line_set
+        self.contour_artist.level = self.state.levels
+        self.contour_artist.contour_lines = [self._contour_line_cache[level] for level
+                                             in self.state.levels]
 
     def _update_image(self, force=False, **kwargs):
+        # ideally, we call super first, and see if we have any extra work to do
+        # but because .pop_changed_properties  pops all changes, we don't have access to it
+        # super()._update_image(force=force, **kwargs)
+        if self.uuid is None or self.state.attribute is None or self.state.layer is None:
+            return
 
-        super()._update_image(force=force, **kwargs)
+        changed = set() if force else self.pop_changed_properties()
 
-        # TODO: Determine under what conditions to update contours
-        self._update_contour()
+        if force or any(prop in changed for prop in ('layer', 'attribute',
+                                                     'slices', 'x_att', 'y_att')):
+            self._update_image_data()
+            force = True  # make sure scaling and visual attributes are updated
+
+        if force or any(prop in changed for prop in ('v_min', 'v_max', 'contrast',
+                                                     'bias', 'alpha', 'color_mode',
+                                                     'cmap', 'color', 'zorder',
+                                                     'visible', 'stretch',
+                                                     'bitmap_visible', 'contour_visible')):
+            self._update_visual_attributes()
+        if force or 'levels' in changed:
+            self._update_contour_lines()
+
+    def _update_image_data(self, *args, **kwargs):
+        super()._update_image_data(*args, **kwargs)
+        # if the image data change, the contour lines are invalid
+        self._contour_line_cache.clear()
+        self._update_contour_lines()
 
 
 class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
@@ -98,7 +156,7 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         self.subset_array = ImageSubsetArray(self._viewer_state, self)
 
         self.image_artist = FRBImage(view, self.subset_array)
-        self.view.figure.marks = list(self.view.figure.marks) + [self.image_artist, self.contour_artist]
+        self.view.figure.marks = list(self.view.figure.marks) + [self.image_artist]
 
     def _update_data(self):
         self.image_artist.invalidate_cache()

@@ -48,6 +48,25 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
 
         link_glue(self, 'color_mode', layer_state.viewer_state)
 
+        # we only go from glue state to the text version of the level list
+        # the other way around is handled in _on_change_c_levels_txt
+        def levels2str(levels):
+            return ", ".join('%g' % v for v in levels)
+        dlink((self.glue_state, 'levels'), (self, 'c_levels_txt'), levels2str)
+
+    @traitlets.observe('c_levels_txt')
+    def _on_change_c_levels_txt(self, change):
+        try:
+            parts = change['new'].split(',')
+            float_list_str = [float(v.strip()) for v in parts]
+        except Exception as e:
+            self.c_levels_error = str(e)
+            return
+
+        if self.glue_state.level_mode == "Custom":
+            self.glue_state.levels = float_list_str
+        self.c_levels_error = ''
+
     def vue_set_colormap(self, data):
         print(f'{data}')
 
