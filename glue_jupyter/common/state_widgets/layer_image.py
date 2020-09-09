@@ -2,7 +2,7 @@ from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox
 from glue.config import colormaps
 from glue.utils import color2hex
 
-from ...link import link
+from ...link import link, dlink
 
 import ipyvuetify as v
 import traitlets
@@ -31,11 +31,18 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
     colormap_items = traitlets.List().tag(sync=True)
     color_mode = traitlets.Unicode().tag(sync=True)
 
+    c_levels_txt = traitlets.Unicode().tag(sync=True)
+    c_levels_error = traitlets.Unicode().tag(sync=True)
+
+    has_contour = traitlets.Bool().tag(sync=True)
+
     def __init__(self, layer_state):
         super().__init__()
 
         self.layer_state = layer_state
         self.glue_state = layer_state
+
+        self.has_contour = hasattr(layer_state, "contour_visible")
 
         link_glue_choices(self, layer_state, 'attribute')
         link_glue_choices(self, layer_state, 'stretch')
@@ -50,9 +57,10 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
 
         # we only go from glue state to the text version of the level list
         # the other way around is handled in _on_change_c_levels_txt
-        def levels2str(levels):
-            return ", ".join('%g' % v for v in levels)
-        dlink((self.glue_state, 'levels'), (self, 'c_levels_txt'), levels2str)
+        if self.has_contour:
+            def levels2str(levels):
+                return ", ".join('%g' % v for v in levels)
+            dlink((self.glue_state, 'levels'), (self, 'c_levels_txt'), levels2str)
 
     @traitlets.observe('c_levels_txt')
     def _on_change_c_levels_txt(self, change):
