@@ -26,12 +26,21 @@ class LayerOptionsWidget(v.VuetifyTemplate):
 
         widgetCache = WidgetCache()
 
-        def layer_to_dict(layer_artist, index):
+        self.current_layers_data = None
+
+        def layer_data(layer_artist):
             if isinstance(layer_artist.state.layer, Subset):
                 label = layer_artist.layer.data.label + ':' + layer_artist.state.layer.label
             else:
                 label = layer_artist.state.layer.label
 
+            return {
+                'color': getattr(layer_artist.state, 'color', ''),
+                'label': label,
+                'visible': layer_artist.state.visible,
+            }
+
+        def layer_to_dict(layer_artist, index):
             def make_layer_panel():
                 widget_cls = viewer._layer_style_widget_cls
                 if isinstance(widget_cls, dict):
@@ -39,15 +48,24 @@ class LayerOptionsWidget(v.VuetifyTemplate):
                 else:
                     return widget_cls(layer_artist.state)
 
-            return {
+            data = layer_data(layer_artist)
+            data.update({
                 'index': index,
-                'color': getattr(layer_artist.state, 'color', ''),
-                'label': label,
-                'visible': layer_artist.state.visible,
-                'layer_panel': widgetCache.get_or_create(layer_artist, make_layer_panel),
-            }
+                'layer_panel': widgetCache.get_or_create(layer_artist, make_layer_panel)
+            })
+            return data
 
         def _update_layers_from_glue_state(*args):
+            new_layers_data = [layer_data(layer) for layer in self.viewer.layers]
+
+            # During the creation of the new widgets, layers can change again, causing a
+            # recursive loop. Short circuit this by checking if the content of the layers has
+            # actually changed.
+            if self.current_layers_data == new_layers_data:
+                return
+
+            self.current_layers_data = new_layers_data
+
             self.layers = [layer_to_dict(layer_artist, i) for i, layer_artist in
                            enumerate(self.viewer.layers)]
 
