@@ -1,4 +1,4 @@
-0.2 (unreleased)
+0.2 (2020-09-17)
 ================
 
 * De-select selection tools after a selection has been made. [#164]
