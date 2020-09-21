@@ -46,7 +46,8 @@ class BqplotImageLayerArtist(ImageLayerArtist):
     def remove(self):
         super().remove()
         marks = list(self.view.figure.marks)
-        marks.remove(self.contour_artist)
+        if self.contour_artist in marks:
+            marks.remove(self.contour_artist)
         self.view.figure.marks = marks
         self.uuid = None
 
