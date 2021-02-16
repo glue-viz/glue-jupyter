@@ -1,3 +1,9 @@
+0.2.2 (unreleased)
+==================
+
+* Fixed a bug that caused the image percentile value to not have any
+  effect. [#208]
+
 0.2.1 (2020-09-21)
 ==================
 
