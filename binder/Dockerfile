@@ -15,7 +15,7 @@ RUN pip3 install --upgrade pip
 # Use curl to install nodejs
 
 RUN apt install curl -y
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt install -y nodejs
 
 # Set up user as required by mybinder docs:
