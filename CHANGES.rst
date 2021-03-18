@@ -1,5 +1,8 @@
-0.2.2 (unreleased)
+0.2.2 (2021-03-18)
 ==================
+
+* Fixed slices slider in image viewer which under certain conditions
+  changed the state when an empty slices property was received. [#211]
 
 * Fixed a bug that caused the image percentile value to not have any
   effect. [#208]
