@@ -1,17 +1,32 @@
 import ipyvuetify as v
 import traitlets
-from ipywidgets import Image
+import base64
 
 from glue.icons import icon_path
 import glue.viewers.common.tool
+from glue_jupyter.vuetify_helpers import load_template
 
 __all__ = ['BasicJupyterToolbar']
 
-ICON_WIDTH = 20
+_icons = {}
 
 
-class BasicJupyterToolbar(v.BtnToggle):
-    active_tool = traitlets.Instance(glue.viewers.common.tool.Tool, allow_none=True)
+def read_icon(file_name, format):
+    if file_name not in _icons:
+        with open(file_name, "rb") as f:
+            _icons[file_name] =\
+                f'data:image/{format};base64,{base64.b64encode(f.read()).decode("ascii")}'
+
+    return _icons[file_name]
+
+
+class BasicJupyterToolbar(v.VuetifyTemplate):
+    template = load_template('basic_jupyter_toolbar.vue', __file__)
+
+    active_tool = traitlets.Instance(glue.viewers.common.tool.Tool, allow_none=True,
+                                     default_value=None)
+    tools_data = traitlets.Dict(default_value={}).tag(sync=True)
+    active_tool_id = traitlets.Any().tag(sync=True)
 
     def __init__(self, viewer):
         self.output = viewer.output_widget
@@ -21,9 +36,9 @@ class BasicJupyterToolbar(v.BtnToggle):
             self._default_mouse_mode.activate()
         else:
             self._default_mouse_mode = None
-        super().__init__(v_model=None, class_='transparent')
+        super().__init__()
 
-    @traitlets.observe('v_model')
+    @traitlets.observe('active_tool_id')
     def _on_change_v_model(self, change):
         with self.output:
             if change.new is not None:
@@ -40,25 +55,18 @@ class BasicJupyterToolbar(v.BtnToggle):
                 self._default_mouse_mode.deactivate()
         if change.new:
             change.new.activate()
-            self.v_model = change.new.tool_id
+            self.active_tool_id = change.new.tool_id
         else:
-            self.v_model = None
+            self.active_tool_id = None
             if self._default_mouse_mode is not None:
                 self._default_mouse_mode.activate()
 
     def add_tool(self, tool):
         self.tools[tool.tool_id] = tool
-        icon = Image.from_file(icon_path(tool.icon, icon_format='svg'), width=ICON_WIDTH)
-        button = v.Btn(v_on="tooltip.on", icon=True, children=[icon], value=tool.tool_id)
-        annotated = v.Tooltip(
-            bottom=True,
-            v_slots=[{
-                'name': 'activator',
-                'variable': 'tooltip',
-                'children': button}],
-            children=[tool.tool_tip])
-        self.children = list(self.children) + [annotated]
-
-
-# traitlets bug?
-BasicJupyterToolbar.active_tool.default_value = None
+        self.tools_data = {
+            **self.tools_data,
+            tool.tool_id: {
+                'tooltip': tool.tool_tip,
+                'img': read_icon(icon_path(tool.icon), 'svg')
+            }
+        }

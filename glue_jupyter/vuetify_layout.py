@@ -3,46 +3,35 @@
 # default layout.
 
 import ipyvuetify as v
-
+import traitlets
+import ipywidgets as widgets
+from ipywidgets import widget_serialization
+from glue_jupyter.vuetify_helpers import load_template
 __all__ = ['vuetify_layout_factory']
+
+shared_layout = widgets.Layout()
+
+
+class LayoutWidget(v.VuetifyTemplate):
+    template = load_template('layout_widget.vue', __file__)
+
+    controls = traitlets.Dict().tag(sync=True, **widget_serialization)
+    drawer_open = traitlets.Bool(False).tag(sync=True)
+    open_panels = traitlets.List(default_value=[0, 1]).tag(sync=True)
+
+    def __init__(self, viewer, *args, **kwargs):
+        self.layout = shared_layout
+        super().__init__(*args, **kwargs)
+        self.controls = dict(
+            toolbar_selection_tools=viewer.toolbar_selection_tools,
+            toolbar_selection_mode=viewer.toolbar_selection_mode,
+            toolbar_active_subset=viewer.toolbar_active_subset,
+            figure_widget=viewer.figure_widget,
+            output_widget=viewer.output_widget,
+            viewer_options=viewer.viewer_options,
+            layer_options=viewer.layer_options,
+        )
 
 
 def vuetify_layout_factory(viewer):
-
-    def on_click(widget, event, data):
-        drawer.v_model = not drawer.v_model
-
-    sidebar_button = v.AppBarNavIcon()
-    sidebar_button.on_event('click', on_click)
-
-    options_panel = v.ExpansionPanels(
-        v_model=[0, 1], multiple=True, accordion=True, style_='padding-left: 1px; min-width: 200px',
-        children=[
-            v.ExpansionPanel(children=[
-                v.ExpansionPanelHeader(class_='font-weight-bold', children=['Viewer Options']),
-                v.ExpansionPanelContent(children=[viewer.viewer_options])]),
-            v.ExpansionPanel(children=[
-                v.ExpansionPanelHeader(class_='font-weight-bold', children=['Layer Options']),
-                v.ExpansionPanelContent(children=[viewer.layer_options])])])
-
-    drawer = v.NavigationDrawer(v_model=False, absolute=True, right=True,
-                                children=[sidebar_button,
-                                          options_panel], width="min-content")
-
-    toolbar = v.Toolbar(dense=True, class_='elevation-0',
-                        children=[v.ToolbarItems(children=[viewer.toolbar_selection_tools,
-                                                           viewer.toolbar_selection_mode,
-                                                           viewer.toolbar_active_subset]),
-                                  v.Spacer(),
-                                  sidebar_button])
-
-    layout = v.Html(tag='div', children=[
-        toolbar,
-        v.Row(no_gutters=True, children=[
-            v.Col(cols=12, children=[viewer.figure_widget]),
-            v.Col(cols=12, children=[viewer.output_widget])
-        ]),
-        drawer
-    ])
-
-    return layout
+    return LayoutWidget(viewer)
