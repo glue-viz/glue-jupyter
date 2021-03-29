@@ -3,6 +3,8 @@ import bqplot
 from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
 
+from bqplot_image_gl.interacts import MouseInteraction, keyboard_events, mouse_events
+
 from ...view import IPyWidgetView
 from ...link import dlink, on_change
 from ...utils import float_or_none, debounced, get_ioloop
@@ -16,7 +18,7 @@ class BqplotBaseView(IPyWidgetView):
     allow_duplicate_data = False
     allow_duplicate_subset = False
     is2d = True
-    _default_mouse_mode_cls = ROIClickAndDrag
+    # _default_mouse_mode_cls = ROIClickAndDrag
 
     def __init__(self, session, state=None):
 
@@ -38,6 +40,17 @@ class BqplotBaseView(IPyWidgetView):
         self._fig_margin_zero = dict(self.figure.fig_margin)
         self._fig_margin_zero['left'] = 0
         self._fig_margin_zero['bottom'] = 0
+
+        # Set up a MouseInteraction instance here tied to the figure. In the
+        # tools we then chain this with any other active interact so that we can
+        # always listen for certain events. This allows us to then have e.g.
+        # mouse-over coordinates regardless of whether tools are active or not.
+        self._mouse_interact = MouseInteraction(x_scale=self.scale_x,
+                                                y_scale=self.scale_y,
+                                                move_throttle=70,
+                                                events=keyboard_events + mouse_events)
+        self._mouse_interact.on_msg(self._on_mouse_interaction)
+        self.figure.interaction = self._mouse_interact
 
         super(BqplotBaseView, self).__init__(session, state=state)
 
@@ -80,6 +93,11 @@ class BqplotBaseView(IPyWidgetView):
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
         self.create_layout()
+
+    def _on_mouse_interaction(self, interaction, data, buffers):
+        # For now just print that an interaction was received, but next we want to provide
+        # an easy way for users to define custom handlers for specific events or key presses
+        print('mouse interaction:', str(data))
 
     @debounced(delay_seconds=0.5, method=True)
     def update_glue_scales(self, *ignored):
