@@ -109,7 +109,7 @@ class BqplotBaseView(IPyWidgetView):
         * 'dblclick'
         * 'mouseenter'
         * 'mouseleave'
-        * 'contextmenu' 
+        * 'contextmenu'
         * 'mousemove'
         * 'keydown'
         * 'keyup'
