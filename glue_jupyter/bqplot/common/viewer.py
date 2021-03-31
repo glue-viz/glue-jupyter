@@ -5,6 +5,8 @@ from glue.core.command import ApplySubsetState
 
 from bqplot_image_gl.interacts import MouseInteraction, keyboard_events, mouse_events
 
+from echo.callback_container import CallbackContainer
+
 from ...view import IPyWidgetView
 from ...link import dlink, on_change
 from ...utils import float_or_none, debounced, get_ioloop
@@ -18,7 +20,7 @@ class BqplotBaseView(IPyWidgetView):
     allow_duplicate_data = False
     allow_duplicate_subset = False
     is2d = True
-    # _default_mouse_mode_cls = ROIClickAndDrag
+    _default_mouse_mode_cls = ROIClickAndDrag
 
     def __init__(self, session, state=None):
 
@@ -45,6 +47,7 @@ class BqplotBaseView(IPyWidgetView):
         # tools we then chain this with any other active interact so that we can
         # always listen for certain events. This allows us to then have e.g.
         # mouse-over coordinates regardless of whether tools are active or not.
+        self._mouse_callbacks = CallbackContainer()
         self._mouse_interact = MouseInteraction(x_scale=self.scale_x,
                                                 y_scale=self.scale_y,
                                                 move_throttle=70,
@@ -94,10 +97,24 @@ class BqplotBaseView(IPyWidgetView):
 
         self.create_layout()
 
+    def add_mouse_callback(self, callback):
+        """
+        Add a callback function for mouse and keyboard events when the mouse is over the figure.
+
+        Functions should take a single argument which is a dictionary containing the event
+        details.
+        """
+        self._mouse_callbacks.append(callback)
+
+    def remove_mouse_callback(self, callback):
+        """
+        Remove a callback function for mouse and keyboard events.
+        """
+        self._mouse_callbacks.remove(callback)
+
     def _on_mouse_interaction(self, interaction, data, buffers):
-        # For now just print that an interaction was received, but next we want to provide
-        # an easy way for users to define custom handlers for specific events or key presses
-        print('mouse interaction:', str(data))
+        for callback in self._mouse_callbacks:
+            callback(data)
 
     @debounced(delay_seconds=0.5, method=True)
     def update_glue_scales(self, *ignored):
