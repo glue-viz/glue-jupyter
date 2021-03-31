@@ -4,6 +4,9 @@
 * Fixed implementation of ``JupyterApplication.viewers`` to now return
   list of viewers as opposed to empty list. [#214]
 
+* Add the ability to register callback functions for mouse and keyboard
+  events with the bqplot viewers. [#213]
+  
 0.2.2 (2021-03-18)
 ==================
 

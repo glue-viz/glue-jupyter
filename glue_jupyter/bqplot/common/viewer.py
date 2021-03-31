@@ -47,7 +47,7 @@ class BqplotBaseView(IPyWidgetView):
         # tools we then chain this with any other active interact so that we can
         # always listen for certain events. This allows us to then have e.g.
         # mouse-over coordinates regardless of whether tools are active or not.
-        self._mouse_callbacks = CallbackContainer()
+        self._event_callbacks = CallbackContainer()
         self._mouse_interact = MouseInteraction(x_scale=self.scale_x,
                                                 y_scale=self.scale_y,
                                                 move_throttle=70,
@@ -97,23 +97,23 @@ class BqplotBaseView(IPyWidgetView):
 
         self.create_layout()
 
-    def add_mouse_callback(self, callback):
+    def add_event_callback(self, callback):
         """
         Add a callback function for mouse and keyboard events when the mouse is over the figure.
 
         Functions should take a single argument which is a dictionary containing the event
         details.
         """
-        self._mouse_callbacks.append(callback)
+        self._event_callbacks.append(callback)
 
-    def remove_mouse_callback(self, callback):
+    def remove_event_callback(self, callback):
         """
         Remove a callback function for mouse and keyboard events.
         """
-        self._mouse_callbacks.remove(callback)
+        self._event_callbacks.remove(callback)
 
     def _on_mouse_interaction(self, interaction, data, buffers):
-        for callback in self._mouse_callbacks:
+        for callback in self._event_callbacks:
             callback(data)
 
     @debounced(delay_seconds=0.5, method=True)
