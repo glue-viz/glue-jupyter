@@ -102,7 +102,19 @@ class BqplotBaseView(IPyWidgetView):
         Add a callback function for mouse and keyboard events when the mouse is over the figure.
 
         Functions should take a single argument which is a dictionary containing the event
-        details.
+        details. One of the keys of the dictionary is ``event`` which is a string that can
+        be one of the following:
+
+        * 'click'
+        * 'dblclick'
+        * 'mouseenter'
+        * 'mouseleave'
+        * 'contextmenu' 
+        * 'mousemove'
+        * 'keydown'
+        * 'keyup'
+
+        The rest of the dictionary depends on the specific event triggered.
         """
         self._event_callbacks.append(callback)
 
