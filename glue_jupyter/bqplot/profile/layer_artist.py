@@ -12,7 +12,7 @@ from glue.core.exceptions import IncompatibleAttribute, IncompatibleDataExceptio
 
 import bqplot
 
-from glue_jupyter.compat import LayerArtist
+from glue.viewers.common.layer_artist import LayerArtist
 
 from ...link import dlink
 

@@ -1,7 +1,7 @@
 import traitlets
 from glue.core import Data
 from glue.core.state_objects import State, CallbackProperty
-from glue.external.echo import ListCallbackProperty
+from echo import ListCallbackProperty
 from glue_jupyter.state_traitlets_helpers import GlueState
 
 

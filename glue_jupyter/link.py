@@ -1,5 +1,5 @@
 import ipywidgets as widgets
-import glue.external.echo.selection
+import echo.selection
 
 
 def _is_traitlet(obj):
@@ -92,7 +92,7 @@ def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='v
 
     def update(*ignore):
         options = [k for k in getattr(type(state), state_attr).get_choices(state)
-                   if not isinstance(k, glue.external.echo.selection.ChoiceSeparator)]
+                   if not isinstance(k, echo.selection.ChoiceSeparator)]
         display_func = getattr(type(state), state_attr).get_display_func(state)
         value = getattr(state, state_attr)
         widget.options = [(display_func(options[k]), k) for k in range(len(options))]
@@ -106,7 +106,7 @@ def link_component_id_to_select_widget(state, state_attr, widget, widget_attr='v
 
     def update_state(change):
         options = [k for k in getattr(type(state), state_attr).get_choices(state)
-                   if not isinstance(k, glue.external.echo.selection.ChoiceSeparator)]
+                   if not isinstance(k, echo.selection.ChoiceSeparator)]
         if change.new is not None:
             setattr(state, state_attr, options[change.new])
 
