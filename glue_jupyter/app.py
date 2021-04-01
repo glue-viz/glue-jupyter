@@ -1,4 +1,6 @@
 import os
+import weakref
+
 import ipywidgets as widgets
 from IPython.display import display
 import ipyvue
@@ -63,6 +65,8 @@ class JupyterApplication(Application):
         self.widget_subset_mode = SelectionModeMenu(session=self.session)
         self.widget = widgets.VBox(children=[self.widget_subset_mode, self.output])
 
+        self._viewer_refs = []
+
     def _ipython_display_(self):
         display(self.widget)
 
@@ -114,9 +118,28 @@ class JupyterApplication(Application):
             mode = SUBSET_MODES[mode]
         self.session.edit_subset_mode.mode = mode
 
+    @property
+    def viewers(self):
+        """
+        A list of viewers in this application - these are all viewers
+        created that still have at least one reference to them even
+        if not currently shown.
+        """
+
+        # Flush out viewers that are no longer referenced
+        self._viewer_refs = [viewer for viewer in self._viewer_refs if viewer() is not None]
+
+        # Now make a list of actual viewers rather than weakrefs, and flush out again
+        # any unreferenced viewer
+        viewers = [viewer() for viewer in self._viewer_refs]
+        viewers = [viewer for viewer in viewers if viewer is not None]
+
+        return viewers
+
     def new_data_viewer(self, *args, **kwargs):
         show = kwargs.pop('show', True)
         viewer = super().new_data_viewer(*args, **kwargs)
+        self._viewer_refs.append(weakref.ref(viewer))
         if show:
             viewer.show()
         return viewer

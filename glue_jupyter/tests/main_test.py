@@ -216,3 +216,17 @@ def test_plugins():
     links = find_possible_links(app.data_collection)
 
     assert 'Astronomy WCS' in links
+
+
+def test_viewers(app, datax, dataxz):
+
+    assert app.viewers == []
+
+    s1 = app.scatter2d(data=datax)
+    assert len(app.viewers) == 1
+    assert app.viewers[0] is s1
+
+    s2 = app.scatter2d(data=dataxz)
+    assert len(app.viewers) == 2
+    assert app.viewers[0] is s1
+    assert app.viewers[1] is s2
