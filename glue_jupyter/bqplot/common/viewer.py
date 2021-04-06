@@ -51,7 +51,7 @@ class BqplotBaseView(IPyWidgetView):
         self._mouse_interact = MouseInteraction(x_scale=self.scale_x,
                                                 y_scale=self.scale_y,
                                                 move_throttle=70,
-                                                events=keyboard_events + mouse_events)
+                                                events=[])
         self._mouse_interact.on_msg(self._on_mouse_interaction)
         self.figure.interaction = self._mouse_interact
 
@@ -97,25 +97,41 @@ class BqplotBaseView(IPyWidgetView):
 
         self.create_layout()
 
-    def add_event_callback(self, callback):
+    def add_event_callback(self, callback, events=None):
         """
         Add a callback function for mouse and keyboard events when the mouse is over the figure.
 
-        Functions should take a single argument which is a dictionary containing the event
-        details. One of the keys of the dictionary is ``event`` which is a string that can
-        be one of the following:
+        Parameters
+        ----------
+        callback : func
+            The callback function. This should take a single argument which is a
+            dictionary containing the event details. One of the keys of the
+            dictionary is ``event`` which is a string that describes the event
+            (see the ``events`` parameter for possible strings). The rest of the
+            dictionary depends on the specific event triggered.
+        events : list, optional
+            The list of events to listen for. The following events are available:
 
-        * 'click'
-        * 'dblclick'
-        * 'mouseenter'
-        * 'mouseleave'
-        * 'contextmenu'
-        * 'mousemove'
-        * 'keydown'
-        * 'keyup'
+            * ``'click'``
+            * ``'dblclick'``
+            * ``'mouseenter'``
+            * ``'mouseleave'``
+            * ``'contextmenu'``
+            * ``'mousemove'``
+            * ``'keydown'``
+            * ``'keyup'``
 
-        The rest of the dictionary depends on the specific event triggered.
+            If this parameter is not passed, all events will be listened for.
         """
+
+        if events is None:
+            events = keyboard_events + mouse_events
+
+        # TODO: the following means that when a callback function is removed, we don't
+        # remove the events from the ones being listened to. We could make this smarter
+        # if it ends up being a performance issue in some real-life use cases.
+        self._mouse_interact.events = sorted(set(self._mouse_interact.events + events))
+
         self._event_callbacks.append(callback)
 
     def remove_event_callback(self, callback):
