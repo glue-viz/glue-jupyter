@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.colors
 
 from glue_vispy_viewers.volume.layer_state import VolumeLayerState
-from glue.external.echo import CallbackProperty
+from echo import CallbackProperty
 from glue.core.data import Subset
 from glue.core.exceptions import IncompatibleAttribute
 from glue_vispy_viewers.common.layer_artist import VispyLayerArtist

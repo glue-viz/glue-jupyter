@@ -3,7 +3,7 @@ import bqplot
 
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.histogram.state import HistogramLayerState
-from glue_jupyter.compat import LayerArtist
+from glue.viewers.common.layer_artist import LayerArtist
 from glue.utils import color2hex
 
 from ...link import link, dlink

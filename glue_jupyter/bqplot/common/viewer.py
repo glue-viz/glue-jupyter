@@ -3,6 +3,10 @@ import bqplot
 from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
 
+from bqplot_image_gl.interacts import MouseInteraction, keyboard_events, mouse_events
+
+from echo.callback_container import CallbackContainer
+
 from ...view import IPyWidgetView
 from ...link import dlink, on_change
 from ...utils import float_or_none, debounced, get_ioloop
@@ -38,6 +42,18 @@ class BqplotBaseView(IPyWidgetView):
         self._fig_margin_zero = dict(self.figure.fig_margin)
         self._fig_margin_zero['left'] = 0
         self._fig_margin_zero['bottom'] = 0
+
+        # Set up a MouseInteraction instance here tied to the figure. In the
+        # tools we then chain this with any other active interact so that we can
+        # always listen for certain events. This allows us to then have e.g.
+        # mouse-over coordinates regardless of whether tools are active or not.
+        self._event_callbacks = CallbackContainer()
+        self._mouse_interact = MouseInteraction(x_scale=self.scale_x,
+                                                y_scale=self.scale_y,
+                                                move_throttle=70,
+                                                events=keyboard_events + mouse_events)
+        self._mouse_interact.on_msg(self._on_mouse_interaction)
+        self.figure.interaction = self._mouse_interact
 
         super(BqplotBaseView, self).__init__(session, state=state)
 
@@ -80,6 +96,37 @@ class BqplotBaseView(IPyWidgetView):
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
         self.create_layout()
+
+    def add_event_callback(self, callback):
+        """
+        Add a callback function for mouse and keyboard events when the mouse is over the figure.
+
+        Functions should take a single argument which is a dictionary containing the event
+        details. One of the keys of the dictionary is ``event`` which is a string that can
+        be one of the following:
+
+        * 'click'
+        * 'dblclick'
+        * 'mouseenter'
+        * 'mouseleave'
+        * 'contextmenu'
+        * 'mousemove'
+        * 'keydown'
+        * 'keyup'
+
+        The rest of the dictionary depends on the specific event triggered.
+        """
+        self._event_callbacks.append(callback)
+
+    def remove_event_callback(self, callback):
+        """
+        Remove a callback function for mouse and keyboard events.
+        """
+        self._event_callbacks.remove(callback)
+
+    def _on_mouse_interaction(self, interaction, data, buffers):
+        for callback in self._event_callbacks:
+            callback(data)
 
     @debounced(delay_seconds=0.5, method=True)
     def update_glue_scales(self, *ignored):

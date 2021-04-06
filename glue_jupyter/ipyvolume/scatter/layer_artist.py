@@ -2,11 +2,11 @@ import numpy as np
 import ipyvolume
 
 from glue.core.data import Subset
-from glue_jupyter.compat import LayerArtist
+from glue.viewers.common.layer_artist import LayerArtist
 from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.scatter.state import ScatterLayerState
-from glue.external.echo import CallbackProperty, SelectionCallbackProperty
+from echo import CallbackProperty, SelectionCallbackProperty
 from glue.utils import ensure_numerical, color2hex
 
 from ...link import link, on_change

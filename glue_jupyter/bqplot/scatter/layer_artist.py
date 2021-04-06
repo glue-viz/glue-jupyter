@@ -5,11 +5,11 @@ from bqplot_image_gl import ImageGL
 from glue.core.data import Subset
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.core.exceptions import IncompatibleAttribute
-from glue_jupyter.compat import LayerArtist
+from glue.viewers.common.layer_artist import LayerArtist
 
 from ...link import dlink, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
-from glue.external.echo import CallbackProperty
+from echo import CallbackProperty
 from glue.utils import ensure_numerical, color2hex
 
 __all__ = ['BqplotScatterLayerState', 'BqplotScatterLayerArtist']

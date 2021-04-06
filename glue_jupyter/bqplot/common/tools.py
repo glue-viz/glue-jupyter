@@ -19,10 +19,10 @@ class InteractCheckableTool(CheckableTool):
         self.viewer = viewer
 
     def activate(self):
-        self.viewer.figure.interaction = self.interact
+        self.viewer._mouse_interact.next = self.interact
 
     def deactivate(self):
-        self.viewer.figure.interaction = None
+        self.viewer._mouse_interact.next = None
 
 
 @viewer_tool

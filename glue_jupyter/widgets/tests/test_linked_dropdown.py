@@ -1,6 +1,6 @@
 from glue.core.state_objects import State
 from glue.core.data_combo_helper import ComponentIDComboHelper
-from glue.external.echo import SelectionCallbackProperty
+from echo import SelectionCallbackProperty
 
 from ..linked_dropdown import LinkedDropdown
 

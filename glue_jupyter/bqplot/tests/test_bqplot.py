@@ -57,7 +57,10 @@ def test_interact(app, dataxyz):
     # s.widget_menu_select_x.click()# = True
     tool = s.toolbar.tools['bqplot:xrange']
     s.toolbar.active_tool = tool
-    assert s.figure.interaction == tool.interact
+    # Note that we need to access 'next' because the default interact
+    # is a MouseInteraction and tools are activated/deactivated via the
+    # 'next' property.
+    assert s.figure.interaction.next == tool.interact
 
 
 def test_scatter2d(app, dataxyz, dataxz):

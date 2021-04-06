@@ -4,7 +4,7 @@ from collections import defaultdict
 from traitlets.utils.bunch import Bunch
 from glue.core.state_objects import State
 from glue.core import Data, Subset, ComponentID
-from glue.external.echo import CallbackList, CallbackDict
+from echo import CallbackList, CallbackDict
 from matplotlib.colors import Colormap
 from matplotlib.cm import get_cmap
 
