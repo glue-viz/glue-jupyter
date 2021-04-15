@@ -1,5 +1,5 @@
-0.3.0 (unreleased)
-==================
+0.3 (2021-04-15)
+================
 
 * Fixed implementation of ``JupyterApplication.viewers`` to now return
   list of viewers as opposed to empty list. [#214]
