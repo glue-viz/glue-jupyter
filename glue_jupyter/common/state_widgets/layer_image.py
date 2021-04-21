@@ -76,8 +76,6 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
         self.c_levels_error = ''
 
     def vue_set_colormap(self, data):
-        print(f'{data}')
-
         cmap = None
         for member in colormaps.members:
             if member[1].name == data:
