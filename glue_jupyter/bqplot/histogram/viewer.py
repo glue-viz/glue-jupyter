@@ -24,7 +24,7 @@ class BqplotHistogramView(BqplotBaseView):
     _subset_artist_cls = BqplotHistogramLayerArtist
     _layer_style_widget_cls = HistogramLayerStateWidget
 
-    tools = ['bqplot:panzoom', 'bqplot:xrange']
+    tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:xrange']
 
     def _roi_to_subset_state(self, roi):
         # TODO: copy paste from glue/viewers/histogram/qt/data_viewer.py

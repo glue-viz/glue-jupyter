@@ -4,7 +4,7 @@ from bqplot_image_gl.interacts import BrushEllipseSelector, MouseInteraction
 from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
-from glue.viewers.common.tool import CheckableTool
+from glue.viewers.common.tool import Tool, CheckableTool
 import numpy as np
 
 __all__ = []
@@ -329,3 +329,15 @@ class ROIClickAndDrag(InteractCheckableTool):
 
     def release(self):
         self.viewer.figure.interaction = self.interact
+
+
+@viewer_tool
+class HomeTool(Tool):
+
+    tool_id = 'bqplot:home'
+    icon = 'glue_home'
+    action_text = 'Home'
+    tool_tip = 'Reset original zoom'
+
+    def activate(self):
+        self.viewer.state.reset_limits()
