@@ -1,3 +1,8 @@
+0.4 (unreleased)
+================
+
+* Added a new 'home' tool in bqplot viewers to reset limits. [#218]
+
 0.3 (2021-04-15)
 ================
 
