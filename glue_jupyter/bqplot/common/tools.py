@@ -182,7 +182,9 @@ class BqplotCircleMode(InteractCheckableTool):
                 yc = y.mean()
                 rx = abs(x[1] - x[0])/2
                 ry = abs(y[1] - y[0])/2
-                if np.allclose(rx, ry):
+                # We use a tolerance of 1e-2 below to match the tolerance set in glue-core
+                # https://github.com/glue-viz/glue/blob/6b968b352bc5ad68b95ad5e3bb25550782a69ee8/glue/viewers/matplotlib/state.py#L198
+                if np.allclose(rx, ry, rtol=1e-2):
                     roi = CircularROI(xc=xc, yc=yc, radius=rx)
                 else:
                     roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
