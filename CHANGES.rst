@@ -1,7 +1,11 @@
-0.4 (unreleased)
+0.4 (2021-04-28)
 ================
 
 * Added a new 'home' tool in bqplot viewers to reset limits. [#218]
+
+* Fixed an issue which caused circular selections to be represented
+  by ``EllipticalROI`` instead of ``CircularROI`` in some corner
+  cases. [#217]
 
 0.3 (2021-04-15)
 ================
