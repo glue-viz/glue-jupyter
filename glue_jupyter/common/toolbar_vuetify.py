@@ -5,6 +5,7 @@ import base64
 from glue.icons import icon_path
 import glue.viewers.common.tool
 from glue_jupyter.vuetify_helpers import load_template
+from glue.viewers.common.tool import CheckableTool
 
 __all__ = ['BasicJupyterToolbar']
 
@@ -40,18 +41,23 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
 
     @traitlets.observe('active_tool_id')
     def _on_change_v_model(self, change):
-        with self.output:
-            if change.new is not None:
+        if change.new is not None:
+            if isinstance(self.tools[change.new], CheckableTool):
                 self.active_tool = self.tools[change.new]
             else:
-                self.active_tool = None
+                # In this case it is a non-checkable tool and we should
+                # activate it but not keep the tool checked in the toolbar
+                self.tools[change.new].activate()
+                self.active_tool_id = None
+        else:
+            self.active_tool = None
 
     @traitlets.observe('active_tool')
     def _on_change_active_tool(self, change):
         if change.old:
             change.old.deactivate()
         else:
-            if self._default_mouse_mode is not None:
+            if self._default_mouse_mode:
                 self._default_mouse_mode.deactivate()
         if change.new:
             change.new.activate()
