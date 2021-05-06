@@ -54,6 +54,7 @@ class BqplotBaseView(IPyWidgetView):
                                                 events=[])
         self._mouse_interact.on_msg(self._on_mouse_interaction)
         self.figure.interaction = self._mouse_interact
+        self._events_for_callback = {}
 
         super(BqplotBaseView, self).__init__(session, state=state)
 
@@ -127,18 +128,24 @@ class BqplotBaseView(IPyWidgetView):
         if events is None:
             events = keyboard_events + mouse_events
 
-        # TODO: the following means that when a callback function is removed, we don't
-        # remove the events from the ones being listened to. We could make this smarter
-        # if it ends up being a performance issue in some real-life use cases.
-        self._mouse_interact.events = sorted(set(self._mouse_interact.events + events))
+        self._events_for_callback[callback] = set(events)
 
         self._event_callbacks.append(callback)
+        self._update_interact_events()
 
     def remove_event_callback(self, callback):
         """
         Remove a callback function for mouse and keyboard events.
         """
+        self._events_for_callback.pop(callback)
         self._event_callbacks.remove(callback)
+        self._update_interact_events()
+
+    def _update_interact_events(self):
+        events = set()
+        for individual_events in self._events_for_callback.values():
+            events |= individual_events
+        self._mouse_interact.events = sorted(events)
 
     def _on_mouse_interaction(self, interaction, data, buffers):
         for callback in self._event_callbacks:
