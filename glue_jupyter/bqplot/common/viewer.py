@@ -145,6 +145,7 @@ class BqplotBaseView(IPyWidgetView):
         events = set()
         for individual_events in self._events_for_callback.values():
             events |= individual_events
+        events = sorted(events)
         self._mouse_interact.events = sorted(events)
 
     def _on_mouse_interaction(self, interaction, data, buffers):

@@ -1,3 +1,4 @@
+import os
 import ipyvuetify as v
 import traitlets
 import base64
@@ -69,10 +70,15 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
 
     def add_tool(self, tool):
         self.tools[tool.tool_id] = tool
+        # TODO: we should ideally just incorporate this check into icon_path directly.
+        if os.path.exists(tool.icon):
+            path = tool.icon
+        else:
+            path = icon_path(tool.icon, icon_format='png')
         self.tools_data = {
             **self.tools_data,
             tool.tool_id: {
                 'tooltip': tool.tool_tip,
-                'img': read_icon(icon_path(tool.icon), 'svg')
+                'img': read_icon(path, 'png')
             }
         }

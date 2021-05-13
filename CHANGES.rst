@@ -1,3 +1,10 @@
+0.5 (unreleased)
+================
+
+* Fix toolbar when non-checkable tools were present. [#222]
+
+* Allow tool icons to be specified as paths instead of just names. [#225]
+
 0.4 (2021-04-28)
 ================
 
