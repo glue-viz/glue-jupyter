@@ -1,4 +1,4 @@
-0.5 (unreleased)
+0.5 (2021-05-13)
 ================
 
 * Fix toolbar when non-checkable tools were present. [#222]
@@ -22,7 +22,7 @@
 
 * Add the ability to register callback functions for mouse and keyboard
   events with the bqplot viewers. [#213]
-  
+
 0.2.2 (2021-03-18)
 ==================
 
