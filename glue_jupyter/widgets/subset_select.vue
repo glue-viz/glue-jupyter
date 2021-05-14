@@ -2,7 +2,7 @@
     <v-menu :close-on-content-click="!multiple">
 
         <template #activator="{ on: menu }">
-            <div v-on="menu" class="py-2">
+            <div v-on="menu" class="py-2 glue__subset-select">
                 <v-chip v-if="selected.length === 0" style="cursor: pointer">
                     <v-icon left>add</v-icon>
                     {{ no_selection_text }}
