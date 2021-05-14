@@ -1,3 +1,8 @@
+0.6 (unreleased)
+================
+
+* Add class name to subset_select vue component for CSS customization. [#226]
+
 0.5 (2021-05-13)
 ================
 
