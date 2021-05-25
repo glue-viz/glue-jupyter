@@ -3,6 +3,8 @@
 
 * Add class name to subset_select vue component for CSS customization. [#226]
 
+* Use SVG icons instead of PNG for toolbar. [#228]
+
 0.5 (2021-05-13)
 ================
 
