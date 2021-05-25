@@ -7,7 +7,7 @@
             <v-select :items="x_att_items" label="x axis" v-model="x_att_selected" hide-details/>
         </div>
         <div>
-            <v-select :items="function_items" label="x axis" v-model="function_selected"/>
+            <v-select :items="function_items" label="function" v-model="function_selected"/>
         </div>
 
         <div class="d-inline-flex flex-wrap">
