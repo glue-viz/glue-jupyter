@@ -2,6 +2,7 @@ import bqplot
 
 from glue.viewers.image.state import ImageViewerState
 from glue.viewers.image.composite_array import CompositeArray
+from bqplot_image_gl.viewlistener import ViewListener
 
 from ...link import on_change
 
@@ -37,6 +38,9 @@ class BqplotImageView(BqplotBaseView):
 
         super(BqplotImageView, self).__init__(session)
 
+        self._vl = ViewListener(widget=self.figure, css_selector=".svg-figure > g")
+        self._vl.observe(self._sync_figure_aspect, names=['view_data'])
+
         on_change([(self.state, 'aspect')])(self._sync_figure_aspect)
         self._sync_figure_aspect()
 
@@ -51,15 +55,20 @@ class BqplotImageView(BqplotBaseView):
         self.state.reset_limits()
 
     def _sync_figure_aspect(self):
+        print('_sync_figure_aspect')
         with self.figure.hold_trait_notifications():
             if self.state.aspect == 'equal':
-                self.figure.max_aspect_ratio = 1
-                self.figure.min_aspect_ratio = 1
-                self.state._set_axes_aspect_ratio(1)
+                print(self._vl.view_data)
+                views = sorted(self._vl.view_data)
+                print(views)
+                if len(views) > 0:
+                    first_view = self._vl.view_data[views[0]]
+                    axes_ratio = first_view.width / first_view.height
+                else:
+                    axes_ratio = None
             else:
-                self.figure.min_aspect_ratio = bqplot.Figure.min_aspect_ratio.default_value
-                self.figure.max_aspect_ratio = bqplot.Figure.max_aspect_ratio.default_value
-                self.state._set_axes_aspect_ratio(None)
+                axes_ratio = None
+            self.state._set_axes_aspect_ratio(axes_ratio)
 
     def get_data_layer_artist(self, layer=None, layer_state=None):
         if layer.ndim == 1:
