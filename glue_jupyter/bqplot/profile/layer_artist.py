@@ -11,12 +11,16 @@ from glue.viewers.profile.state import ProfileLayerState
 from glue.core.exceptions import IncompatibleAttribute, IncompatibleDataException
 
 import bqplot
+from bqplot_image_gl import LinesGL
 
 from glue.viewers.common.layer_artist import LayerArtist
 
 from ...link import dlink
 
 __all__ = ['BqplotProfileLayerArtist']
+
+
+USE_GL = True
 
 
 class BqplotProfileLayerArtist(LayerArtist):
@@ -34,7 +38,8 @@ class BqplotProfileLayerArtist(LayerArtist):
 
         self.view = view
 
-        self.line_mark = bqplot.Lines(scales=self.view.scales, x=[0, 1], y=[0, 1])
+        LinesClass = LinesGL if USE_GL else bqplot.Lines
+        self.line_mark = LinesClass(scales=self.view.scales, x=[0, 1], y=[0, 1])
 
         self.view.figure.marks = list(self.view.figure.marks) + [self.line_mark]
 
