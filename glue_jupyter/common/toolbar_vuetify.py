@@ -74,11 +74,11 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
         if os.path.exists(tool.icon):
             path = tool.icon
         else:
-            path = icon_path(tool.icon, icon_format='png')
+            path = icon_path(tool.icon, icon_format='svg')
         self.tools_data = {
             **self.tools_data,
             tool.tool_id: {
                 'tooltip': tool.tool_tip,
-                'img': read_icon(path, 'png')
+                'img': read_icon(path, 'svg+xml')
             }
         }
