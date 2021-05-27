@@ -38,8 +38,7 @@ class BqplotImageView(BqplotBaseView):
 
         super(BqplotImageView, self).__init__(session)
 
-        self._vl = ViewListener(widget=self.figure, css_selector=".svg-figure > g")
-        self._vl.observe(self._sync_figure_aspect, names=['view_data'])
+        self._vl = None
 
         on_change([(self.state, 'aspect')])(self._sync_figure_aspect)
         self._sync_figure_aspect()
@@ -51,19 +50,22 @@ class BqplotImageView(BqplotBaseView):
         self.state.add_callback('x_att', self._reset_limits)
         self.state.add_callback('y_att', self._reset_limits)
 
+    def _setup_view_listener(self):
+        self._vl = ViewListener(widget=self.figure,
+                                css_selector=".svg-figure > g")
+        self._vl.observe(self._sync_figure_aspect, names=['view_data'])
+
     def _reset_limits(self, *args):
         self.state.reset_limits()
 
-    def _sync_figure_aspect(self):
-        print('_sync_figure_aspect')
+    def _sync_figure_aspect(self, *args, **kwargs):
         with self.figure.hold_trait_notifications():
-            if self.state.aspect == 'equal':
-                print(self._vl.view_data)
+            if self.state.aspect == 'equal' and self._vl is not None:
                 views = sorted(self._vl.view_data)
                 print(views)
                 if len(views) > 0:
                     first_view = self._vl.view_data[views[0]]
-                    axes_ratio = first_view.width / first_view.height
+                    axes_ratio = first_view['height'] / first_view['width']
                 else:
                     axes_ratio = None
             else:
