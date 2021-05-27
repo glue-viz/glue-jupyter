@@ -1,5 +1,3 @@
-import bqplot
-
 from glue.viewers.image.state import ImageViewerState
 from glue.viewers.image.composite_array import CompositeArray
 from bqplot_image_gl.viewlistener import ViewListener
