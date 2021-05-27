@@ -5,6 +5,9 @@
 
 * Use SVG icons instead of PNG for toolbar. [#228]
 
+* Make sure image viewer fills all available space even when using
+  equal aspect ratio. [#231]
+
 0.5 (2021-05-13)
 ================
 
