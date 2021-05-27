@@ -14,13 +14,9 @@ class ProfileLayerStateWidget(VuetifyTemplate):
     attribute_items = traitlets.List().tag(sync=True)
     attribute_selected = traitlets.Int().tag(sync=True)
 
-    percentile_items = traitlets.List().tag(sync=True)
-    percentile_selected = traitlets.Int().tag(sync=True)
-
     def __init__(self, layer_state):
         super().__init__()
 
         self.glue_state = layer_state
 
         link_glue_choices(self, layer_state, 'attribute')
-        link_glue_choices(self, layer_state, 'percentile')
