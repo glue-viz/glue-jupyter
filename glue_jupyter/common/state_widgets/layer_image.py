@@ -2,7 +2,7 @@ from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox
 from glue.config import colormaps
 from glue.utils import color2hex
 
-from ...link import link, dlink
+from ...link import link
 
 import ipyvuetify as v
 import traitlets
@@ -32,6 +32,7 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
     color_mode = traitlets.Unicode().tag(sync=True)
 
     c_levels_txt = traitlets.Unicode().tag(sync=True)
+    c_levels_txt_editing = False
     c_levels_error = traitlets.Unicode().tag(sync=True)
 
     has_contour = traitlets.Bool().tag(sync=True)
@@ -58,22 +59,29 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
         # we only go from glue state to the text version of the level list
         # the other way around is handled in _on_change_c_levels_txt
         if self.has_contour:
-            def levels2str(levels):
-                return ", ".join('%g' % v for v in levels)
-            dlink((self.glue_state, 'levels'), (self, 'c_levels_txt'), levels2str)
+            def levels_to_text(*_ignore):
+                if not self.c_levels_txt_editing:
+                    text = ", ".join('%g' % v for v in self.glue_state.levels)
+                    self.c_levels_txt = text
+
+            self.glue_state.add_callback('levels', levels_to_text)
 
     @traitlets.observe('c_levels_txt')
     def _on_change_c_levels_txt(self, change):
         try:
-            parts = change['new'].split(',')
-            float_list_str = [float(v.strip()) for v in parts]
-        except Exception as e:
-            self.c_levels_error = str(e)
-            return
+            self.c_levels_txt_editing = True
+            try:
+                parts = change['new'].split(',')
+                float_list_str = [float(v.strip()) for v in parts]
+            except Exception as e:
+                self.c_levels_error = str(e)
+                return
 
-        if self.glue_state.level_mode == "Custom":
-            self.glue_state.levels = float_list_str
-        self.c_levels_error = ''
+            if self.glue_state.level_mode == "Custom":
+                self.glue_state.levels = float_list_str
+            self.c_levels_error = ''
+        finally:
+            self.c_levels_txt_editing = False
 
     def vue_set_colormap(self, data):
         cmap = None
