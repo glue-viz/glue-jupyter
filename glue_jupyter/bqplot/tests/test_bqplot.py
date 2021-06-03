@@ -288,15 +288,16 @@ def test_imshow_equal_aspect(app, data_image):
     data = Data(array=np.random.random((100, 5)))
     app.data_collection.append(data)
     v = app.imshow(data=data)
-    assert v.figure.min_aspect_ratio == 1
-    assert v.figure.max_aspect_ratio == 1
+    # Since the widget isn't actually shown during the testing we set the axes
+    # ratio manually here
+    v.state._set_axes_aspect_ratio(1)
+    v.state.reset_limits()
+    assert v.state.aspect == 'equal'
     assert v.scale_x.min == -48.0
     assert v.scale_x.max == +52.0
     assert v.scale_y.min == -0.5
     assert v.scale_y.max == +99.5
     v.state.aspect = 'auto'
-    assert v.figure.min_aspect_ratio == 0.01
-    assert v.figure.max_aspect_ratio == 100
     # NOTE: the limits don't actually change automatically, because if user
     # is zoomed in they might not want to automatically zoom all the way out
     # again.
@@ -305,8 +306,6 @@ def test_imshow_equal_aspect(app, data_image):
     assert v.scale_y.min == -0.5
     assert v.scale_y.max == +99.5
     v.state.aspect = 'equal'
-    assert v.figure.min_aspect_ratio == 1
-    assert v.figure.max_aspect_ratio == 1
     assert v.scale_x.min == -48.0
     assert v.scale_x.max == +52.0
     assert v.scale_y.min == -0.5
