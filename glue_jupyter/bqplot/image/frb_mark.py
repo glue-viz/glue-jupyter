@@ -35,13 +35,27 @@ class FRBImage(ImageGL):
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'min')
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'max')
 
+        self.shape = None
+
         self.update()
 
     @debounced(method=True)
     def debounced_update(self, *args, **kwargs):
         return self.update(self, *args, **kwargs)
 
+    @property
+    def shape(self):
+        return self._shape
+
+    @shape.setter
+    def shape(self, value):
+        self._shape = value
+        self.update()
+
     def update(self, *args, **kwargs):
+
+        if self.shape is None:
+            return
 
         # Get current limits from the plot
         xmin = self.viewer.figure.axes[0].scale.min
@@ -52,12 +66,7 @@ class FRBImage(ImageGL):
         if xmin is None or xmax is None or ymin is None or ymax is None:
             return
 
-        # Find out the size of the widget. Unfortunately there is actually
-        # no way to find this out, so we need to hard-code this, and we could
-        # make it a parameter in future. Bqplot does allow us to constrain the
-        # aspect ratio though so we could envisage trying to use that info
-        # to make sure the ratio of the sizes is sensible..
-        ny, nx = 256, 256
+        ny, nx = self.shape
 
         # Set up bounds
         bounds = [(ymin, ymax, ny), (xmin, xmax, nx)]

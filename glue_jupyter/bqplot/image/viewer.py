@@ -36,11 +36,6 @@ class BqplotImageView(BqplotBaseView):
 
         super(BqplotImageView, self).__init__(session)
 
-        self._vl = None
-
-        on_change([(self.state, 'aspect')])(self._sync_figure_aspect)
-        self._sync_figure_aspect()
-
         self._composite = CompositeArray()
         self._composite_image = FRBImage(self, self._composite)
         self.figure.marks = list(self.figure.marks) + [self._composite_image]
@@ -48,24 +43,36 @@ class BqplotImageView(BqplotBaseView):
         self.state.add_callback('x_att', self._reset_limits)
         self.state.add_callback('y_att', self._reset_limits)
 
+        self._setup_view_listener()
+
+        on_change([(self.state, 'aspect')])(self._sync_figure_aspect)
+        self._sync_figure_aspect()
+
     def _setup_view_listener(self):
         self._vl = ViewListener(widget=self.figure,
                                 css_selector=".svg-figure > g")
-        self._vl.observe(self._sync_figure_aspect, names=['view_data'])
+        self._vl.observe(self._on_view_change, names=['view_data'])
 
     def _reset_limits(self, *args):
         self.state.reset_limits()
 
+    def _on_view_change(self, *args):
+        views = sorted(self._vl.view_data)
+        if len(views) > 0:
+            first_view = self._vl.view_data[views[0]]
+            self._composite_image.shape = (int(first_view['height']), int(first_view['width']))
+        else:
+            self._composite_image.shape = None
+        self._sync_figure_aspect()
+
     def _sync_figure_aspect(self, *args, **kwargs):
         with self.figure.hold_trait_notifications():
             if self.state.aspect == 'equal' and self._vl is not None:
-                views = sorted(self._vl.view_data)
-                print(views)
-                if len(views) > 0:
-                    first_view = self._vl.view_data[views[0]]
-                    axes_ratio = first_view['height'] / first_view['width']
-                else:
+                if self._composite_image.shape is None:
                     axes_ratio = None
+                else:
+                    height, width = self._composite_image.shape
+                    axes_ratio = height / width
             else:
                 axes_ratio = None
             self.state._set_axes_aspect_ratio(axes_ratio)
