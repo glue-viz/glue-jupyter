@@ -67,7 +67,7 @@ class BqplotImageView(BqplotBaseView):
 
     def _sync_figure_aspect(self, *args, **kwargs):
         with self.figure.hold_trait_notifications():
-            if self.state.aspect == 'equal' and self._vl is not None:
+            if self.state.aspect == 'equal':
                 if self._composite_image.shape is None:
                     axes_ratio = None
                 else:
