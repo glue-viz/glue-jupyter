@@ -36,6 +36,8 @@ class BqplotImageView(BqplotBaseView):
 
         super(BqplotImageView, self).__init__(session)
 
+        self.shape = None
+
         self._composite = CompositeArray()
         self._composite_image = FRBImage(self, self._composite)
         self.figure.marks = list(self.figure.marks) + [self._composite_image]
@@ -60,15 +62,15 @@ class BqplotImageView(BqplotBaseView):
         views = sorted(self._vl.view_data)
         if len(views) > 0:
             first_view = self._vl.view_data[views[0]]
-            self._composite_image.shape = (int(first_view['height']), int(first_view['width']))
+            self.shape = (int(first_view['height']), int(first_view['width']))
         else:
-            self._composite_image.shape = None
+            self.shape = None
         self._sync_figure_aspect()
 
     def _sync_figure_aspect(self, *args, **kwargs):
         with self.figure.hold_trait_notifications():
             if self.state.aspect == 'equal':
-                if self._composite_image.shape is None:
+                if self.shape is None:
                     axes_ratio = None
                 else:
                     height, width = self._composite_image.shape

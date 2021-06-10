@@ -6,8 +6,10 @@
 0.6.1 (unreleased)
 ==================
 
+* Fix bug that caused selection tools to not work correctly in 0.6 release. [#234]
+
 * Fix bug that caused the aspect ratio of the image viewer to change when a
-  selection region was partially outside plot.
+  selection region was partially outside plot. [#233]
 
 0.6 (2021-06-08)
 ================
