@@ -3,7 +3,7 @@
 
 * No changes yet.
 
-0.6.1 (unreleased)
+0.6.1 (2021-06-10)
 ==================
 
 * Fix bug that caused selection tools to not work correctly in 0.6 release. [#234]
