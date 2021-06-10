@@ -35,8 +35,6 @@ class FRBImage(ImageGL):
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'min')
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'max')
 
-        self.shape = None
-
         self.update()
 
     @debounced(method=True)
@@ -45,12 +43,7 @@ class FRBImage(ImageGL):
 
     @property
     def shape(self):
-        return self._shape
-
-    @shape.setter
-    def shape(self, value):
-        self._shape = value
-        self.update()
+        return self.viewer.shape
 
     def update(self, *args, **kwargs):
 
