@@ -3,6 +3,12 @@
 
 * No changes yet.
 
+0.6.1 (unreleased)
+==================
+
+* Fix bug that caused the aspect ratio of the image viewer to change when a
+  selection region was partially outside plot.
+
 0.6 (2021-06-08)
 ================
 

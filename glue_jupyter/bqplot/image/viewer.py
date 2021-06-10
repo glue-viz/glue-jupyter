@@ -50,7 +50,7 @@ class BqplotImageView(BqplotBaseView):
 
     def _setup_view_listener(self):
         self._vl = ViewListener(widget=self.figure,
-                                css_selector=".svg-figure > g")
+                                css_selector=".plotarea_events")
         self._vl.observe(self._on_view_change, names=['view_data'])
 
     def _reset_limits(self, *args):
