@@ -25,6 +25,24 @@ class InteractCheckableTool(CheckableTool):
         self.viewer._mouse_interact.next = None
 
 
+class BqplotSelectionTool(InteractCheckableTool):
+    """Disables all other tools when activated."""
+
+    def activate(self):
+        with self.viewer._output_widget:
+            self.interact.selected_x = None
+            self.interact.selected_y = None
+
+        for viewer in self.viewer.session.application.viewers:
+            if viewer is not self.viewer:
+                viewer.toolbar.active_tool = None
+
+        # TODO: Tom asked me to add this, but adding this fails the test.
+        # self.viewer.session.edit_subset_mode.edit_subset = []
+
+        super().activate()
+
+
 @viewer_tool
 class BqplotPanZoomMode(InteractCheckableTool):
 
@@ -72,7 +90,7 @@ class BqplotPanZoomYMode(InteractCheckableTool):
 
 
 @viewer_tool
-class BqplotRectangleMode(InteractCheckableTool):
+class BqplotRectangleMode(BqplotSelectionTool):
 
     icon = 'glue_square'
     tool_id = 'bqplot:rectangle'
@@ -126,15 +144,9 @@ class BqplotRectangleMode(InteractCheckableTool):
             if self.finalize_callback is not None:
                 self.finalize_callback()
 
-    def activate(self):
-        with self.viewer._output_widget:
-            self.interact.selected_x = None
-            self.interact.selected_y = None
-        super().activate()
-
 
 @viewer_tool
-class BqplotCircleMode(InteractCheckableTool):
+class BqplotCircleMode(BqplotSelectionTool):
 
     icon = 'glue_circle'
     tool_id = 'bqplot:circle'
@@ -206,12 +218,6 @@ class BqplotCircleMode(InteractCheckableTool):
         if self.interact.selected_x is None or self.interact.selected_y is None:
             if self.finalize_callback is not None:
                 self.finalize_callback()
-
-    def activate(self):
-        with self.viewer._output_widget:
-            self.interact.selected_x = None
-            self.interact.selected_y = None
-        super().activate()
 
 
 @viewer_tool
