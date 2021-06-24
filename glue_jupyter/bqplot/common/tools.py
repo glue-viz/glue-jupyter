@@ -37,8 +37,8 @@ class BqplotSelectionTool(InteractCheckableTool):
             if viewer is not self.viewer:
                 viewer.toolbar.active_tool = None
 
-        # TODO: Tom asked me to add this, but adding this fails the test.
-        self.viewer.session.edit_subset_mode.edit_subset = []
+        # Jumps back to "create new"
+        self.viewer.session.edit_subset_mode.edit_subset = None
 
         super().activate()
 
