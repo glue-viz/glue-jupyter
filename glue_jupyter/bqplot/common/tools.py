@@ -215,7 +215,7 @@ class BqplotCircleMode(InteractCheckableTool):
 
 
 @viewer_tool
-class BqplotEllipseMode(InteractCheckableTool):
+class BqplotEllipseMode(BqplotCircleMode):
 
     icon = 'glue_lasso'
     tool_id = 'bqplot:ellipse'
@@ -245,53 +245,6 @@ class BqplotEllipseMode(InteractCheckableTool):
         self.interact.observe(self.on_selection_change, "selected_x")
         self.interact.observe(self.on_selection_change, "selected_y")
         self.finalize_callback = finalize_callback
-
-    def update_selection(self, *args):
-        if self.interact.brushing:
-            return
-        with self.viewer._output_widget:
-            if self.interact.selected_x is not None and self.interact.selected_y is not None:
-                x = self.interact.selected_x
-                y = self.interact.selected_y
-                # similar to https://github.com/glue-viz/glue/blob/b14ccffac6a5
-                # 271c2869ead9a562a2e66232e397/glue/core/roi.py#L1275-L1297
-                # We should now check if the radius in data coordinates is the same
-                # along x and y, as if so then we can return a circle, otherwise we
-                # should return an ellipse.
-                xc = x.mean()
-                yc = y.mean()
-                rx = abs(x[1] - x[0])/2
-                ry = abs(y[1] - y[0])/2
-                # We use a tolerance of 1e-2 below to match the tolerance set in glue-core
-                # https://github.com/glue-viz/glue/blob/6b968b352bc5ad68b95ad5e3bb25550782a69ee8/glue/viewers/matplotlib/state.py#L198
-                if np.allclose(rx, ry, rtol=1e-2):
-                    roi = CircularROI(xc=xc, yc=yc, radius=rx)
-                else:
-                    roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
-                self.viewer.apply_roi(roi)
-                if self.finalize_callback is not None:
-                    self.finalize_callback()
-
-    def update_from_roi(self, roi):
-        if isinstance(roi, CircularROI):
-            rx = ry = roi.radius
-        elif isinstance(roi, EllipticalROI):
-            rx, ry = roi.radius_x, roi.radius_y
-        else:
-            raise TypeError(f'Cannot initialize a BqplotCircleMode from a {type(roi)}')
-        self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
-        self.interact.selected_y = [roi.yc - ry, roi.yc + ry]
-
-    def on_selection_change(self, *args):
-        if self.interact.selected_x is None or self.interact.selected_y is None:
-            if self.finalize_callback is not None:
-                self.finalize_callback()
-
-    def activate(self):
-        with self.viewer._output_widget:
-            self.interact.selected_x = None
-            self.interact.selected_y = None
-        super().activate()
 
 
 @viewer_tool
