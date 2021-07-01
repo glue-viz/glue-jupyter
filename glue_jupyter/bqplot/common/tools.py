@@ -19,10 +19,25 @@ class InteractCheckableTool(CheckableTool):
         self.viewer = viewer
 
     def activate(self):
+
+        # Disable any active tool in other viewers
+        for viewer in self.viewer.session.application.viewers:
+            if viewer is not self.viewer:
+                viewer.toolbar.active_tool = None
+
         self.viewer._mouse_interact.next = self.interact
 
     def deactivate(self):
         self.viewer._mouse_interact.next = None
+
+
+class BqplotSelectionTool(InteractCheckableTool):
+
+    def activate(self):
+        # Jumps back to "create new" if that setting is active
+        if self.viewer.session.application.get_setting('new_subset_on_selection_tool_change'):
+            self.viewer.session.edit_subset_mode.edit_subset = None
+        super().activate()
 
 
 @viewer_tool
@@ -72,7 +87,7 @@ class BqplotPanZoomYMode(InteractCheckableTool):
 
 
 @viewer_tool
-class BqplotRectangleMode(InteractCheckableTool):
+class BqplotRectangleMode(BqplotSelectionTool):
 
     icon = 'glue_square'
     tool_id = 'bqplot:rectangle'
@@ -134,7 +149,7 @@ class BqplotRectangleMode(InteractCheckableTool):
 
 
 @viewer_tool
-class BqplotCircleMode(InteractCheckableTool):
+class BqplotCircleMode(BqplotSelectionTool):
 
     icon = 'glue_circle'
     tool_id = 'bqplot:circle'
@@ -248,7 +263,7 @@ class BqplotEllipseMode(BqplotCircleMode):
 
 
 @viewer_tool
-class BqplotXRangeMode(InteractCheckableTool):
+class BqplotXRangeMode(BqplotSelectionTool):
 
     icon = 'glue_xrange_select'
     tool_id = 'bqplot:xrange'
@@ -279,7 +294,7 @@ class BqplotXRangeMode(InteractCheckableTool):
 
 
 @viewer_tool
-class BqplotYRangeMode(InteractCheckableTool):
+class BqplotYRangeMode(BqplotSelectionTool):
 
     icon = 'glue_yrange_select'
     tool_id = 'bqplot:yrange'

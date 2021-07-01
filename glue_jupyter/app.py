@@ -30,6 +30,10 @@ for name in ['glue-float-field', 'glue-throttled-slider']:
         None, name, os.path.join(os.path.dirname(__file__), 'widgets', file))
 
 
+def is_bool(value):
+    return isinstance(value, bool)
+
+
 class JupyterApplication(Application):
     """
     The main Glue application object for the Jupyter environment.
@@ -45,9 +49,11 @@ class JupyterApplication(Application):
     session : `~glue.core.session.Session`
         A pre-existing session object. By default, a new session object is
         created.
+    settings : dict or None
+        Initial settings to override defaults
     """
 
-    def __init__(self, data_collection=None, session=None):
+    def __init__(self, data_collection=None, session=None, settings=None):
 
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
 
@@ -64,6 +70,12 @@ class JupyterApplication(Application):
         self.widget_subset_select = SubsetSelect(session=self.session)
         self.widget_subset_mode = SelectionModeMenu(session=self.session)
         self.widget = widgets.VBox(children=[self.widget_subset_mode, self.output])
+
+        self._settings['new_subset_on_selection_tool_change'] = [False, is_bool]
+
+        if settings is not None:
+            for key, value in settings.items():
+                self.set_setting(key, value)
 
         self._viewer_refs = []
 
