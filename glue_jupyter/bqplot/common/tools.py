@@ -215,6 +215,39 @@ class BqplotCircleMode(InteractCheckableTool):
 
 
 @viewer_tool
+class BqplotEllipseMode(BqplotCircleMode):
+
+    icon = 'glue_lasso'
+    tool_id = 'bqplot:ellipse'
+    action_text = 'Elliptical ROI'
+    tool_tip = 'Define an elliptical region of interest'
+
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+
+        self.interact = BrushEllipseSelector(x_scale=self.viewer.scale_x,
+                                             y_scale=self.viewer.scale_y)
+
+        # Workaround for bug that causes the `color` trait to not be recognized
+        style = self.interact.style.copy()
+        style['fill'] = INTERACT_COLOR
+        border_style = self.interact.border_style.copy()
+        border_style['fill'] = INTERACT_COLOR
+        border_style['stroke'] = INTERACT_COLOR
+        self.interact.style = style
+        self.interact.border_style = border_style
+
+        if roi is not None:
+            self.update_from_roi(roi)
+
+        self.interact.observe(self.update_selection, "brushing")
+        self.interact.observe(self.on_selection_change, "selected_x")
+        self.interact.observe(self.on_selection_change, "selected_y")
+        self.finalize_callback = finalize_callback
+
+
+@viewer_tool
 class BqplotXRangeMode(InteractCheckableTool):
 
     icon = 'glue_xrange_select'
