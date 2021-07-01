@@ -40,7 +40,7 @@ def get_layout_factory():
         return LAYOUT_FACTORY
 
 
-def jglue(*args, **kwargs):
+def jglue(*args, settings=None, show=False, links=None, **kwargs):
     """
     Create a new Jupyter-based glue application.
 
@@ -54,14 +54,10 @@ def jglue(*args, **kwargs):
     for that class for more details.
     """
 
-    show = kwargs.pop('show', False)
-
     from glue.qglue import parse_data, parse_links
     from glue.core.data_factories import load_data
 
-    japp = JupyterApplication()
-
-    links = kwargs.pop('links', None)
+    japp = JupyterApplication(settings=settings)
 
     dc = japp.data_collection
     for label, data in kwargs.items():
