@@ -1,3 +1,4 @@
+import os
 from bqplot import PanZoom
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
 from bqplot_image_gl.interacts import BrushEllipseSelector, MouseInteraction
@@ -11,6 +12,8 @@ __all__ = []
 
 ICON_WIDTH = 20
 INTERACT_COLOR = '#cbcbcb'
+
+ICONS_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'icons')
 
 
 class InteractCheckableTool(CheckableTool):
@@ -232,7 +235,7 @@ class BqplotCircleMode(BqplotSelectionTool):
 @viewer_tool
 class BqplotEllipseMode(BqplotCircleMode):
 
-    icon = 'glue_lasso'
+    icon = os.path.join(ICONS_DIR, 'glue_ellipse.svg')
     tool_id = 'bqplot:ellipse'
     action_text = 'Elliptical ROI'
     tool_tip = 'Define an elliptical region of interest'
