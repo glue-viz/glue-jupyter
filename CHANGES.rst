@@ -1,12 +1,17 @@
-0.7 (unreleased)
+0.7 (2021-07-02)
 ================
 
-* No changes yet.
+* Add implementation of an elliptical selection (not yet exposed in the default
+  viewers). [#241, #242]
+
+* Disable tools in viewers when a tool is selected in another viewer, and add
+  a setting to allow the subset selector to revert back to 'Create New' each time
+  a new tool is selected. [#238]
 
 0.6.1 (2021-06-10)
 ==================
 
-* Fix bug that caused selection tools to not work correctly in 0.6 release. [#234]
+* Fix bug that caused selection tools to not work correctly in 0.6 release. [#235]
 
 * Fix bug that caused the aspect ratio of the image viewer to change when a
   selection region was partially outside plot. [#233]
