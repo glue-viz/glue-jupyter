@@ -69,6 +69,13 @@ class LayerOptionsWidget(v.VuetifyTemplate):
             self.layers = [layer_to_dict(layer_artist, i) for i, layer_artist in
                            enumerate(self.viewer.layers)]
 
+            # Auto-select top visible Data layer
+            idx = [i for i, layer_artist in enumerate(self.viewer.layers)
+                   if layer_artist.state.visible and
+                   not isinstance(layer_artist.state.layer, Subset)]
+            if len(idx) > 0:
+                self.selected = idx[-1]
+
         self.viewer.state.add_callback('layers', _update_layers_from_glue_state)
         _update_layers_from_glue_state()
 
