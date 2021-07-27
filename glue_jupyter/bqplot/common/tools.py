@@ -49,7 +49,7 @@ class BqplotPanZoomMode(InteractCheckableTool):
     icon = 'glue_move'
     tool_id = 'bqplot:panzoom'
     action_text = 'Pan and Zoom'
-    tool_tip = 'Interactively pan and zoom around'
+    tool_tip = 'Interactively pan (click-drag) and zoom (scroll) around'
 
     def __init__(self, viewer, **kwargs):
 
