@@ -59,16 +59,17 @@ class FRBImage(ImageGL):
         ymin = self.viewer.figure.axes[1].scale.min
         ymax = self.viewer.figure.axes[1].scale.max
 
+        if xmin is None or xmax is None or ymin is None or ymax is None:
+            return
+
+        ny, nx = self.shape
+
         # Expand beyond the boundary
         dx = (xmax - xmin)
         dy = (ymax - ymin)
         xmin, xmax = xmin - dx, xmax + dx
         ymin, ymax = ymin - dy, ymax + dy
-
-        if xmin is None or xmax is None or ymin is None or ymax is None:
-            return
-
-        ny, nx = self.shape
+        ny, nx = ny * 3, nx * 3
 
         # Set up bounds
         bounds = [(ymin, ymax, ny), (xmin, xmax, nx)]
