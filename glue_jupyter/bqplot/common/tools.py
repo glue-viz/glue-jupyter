@@ -58,6 +58,14 @@ class BqplotPanZoomMode(InteractCheckableTool):
         self.interact = PanZoom(scales={'x': [self.viewer.scale_x],
                                         'y': [self.viewer.scale_y]})
 
+    def activate(self):
+        self.viewer._composite_image.expand_bounds = True
+        super().activate()
+
+    def deactivate(self):
+        self.viewer._composite_image.expand_bounds = False
+        super().deactivate()
+
 
 @viewer_tool
 class BqplotPanZoomXMode(InteractCheckableTool):

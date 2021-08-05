@@ -21,6 +21,8 @@ class FRBImage(ImageGL):
         # FIXME: need to use weakref to avoid circular references
         self.viewer = viewer
 
+        self._expand_bounds = False
+
         self.scale_image = ColorScale()
         self.scales = {'x': self.viewer.scale_x,
                        'y': self.viewer.scale_y,
@@ -48,6 +50,16 @@ class FRBImage(ImageGL):
     def shape(self):
         return self.viewer.shape
 
+    @property
+    def expand_bounds(self):
+        return self._expand_bounds
+
+    @expand_bounds.setter
+    def expand_bounds(self, value):
+        self._expand_bounds = value
+        if value:  # no point updating if the expanded bounds are removed
+            self.debounced_update()
+
     def update(self, *args, **kwargs):
 
         if self.shape is None:
@@ -65,11 +77,13 @@ class FRBImage(ImageGL):
         ny, nx = self.shape
 
         # Expand beyond the boundary
-        dx = (xmax - xmin)
-        dy = (ymax - ymin)
-        xmin, xmax = xmin - dx, xmax + dx
-        ymin, ymax = ymin - dy, ymax + dy
-        ny, nx = ny * 3, nx * 3
+        if self.expand_bounds:
+            dx = (xmax - xmin)
+            dy = (ymax - ymin)
+            xmin, xmax = xmin - dx / 2, xmax + dx / 2
+            ymin, ymax = ymin - dy / 2, ymax + dy / 2
+            nx *= 2
+            ny *= 2
 
         # Set up bounds
         bounds = [(ymin, ymax, ny), (xmin, xmax, nx)]
