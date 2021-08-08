@@ -112,15 +112,15 @@ class BqplotProfileLayerArtist(LayerArtist):
             self.state._y_min = y_min - y_range * 0.1
             self.state._y_max = y_max + y_range * 0.1
 
-            largest_y_max = max(getattr(layer, '_y_max', 0)
-                                for layer in self._viewer_state.layers)
-            if largest_y_max != self._viewer_state.y_max:
-                self._viewer_state.y_max = largest_y_max
+            # largest_y_max = max(getattr(layer, '_y_max', 0)
+            #                     for layer in self._viewer_state.layers)
+            # if largest_y_max != self._viewer_state.y_max:
+            #     self._viewer_state.y_max = largest_y_max
 
-            smallest_y_min = min(getattr(layer, '_y_min', np.inf)
-                                 for layer in self._viewer_state.layers)
-            if smallest_y_min != self._viewer_state.y_min:
-                self._viewer_state.y_min = smallest_y_min
+            # smallest_y_min = min(getattr(layer, '_y_min', np.inf)
+            #                      for layer in self._viewer_state.layers)
+            # if smallest_y_min != self._viewer_state.y_min:
+            #     self._viewer_state.y_min = smallest_y_min
 
         self.redraw()
 
