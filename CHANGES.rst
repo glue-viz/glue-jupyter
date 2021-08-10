@@ -1,3 +1,8 @@
+0.8 (unreleased)
+================
+
+* Avoid updating FRBMark multiple times when adding a new layer. [#248]
+
 0.7 (2021-07-02)
 ================
 

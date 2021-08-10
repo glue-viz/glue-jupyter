@@ -135,7 +135,7 @@ class BqplotImageLayerArtist(ImageLayerArtist):
             self._update_contour_lines()
 
     def _update_image_data(self, *args, **kwargs):
-        super()._update_image_data(*args, **kwargs)
+        self.composite_image.invalidate_cache()
         # if the image data change, the contour lines are invalid
         self._contour_line_cache.clear()
         self._update_contour_lines()

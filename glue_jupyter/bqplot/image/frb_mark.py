@@ -35,7 +35,10 @@ class FRBImage(ImageGL):
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'min')
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'max')
 
-        self.update()
+        # NOTE: we deliberately don't call .update() here because when FRBImage
+        # is created for the main composite image layer the composite arrays
+        # haven't been set up yet, and for subset layers the layer gets force
+        # updated anyway when the layers are added to the viewer.
 
     @debounced(method=True)
     def debounced_update(self, *args, **kwargs):
