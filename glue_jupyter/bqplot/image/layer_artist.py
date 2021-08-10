@@ -135,7 +135,7 @@ class BqplotImageLayerArtist(ImageLayerArtist):
             self._update_contour_lines()
 
     def _update_image_data(self, *args, **kwargs):
-        super()._update_image_data(*args, **kwargs)
+        self.composite_image.invalidate_cache()
         # if the image data change, the contour lines are invalid
         self._contour_line_cache.clear()
         self._update_contour_lines()
@@ -206,12 +206,6 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         if hasattr(self, 'image_artist'):
             self.image_artist.invalidate_cache()
             self._update_visual_attributes(redraw=redraw)
-
-    def update(self, *event):
-        ARRAY_CACHE.pop(self.state.uuid, None)
-        PIXEL_CACHE.pop(self.state.uuid, None)
-        self._update_image(force=True)
-        self.redraw()
 
     def redraw(self):
         pass
