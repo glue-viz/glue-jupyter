@@ -78,4 +78,4 @@ class FRBImage(ImageGL):
             self.image = EMPTY_IMAGE
 
     def invalidate_cache(self):
-        self.debounced_update()
+        self.update()
