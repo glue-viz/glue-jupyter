@@ -207,5 +207,11 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
             self.image_artist.invalidate_cache()
             self._update_visual_attributes(redraw=redraw)
 
+    def update(self, *event):
+        ARRAY_CACHE.pop(self.state.uuid, None)
+        PIXEL_CACHE.pop(self.state.uuid, None)
+        self._update_image(force=True)
+        self.redraw()
+
     def redraw(self):
         pass
