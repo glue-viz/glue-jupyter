@@ -79,6 +79,9 @@ class LayerOptionsWidget(v.VuetifyTemplate):
         self.viewer.state.add_callback('layers', _update_layers_from_glue_state)
         _update_layers_from_glue_state()
 
+        # Expose this as instance method to be called from elsewhere.
+        self.update = _update_layers_from_glue_state
+
     def vue_toggle_visible(self, index):
         state = self.viewer.layers[index].state
         state.visible = not state.visible
