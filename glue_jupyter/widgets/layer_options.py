@@ -70,9 +70,15 @@ class LayerOptionsWidget(v.VuetifyTemplate):
                            enumerate(self.viewer.layers)]
 
             # Auto-select top visible Data layer
+            try:
+                data_labels = [d.label for d in self.viewer.data()]
+            except Exception:
+                data_labels = None
             idx = [i for i, layer_artist in enumerate(self.viewer.layers)
-                   if layer_artist.state.visible and
-                   not isinstance(layer_artist.state.layer, Subset)]
+                   if (layer_artist.state.visible and
+                       (data_labels is None or
+                        (hasattr(layer_artist, 'layer') and
+                         layer_artist.layer.label in data_labels)))]
             if len(idx) > 0:
                 self.selected = idx[-1]
 
