@@ -139,6 +139,7 @@ class BqplotImageLayerArtist(ImageLayerArtist):
         # if the image data change, the contour lines are invalid
         self._contour_line_cache.clear()
         self._update_contour_lines()
+        self.view._layout_layer_options.update()
 
 
 class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
