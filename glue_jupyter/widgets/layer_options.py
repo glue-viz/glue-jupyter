@@ -69,7 +69,7 @@ class LayerOptionsWidget(v.VuetifyTemplate):
             self.layers = [layer_to_dict(layer_artist, i) for i, layer_artist in
                            enumerate(self.viewer.layers)]
 
-        self.viewer.state.add_callback('layers', _update_layers_from_glue_state)
+        self.viewer._layer_artist_container.on_changed(_update_layers_from_glue_state)
         _update_layers_from_glue_state()
 
     def vue_toggle_visible(self, index):
