@@ -191,7 +191,7 @@ class BqplotBaseView(IPyWidgetView):
                 subset_state = self._roi_to_subset_state(roi)
                 cmd = ApplySubsetState(data_collection=self._data,
                                        subset_state=subset_state,
-                                       use_current=use_current)
+                                       override_mode=use_current)
                 self._session.command_stack.do(cmd)
 
     def _roi_to_subset_state(self, roi):

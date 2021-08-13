@@ -78,7 +78,7 @@ class IpyvolumeBaseView(IPyWidgetView):
             subset_state = RoiSubsetState3d(x, y, z, roi)
             cmd = ApplySubsetState(data_collection=self._data,
                                    subset_state=subset_state,
-                                   use_current=use_current)
+                                   override_mode=use_current)
             self._session.command_stack.do(cmd)
 
     def limits_to_scales(self, *args):
