@@ -1,7 +1,13 @@
-0.8 (unreleased)
+0.8 (2021-08-20)
 ================
 
+* Fix compatibility with latest stable releases of glue-core. [#252]
+
+* Fix updating of layer list when adding new layers to a figure. [#251]
+
 * Avoid updating FRBMark multiple times when adding a new layer. [#248]
+
+* Improve tooltip for pan/zoom. [#245]
 
 0.7 (2021-07-02)
 ================
