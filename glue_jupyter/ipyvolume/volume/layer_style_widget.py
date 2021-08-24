@@ -53,7 +53,7 @@ class Volume3DLayerStateWidget(VBox):
         self.widget_clamp_max = Checkbox(description='clamp maximum', value=self.state.clamp_max)
         link((self.state, 'clamp_max'), (self.widget_clamp_max, 'value'))
 
-        self.widget_color = ColorPicker(value=self.state.color, description='color')
+        self.widget_color = ColorPicker(value=color2hex(self.state.color), description='color')
         link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
 
         if self.state.alpha is None:
