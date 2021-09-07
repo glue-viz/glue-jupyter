@@ -1,3 +1,10 @@
+0.8.1 (unreleased)
+==================
+
+* Better handle incompatible subsets in table viewer. [#256]
+
+* Better handle case where image artist has already been removed. [#256]
+
 0.8 (2021-08-20)
 ================
 

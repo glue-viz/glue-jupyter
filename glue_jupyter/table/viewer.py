@@ -1,10 +1,12 @@
 import os
 
+import numpy as np
 import ipyvuetify as v
 import ipywidgets as widgets
 import traitlets
 from glue.core.data import Subset
 from glue.core.subset import ElementSubsetState
+from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
 
 from ..view import IPyWidgetView
@@ -126,7 +128,12 @@ class TableGlue(TableBase):
         i2 = min(len(self), (page + 1) * page_size)
 
         view = slice(i1, i2)
-        masks = {k.label: k.to_mask(view) for k in self.data.subsets}
+        masks = {}
+        for k in self.data.subsets:
+            try:
+                masks[k.label] = k.to_mask(view)
+            except IncompatibleAttribute:
+                masks[k.label] = np.zeros(i2 - i1, dtype=bool)
 
         items = []
         for i in range(i2 - i1):
