@@ -1,4 +1,4 @@
-0.8.1 (unreleased)
+0.8.1 (2021-09-07)
 ==================
 
 * Better handle incompatible subsets in table viewer. [#256]
