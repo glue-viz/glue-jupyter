@@ -203,7 +203,7 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         # We need to now ensure that image_artist, which may have been marked
         # as not being visible when the layer was cleared is made visible
         # again.
-        if hasattr(self, 'image_artist'):
+        if hasattr(self, 'image_artist') and self.image_artist is not None:
             self.image_artist.invalidate_cache()
             self._update_visual_attributes(redraw=redraw)
 
