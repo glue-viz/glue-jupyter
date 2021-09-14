@@ -3,8 +3,6 @@ from __future__ import absolute_import, division, print_function
 import sys
 import warnings
 
-import numpy as np
-
 from glue.core import BaseData
 from glue.utils import defer_draw, color2hex
 from glue.viewers.profile.state import ProfileLayerState
