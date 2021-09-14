@@ -4,8 +4,16 @@ from echo import CallbackProperty
 from glue.viewers.matplotlib.state import (DeferredDrawCallbackProperty as DDCProperty,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
-from glue.viewers.image.state import ImageLayerState
+from glue.viewers.image.state import ImageViewerState, ImageLayerState
 from glue.core.state_objects import StateAttributeLimitsHelper
+
+
+class BqplotImageViewerState(ImageViewerState):
+    image_external_padding = DDCProperty(0, docstring='How much padding to add to the '
+                                                      'fixed resolution buffer beyond the '
+                                                      'bounds of the image, as a value relative '
+                                                      'to the axes width/height (0 means no '
+                                                      'padding)')
 
 
 class BqplotImageLayerState(ImageLayerState):

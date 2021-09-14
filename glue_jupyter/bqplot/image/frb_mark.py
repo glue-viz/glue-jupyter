@@ -21,7 +21,7 @@ class FRBImage(ImageGL):
         # FIXME: need to use weakref to avoid circular references
         self.viewer = viewer
 
-        self._expand_bounds = False
+        self._external_padding = False
 
         self.scale_image = ColorScale()
         self.scales = {'x': self.viewer.scale_x,
@@ -51,13 +51,14 @@ class FRBImage(ImageGL):
         return self.viewer.shape
 
     @property
-    def expand_bounds(self):
-        return self._expand_bounds
+    def external_padding(self):
+        return self._external_padding
 
-    @expand_bounds.setter
-    def expand_bounds(self, value):
-        self._expand_bounds = value
-        if value:  # no point updating if the expanded bounds are removed
+    @external_padding.setter
+    def external_padding(self, value):
+        previous_value = self._external_padding
+        self._external_padding = value
+        if value < previous_value:  # no point updating if the value is smaller than before
             self.debounced_update()
 
     def update(self, *args, **kwargs):
@@ -77,13 +78,14 @@ class FRBImage(ImageGL):
         ny, nx = self.shape
 
         # Expand beyond the boundary
-        if self.expand_bounds:
+        print(self.external_padding)
+        if self.external_padding > 0:
             dx = (xmax - xmin)
             dy = (ymax - ymin)
-            xmin, xmax = xmin - dx / 2, xmax + dx / 2
-            ymin, ymax = ymin - dy / 2, ymax + dy / 2
-            nx *= 2
-            ny *= 2
+            xmin, xmax = xmin - dx * self.external_padding, xmax + dx * self.external_padding
+            ymin, ymax = ymin - dy * self.external_padding, ymax + dy * self.external_padding
+            nx *= (1 + 2 * self.external_padding)
+            ny *= (1 + 2 * self.external_padding)
 
         # Set up bounds
         bounds = [(ymin, ymax, ny), (xmin, xmax, nx)]

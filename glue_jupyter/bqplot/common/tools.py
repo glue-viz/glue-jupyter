@@ -60,12 +60,12 @@ class BqplotPanZoomMode(InteractCheckableTool):
 
     def activate(self):
         if hasattr(self.viewer, '_composite_image'):
-            self.viewer._composite_image.expand_bounds = True
+            self.viewer._composite_image.external_padding = self.viewer.state.image_external_padding
         super().activate()
 
     def deactivate(self):
         if hasattr(self.viewer, '_composite_image'):
-            self.viewer._composite_image.expand_bounds = False
+            self.viewer._composite_image.external_padding = 0
         super().deactivate()
 
 
