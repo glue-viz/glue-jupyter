@@ -1,3 +1,9 @@
+0.9 (unreleased)
+================
+
+* Add an option to allow fixed resolution buffer to be larger than
+  axes by a given factor. [#246]
+
 0.8.1 (2021-09-07)
 ==================
 

@@ -2,6 +2,7 @@
 # that implements __call__ with a bounds= argument and returns a fixed
 # resolution buffer (FRB). It is the equivalent of FRBArtist in glue-core.
 
+import math
 import numpy as np
 
 from bqplot import ColorScale
@@ -20,6 +21,8 @@ class FRBImage(ImageGL):
 
         # FIXME: need to use weakref to avoid circular references
         self.viewer = viewer
+
+        self._external_padding = 0
 
         self.scale_image = ColorScale()
         self.scales = {'x': self.viewer.scale_x,
@@ -48,6 +51,17 @@ class FRBImage(ImageGL):
     def shape(self):
         return self.viewer.shape
 
+    @property
+    def external_padding(self):
+        return self._external_padding
+
+    @external_padding.setter
+    def external_padding(self, value):
+        previous_value = self._external_padding
+        self._external_padding = value
+        if value > previous_value:  # no point updating if the value is smaller than before
+            self.debounced_update()
+
     def update(self, *args, **kwargs):
 
         if self.shape is None:
@@ -63,6 +77,15 @@ class FRBImage(ImageGL):
             return
 
         ny, nx = self.shape
+
+        # Expand beyond the boundary
+        if self.external_padding != 0:
+            dx = (xmax - xmin)
+            dy = (ymax - ymin)
+            xmin, xmax = xmin - dx * self.external_padding, xmax + dx * self.external_padding
+            ymin, ymax = ymin - dy * self.external_padding, ymax + dy * self.external_padding
+            nx *= math.ceil(1 + 2 * self.external_padding)
+            ny *= math.ceil(1 + 2 * self.external_padding)
 
         # Set up bounds
         bounds = [(ymin, ymax, ny), (xmin, xmax, nx)]

@@ -1,4 +1,3 @@
-from glue.viewers.image.state import ImageViewerState
 from glue.viewers.image.composite_array import CompositeArray
 from bqplot_image_gl.viewlistener import ViewListener
 
@@ -10,6 +9,7 @@ from ..scatter.layer_artist import BqplotScatterLayerArtist
 from .layer_artist import BqplotImageLayerArtist, BqplotImageSubsetLayerArtist
 from .frb_mark import FRBImage
 
+from glue_jupyter.bqplot.image.state import BqplotImageViewerState
 from glue_jupyter.common.state_widgets.layer_scatter import ScatterLayerStateWidget
 from glue_jupyter.common.state_widgets.layer_image import (ImageLayerStateWidget,
                                                            ImageSubsetLayerStateWidget)
@@ -27,7 +27,7 @@ class BqplotImageView(BqplotBaseView):
     _layer_style_widget_cls = {BqplotImageLayerArtist: ImageLayerStateWidget,
                                BqplotImageSubsetLayerArtist: ImageSubsetLayerStateWidget,
                                BqplotScatterLayerArtist: ScatterLayerStateWidget}
-    _state_cls = ImageViewerState
+    _state_cls = BqplotImageViewerState
     _options_cls = ImageViewerStateWidget
 
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:rectangle', 'bqplot:circle']
