@@ -35,3 +35,8 @@ ipyvolume viewers
 .. automodapi:: glue_jupyter.ipyvolume.scatter
 
 .. automodapi:: glue_jupyter.ipyvolume.volume
+
+Other viewers
+--------------
+
+.. automodapi:: glue_jupyter.table
