@@ -6,7 +6,7 @@ import warnings
 import numpy as np
 
 from glue.core import BaseData
-from glue.utils import defer_draw, nanmin, nanmax, color2hex
+from glue.utils import defer_draw, color2hex
 from glue.viewers.profile.state import ProfileLayerState
 from glue.core.exceptions import IncompatibleAttribute, IncompatibleDataException
 
@@ -102,25 +102,6 @@ class BqplotProfileLayerArtist(LayerArtist):
             with self.line_mark.hold_sync():
                 self.line_mark.x = [0.]
                 self.line_mark.y = [0.]
-
-        if not self._viewer_state.normalize and len(y) > 0:
-
-            y_min = nanmin(y)
-            y_max = nanmax(y)
-            y_range = y_max - y_min
-
-            self.state._y_min = y_min - y_range * 0.1
-            self.state._y_max = y_max + y_range * 0.1
-
-            # largest_y_max = max(getattr(layer, '_y_max', 0)
-            #                     for layer in self._viewer_state.layers)
-            # if largest_y_max != self._viewer_state.y_max:
-            #     self._viewer_state.y_max = largest_y_max
-
-            # smallest_y_min = min(getattr(layer, '_y_min', np.inf)
-            #                      for layer in self._viewer_state.layers)
-            # if smallest_y_min != self._viewer_state.y_min:
-            #     self._viewer_state.y_min = smallest_y_min
 
         self.redraw()
 
