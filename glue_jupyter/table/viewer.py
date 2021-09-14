@@ -4,15 +4,21 @@ import numpy as np
 import ipyvuetify as v
 import ipywidgets as widgets
 import traitlets
+from echo import ListCallbackProperty
 from glue.core.data import Subset
 from glue.core.subset import ElementSubsetState
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
+from glue.viewers.common.state import ViewerState
 
 from ..view import IPyWidgetView
 
 with open(os.path.join(os.path.dirname(__file__), "table.vue")) as f:
     TEMPLATE = f.read()
+
+
+class TableState(ViewerState):
+    hidden_components = ListCallbackProperty(docstring='Attributes to hide in the table display')
 
 
 class TableBase(v.VuetifyTemplate):
@@ -27,6 +33,7 @@ class TableBase(v.VuetifyTemplate):
     selection_colors = traitlets.Any([]).tag(sync=True)
     selection_enabled = traitlets.Bool(True).tag(sync=True)
     highlighted = traitlets.Int(None, allow_none=True).tag(sync=True)
+    hidden_components = traitlets.List([]).tag(sync=False)
 
     def _update(self):
         self._update_columns()
@@ -99,6 +106,18 @@ class TableBase(v.VuetifyTemplate):
     def vue_on_row_clicked(self, index):
         self.highlighted = index
 
+    def get_visible_components(self):
+        components = []
+        for cid in self.data.main_components + self.data.derived_components:
+            # NOTE: we need to use a loop here instead of using 'not in' because
+            # this doesn't work corectly with ComponentIDs (which override __eq__)
+            for hidden_cid in self.hidden_components:
+                if cid is hidden_cid:
+                    break
+            else:
+                components.append(cid)
+        return components
+
 
 class TableGlue(TableBase):
     data = traitlets.Any()  # Glue data object
@@ -116,8 +135,8 @@ class TableGlue(TableBase):
     def _get_headers(self):
         if self.data is None:
             return []
-        components = [str(k) for k in self.data.main_components + self.data.derived_components]
-        return [{'text': k, 'value': k, 'sortable': False} for k in components]
+        components = self.get_visible_components()
+        return [{'text': str(k), 'value': str(k), 'sortable': False} for k in components]
 
     def _get_items(self):
         if self.data is None:
@@ -141,7 +160,8 @@ class TableGlue(TableBase):
             for selection in self.selections:
                 selected = masks[selection][i]
                 item[selection] = bool(selected)
-            for j, component in enumerate(self.data.main_components + self.data.derived_components):
+            components = self.get_visible_components()
+            for j, component in enumerate(components):
                 item[str(component)] = self.format(self.data[component][i + i1])
             items.append(item)
         return items
@@ -193,6 +213,7 @@ class TableViewer(IPyWidgetView):
     allow_duplicate_subset = False
     large_data_size = 1e100  # Basically infinite (a googol)
 
+    _state_cls = TableState
     _options_cls = TableViewerStateWidget
     _data_artist_cls = TableLayerArtist
     _subset_artist_cls = TableLayerArtist
@@ -204,6 +225,11 @@ class TableViewer(IPyWidgetView):
         super(TableViewer, self).__init__(session, state=state)
         self.widget_table = TableGlue(data=None, apply_filter=self.apply_filter)
         self.create_layout()
+        self.state.add_callback('hidden_components', self._update_hidden)
+
+    def _update_hidden(self, *args):
+        self.widget_table.hidden_components = self.state.hidden_components
+        self.redraw()
 
     def redraw(self):
         subsets = [k.layer for k in self.layers if isinstance(k.layer, Subset)]

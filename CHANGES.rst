@@ -1,3 +1,9 @@
+0.10 (unreleased)
+=================
+
+* Add the ability to hide columns in the table viewer by using
+  ``TableViewer.state.hidden_components``. [#259]
+
 0.9 (2021-09-14)
 ================
 
