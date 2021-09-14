@@ -1,4 +1,4 @@
-0.10 (unreleased)
+0.10 (2021-09-14)
 =================
 
 * Add the ability to hide columns in the table viewer by using
