@@ -1,4 +1,4 @@
-0.9 (unreleased)
+0.9 (2021-09-14)
 ================
 
 * Add an option to allow fixed resolution buffer to be larger than
