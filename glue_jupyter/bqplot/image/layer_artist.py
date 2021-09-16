@@ -118,7 +118,9 @@ class BqplotImageLayerArtist(ImageLayerArtist):
         if self.uuid is None or self.state.attribute is None or self.state.layer is None:
             return
 
-        changed = set() if force else self.pop_changed_properties()
+        # NOTE: we need to evaluate this even if force=True so that the cache
+        # of updated properties is up to date after this method has been called.
+        changed = self.pop_changed_properties()
 
         if force or any(prop in changed for prop in ('layer', 'attribute',
                                                      'slices', 'x_att', 'y_att')):
@@ -175,7 +177,9 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         if self.subset_array is None or self.state.layer is None:
             return
 
-        changed = set() if force else self.pop_changed_properties()
+        # NOTE: we need to evaluate this even if force=True so that the cache
+        # of updated properties is up to date after this method has been called.
+        changed = self.pop_changed_properties()
 
         if force or any(prop in changed for prop in ('layer', 'attribute', 'color',
                                                      'x_att', 'y_att', 'slices')):

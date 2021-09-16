@@ -11,8 +11,6 @@ from glue_jupyter.common.state_widgets.viewer_profile import ProfileViewerStateW
 
 __all__ = ['BqplotProfileView']
 
-__all__ = ['BqplotProfileView']
-
 
 class BqplotProfileView(BqplotBaseView):
 

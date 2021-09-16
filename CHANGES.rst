@@ -1,3 +1,9 @@
+0.10.1 (unreleased)
+===================
+
+* Prevent jumping around of view in profile viewer when creating
+  or updating subsets. [#247]
+
 0.10 (2021-09-14)
 =================
 
