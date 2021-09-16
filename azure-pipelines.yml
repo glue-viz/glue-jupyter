@@ -37,19 +37,22 @@ jobs:
       libraries: {}
       coverage: 'false'
 
-    - linux: py36-test
     - linux: py37-test
+    - linux: py38-test
+    - linux: py39-test
 
-    - macos: py36-test
     - macos: py37-test
+    - macos: py38-test
+    - macos: py39-test
 
-    - windows: py36-test
     - windows: py37-test
+    - windows: py38-test
+    - windows: py39-test
 
     - linux: py37-notebooks
-    - macos: py37-notebooks
-    - windows: py36-notebooks
+    - macos: py38-notebooks
+    - windows: py39-notebooks
 
-    - linux: py37-docs
+    - linux: py39-docs
     - macos: py37-docs
-    - windows: py36-docs
+    - windows: py38-docs
