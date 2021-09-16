@@ -1,4 +1,4 @@
-0.10.1 (unreleased)
+0.10.1 (2021-09-16)
 ===================
 
 * Prevent jumping around of view in profile viewer when creating
