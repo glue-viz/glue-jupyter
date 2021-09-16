@@ -78,8 +78,8 @@ class BqplotScatterLayerArtist(LayerArtist):
         dlink((self.state, 'visible'), (self.scatter, 'visible'))
         dlink((self.state, 'visible'), (self.image, 'visible'))
 
-        dlink((self.state, 'alpha'), (self.scatter, 'default_opacities'), lambda x: [x])
-        dlink((self.state, 'alpha'), (self.quiver, 'default_opacities'), lambda x: [x])
+        dlink((self.state, 'alpha'), (self.scatter, 'opacities'), lambda x: [x])
+        dlink((self.state, 'alpha'), (self.quiver, 'opacities'), lambda x: [x])
         dlink((self.state, 'alpha'), (self.image, 'opacity'))
 
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
