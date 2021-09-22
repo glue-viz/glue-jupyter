@@ -80,6 +80,8 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
     def _sync_available_from_state(self):
         self.available = [subset_to_dict(subset) for subset in
                           self.data_collection.subset_groups]
+        if len(self.available) == 0:
+            self.selected = []
 
     @traitlets.observe('selected')
     def _sync_selected_from_ui(self, change):
