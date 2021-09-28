@@ -9,13 +9,13 @@
       :options.sync="options"
       :items_per_page.sync="items_per_page"
       :server-items-length="total_length"
-      class="elevation-1"
+      class="elevation-1 glue-data-table"
     >
       <template v-slot:header="props">
         <thead>
           <tr>
-            <th style="padding: 0 10px">#</th>
-            <th style="padding: 0 1px" v-if="selection_enabled">
+            <th style="padding: 0 10px; width: 40px">#</th>
+            <th style="padding: 0 1px; width: 30px" v-if="selection_enabled">
               <v-btn icon color="primary" text small @click="apply_filter">
                 <v-icon>filter_list</v-icon>
               </v-btn>
@@ -51,9 +51,13 @@
               >brightness_1</v-icon>
             </v-fade-transition>
           </td>
-          <td v-for="header in headers" class="text-xs-right" :key="header.text">
+          <td v-for="header in headers" class="text-xs-right"
+              :key="header.text"
+              class="text-truncate text-no-wrap"
+              :title="props.item[header.value]"
+          >
             <v-slide-x-transition appear>
-              <span class="text-truncate" style="display: inline-block">{{ props.item[header.value] }}</span>
+              <span>{{ props.item[header.value] }}</span>
             </v-slide-x-transition>
           </td>
         </tr>
@@ -63,8 +67,12 @@
 </template>
 
 
-<style scoped>
+<style id="glue_table">
 .highlightedRow {
     background-color: #E3F2FD;
+}
+
+.glue-data-table table {
+  table-layout: fixed;
 }
 </style>
