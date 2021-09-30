@@ -28,6 +28,7 @@ class BqplotHistogramLayerArtist(LayerArtist):
         self.view.figure.marks = list(self.view.figure.marks) + [self.bars]
 
         dlink((self.state, 'color'), (self.bars, 'colors'), lambda x: [color2hex(x)])
+        dlink((self.state, 'alpha'), (self.bars, 'opacities'), lambda x: [x])
 
         self._viewer_state.add_global_callback(self._update_histogram)
         self.state.add_global_callback(self._update_histogram)
