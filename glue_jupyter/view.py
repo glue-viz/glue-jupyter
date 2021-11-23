@@ -36,8 +36,10 @@ class IPyWidgetView(Viewer):
         self._output_widget = (None
                                if self.session.application.get_setting('disable_output_widget')
                                else Output())
+        self.initialize_main()
         self.initialize_layer_options()
         self.initialize_toolbar()
+        self.create_layout()
 
     @property
     def toolbar_selection_tools(self):
@@ -141,6 +143,9 @@ class IPyWidgetView(Viewer):
 
     def get_layer_artist(self, cls, layer=None, layer_state=None):
         return cls(self, self.state, layer=layer, layer_state=layer_state)
+
+    def initialize_main(self):
+        pass
 
     def initialize_layer_options(self):
         self._layout_layer_options = LayerOptionsWidget(self)

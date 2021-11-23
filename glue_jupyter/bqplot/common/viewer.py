@@ -25,10 +25,63 @@ class BqplotBaseView(IPyWidgetView):
     _default_mouse_mode_cls = ROIClickAndDrag
 
     def __init__(self, session, state=None):
+        super(BqplotBaseView, self).__init__(session, state=state)
 
+    def initialize_main(self):
         # if we allow padding, we sometimes get odd behaviour with the interacts
         self.scale_x = bqplot.LinearScale(min=0, max=1, allow_padding=False)
-        self.scale_y = bqplot.LinearScale(min=0, max=1)
+
+        # lazily create widgets
+        self.scale_y_log = None
+        self.scale_y_linear = None
+        self.scale_x_log = None
+        self.scale_x_linear = None
+
+        if self.state.y_log:
+            self.scale_y = bqplot.LogScale()
+        else:
+            self.scale_y = bqplot.LinearScale(min=0, max=1)
+
+        if self.state.x_log:
+            self.scale_x = bqplot.LogScale()
+        else:
+            self.scale_x = bqplot.LinearScale(min=0, max=1)
+
+        def update_scale_type_y(_ignore):
+            prev = self.scale_y
+            if self.state.y_log:
+                self.scale_y = bqplot.LogScale()
+            else:
+                self.scale_y = bqplot.LinearScale()
+            self._mouse_interact.y_scale = self.scale_y
+            prev.close()
+            prev.unobserve(self.update_glue_scales, names=['min', 'max'])
+            self.scale_x.observe(self.update_glue_scales, names=['min', 'max'])
+            update_scales()
+        self.state.add_callback('y_log', update_scale_type_y, priority=-1)
+
+        def update_scale_type_x(_ignore):
+            prev = self.scale_x
+            if self.state.x_log:
+                self.scale_x = bqplot.LogScale()
+            else:
+                self.scale_x_linear = bqplot.LinearScale()
+                scale = self.scale_x_linear
+            self.scale_y = scale
+            prev.unobserve(self.update_glue_scales, names=['min', 'max'])
+            self.scale_x.observe(self.update_glue_scales, names=['min', 'max'])
+            update_scales()
+        self.state.add_callback('x_log', update_scale_type_x, priority=-1)
+
+        def update_scales():
+            self.scales = {'x': self.scale_x, 'y': self.scale_y}
+            self.axis_x.scale = self.scale_x
+            self.axis_y.scale = self.scale_y
+            self.figure.axes = [self.axis_x, self.axis_y]
+            self.figure.scale_x = self.scale_x
+            self.figure.scale_y = self.scale_y
+            self._mouse_interact.x_scale = self.scale_x
+            self._mouse_interact.y_scale = self.scale_y
 
         self.scales = {'x': self.scale_x, 'y': self.scale_y}
         self.axis_x = bqplot.Axis(
@@ -59,7 +112,7 @@ class BqplotBaseView(IPyWidgetView):
         self.figure.interaction = self._mouse_interact
         self._events_for_callback = {}
 
-        super(BqplotBaseView, self).__init__(session, state=state)
+    def create_layout(self):
 
         # Remove the following two lines once glue v0.16 is required - see
         # https://github.com/glue-viz/glue/pull/2099/files for more information.
@@ -87,7 +140,7 @@ class BqplotBaseView(IPyWidgetView):
 
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
-        self.create_layout()
+        super().create_layout()
 
     def update_x_axislabel(self, *event):
         self.axis_x.label = self.state.x_axislabel
