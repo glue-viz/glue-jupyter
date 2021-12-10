@@ -32,11 +32,11 @@ class BqplotImageView(BqplotBaseView):
 
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:rectangle', 'bqplot:circle']
 
-    def __init__(self, session):
+    def __init__(self, session, app=None):
 
         super(BqplotImageView, self).__init__(session)
-
         self.shape = None
+        self.app = app
 
         self._composite = CompositeArray()
         self._composite_image = FRBImage(self, self._composite)
