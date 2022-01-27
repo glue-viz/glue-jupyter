@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 
 import ipyvuetify as v
 import ipywidgets as widgets
@@ -7,7 +8,6 @@ from glue.icons import icon_path
 from glue.core.edit_subset_mode import OrMode, AndNotMode, AndMode, XorMode, ReplaceMode
 from glue.core.hub import HubListener
 from glue.utils.decorators import avoid_circular
-from glue_jupyter.utils import nullcontext
 
 __all__ = ['SelectionModeMenu']
 
