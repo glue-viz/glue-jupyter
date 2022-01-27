@@ -1,4 +1,3 @@
-import sys
 import functools
 import collections
 import time
