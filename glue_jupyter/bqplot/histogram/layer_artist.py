@@ -60,7 +60,7 @@ class BqplotHistogramLayerArtist(LayerArtist):
         if self.bins.size == 0 or self.hist_unscaled.sum() == 0:
             return
 
-        self.hist = self.hist_unscaled.astype(np.float)
+        self.hist = self.hist_unscaled.astype(float)
         dx = self.bins[1] - self.bins[0]
 
         if self._viewer_state.cumulative:

@@ -34,7 +34,8 @@ class BqplotBaseView(IPyWidgetView):
         self.axis_y = bqplot.Axis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
                                   grid_lines='none', label='y')
 
-        self.figure = bqplot.Figure(scales=self.scales, animation_duration=0,
+        self.figure = bqplot.Figure(scale_x=self.scale_x, scale_y=self.scale_y,
+                                    animation_duration=0,
                                     axes=[self.axis_x, self.axis_y],
                                     fig_margin={'left': 60, 'bottom': 60, 'top': 10, 'right': 10})
         self.figure.padding_y = 0
