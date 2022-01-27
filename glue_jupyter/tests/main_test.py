@@ -9,7 +9,6 @@ from glue.core import Data
 from glue.core.autolinking import find_possible_links
 
 import glue_jupyter as gj
-from glue_jupyter.utils import GLUE_LT_016
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -134,11 +133,7 @@ def test_data_names(app, viewer_name):
     data1 = Data(x=np.ones((2, 3, 4)))
     data2 = Data(y=np.ones((2, 3, 4)))
 
-    if GLUE_LT_016:
-        for data in list(app.data_collection):
-            app.data_collection.remove(data)
-    else:
-        app.data_collection.clear()
+    app.data_collection.clear()
 
     app.add_data(mydata1=data1)
     app.add_data(mydata2=data2)

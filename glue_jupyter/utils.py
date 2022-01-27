@@ -2,27 +2,13 @@ import sys
 import functools
 import collections
 import time
-from distutils.version import LooseVersion
 
 import matplotlib
 import PIL.Image
 import numpy as np
 from io import BytesIO as StringIO
 
-from glue import __version__ as glue_version
 from glue.core import Data
-
-GLUE_LT_016 = LooseVersion(glue_version) < LooseVersion('0.16')
-
-if sys.version_info[:2] < (3, 7):
-    from contextlib import contextmanager  # noqa
-
-    @contextmanager
-    def nullcontext():
-        yield None
-
-else:
-    from contextlib import nullcontext  # noqa
 
 
 def float_or_none(x):
@@ -166,11 +152,7 @@ def validate_data_argument(data_collection, data):
         else:
             return data_collection[0]
     elif isinstance(data, str):
-        if GLUE_LT_016 and data in [d.label for d in data_collection]:
-            for d in data_collection:
-                if d.label == data:
-                    return d
-        elif not GLUE_LT_016 and data in data_collection:
+        if data in data_collection:
             return data_collection[data]
         else:
             raise ValueError(f"'{data}' is not a valid dataset name. The "
