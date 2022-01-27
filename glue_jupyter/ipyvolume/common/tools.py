@@ -22,9 +22,9 @@ class IPyVolumeCheckableTool(CheckableTool):
 
     @property
     def projection_matrix(self):
-        W = np.matrix(self.viewer.figure.matrix_world).reshape((4, 4))     .T
-        P = np.matrix(self.viewer.figure.matrix_projection).reshape((4, 4)).T
-        M = np.dot(P, W)
+        W = np.array(self.viewer.figure.matrix_world).reshape((4, 4))     .T  # noqa: N806
+        P = np.array(self.viewer.figure.matrix_projection).reshape((4, 4)).T  # noqa: N806
+        M = np.dot(P, W)  # noqa: N806
         return M
 
 
