@@ -1,3 +1,9 @@
+0.10.2 (unreleased)
+===================
+
+* Link opacity of the histogram bars with the layer state in
+  the histogram viewer. [#275]
+
 0.10.1 (2021-09-16)
 ===================
 
