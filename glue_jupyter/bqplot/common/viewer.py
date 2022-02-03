@@ -151,7 +151,9 @@ class BqplotBaseView(IPyWidgetView):
 
     def _on_mouse_interaction(self, interaction, data, buffers):
         for callback in self._event_callbacks:
-            callback(data)
+            events = self._events_for_callback.get(callback, [])
+            if data["event"] in events:
+                callback(data)
 
     @debounced(delay_seconds=0.5, method=True)
     def update_glue_scales(self, *ignored):
