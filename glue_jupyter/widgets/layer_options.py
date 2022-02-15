@@ -6,10 +6,12 @@ __all__ = ['LayerOptionsWidget']
 
 import traitlets
 import ipywidgets as widgets
+from glue.core import message as msg
+from glue.core.hub import HubListener
 from ..vuetify_helpers import load_template, WidgetCache
 
 
-class LayerOptionsWidget(v.VuetifyTemplate):
+class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
     """
     A widget that contains a way to select layers, and will automatically show
     the options for the selected layer.
@@ -68,6 +70,15 @@ class LayerOptionsWidget(v.VuetifyTemplate):
 
             self.layers = [layer_to_dict(layer_artist, i) for i, layer_artist in
                            enumerate(self.viewer.layers)]
+
+        def _on_data_or_subset_update(msg):
+            if msg.attribute == 'label' or msg.attribute == 'style':
+                _update_layers_from_glue_state()
+
+        self.viewer.session.hub.subscribe(self, msg.DataUpdateMessage,
+                                          handler=_on_data_or_subset_update)
+        self.viewer.session.hub.subscribe(self, msg.SubsetUpdateMessage,
+                                          handler=_on_data_or_subset_update)
 
         self.viewer._layer_artist_container.on_changed(_update_layers_from_glue_state)
         _update_layers_from_glue_state()
