@@ -23,7 +23,7 @@
                                     <v-icon>mdi-close</v-icon>
                                 </v-btn>
                                 <v-color-picker :value="data.item.color"
-                                            @update:color="set_color({index: data.item.index, color: $event.hex})"></v-color-picker>
+                                            @update:color="throttledSetColor({index: data.item.index, color: $event.hex})"></v-color-picker>
                             </div>
                         </v-menu>
                         <v-btn icon @click.stop="toggle_visible(data.item.index)">
@@ -50,6 +50,16 @@
         </div>
     </div>
 </template>
+
+<script>
+  module.exports = {
+    created() {
+      this.throttledSetColor = _.throttle(
+        (v) => { this.set_color(v) },
+        100);
+    }
+  }
+</script>
 
 <style id="glue-layeroptions">
     .glue-color-menu {
