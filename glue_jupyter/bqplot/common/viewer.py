@@ -34,13 +34,12 @@ class BqplotBaseView(IPyWidgetView):
         self.axis_y = bqplot.Axis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
                                   grid_lines='none', label='y')
 
-        self.figure = bqplot.Figure(scale_x=self.scale_x, scale_y=self.scale_y,
-                                    animation_duration=0,
-                                    axes=[self.axis_x, self.axis_y],
-                                    fig_margin={'left': 60, 'bottom': 60, 'top': 10, 'right': 10})
+        self.figure = bqplot.Hist(scales={"sample": self.scale_x, "count": self.scale_y},
+                                  animation_duration=0,
+                                  axes=[self.axis_x, self.axis_y])
         self.figure.padding_y = 0
-        self._fig_margin_default = self.figure.fig_margin
-        self._fig_margin_zero = dict(self.figure.fig_margin)
+        self._fig_margin_default = 0  # self.figure.fig_margin
+        self._fig_margin_zero = {}  # dict(self.figure.fig_margin)
         self._fig_margin_zero['left'] = 0
         self._fig_margin_zero['bottom'] = 0
 
