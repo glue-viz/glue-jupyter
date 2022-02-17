@@ -35,7 +35,8 @@ jobs:
 
     - linux: codestyle
       libraries: {}
-      coverage: 'false'
+      coverage: false
+      pytest: false
 
     - linux: py37-test
     - linux: py38-test
@@ -50,9 +51,21 @@ jobs:
     - windows: py39-test
 
     - linux: py37-notebooks
+      coverage: false
+      pytest: false
     - macos: py38-notebooks
+      coverage: false
+      pytest: false
     - windows: py39-notebooks
+      coverage: false
+      pytest: false
 
     - linux: py39-docs
+      coverage: false
+      pytest: false
     - macos: py37-docs
+      coverage: false
+      pytest: false
     - windows: py38-docs
+      coverage: false
+      pytest: false
