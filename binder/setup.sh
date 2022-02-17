@@ -2,7 +2,8 @@
 
 set -ex
 
-# keep git happy
+# Keep git happy
+
 git config --global user.email "binder@binder.com"
 git config --global user.name "Binder"
 
@@ -10,13 +11,3 @@ git config --global user.name "Binder"
 # install astroquery for the GAIA notebook.
 
 pip install . jupyterlab astroquery --user
-
-# Install Jupyter Lab widgets extensions
-
-jupyter labextension install @jupyter-widgets/jupyterlab-manager \
-                             ipyvolume jupyter-threejs \
-                             bqplot bqplot-image-gl jupyter-vuetify --no-build
-
-# Re-build Jupyter Lab
-
-jupyter lab build
