@@ -96,3 +96,17 @@ components of glue:
 * :ref:`glue:data_tutorial` - for the data collection, data, and subsets
 * :ref:`glue:linking-framework` - for the data linking framework
 * :ref:`glue:communication` - for the event framework
+
+Inspecting glue messages being broadcast
+----------------------------------------
+
+When performing certain actions (e.g. updating a subset), glue will emit
+messages which can be listened for (see ... for more details). It can
+sometimes be helpful to see all the messages being broadcast - in a glue-jupyter
+this can be done by calling::
+
+    from glue.logger import logger
+    logger.setLevel('INFO')
+
+After this call, you will see when clients subscribe to the hub for messages
+and when particular messages are being broadcast.
