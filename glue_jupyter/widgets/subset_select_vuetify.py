@@ -80,7 +80,7 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
                          in self.edit_subset_mode.edit_subset]
 
     def _on_subset_update(self, msg):
-        if msg.attribute == 'label' or msg.attribute == 'style':
+        if msg.attribute in ('label', 'style'):
             self._sync_available_from_state()
 
     def _sync_available_from_state(self, *args):

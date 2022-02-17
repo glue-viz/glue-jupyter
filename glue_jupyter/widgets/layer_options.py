@@ -72,7 +72,7 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
                            enumerate(self.viewer.layers)]
 
         def _on_data_or_subset_update(msg):
-            if msg.attribute == 'label' or msg.attribute == 'style':
+            if msg.attribute in ('label', 'style'):
                 _update_layers_from_glue_state()
 
         self.viewer.session.hub.subscribe(self, msg.DataUpdateMessage,
