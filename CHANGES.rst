@@ -4,6 +4,10 @@
 * Link opacity of the histogram bars with the layer state in
   the histogram viewer. [#275]
 
+* Fix a bug that caused the data and subset colors and labels to not be
+  updated the active subset dropdown and the layer selection dropdown.
+  [#283]
+
 0.10.1 (2021-09-16)
 ===================
 

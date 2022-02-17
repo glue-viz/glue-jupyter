@@ -63,21 +63,27 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
 
         # state change events from glue come in from the hub
         session.hub.subscribe(self, msg.EditSubsetMessage,
-                              handler=lambda _: self._sync_selected_from_state())
+                              handler=self._sync_selected_from_state)
         session.hub.subscribe(self, msg.SubsetCreateMessage,
-                              handler=lambda _: self._sync_available_from_state())
+                              handler=self._sync_available_from_state)
+        session.hub.subscribe(self, msg.SubsetUpdateMessage,
+                              handler=self._on_subset_update)
         session.hub.subscribe(self, msg.SubsetDeleteMessage,
-                              handler=lambda _: self._sync_available_from_state())
+                              handler=self._sync_available_from_state)
 
         # manually trigger to set up the initial state
         self._sync_selected_from_state()
         self._sync_available_from_state()
 
-    def _sync_selected_from_state(self):
+    def _sync_selected_from_state(self, *args):
         self.selected = [self.data_collection.subset_groups.index(subset) for subset
                          in self.edit_subset_mode.edit_subset]
 
-    def _sync_available_from_state(self):
+    def _on_subset_update(self, msg):
+        if msg.attribute in ('label', 'style'):
+            self._sync_available_from_state()
+
+    def _sync_available_from_state(self, *args):
         self.available = [subset_to_dict(subset) for subset in
                           self.data_collection.subset_groups]
         if len(self.available) == 0:
