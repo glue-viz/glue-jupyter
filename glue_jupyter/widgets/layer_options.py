@@ -80,7 +80,14 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         self.viewer.session.hub.subscribe(self, msg.SubsetUpdateMessage,
                                           handler=_on_data_or_subset_update)
 
+        # The first call below looks for changes in self.viewer.layers and
+        # the second call looks for changes in self.viewer.state.layers. The
+        # second one is needed to watch for changes in e.g. layer visibility,
+        # the first one is needed because the callback function needs access
+        # to the layer artist and in some cases the new layer artist hasn't been
+        # created yet even if state.layers is up-to-date.
         self.viewer._layer_artist_container.on_changed(_update_layers_from_glue_state)
+        self.viewer.state.add_callback('layers', _update_layers_from_glue_state)
         _update_layers_from_glue_state()
 
     def vue_toggle_visible(self, index):
