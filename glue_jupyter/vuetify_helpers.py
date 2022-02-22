@@ -1,12 +1,4 @@
-import os
-import traitlets
 from .widgets.linked_dropdown import get_choices
-
-
-def load_template(file_name, path=None):
-    path = os.path.dirname(path)
-    with open(os.path.join(path, file_name)) as f:
-        return traitlets.Unicode(f.read()).tag(sync=True)
 
 
 def link_glue(widget, widget_prop, state, glue_prop=None, from_glue_fn=lambda x: x,

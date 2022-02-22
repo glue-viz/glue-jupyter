@@ -1,13 +1,13 @@
 from ipyvuetify import VuetifyTemplate
 import traitlets
 from ...state_traitlets_helpers import GlueState
-from ...vuetify_helpers import load_template, link_glue_choices
+from ...vuetify_helpers import link_glue_choices
 
 __all__ = ['ProfileLayerStateWidget']
 
 
 class ProfileLayerStateWidget(VuetifyTemplate):
-    template = load_template('layer_profile.vue', __file__)
+    template_file = (__file__, 'layer_profile.vue')
 
     glue_state = GlueState().tag(sync=True)
 
