@@ -16,6 +16,9 @@ class ScatterLayerStateWidget(VBox):
         self.widget_visible = Checkbox(description='visible', value=self.state.visible)
         link((self.state, 'visible'), (self.widget_visible, 'value'))
 
+        self.widget_fill = Checkbox(description='fill', value=self.state.fill)
+        link((self.state, 'fill'), (self.widget_fill, 'value'))
+
         self.widget_opacity = FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha,
                                           description='opacity')
         link((self.state, 'alpha'), (self.widget_opacity, 'value'))
@@ -42,7 +45,7 @@ class ScatterLayerStateWidget(VBox):
                                          description='bin count')
             link((self.state, 'bins'), (self.widget_bins, 'value'))
 
-        super().__init__([self.widget_visible, self.widget_opacity,
+        super().__init__([self.widget_visible, self.widget_fill, self.widget_opacity,
                           self.widget_size, self.widget_color,
                           self.widget_vector, self.widget_vector_x,
                           self.widget_vector_y])
