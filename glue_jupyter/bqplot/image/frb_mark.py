@@ -64,7 +64,8 @@ class FRBImage(ImageGL):
 
     def update(self, *args, **kwargs):
 
-        if self.shape is None:
+        # Shape can be (0, 0) when viewer was created and then destroyed.
+        if self.shape is None or np.allclose(self.shape, 0):
             return
 
         # Get current limits from the plot

@@ -8,6 +8,10 @@
   updated the active subset dropdown and the layer selection dropdown.
   [#283]
 
+* Fix a bug that caused out of bounds error on subset deletion when
+  viewer shape is zero after the viewer has been destroyed by an
+  application. [#293]
+
 * Fix a bug that caused the eye icon to not be updated when toggling
   the visibility of a layer.
 
