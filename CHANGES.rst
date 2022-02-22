@@ -9,7 +9,7 @@
   [#283]
 
 * Fix a bug that caused the eye icon to not be updated when toggling
-  the visibility of a layer.
+  the visibility of a layer. [#289]
 
 0.10.1 (2021-09-16)
 ===================
