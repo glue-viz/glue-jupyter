@@ -33,6 +33,11 @@ class TableBase(v.VuetifyTemplate):
     selection_colors = traitlets.Any([]).tag(sync=True)
     selection_enabled = traitlets.Bool(True).tag(sync=True)
     highlighted = traitlets.Int(None, allow_none=True).tag(sync=True)
+    scrollable = traitlets.Bool(False).tag(sync=True)
+
+    # for use with scrollable, when used in the default UI
+    height = traitlets.Unicode(None, allow_none=True).tag(sync=True)
+
     hidden_components = traitlets.List([]).tag(sync=False)
 
     def _update(self):
