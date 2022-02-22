@@ -6,14 +6,13 @@ import ipyvuetify as v
 import traitlets
 import ipywidgets as widgets
 from ipywidgets import widget_serialization
-from glue_jupyter.vuetify_helpers import load_template
 __all__ = ['vuetify_layout_factory']
 
 shared_layout = widgets.Layout()
 
 
 class LayoutWidget(v.VuetifyTemplate):
-    template = load_template('layout_widget.vue', __file__)
+    template_file = (__file__, 'layout_widget.vue')
 
     controls = traitlets.Dict().tag(sync=True, **widget_serialization)
     drawer_open = traitlets.Bool(False).tag(sync=True)

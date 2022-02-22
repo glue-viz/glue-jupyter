@@ -5,7 +5,6 @@ import base64
 
 from glue.icons import icon_path
 import glue.viewers.common.tool
-from glue_jupyter.vuetify_helpers import load_template
 from glue.viewers.common.tool import CheckableTool
 
 __all__ = ['BasicJupyterToolbar']
@@ -23,7 +22,7 @@ def read_icon(file_name, format):
 
 
 class BasicJupyterToolbar(v.VuetifyTemplate):
-    template = load_template('basic_jupyter_toolbar.vue', __file__)
+    template_file = (__file__, 'basic_jupyter_toolbar.vue')
 
     active_tool = traitlets.Instance(glue.viewers.common.tool.Tool, allow_none=True,
                                      default_value=None)

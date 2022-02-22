@@ -1,16 +1,10 @@
 import ipyvuetify as v
 
-import os
 import traitlets
 from glue.core import message as msg
 from glue.core.hub import HubListener
 
 __all__ = ['SubsetSelect']
-
-
-def load_template_as_traitlet(path, filename):
-    with open(os.path.join(os.path.dirname(path), filename)) as f:
-        return traitlets.Unicode(f.read()).tag(sync=True)
 
 
 def subset_to_dict(subset):
@@ -53,7 +47,7 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
         }
     }''').tag(sync=True)
 
-    template = load_template_as_traitlet(__file__, 'subset_select.vue')
+    template_file = (__file__, 'subset_select.vue')
 
     def __init__(self, session=None):
         super().__init__()

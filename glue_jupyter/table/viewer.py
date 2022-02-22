@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 import ipyvuetify as v
 import ipywidgets as widgets
@@ -13,15 +11,14 @@ from glue.viewers.common.state import ViewerState
 
 from ..view import IPyWidgetView
 
-with open(os.path.join(os.path.dirname(__file__), "table.vue")) as f:
-    TEMPLATE = f.read()
-
 
 class TableState(ViewerState):
     hidden_components = ListCallbackProperty(docstring='Attributes to hide in the table display')
 
 
 class TableBase(v.VuetifyTemplate):
+    template_file = (__file__, 'table.vue')
+
     total_length = traitlets.CInt().tag(sync=True)
     checked = traitlets.List([]).tag(sync=True)  # indices of which rows are selected
     items = traitlets.Any().tag(sync=True)  # the data, a list of dict
@@ -85,11 +82,6 @@ class TableBase(v.VuetifyTemplate):
     @traitlets.observe('options')
     def _on_change_options(self, change):
         self.items = self._get_items()
-
-    @traitlets.default('template')
-    def _template(self):
-        with open(os.path.join(os.path.dirname(__file__), "table.vue")) as f:
-            return f.read()
 
     def vue_apply_filter(self, data):
         pass

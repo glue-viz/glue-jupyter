@@ -8,7 +8,7 @@ import traitlets
 import ipywidgets as widgets
 from glue.core import message as msg
 from glue.core.hub import HubListener
-from ..vuetify_helpers import load_template, WidgetCache
+from ..vuetify_helpers import WidgetCache
 
 
 class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
@@ -17,7 +17,7 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
     the options for the selected layer.
     """
 
-    template = load_template('layeroptions.vue', __file__)
+    template_file = (__file__, 'layeroptions.vue')
     layers = traitlets.List().tag(sync=True, **widgets.widget_serialization)
     selected = traitlets.Int(0).tag(sync=True)
     color_menu_open = traitlets.Bool(False).tag(sync=True)

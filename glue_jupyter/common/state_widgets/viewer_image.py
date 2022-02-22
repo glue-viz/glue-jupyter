@@ -3,14 +3,14 @@ from glue.core.coordinate_helpers import world_axis
 import ipyvuetify as v
 import traitlets
 from ...state_traitlets_helpers import GlueState
-from ...vuetify_helpers import load_template, link_glue_choices
+from ...vuetify_helpers import link_glue_choices
 
 
 __all__ = ['ImageViewerStateWidget']
 
 
 class ImageViewerStateWidget(v.VuetifyTemplate):
-    template = load_template('viewer_image.vue', __file__)
+    template_file = (__file__, 'viewer_image.vue')
 
     glue_state = GlueState().tag(sync=True)
 
