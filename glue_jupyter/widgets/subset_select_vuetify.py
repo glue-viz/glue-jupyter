@@ -85,8 +85,15 @@ class SubsetSelect(v.VuetifyTemplate, HubListener):
 
     @traitlets.observe('selected')
     def _sync_selected_from_ui(self, change):
-        self.edit_subset_mode.edit_subset = [self.data_collection.subset_groups[index] for index in
-                                             change['new']]
+        try:
+            self.edit_subset_mode.edit_subset = [self.data_collection.subset_groups[index] for index
+                                                 in change['new']]
+        # https://github.com/spacetelescope/jdaviz/issues/928
+        except IndexError:
+            if len(self.data_collection.subset_groups) == 0:
+                self.edit_subset_mode.edit_subset = None
+            else:
+                self.edit_subset_mode.edit_subset = [self.data_collection.subset_groups[-1]]
 
     @traitlets.observe('multiple')
     def _switch_multiple(self, change):
