@@ -1,5 +1,4 @@
 import bqplot
-from functools import partial
 
 from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
@@ -100,13 +99,6 @@ class BqplotBaseView(IPyWidgetView):
 
         self.create_layout()
 
-    def _callback_key(self, callback):
-        if CallbackContainer.is_bound_method(callback):
-            return (callback.__func__, (callback.__self__,))
-        elif isinstance(callback, partial):
-            return (callback.func, callback.args)
-        return callback
-
     def add_event_callback(self, callback, events=None):
         """
         Add a callback function for mouse and keyboard events when the mouse is over the figure.
@@ -137,9 +129,9 @@ class BqplotBaseView(IPyWidgetView):
         if events is None:
             events = keyboard_events + mouse_events
 
+        self._events_for_callback[callback] = set(events)
+
         self._event_callbacks.append(callback)
-        key = self._callback_key(callback)
-        self._events_for_callback[key] = set(events)
         self._update_interact_events()
 
     def remove_event_callback(self, callback):
@@ -159,10 +151,7 @@ class BqplotBaseView(IPyWidgetView):
 
     def _on_mouse_interaction(self, interaction, data, buffers):
         for callback in self._event_callbacks:
-            key = self._callback_key(callback)
-            events = self._events_for_callback.get(key, [])
-            if data["event"] in events:
-                callback(data)
+            callback(data)
 
     @debounced(delay_seconds=0.5, method=True)
     def update_glue_scales(self, *ignored):
