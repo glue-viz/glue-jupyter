@@ -1,6 +1,8 @@
 0.11.0 (unreleased)
 ===================
 
+* Only trigger bqplot viewer callbacks on their specified events. [#279]
+
 * Link opacity of the histogram bars with the layer state in
   the histogram viewer. [#275]
 
