@@ -1,4 +1,4 @@
-0.10.2 (unreleased)
+0.11.0 (unreleased)
 ===================
 
 * Link opacity of the histogram bars with the layer state in
@@ -16,6 +16,8 @@
   the visibility of a layer. [#289]
 
 * Add the ability to set fill attribute for scatter plot. [#292]
+
+* Add the ability to make the table viewer scrollable. [#287]
 
 0.10.1 (2021-09-16)
 ===================
