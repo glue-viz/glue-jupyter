@@ -9,7 +9,8 @@
       :options.sync="options"
       :items_per_page.sync="items_per_page"
       :server-items-length="total_length"
-      class="elevation-1 glue-data-table"
+      :class="['elevation-1', 'glue-data-table', scrollable && 'glue-data-table--scrollable']"
+      :style="scrollable && height != null && `height: ${height}`"
     >
       <template v-slot:header="props">
         <thead>
@@ -74,5 +75,29 @@
 
 .glue-data-table table {
   table-layout: fixed;
+}
+
+.glue-data-table--scrollable .v-data-table__wrapper {
+  overflow-y: auto;
+  height: calc(100% - 59px);
+}
+
+.glue-data-table--scrollable thead > tr {
+  position: sticky;
+  top: 0;
+}
+
+.glue-data-table--scrollable .v-data-table__wrapper,
+.glue-data-table--scrollable .v-data-table__wrapper > table,
+.glue-data-table--scrollable .v-data-table__wrapper > table thead,
+.glue-data-table--scrollable .v-data-table__wrapper > table thead *
+{
+  background-color: inherit;
+}
+
+/* prevent checkboxes overlaying the table header */
+.glue-data-table--scrollable .v-data-table__wrapper > table thead {
+  position: relative;
+  z-index: 1;
 }
 </style>
