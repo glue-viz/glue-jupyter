@@ -1,4 +1,4 @@
-0.11.0 (unreleased)
+0.11.0 (2022-02-24)
 ===================
 
 * Only trigger bqplot viewer callbacks on their specified events. [#279]
