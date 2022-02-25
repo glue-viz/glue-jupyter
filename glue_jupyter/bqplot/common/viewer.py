@@ -146,7 +146,8 @@ class BqplotBaseView(IPyWidgetView):
         """
         Remove a callback function for mouse and keyboard events.
         """
-        self._events_for_callback.pop(callback)
+        key = self._callback_key(callback)
+        self._events_for_callback.pop(key)
         self._event_callbacks.remove(callback)
         self._update_interact_events()
 
