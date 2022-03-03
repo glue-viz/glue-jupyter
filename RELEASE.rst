@@ -8,9 +8,9 @@ How to release a new version of glue-jupyter
 
     git commit -m "Preparing release v..."
 
-   where v... is the version you are releasing and push to master::
+   where v... is the version you are releasing and push to main::
 
-    git push upstream master
+    git push upstream main
 
 #. Tag the release you want to make, optionally signing it (``-s``)::
 

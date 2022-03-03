@@ -1,3 +1,9 @@
+0.11.1 (2022-03-03)
+===================
+
+* Fix a bug where removing a callback function from the events dict was
+  pop()ing a wrong key. [#296]
+
 0.11.0 (2022-02-24)
 ===================
 
