@@ -1,21 +1,21 @@
 <template>
-    <div>
+    <div class="glue-viewer-image">
         <div>
             <v-select label="mode" :items="color_mode_items" v-model="color_mode_selected" hide-details />
         </div>
         <div>
             <v-select label="reference" :items="reference_data_items" v-model="reference_data_selected" hide-details />
         </div>
-        <v-row style="min-width: 272px">
-            <v-col>
+        <div class="glue-viewer-image-switches">
+            <div>
                 <v-subheader class="pl-0 slider-label">equal aspect ratio</v-subheader>
                 <v-switch input-value="glue_state.aspect === EQUAL" @change="setEqualAspect" hide-details style="margin-top: 0" />
-            </v-col>
-            <v-col>
+            </div>
+            <div>
                 <v-subheader class="pl-0 slider-label">show axes</v-subheader>
                 <v-switch v-model="glue_state.show_axes" hide-details style="margin-top: 0"/>
-            </v-col>
-        </v-row>
+            </div>
+        </div>
         <div>
             <v-select label="x axis" :items="x_att_world_items" v-model="x_att_world_selected" hide-details />
         </div>
@@ -44,6 +44,15 @@
     }
 </script>
 <style id="viewer_image">
+    .glue-viewer-image {
+        width: 100%;
+    }
+
+    .glue-viewer-image-switches {
+        display: flex;
+        flex-direction: row;
+    }
+
     .v-subheader.slider-label {
         font-size: 12px;
         height: 16px;

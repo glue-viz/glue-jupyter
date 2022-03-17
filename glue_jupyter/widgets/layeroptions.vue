@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="glue-layer-options">
         <div>
             <v-select
                     :items="layers"
@@ -52,6 +52,10 @@
 </template>
 
 <style id="glue-layeroptions">
+    .glue-layer-options {
+        width: 100%;
+    }
+
     .glue-color-menu {
         font-size: 16px;
         padding-left: 16px;
@@ -62,5 +66,6 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        width: 100%;
     }
 </style>
