@@ -1,3 +1,8 @@
+0.11.2 (2022-03-22)
+===================
+
+* Improvements to vue layout, prevent long content from pushing out of view. [#299]
+
 0.11.1 (2022-03-03)
 ===================
 
