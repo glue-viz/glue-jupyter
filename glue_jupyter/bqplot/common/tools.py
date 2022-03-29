@@ -358,15 +358,20 @@ class ROIClickAndDrag(InteractCheckableTool):
 
         self.viewer = viewer
         self._edit_subset_mode = viewer.session.edit_subset_mode
-        self.interact = MouseInteraction(x_scale=self.viewer.scale_x,
-                                         y_scale=self.viewer.scale_y)
-
-        self.interact.on_msg(self.on_msg)
+        self.interact = None
         self._active_tool = None
 
-    def on_msg(self, interact, msg, buffers):
-        name = msg['event']
-        domain = msg['domain']
+    def activate(self):
+        super().activate()
+        self.viewer.add_event_callback(self.on_msg, events=['dragstart'])
+
+    def deactivate(self):
+        self.viewer.remove_event_callback(self.on_msg)
+        super().deactivate()
+
+    def on_msg(self, event):
+        name = event['event']
+        domain = event['domain']
         x, y = domain['x'], domain['y']
         if name == 'dragstart':
             self.press(x, y)
@@ -383,11 +388,11 @@ class ROIClickAndDrag(InteractCheckableTool):
                     if isinstance(roi, (EllipticalROI, CircularROI)):
                         self._active_tool = BqplotCircleMode(self.viewer, roi=roi,
                                                              finalize_callback=self.release)
-                        self.viewer.figure.interaction = self._active_tool.interact
+                        self.viewer._mouse_interact.next = self._active_tool.interact
                     elif isinstance(roi, (PolygonalROI, RectangularROI)):
                         self._active_tool = BqplotRectangleMode(self.viewer, roi=roi,
                                                                 finalize_callback=self.release)
-                        self.viewer.figure.interaction = self._active_tool.interact
+                        self.viewer._mouse_interact.next = self._active_tool.interact
                     else:
                         raise TypeError(f"Unexpected ROI type: {type(roi)}")
                     self._edit_subset_mode.edit_subset = [layer.state.layer.group]
@@ -396,7 +401,7 @@ class ROIClickAndDrag(InteractCheckableTool):
             self._selected = False
 
     def release(self):
-        self.viewer.figure.interaction = self.interact
+        self.viewer._mouse_interact.next = None
 
 
 @viewer_tool
