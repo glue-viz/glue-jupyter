@@ -23,9 +23,6 @@ jobs:
         - macos: py37-test
         - macos: py38-test
         - macos: py39-test
-        - macos: py310-test
-          runs-on: macos-11
-          PLAT: arm64
 
         - windows: py37-test
         - windows: py38-test
@@ -41,18 +38,33 @@ jobs:
         - linux: codestyle
 
         - linux: py37-notebooks
-        - macos: py38-notebooks
         - windows: py39-notebooks
         - linux: py310-notebooks
 
-        - linux: py39-docs
-        - macos: py37-docs
+        - linux: py37-docs
         - windows: py38-docs
 
   publish:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v1
     with:
-      targets: |
-        - wheels_universal
+      test_extras: test
+      test_command: pytest --pyargs glue_jupyter
     secrets:
       pypi_token: ${{ secrets.pypi_token }}
+
+  allowed_failures:
+    # some (all?!?) macOS targets are failing on GH actions without any output or explanation
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      coverage: codecov
+
+      envs: |
+        - macos: py310-test
+
+        - macos: py38-notebooks
+          coverage: false
+          pytest: false
+
+        - macos: py37-docs
+          coverage: false
+          pytest: false
