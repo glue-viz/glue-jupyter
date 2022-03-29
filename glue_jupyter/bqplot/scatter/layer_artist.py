@@ -1,6 +1,6 @@
 import numpy as np
 import bqplot
-from bqplot_image_gl import ImageGL
+from ..compatibility import ScatterGL, ImageGL
 
 from glue.core.data import Subset
 from glue.viewers.scatter.state import ScatterLayerState
@@ -40,9 +40,9 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.scales_quiver = dict(self.view.scales, size=self.scale_size_quiver,
                                   rotation=self.scale_rotation)
         self.scales_image = dict(self.view.scales, image=self.scale_image)
-        self.scatter = bqplot.ScatterGL(scales=self.scales, x=[0, 1], y=[0, 1])
-        self.quiver = bqplot.ScatterGL(scales=self.scales_quiver, x=[0, 1], y=[0, 1],
-                                       visible=False, marker='arrow')
+        self.scatter = ScatterGL(scales=self.scales, x=[0, 1], y=[0, 1])
+        self.quiver = ScatterGL(scales=self.scales_quiver, x=[0, 1], y=[0, 1],
+                                visible=False, marker='arrow')
 
         self.counts = None
         self.image = ImageGL(scales=self.scales_image)
