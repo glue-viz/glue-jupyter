@@ -1,3 +1,9 @@
+0.11.3 (unreleased)
+===================
+
+* Fixed a bug that caused clicking and dragging of existing regions to not
+  correctly restore other event. [#301]
+
 0.11.2 (2022-03-22)
 ===================
 
