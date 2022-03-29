@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - '*'
+  pull_request:
+
+jobs:
+  tests:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      coverage: codecov
+
+      envs: |
+        - linux: py37-test
+        - linux: py38-test
+        - linux: py39-test
+        - linux: py310-test
+
+        - macos: py37-test
+        - macos: py38-test
+        - macos: py39-test
+        - macos: py310-test
+          runs-on: macos-11
+          PLAT: arm64
+
+        - windows: py37-test
+        - windows: py38-test
+        - windows: py39-test
+
+  uncovered:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      coverage: false
+      pytest: false
+
+      envs: |
+        - linux: codestyle
+
+        - linux: py37-notebooks
+        - macos: py38-notebooks
+        - windows: py39-notebooks
+        - linux: py310-notebooks
+
+        - linux: py39-docs
+        - macos: py37-docs
+        - windows: py38-docs
+
+  publish:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
+    with:
+      targets: |
+        - wheels_universal
+    secrets:
+      pypi_token: ${{ secrets.pypi_token }}
