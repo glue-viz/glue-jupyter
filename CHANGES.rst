@@ -1,3 +1,11 @@
+0.11.4 (2022-03-31)
+===================
+
+* Fixed compatibility with latest developer version of bqplot. [#302]
+
+* Fixed a bug that caused numbers in exponential notation (e.g. 1e2) to
+  be reformatted immediately to decimal form (e.g. 100). [#303]
+
 0.11.3 (2022-03-29)
 ===================
 
