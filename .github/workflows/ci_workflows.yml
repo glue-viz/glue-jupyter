@@ -28,7 +28,7 @@ jobs:
         - windows: py38-test
         - windows: py39-test
 
-  uncovered:
+  no_coverage:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
       coverage: false
@@ -38,10 +38,12 @@ jobs:
         - linux: codestyle
 
         - linux: py37-notebooks
+        - macos: py38-notebooks
         - windows: py39-notebooks
         - linux: py310-notebooks
 
         - linux: py37-docs
+        - macos: py39-docs
         - windows: py38-docs
 
   publish:
@@ -60,11 +62,3 @@ jobs:
 
       envs: |
         - macos: py310-test
-
-        - macos: py38-notebooks
-          coverage: false
-          pytest: false
-
-        - macos: py37-docs
-          coverage: false
-          pytest: false
