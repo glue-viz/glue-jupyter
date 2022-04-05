@@ -23,6 +23,8 @@ jobs:
         - macos: py37-test
         - macos: py38-test
         - macos: py39-test
+        # One of these to be switched to arm64 running natively once the PLAT var is supported.
+        - macos: py310-test
 
         - windows: py37-test
         - windows: py38-test
@@ -53,12 +55,3 @@ jobs:
       test_command: pytest --pyargs glue_jupyter
     secrets:
       pypi_token: ${{ secrets.pypi_token }}
-
-  allowed_failures:
-    # some (all?!?) macOS targets are failing on GH actions without any output or explanation
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
-    with:
-      coverage: codecov
-
-      envs: |
-        - macos: py310-test
