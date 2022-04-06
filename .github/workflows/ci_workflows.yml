@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - '*'
+  pull_request:
+
+jobs:
+  tests:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      coverage: codecov
+
+      envs: |
+        - linux: py37-test
+        - linux: py38-test
+        - linux: py39-test
+        - linux: py310-test
+
+        - macos: py37-test
+        - macos: py38-test
+        - macos: py39-test
+        # One of these to be switched to arm64 running natively once the PLAT var is supported.
+        - macos: py310-test
+
+        - windows: py37-test
+        - windows: py38-test
+        - windows: py39-test
+
+  no_coverage:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      coverage: false
+      pytest: false
+
+      envs: |
+        - linux: codestyle
+
+        - linux: py37-notebooks
+        - macos: py38-notebooks
+        - windows: py39-notebooks
+        - linux: py310-notebooks
+
+        - linux: py37-docs
+        - macos: py39-docs
+        - windows: py38-docs
+
+  publish:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v1
+    with:
+      test_extras: test
+      test_command: pytest --pyargs glue_jupyter
+    secrets:
+      pypi_token: ${{ secrets.pypi_token }}
