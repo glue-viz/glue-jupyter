@@ -9,7 +9,7 @@ from bqplot_image_gl.interacts import MouseInteraction, keyboard_events, mouse_e
 from echo.callback_container import CallbackContainer
 
 from ...view import IPyWidgetView
-from ...link import dlink, on_change
+from ...link import on_change
 from ...utils import float_or_none, debounced, get_ioloop
 from .tools import ROIClickAndDrag
 
@@ -91,14 +91,37 @@ class BqplotBaseView(IPyWidgetView):
         self.scale_x.observe(self.update_glue_scales, names=['min', 'max'])
         self.scale_y.observe(self.update_glue_scales, names=['min', 'max'])
 
-        dlink((self.state, 'x_min'), (self.scale_x, 'min'), float_or_none)
-        dlink((self.state, 'x_max'), (self.scale_x, 'max'), float_or_none)
-        dlink((self.state, 'y_min'), (self.scale_y, 'min'), float_or_none)
-        dlink((self.state, 'y_max'), (self.scale_y, 'max'), float_or_none)
+        self._last_limits = None
+        self.state.add_callback('x_min', self._update_bqplot_limits)
+        self.state.add_callback('x_max', self._update_bqplot_limits)
+        self.state.add_callback('y_min', self._update_bqplot_limits)
+        self.state.add_callback('y_max', self._update_bqplot_limits)
 
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
         self.create_layout()
+
+    def _update_bqplot_limits(self, *args):
+
+        if self._last_limits == (self.state.x_min, self.state.x_max,
+                                 self.state.y_min, self.state.y_max):
+            return
+
+        # NOTE: in the following, the figure will still update twice. There
+        # isn't a way around it at the moment and nesting the context managers
+        # doesn't change this - at the end of the day, the two scales are
+        # separate widgets so will result in two updates.
+
+        with self.scale_x.hold_sync():
+            self.scale_x.min = float_or_none(self.state.x_min)
+            self.scale_x.max = float_or_none(self.state.x_max)
+
+        with self.scale_y.hold_sync():
+            self.scale_y.min = float_or_none(self.state.y_min)
+            self.scale_y.max = float_or_none(self.state.y_max)
+
+        self._last_limits = (self.state.x_min, self.state.x_max,
+                             self.state.y_min, self.state.y_max)
 
     def _callback_key(self, callback):
         if CallbackContainer.is_bound_method(callback):
