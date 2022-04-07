@@ -107,12 +107,18 @@ class BqplotBaseView(IPyWidgetView):
                                  self.state.y_min, self.state.y_max):
             return
 
-        with self.scale_x.hold_trait_notifications():
-            with self.scale_y.hold_trait_notifications():
-                self.scale_x.min = float_or_none(self.state.x_min)
-                self.scale_x.max = float_or_none(self.state.x_max)
-                self.scale_y.min = float_or_none(self.state.y_min)
-                self.scale_y.max = float_or_none(self.state.y_max)
+        # NOTE: in the following, the figure will still update twice. There
+        # isn't a way around it at the moment and nesting the context managers
+        # doesn't change this - at the end of the day, the two scales are
+        # separate widgets so will result in two updates.
+
+        with self.scale_x.hold_sync():
+            self.scale_x.min = float_or_none(self.state.x_min)
+            self.scale_x.max = float_or_none(self.state.x_max)
+
+        with self.scale_y.hold_sync():
+            self.scale_y.min = float_or_none(self.state.y_min)
+            self.scale_y.max = float_or_none(self.state.y_max)
 
         self._last_limits = (self.state.x_min, self.state.x_max,
                              self.state.y_min, self.state.y_max)
