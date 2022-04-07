@@ -56,7 +56,7 @@ The test suite can be run using::
 
    pytest glue_jupyter
 
-.. |Build Status| image:: https://dev.azure.com/glue-viz/glue-jupyter/_apis/build/status/glue-viz.glue-jupyter?branchName=main
-   :target: https://dev.azure.com/glue-viz/glue-jupyter/_build/latest?definitionId=7&branchName=main
+.. |Build Status| image:: https://github.com/glue-viz/glue-jupyter/actions/workflows/ci_workflows.yml/badge.svg
+   :target: https://github.com/glue-viz/glue-jupyter/actions/workflows/ci_workflows.yml
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
    :target: https://mybinder.org/v2/gh/glue-viz/glue-jupyter/main?urlpath=lab/tree/notebooks
