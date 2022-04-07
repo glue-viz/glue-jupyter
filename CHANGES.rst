@@ -1,3 +1,8 @@
+0.11.5 (unreleased)
+===================
+
+* Speed up syncing of glue and bqplot limits in viewers.
+
 0.11.4 (2022-03-31)
 ===================
 
