@@ -9,7 +9,7 @@ from bqplot_image_gl.interacts import MouseInteraction, keyboard_events, mouse_e
 from echo.callback_container import CallbackContainer
 
 from ...view import IPyWidgetView
-from ...link import dlink, on_change
+from ...link import on_change
 from ...utils import float_or_none, debounced, get_ioloop
 from .tools import ROIClickAndDrag
 
