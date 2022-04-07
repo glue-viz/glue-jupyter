@@ -1,7 +1,9 @@
-0.11.5 (unreleased)
+0.12.0 (2022-04-07)
 ===================
 
 * Speed up syncing of glue and bqplot limits in viewers. [#306]
+
+* Improve performance of line plots using WebGL. [#227]
 
 0.11.4 (2022-03-31)
 ===================
