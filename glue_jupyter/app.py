@@ -17,6 +17,8 @@ from glue_jupyter.utils import _update_not_none, validate_data_argument
 from glue_jupyter.widgets.subset_select_vuetify import SubsetSelect
 from glue_jupyter.widgets.subset_mode_vuetify import SelectionModeMenu
 
+from glue_jupyter.registries import viewer_registry
+
 __all__ = ['JupyterApplication']
 
 # TODO: move this to glue-core so that the subset mode can be set ot a string
@@ -150,6 +152,12 @@ class JupyterApplication(Application):
 
     def new_data_viewer(self, *args, **kwargs):
         show = kwargs.pop('show', True)
+        if isinstance(args[0], str):
+            try:
+                viewer_cls = viewer_registry.members[args[0]]['cls']
+            except KeyError:
+                raise ValueError("No registered viewer found with name {0}".format(args[0]))
+            args = (viewer_cls, )
         viewer = super().new_data_viewer(*args, **kwargs)
         self._viewer_refs.append(weakref.ref(viewer))
         if show:
