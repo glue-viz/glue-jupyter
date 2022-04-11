@@ -1,3 +1,4 @@
+import pytest
 from glue_jupyter.registries import viewer_registry
 from glue.viewers.common.viewer import Viewer
 import glue_jupyter as gj
@@ -11,6 +12,21 @@ def test_add_client():
         pass
 
     assert viewer_registry.members['test']['cls'] == ClientTest
+
+
+def test_access_missing_malformed_viewer():
+    app = gj.jglue()
+    with pytest.raises(ValueError, match='No registered viewer found with name missing'):
+        app.new_data_viewer('missing', data=None, show=False)
+
+    @viewer_registry("malformed")
+    class MalformedViewer(Viewer):
+        pass
+
+    del viewer_registry.members['malformed']['cls']
+
+    with pytest.raises(ValueError, match='Registry does not define a Viewer class for malformed'):
+        app.new_data_viewer('malformed', data=None, show=False)
 
 
 def test_adding_viewers():

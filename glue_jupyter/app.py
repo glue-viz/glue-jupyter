@@ -152,11 +152,16 @@ class JupyterApplication(Application):
 
     def new_data_viewer(self, *args, **kwargs):
         show = kwargs.pop('show', True)
-        if isinstance(args[0], str):
-            try:
-                viewer_cls = viewer_registry.members[args[0]]['cls']
-            except KeyError:
-                raise ValueError("No registered viewer found with name {0}".format(args[0]))
+        viewer_name = args[0]
+        if isinstance(viewer_name, str):
+            if viewer_name in viewer_registry.members:
+                try:
+                    viewer_cls = viewer_registry.members[viewer_name]['cls']
+                except KeyError:
+                    err_msg = "Registry does not define a Viewer class for {0}".format(viewer_name)
+                    raise ValueError(err_msg)
+            else:
+                raise ValueError("No registered viewer found with name {0}".format(viewer_name))
             args = (viewer_cls, )
         viewer = super().new_data_viewer(*args, **kwargs)
         self._viewer_refs.append(weakref.ref(viewer))
