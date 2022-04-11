@@ -20,10 +20,8 @@ def test_adding_viewers():
         pass
 
     app = gj.jglue()
-
     from glue_jupyter.table import TableViewer
     viewer_cls = TableViewer
-
     s1 = app.new_data_viewer(viewer_cls, data=None)
     assert len(app.viewers) == 1
     assert app.viewers[0] is s1
@@ -37,5 +35,23 @@ def test_adding_viewers():
 def test_external_viewer():
     app = gj.jglue()
     s = app.new_data_viewer('externalviewer', data=None, show=False)
+    assert len(app.viewers) == 1
+    assert app.viewers[0] is s
+
+
+def test_builtin_table_viewer(app, dataxyz):
+    from glue_jupyter.table import TableViewer # noqa
+
+    s = app.new_data_viewer('table', data=dataxyz)
+    assert len(app.viewers) == 1
+    assert app.viewers[0] is s
+    assert len(s.layers) == 1
+    assert s.widget_table is not None
+
+
+def test_builtin_scatter_viewer(app, dataxyz):
+    from glue_jupyter.bqplot.scatter import BqplotScatterView # noqa
+
+    s = app.new_data_viewer('scatter', data=dataxyz)
     assert len(app.viewers) == 1
     assert app.viewers[0] is s
