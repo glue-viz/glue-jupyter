@@ -8,13 +8,13 @@ class ViewerRegistry(DictRegistry):
     Registry containing references to custom viewers.
     """
 
-    def __call__(self, name=None, label=None):
+    def __call__(self, name=None):
         def decorator(cls):
-            self.add(name, cls, label)
+            self.add(name, cls)
             return cls
         return decorator
 
-    def add(self, name, cls, label=None):
+    def add(self, name, cls):
         """
         Add an item to the registry.
 
@@ -26,14 +26,12 @@ class ViewerRegistry(DictRegistry):
         cls : type
             The class definition (not instance) associated with the name given
             in the first parameter.
-        label : str, optional
-            A label for this viewer type (not currently used)
         """
         if name in self.members:
             raise ValueError(f"Viewer with the name {name} already exists, "
                              f"please choose a different name.")
         else:
-            self.members[name] = {'cls': cls, 'label': label}
+            self.members[name] = {'cls': cls}
 
 
 viewer_registry = ViewerRegistry()
