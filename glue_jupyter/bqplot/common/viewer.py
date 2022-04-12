@@ -24,7 +24,10 @@ class BqplotBaseView(IPyWidgetView):
     _default_mouse_mode_cls = ROIClickAndDrag
 
     def __init__(self, session, state=None):
+        super(BqplotBaseView, self).__init__(session, state=state)
 
+
+    def initialize_figure(self):
         # if we allow padding, we sometimes get odd behaviour with the interacts
         self.scale_x = bqplot.LinearScale(min=0, max=1, allow_padding=False)
         self.scale_y = bqplot.LinearScale(min=0, max=1)
@@ -58,8 +61,7 @@ class BqplotBaseView(IPyWidgetView):
         self.figure.interaction = self._mouse_interact
         self._events_for_callback = {}
 
-        super(BqplotBaseView, self).__init__(session, state=state)
-
+    def create_layout(self):
         # Remove the following two lines once glue v0.16 is required - see
         # https://github.com/glue-viz/glue/pull/2099/files for more information.
         self.state.remove_callback('layers', self._sync_layer_artist_container)
@@ -99,7 +101,7 @@ class BqplotBaseView(IPyWidgetView):
 
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
-        self.create_layout()
+        super().create_layout()
 
     def _update_bqplot_limits(self, *args):
 
