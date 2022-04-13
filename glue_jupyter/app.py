@@ -151,6 +151,18 @@ class JupyterApplication(Application):
         return viewers
 
     def new_data_viewer(self, *args, **kwargs):
+        """
+        Create a new data viewer
+
+        This function can be called directly with the name of a viewer
+        as the first parameter for any viewer types registered in the
+        viewer_registry.
+
+        s = app.new_data_viewer('table')
+
+        This is the preferred way to call viewers defined in external plugins.
+        Built-in viewers can also be called using the custom functions
+        """
         show = kwargs.pop('show', True)
         viewer_name = args[0]
         if isinstance(viewer_name, str):
