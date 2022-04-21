@@ -7,7 +7,7 @@
             <v-select label="attribute" :items="attribute_items" v-model="attribute_selected" hide-details />
         </div>
         <div>
-            <v-switch label="Plot as steps/histogram" v-model="as_steps" />
+            <v-switch label="Plot as steps" v-model="as_steps" />
         </div>
     </div>
 </template>
