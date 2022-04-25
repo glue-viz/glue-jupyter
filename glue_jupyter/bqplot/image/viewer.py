@@ -78,6 +78,7 @@ class BqplotImageView(BqplotBaseView):
             else:
                 axes_ratio = None
             self.state._set_axes_aspect_ratio(axes_ratio)
+        self._composite_image.update()
 
     def get_data_layer_artist(self, layer=None, layer_state=None):
         if layer.ndim == 1:
