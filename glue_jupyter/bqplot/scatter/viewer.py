@@ -7,9 +7,12 @@ from .layer_artist import BqplotScatterLayerArtist
 from glue_jupyter.common.state_widgets.layer_scatter import ScatterLayerStateWidget
 from glue_jupyter.common.state_widgets.viewer_scatter import ScatterViewerStateWidget
 
+from glue_jupyter.registries import viewer_registry
+
 __all__ = ['BqplotScatterView']
 
 
+@viewer_registry("scatter")
 class BqplotScatterView(BqplotBaseView):
 
     allow_duplicate_data = False

@@ -17,6 +17,8 @@ from glue_jupyter.utils import _update_not_none, validate_data_argument
 from glue_jupyter.widgets.subset_select_vuetify import SubsetSelect
 from glue_jupyter.widgets.subset_mode_vuetify import SelectionModeMenu
 
+from glue_jupyter.registries import viewer_registry
+
 __all__ = ['JupyterApplication']
 
 # TODO: move this to glue-core so that the subset mode can be set ot a string
@@ -149,7 +151,36 @@ class JupyterApplication(Application):
         return viewers
 
     def new_data_viewer(self, *args, **kwargs):
+        """
+        Create a new data viewer
+
+        This function can be called directly with the name of a viewer
+        as the first parameter for any viewer types registered in the
+        viewer_registry. Thus if a plug-in defines a viewer class as
+
+        from glue_jupyter.registries import viewer_registry
+        @viewer_registry("pluginviewer")
+        class PluginViewer(Viewer):
+            ...
+
+        then this viewer can be created in a glue-jupyter app via:
+
+        s = app.new_data_viewer('pluginviewer')
+
+        This is the preferred way to call viewers defined in external plugins.
+        """
         show = kwargs.pop('show', True)
+        viewer_name = args[0]
+        if isinstance(viewer_name, str):
+            if viewer_name in viewer_registry.members:
+                try:
+                    viewer_cls = viewer_registry.members[viewer_name]['cls']
+                except KeyError:
+                    err_msg = "Registry does not define a Viewer class for {0}".format(viewer_name)
+                    raise ValueError(err_msg)
+            else:
+                raise ValueError("No registered viewer found with name {0}".format(viewer_name))
+            args = (viewer_cls, )
         viewer = super().new_data_viewer(*args, **kwargs)
         self._viewer_refs.append(weakref.ref(viewer))
         if show:

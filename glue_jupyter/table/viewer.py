@@ -9,6 +9,8 @@ from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.common.state import ViewerState
 
+from glue_jupyter.registries import viewer_registry
+
 from ..view import IPyWidgetView
 
 
@@ -205,6 +207,7 @@ class TableViewerStateWidget(widgets.VBox):
         self.state = viewer_state
 
 
+@viewer_registry("table")
 class TableViewer(IPyWidgetView):
     allow_duplicate_data = False
     allow_duplicate_subset = False
