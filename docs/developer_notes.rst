@@ -118,26 +118,26 @@ New viewers can be added via the normal glue plug-in infrastructure. One
 subtlety is that these new viewers have to be added to the viewer registry
 and then created using the generic :func:`~glue_jupyter.app.new_data_viewer`
 function. To add a viewer to the registry add an entry_point in your
-plugin's setup.cfg:
+plugin's setup.cfg::
 
     [options.entry_points]
     glue.plugins =
         my_plugin_viewer = my_plugin_viewer:setup
             
-And then define a setup function in your plugin's __init__.py file:
+And then define a setup function in your plugin's __init__.py file::
 
     def setup():
         from .viewer import MyPluginViewer
         from glue_jupyter.registries import viewer_registry
         viewer_registry.add("myviewer",MyPluginViewer)
         
-A MyPluginViewer can now be created in a glue-jupyter app as follows:
+A MyPluginViewer can now be created in a glue-jupyter app as follows::
 
     >>> from glue_jupyter import jglue
     >>> app = jglue()
     >>> myviewer = app.new_data_viewer('myviewer')
     
-You can add data to the viewer at creation time:
+You can add data to the viewer at creation time::
 
     >>> table = app.load_data('mytable.csv')
     >>> myviewer = app.new_data_viewer('myviewer', data=table)
