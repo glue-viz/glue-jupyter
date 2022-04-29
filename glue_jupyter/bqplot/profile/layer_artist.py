@@ -92,7 +92,7 @@ class BqplotProfileLayerArtist(LayerArtist):
         self.enable()
 
         x, y = visible_data
-        if self.state.as_steps:
+        if self.state.as_steps and len(x) > 0:
             a = np.insert(x, 0, 2*x[0] - x[1])
             b = np.append(x, 2*x[-1] - x[-2])
             edges = (a + b) / 2
