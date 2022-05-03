@@ -7,6 +7,12 @@
             <v-select :items="x_att_items" label="x axis" v-model="x_att_selected" hide-details/>
         </div>
         <div>
+            <v-select :items="x_display_unit_items" label="x axis units" v-model="x_display_unit_selected" hide-details/>
+        </div>
+        <div>
+            <v-select :items="y_display_unit_items" label="y axis units" v-model="y_display_unit_selected" hide-details/>
+        </div>
+        <div>
             <v-select :items="function_items" label="function" v-model="function_selected"/>
         </div>
 
