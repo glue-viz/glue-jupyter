@@ -32,6 +32,11 @@ class BqplotProfileView(BqplotBaseView):
         x = roi.to_polygon()[0]
         lo, hi = min(x), max(x)
 
+        # Apply inverse unit conversion, converting from display to native units
+        scale = self.state._x_unit_scale
+        lo /= scale
+        hi /= scale
+
         roi_new = RangeROI(min=lo, max=hi, orientation='x')
 
         return roi_to_subset_state(roi_new, x_att=self.state.x_att)
