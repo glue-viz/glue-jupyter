@@ -1,3 +1,6 @@
+import numpy as np
+
+from glue.core.units import UnitConverter
 from glue.core.subset import roi_to_subset_state
 from glue.core.roi import RangeROI
 from glue.viewers.profile.state import ProfileViewerState
@@ -33,9 +36,10 @@ class BqplotProfileView(BqplotBaseView):
         lo, hi = min(x), max(x)
 
         # Apply inverse unit conversion, converting from display to native units
-        scale = self.state._x_unit_scale
-        lo /= scale
-        hi /= scale
+        converter = UnitConverter()
+        lo, hi = converter.to_native(self.state.reference_data,
+                                     self.state.x_att, np.array([lo, hi]),
+                                     self.state.x_display_unit)
 
         roi_new = RangeROI(min=lo, max=hi, orientation='x')
 
