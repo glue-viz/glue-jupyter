@@ -63,6 +63,7 @@ class BqplotImageView(BqplotBaseView):
         if len(views) > 0:
             first_view = self._vl.view_data[views[0]]
             self.shape = (int(first_view['height']), int(first_view['width']))
+            self._composite_image.update()
         else:
             self.shape = None
         self._sync_figure_aspect()
