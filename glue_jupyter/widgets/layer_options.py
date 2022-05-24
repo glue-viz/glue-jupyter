@@ -8,6 +8,7 @@ import traitlets
 import ipywidgets as widgets
 from glue.core import message as msg
 from glue.core.hub import HubListener
+from ..utils import debounced
 from ..vuetify_helpers import WidgetCache
 
 
@@ -21,6 +22,7 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
     layers = traitlets.List().tag(sync=True, **widgets.widget_serialization)
     selected = traitlets.Int(0).tag(sync=True)
     color_menu_open = traitlets.Bool(False).tag(sync=True)
+    set_layer_color = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
 
     def __init__(self, viewer):
         super().__init__()
@@ -94,7 +96,12 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         state = self.viewer.layers[index].state
         state.visible = not state.visible
 
-    def vue_set_color(self, data):
-        index = data['index']
-        color = data['color']
-        self.viewer.layers[index].state.color = color
+    @traitlets.observe('set_layer_color')
+    @debounced(method=True)
+    def _set_layer_color(self, change):
+        data = change['new']
+        if data:
+            index = data['index']
+            color = data['color']
+            self.viewer.layers[index].state.color = color
+            self.set_layer_color = None

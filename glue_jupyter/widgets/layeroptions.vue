@@ -22,8 +22,8 @@
                                 <v-btn icon @click="color_menu_open = false">
                                     <v-icon>mdi-close</v-icon>
                                 </v-btn>
-                                <v-color-picker :value="data.item.color"
-                                            @update:color="set_color({index: data.item.index, color: $event.hex})"></v-color-picker>
+                                <v-color-picker :value="set_layer_color && set_layer_color.index == data.item.index ? set_layer_color.color : data.item.color"
+                                                @update:color="set_layer_color = {index: data.item.index, color: $event.hex}"></v-color-picker>
                             </div>
                         </v-menu>
                         <v-btn icon @click.stop="toggle_visible(data.item.index)">
