@@ -1,5 +1,6 @@
 from glue.viewers.image.composite_array import CompositeArray
 from bqplot_image_gl.viewlistener import ViewListener
+from glue.core.command import ApplySubsetState
 
 from ...link import on_change
 
@@ -93,3 +94,27 @@ class BqplotImageView(BqplotBaseView):
         else:
             cls = BqplotImageSubsetLayerArtist
         return self.get_layer_artist(cls, layer=layer, layer_state=layer_state)
+
+    def apply_roi(self, roi, use_current=False):
+        # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
+        # with self._output_widget:
+        if True:
+            if len(self.layers) > 0:
+                subset_state = self._roi_to_subset_state(roi,
+                                                         use_pretransform=self.state.affine_matrix is not None)
+
+                if self.state.affine_matrix is not None:
+
+                    def wrapper(x, y):
+                        import numpy as np
+                        shape = x.shape
+                        xn, yn = self.state.affine_matrix.transform(np.vstack([x.ravel(), y.ravel()]).T).T
+                        xn, yn = xn.reshape(shape), yn.reshape(shape)
+                        return xn, yn
+
+                    subset_state.pretransform = wrapper
+
+                cmd = ApplySubsetState(data_collection=self._data,
+                                       subset_state=subset_state,
+                                       override_mode=use_current)
+                self._session.command_stack.do(cmd)

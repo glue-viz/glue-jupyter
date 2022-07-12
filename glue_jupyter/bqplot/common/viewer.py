@@ -230,7 +230,7 @@ class BqplotBaseView(IPyWidgetView):
                                        override_mode=use_current)
                 self._session.command_stack.do(cmd)
 
-    def _roi_to_subset_state(self, roi):
+    def _roi_to_subset_state(self, roi, use_pretransform=False):
         # TODO: copy paste from glue/viewers/image/qt/data_viewer.py#L66
 
         # next lines don't work.. comp has no datetime?
@@ -241,7 +241,7 @@ class BqplotBaseView(IPyWidgetView):
         #    roi = roi.transformed(xfunc=mpl_to_datetime64 if x_date else None,
         #                          yfunc=mpl_to_datetime64 if y_date else None)
         if self.is2d:
-            return roi_to_subset_state(roi, x_att=self.state.x_att, y_att=self.state.y_att)
+            return roi_to_subset_state(roi, x_att=self.state.x_att, y_att=self.state.y_att, use_pretransform=use_pretransform)
 
     def limits_to_scales(self, *args):
         if self.state.x_min is not None and self.state.x_max is not None:

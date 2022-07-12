@@ -7,6 +7,7 @@ from glue.core import Data, Subset, ComponentID
 from echo import CallbackList, CallbackDict
 from matplotlib.colors import Colormap
 from matplotlib.cm import get_cmap
+from matplotlib.transforms import Affine2D
 
 MAGIC_IGNORE = '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4'
 
@@ -82,6 +83,8 @@ class GlueStateJSONEncoder(json.JSONEncoder):
             return MAGIC_IGNORE
         elif isinstance(obj, Colormap):
             return obj.name
+        elif isinstance(obj, Affine2D):
+            return obj.get_matrix().tolist()
 
         # JSON cannot serialized native numpy types, so check if the object
         #  is a numpy dtype, and if it is, convert to python type
