@@ -20,10 +20,13 @@ def create_scale(viewer_state, name):
     is_log, set_x_log = use_echo_state(viewer_state, f"{name}_log")
     v_min, set_v_min = use_echo_state(viewer_state, f"{name}_min")
     v_max, set_v_max = use_echo_state(viewer_state, f"{name}_max")
+
+    def cast(v):
+        return float(v) if v is not None else None
     if is_log:
-        scale = bq.LogScale(min=v_min, max=v_max, allow_padding=False).shared()
+        scale = bq.LogScale(min=cast(v_min), max=cast(v_max), allow_padding=False).shared()
     else:
-        scale = bq.LinearScale(min=v_min, max=v_max, allow_padding=False).shared()
+        scale = bq.LinearScale(min=cast(v_min), max=cast(v_max), allow_padding=False).shared()
     return scale
 
 
