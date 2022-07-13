@@ -2,6 +2,7 @@ from glue.viewers.common.viewer import Viewer
 from glue.viewers.common.state import State
 import react_ipywidgets as react
 
+
 def use_echo_state(state: State, name):
     value, set_value = react.use_state(getattr(state, name), key=name)
 

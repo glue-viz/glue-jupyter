@@ -118,10 +118,9 @@ def Histogram(
     else:
         x, y = bins
 
-    bars = bq.Bars(scales=scales, x=x, y=y, colors=[color2hex(color)], visible=visible, opacities=[alpha])
+    bars = bq.Bars(scales=scales, x=x, y=y, colors=[color2hex(color)], visible=visible,
+                   opacities=[alpha])
     return bars
-
-
 
 
 class BqplotHistogramView(BqplotBaseViewReact):
@@ -159,4 +158,4 @@ class BqplotHistogramView(BqplotBaseViewReact):
         return roi_to_subset_state(roi_new, x_att=self.state.x_att)
 
     def redraw(self):
-        pass # i don't think we need to do anything
+        pass  # i don't think we need to do anything

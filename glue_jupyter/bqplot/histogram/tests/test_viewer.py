@@ -1,4 +1,5 @@
 import glue_jupyter as gj
+from glue.core import Data
 
 
 def test_non_hex_colors(app, dataxyz):
@@ -26,8 +27,6 @@ def test_remove(app, dataxz, dataxyz):
     s.remove_data(dataxz)
     assert len(s.figure_widget.marks) == 0
 
-from glue.core import Data
-
 
 def test_normalize():
     data = Data(x=[1, 2, 3, 4], label="x data")
@@ -41,4 +40,3 @@ def test_normalize():
     assert s.figure_widget.marks[0].y.tolist() == [1.0, 1.0, 1.0, 1.0, 0.0]
     s.state.normalize = True
     assert s.figure_widget.marks[0].y.tolist() == [1/4., 1/4., 1/4., 1/4., 0.0]
-

@@ -26,7 +26,6 @@ class BqplotBaseView(IPyWidgetView):
     def __init__(self, session, state=None):
         super(BqplotBaseView, self).__init__(session, state=state)
 
-
     def initialize_figure(self):
         # if we allow padding, we sometimes get odd behaviour with the interacts
         self.scale_x = bqplot.LinearScale(min=0, max=1, allow_padding=False)

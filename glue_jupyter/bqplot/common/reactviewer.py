@@ -4,19 +4,16 @@ from functools import partial
 import bqplot
 import react_ipywidgets as react
 import react_ipywidgets.bqplot as bq
-from bqplot_image_gl.interacts import MouseInteraction
+from bqplot_image_gl.interacts import MouseInteraction, keyboard_events, mouse_events
 from echo.callback_container import CallbackContainer
 from glue.core.command import ApplySubsetState
 from glue.core.subset import roi_to_subset_state
 from glue.viewers.common.state import State
-from glue.viewers.histogram.state import HistogramViewerState
-from bqplot_image_gl.interacts import MouseInteraction, keyboard_events, mouse_events
 
 from ...common.hooks import use_echo_state, use_layer_watch
 
 from ...view import IPyWidgetView
 from .tools import ROIClickAndDrag
-
 
 
 def create_scale(viewer_state, name):
@@ -136,15 +133,15 @@ class BqplotBaseViewReact(IPyWidgetView):
     def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
         # with self._output_widget:
-        
-            if len(self.layers) > 0:
-                subset_state = self._roi_to_subset_state(roi)
-                cmd = ApplySubsetState(
-                    data_collection=self._data,
-                    subset_state=subset_state,
-                    override_mode=use_current,
-                )
-                self._session.command_stack.do(cmd)
+
+        if len(self.layers) > 0:
+            subset_state = self._roi_to_subset_state(roi)
+            cmd = ApplySubsetState(
+                data_collection=self._data,
+                subset_state=subset_state,
+                override_mode=use_current,
+            )
+            self._session.command_stack.do(cmd)
 
     def _roi_to_subset_state(self, roi):
         # TODO: copy paste from glue/viewers/image/qt/data_viewer.py#L66
@@ -160,7 +157,6 @@ class BqplotBaseViewReact(IPyWidgetView):
             return roi_to_subset_state(
                 roi, x_att=self.state.x_att, y_att=self.state.y_att
             )
-
 
     def add_event_callback(self, callback, events=None):
         """
