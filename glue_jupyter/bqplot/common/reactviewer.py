@@ -24,9 +24,9 @@ def create_scale(viewer_state, name):
     v_min, set_v_min = use_echo_state(viewer_state, f"{name}_min")
     v_max, set_v_max = use_echo_state(viewer_state, f"{name}_max")
     if is_log:
-        scale = bq.LogScale(min=v_min, max=v_max, allow_padding=False)
+        scale = bq.LogScale(min=v_min, max=v_max, allow_padding=False).shared()
     else:
-        scale = bq.LinearScale(min=v_min, max=v_max, allow_padding=False)
+        scale = bq.LinearScale(min=v_min, max=v_max, allow_padding=False).shared()
     return scale
 
 
@@ -76,7 +76,6 @@ def Figure(
     ]
 
     show_axes, _ = use_echo_state(viewer_state, "show_axes")
-    # print(viewer_state)
     axis_x = bq.Axis(scale=scale_x, grid_lines="none", label=label_x, visible=show_axes)
     axis_y = bq.Axis(
         scale=scale_y,
@@ -118,7 +117,7 @@ class BqplotBaseViewReact(IPyWidgetView):
         self.figure_el = Figure(
             self, self.state, is2d=self.is2d, components=self.components
         )
-        self._figure: bqplot.Figure = react.render_fixed(self.figure_el)[0]
+        self._figure: bqplot.Figure = react.render_fixed(self.figure_el, handle_error=False)[0]
         self.scale_x = self._figure.scale_x
         self.scale_y = self._figure.scale_y
         self.scales = {"x": self.scale_x, "y": self.scale_y}

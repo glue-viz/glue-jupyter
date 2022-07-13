@@ -15,7 +15,7 @@ def use_echo_state(state: State, name):
         state.add_callback(name, handler)
         return cleanup
 
-    react.use_side_effect(add_event_handler)
+    react.use_effect(add_event_handler)
 
     def set_value_sync(new_value):
         setattr(
@@ -40,4 +40,4 @@ def use_layer_watch(viewer: Viewer):
         viewer._layer_artist_container.on_changed(handler)
         return cleanup
 
-    react.use_side_effect(hookup)
+    react.use_effect(hookup)
