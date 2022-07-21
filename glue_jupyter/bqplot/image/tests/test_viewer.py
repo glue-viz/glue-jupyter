@@ -82,3 +82,39 @@ def test_contour_state(app, data_image):
     )
     # Without priority of levels, this gets set to [2, 3]
     assert layer.state.levels == [2.5, 5, 7.5]
+
+
+def test_add_markers_zoom(app, data_image, data_volume, dataxyz):
+
+    # Regression test for a bug that caused the zoom to be
+    # reset when adding markers to an image
+
+    im = app.imshow(data=data_image)
+
+    im.state.x_min = 0.2
+    im.state.x_max = 0.4
+    im.state.y_min = 0.3
+    im.state.y_max = 0.5
+
+    app.add_link(data_image, data_image.pixel_component_ids[0], dataxyz, dataxyz.id['y'])
+    app.add_link(data_image, data_image.pixel_component_ids[1], dataxyz, dataxyz.id['x'])
+    im.add_data(dataxyz)
+
+    assert im.state.x_min == 0.2
+    assert im.state.x_max == 0.4
+    assert im.state.y_min == 0.3
+    assert im.state.y_max == 0.5
+
+    im.add_data(data_volume)
+
+    assert im.state.x_min == 0.2
+    assert im.state.x_max == 0.4
+    assert im.state.y_min == 0.3
+    assert im.state.y_max == 0.5
+
+    im.state.reference_data = data_volume
+
+    assert im.state.x_min == -0.5
+    assert im.state.x_max == 63.5
+    assert im.state.y_min == -0.5
+    assert im.state.y_max == 63.5
