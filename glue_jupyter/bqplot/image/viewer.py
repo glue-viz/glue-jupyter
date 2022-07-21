@@ -41,9 +41,9 @@ class BqplotImageView(BqplotBaseView):
         self._composite = CompositeArray()
         self._composite_image = FRBImage(self, self._composite)
         self.figure.marks = list(self.figure.marks) + [self._composite_image]
-        self.state.add_callback('reference_data', self._reset_limits)
-        self.state.add_callback('x_att', self._reset_limits)
-        self.state.add_callback('y_att', self._reset_limits)
+        self.state.add_callback('reference_data', self._reset_limits, echo_old=True)
+        self.state.add_callback('x_att', self._reset_limits, echo_old=True)
+        self.state.add_callback('y_att', self._reset_limits, echo_old=True)
 
         self._setup_view_listener()
 
@@ -55,8 +55,9 @@ class BqplotImageView(BqplotBaseView):
                                 css_selector=".plotarea_events")
         self._vl.observe(self._on_view_change, names=['view_data'])
 
-    def _reset_limits(self, *args):
-        self.state.reset_limits()
+    def _reset_limits(self, old, new):
+        if new is not old:
+            self.state.reset_limits()
 
     def _on_view_change(self, *args):
         views = sorted(self._vl.view_data)
