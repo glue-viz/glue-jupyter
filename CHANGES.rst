@@ -1,3 +1,9 @@
+0.12.1 (unreleased)
+===================
+
+* Fixed a bug that caused the image viewer zoom to be reset when adding
+  additional datasets. [#316]
+
 0.12.0 (2022-04-07)
 ===================
 
