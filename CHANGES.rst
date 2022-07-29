@@ -1,4 +1,4 @@
-0.12.1 (unreleased)
+0.12.1 (2022-07-29)
 ===================
 
 * Fixed a bug that caused the image viewer zoom to be reset when adding
