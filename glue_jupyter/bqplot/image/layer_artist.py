@@ -124,7 +124,7 @@ class BqplotImageLayerArtist(ImageLayerArtist):
 
         if force or any(prop in changed for prop in ('layer', 'attribute',
                                                      'slices', 'x_att', 'y_att',
-                                                     'affine_matrix')):
+                                                     'rotation')):
             self._update_image_data()
             force = True  # make sure scaling and visual attributes are updated
 
@@ -183,7 +183,8 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         changed = self.pop_changed_properties()
 
         if force or any(prop in changed for prop in ('layer', 'attribute', 'color',
-                                                     'x_att', 'y_att', 'slices')):
+                                                     'x_att', 'y_att', 'slices',
+                                                     'rotation')):
             self._update_data()
             force = True  # make sure scaling and visual attributes are updated
 

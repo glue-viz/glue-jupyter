@@ -101,18 +101,10 @@ class BqplotImageView(BqplotBaseView):
         if True:
             if len(self.layers) > 0:
                 subset_state = self._roi_to_subset_state(roi,
-                                                         use_pretransform=self.state.affine_matrix is not None)
+                                                         use_pretransform=self.state._affine_pretransform is not None)
 
-                if self.state.affine_matrix is not None:
-
-                    def wrapper(x, y):
-                        import numpy as np
-                        shape = x.shape
-                        xn, yn = self.state.affine_matrix.transform(np.vstack([x.ravel(), y.ravel()]).T).T
-                        xn, yn = xn.reshape(shape), yn.reshape(shape)
-                        return xn, yn
-
-                    subset_state.pretransform = wrapper
+                if self.state._affine_pretransform is not None:
+                    subset_state.pretransform = self.state._affine_pretransform.inverse
 
                 cmd = ApplySubsetState(data_collection=self._data,
                                        subset_state=subset_state,
