@@ -104,7 +104,7 @@ class BqplotImageView(BqplotBaseView):
                                                          use_pretransform=self.state._affine_pretransform is not None)
 
                 if self.state._affine_pretransform is not None:
-                    subset_state.pretransform = self.state._affine_pretransform.inverse
+                    subset_state.pretransform = self.state._affine_pretransform
 
                 cmd = ApplySubsetState(data_collection=self._data,
                                        subset_state=subset_state,
