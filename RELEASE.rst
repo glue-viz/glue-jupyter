@@ -20,9 +20,9 @@ How to release a new version of glue-jupyter
 
     git push upstream v0.2.2
 
-#. At this point, the release sdist and wheel will be built on Azure
-   Pipelines and automatically uploaded to PyPI. You can check
-   the build `here <https://dev.azure.com/glue-viz/glue-jupyter/_build?definitionId=7>`_
+#. At this point, the release sdist and wheel will be built on by GitHub
+   Actions and automatically uploaded to PyPI. You can check the build
+   for the release commit `here <https://github.com/glue-viz/glue-jupyter/actions/>`_
    and if there are any issues you can delete the tag, fix the issues
    (preferably via a pull request) and then try the release process
    again.

@@ -1,4 +1,4 @@
-0.13.0 (unreleased)
+0.13.0 (2022-08-26)
 ===================
 
 * Add button to profile viewer layers to toggle plotting as steps. [#309]
