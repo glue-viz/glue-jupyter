@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import sys
 import warnings
+import numpy as np
 
 from glue.core import BaseData
 from glue.utils import defer_draw, color2hex
@@ -91,6 +92,12 @@ class BqplotProfileLayerArtist(LayerArtist):
         self.enable()
 
         x, y = visible_data
+        if self.state.as_steps and len(x) > 0:
+            a = np.insert(x, 0, 2*x[0] - x[1])
+            b = np.append(x, 2*x[-1] - x[-2])
+            edges = (a + b) / 2
+            x = np.concatenate((edges[:1], np.repeat(edges[1:-1], 2), edges[-1:]))
+            y = np.repeat(y, 2)
 
         # Update the data values.
         if len(x) > 0:
@@ -145,7 +152,8 @@ class BqplotProfileLayerArtist(LayerArtist):
 
         if force or any(prop in changed for prop in ('layer', 'x_att', 'attribute',
                                                      'function', 'normalize',
-                                                     'v_min', 'v_max')):
+                                                     'v_min', 'v_max',
+                                                     'as_steps')):
             self._calculate_profile(reset=force)
             force = True
 
