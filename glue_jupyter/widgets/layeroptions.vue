@@ -22,11 +22,10 @@
                                 <v-btn icon @click="color_menu_open = false">
                                     <v-icon>mdi-close</v-icon>
                                 </v-btn>
-                                <v-color-picker :value="data.item.color"
-                                            @update:color="set_color({index: data.item.index, color: $event.hex})"></v-color-picker>
+                                <v-color-picker v-model="data.item.color"></v-color-picker>
                             </div>
                         </v-menu>
-                        <v-btn icon @click.stop="toggle_visible(data.item.index)">
+                        <v-btn icon @click.stop="data.item.visible = !data.item.visible">
                             <v-icon>mdi-eye{{ data.item.visible ? '' : '-off' }}</v-icon>
                         </v-btn>
                         {{ data.item.label }}
@@ -37,7 +36,7 @@
                         <span class="glue-color-menu"
                               :style="`background:${data.item.color}`"
                         >&nbsp;</span>
-                        <v-icon style="padding: 0 4px" @click.stop="toggle_visible(data.item.index)">
+                        <v-icon style="padding: 0 4px" @click.stop="data.item.visible = !data.item.visible">
                             mdi-eye{{ data.item.visible ? '' : '-off' }}
                         </v-icon>
                         {{ data.item.label }}
