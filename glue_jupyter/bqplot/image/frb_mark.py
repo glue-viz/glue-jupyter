@@ -93,6 +93,8 @@ class FRBImage(ImageGL):
 
         # Get the array and assign it to the artist
         image = self.array_maker(bounds=bounds)
+        if image.dtype == np.dtype("float64"):
+            image = image.astype(np.float32)
         if image is not None:
             with self.hold_sync():
                 self.image = image
