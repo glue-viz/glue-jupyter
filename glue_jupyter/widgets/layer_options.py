@@ -27,6 +27,7 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         self.viewer = viewer
 
         widgetCache = WidgetCache()
+        self.observe(self._update_glue_state_from_layers, 'layers')
 
         self.current_layers_data = None
 
@@ -90,11 +91,7 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         self.viewer.state.add_callback('layers', _update_layers_from_glue_state)
         _update_layers_from_glue_state()
 
-    def vue_toggle_visible(self, index):
-        state = self.viewer.layers[index].state
-        state.visible = not state.visible
-
-    def vue_set_color(self, data):
-        index = data['index']
-        color = data['color']
-        self.viewer.layers[index].state.color = color
+    def _update_glue_state_from_layers(self, *args):
+        for layer_data, layer in zip(self.layers, self.viewer.layers):
+            layer.state.visible = layer_data['visible']
+            layer.state.color = layer_data['color']
