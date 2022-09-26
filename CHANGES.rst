@@ -1,3 +1,11 @@
+0.13.1 (2022-09-26)
+===================
+
+* Fixed a bug causing the colour picker to enter an infinite loop upon
+  dragging in the widget. [#312]
+
+* Ensure ``bqplot`` ``FRBImage`` sends data as float32 to WebGL. [#318/#319]
+
 0.13.0 (2022-08-26)
 ===================
 
