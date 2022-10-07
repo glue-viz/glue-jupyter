@@ -2,6 +2,9 @@ changelog:
   exclude:
     authors:
       - pre-commit-ci
+  exclude-labels:
+    - 'skip-changelog'
+    - 'no-changelog-entry-needed'
   categories:
     - title: Bug Fixes
       labels:
@@ -12,9 +15,6 @@ changelog:
     - title: Documentation
       labels:
         - documentation
-    - title: Infrastructure
-      labels:
-        - no-changelog-entry-needed
     - title: Other Changes
       labels:
         - "*"
