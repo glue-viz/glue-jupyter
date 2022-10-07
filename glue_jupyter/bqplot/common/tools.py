@@ -24,9 +24,10 @@ class InteractCheckableTool(CheckableTool):
     def activate(self):
 
         # Disable any active tool in other viewers
-        for viewer in self.viewer.session.application.viewers:
-            if viewer is not self.viewer:
-                viewer.toolbar.active_tool = None
+        if self.viewer.session.application.get_setting('single_global_active_tool'):
+            for viewer in self.viewer.session.application.viewers:
+                if viewer is not self.viewer:
+                    viewer.toolbar.active_tool = None
 
         self.viewer._mouse_interact.next = self.interact
 
