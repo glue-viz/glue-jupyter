@@ -1,0 +1,20 @@
+changelog:
+  exclude:
+    authors:
+      - pre-commit-ci
+  categories:
+    - title: Bug Fixes
+      labels:
+        - bug
+    - title: New Features
+      labels:
+        - enhancement
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Infrastructure
+      labels:
+        - no-changelog-entry-needed
+    - title: Other Changes
+      labels:
+        - "*"
