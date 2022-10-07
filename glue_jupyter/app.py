@@ -73,7 +73,8 @@ class JupyterApplication(Application):
         self.widget_subset_mode = SelectionModeMenu(session=self.session)
         self.widget = widgets.VBox(children=[self.widget_subset_mode, self.output])
 
-        self._settings['new_subset_on_selection_tool_change'] = [False, is_bool]
+        self._settings['new_subset_on_selection_tool_change'] = [False, bool]
+        self._settings['single_global_active_tool'] = [True, bool]
 
         if settings is not None:
             for key, value in settings.items():
