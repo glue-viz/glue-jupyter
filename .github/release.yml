@@ -2,9 +2,10 @@ changelog:
   exclude:
     authors:
       - pre-commit-ci
-  exclude-labels:
-    - 'skip-changelog'
-    - 'no-changelog-entry-needed'
+    labels:
+      - no-changelog-entry-needed
+      - skip-changelog
+
   categories:
     - title: Bug Fixes
       labels:
