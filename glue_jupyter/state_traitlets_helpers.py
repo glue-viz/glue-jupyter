@@ -109,6 +109,7 @@ class GlueState(traitlets.Any):
         super().__init__(*args, **kwargs)
         self.tag(to_json=self.convert_state_to_json,
                  from_json=self.update_state_from_json)
+        self._last_serialized = ''
 
     def validate(self, obj, value):
 
@@ -126,12 +127,29 @@ class GlueState(traitlets.Any):
         state.add_global_callback(PartialCallback(self.on_state_change, obj=obj))
 
     def on_state_change(self, *args, obj=None, **kwargs):
+
         if self._block_on_state_change:
             return
+
+        state = self.get(obj)
+
+        # To avoid unecessary messages, we now check if the serialized version
+        # of the state has actually changed since the last time it was sent to
+        # front-end. In some cases it can happen that a glue state change doesn't
+        # result in any actual change to the JSON because some items are ignored
+        # in the serialization.
+
+        serialized = self.convert_state_to_json(state, None)
+
+        if serialized == self._last_serialized:
+            return
+        else:
+            self._last_serialized = serialized
+
         obj.notify_change(Bunch({'name': self.name,
                                  'type': 'change',
-                                 'value': self.get(obj),
-                                 'new': self.get(obj)}))
+                                 'value': state,
+                                 'new': state}))
 
     # NOTE: the following two methods are implemented as methods on the trait
     # because we need update_state_from_json to have an unambiguous reference
