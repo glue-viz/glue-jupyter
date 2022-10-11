@@ -6,7 +6,6 @@ __all__ = ['LayerOptionsWidget']
 
 import traitlets
 import ipywidgets as widgets
-from glue.core import message as msg
 from glue.core.hub import HubListener
 from glue.utils import avoid_circular
 
@@ -73,7 +72,7 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         self.current_layers_data = new_layers_data
 
         self.layers = [self.layer_to_dict(layer_artist, i) for i, layer_artist in
-                        enumerate(self.viewer.layers)]
+                       enumerate(self.viewer.layers)]
 
     def _on_data_or_subset_update(self, msg):
         if msg.attribute in ('label', 'style'):
