@@ -6,6 +6,7 @@ __all__ = ['LayerOptionsWidget']
 
 import traitlets
 import ipywidgets as widgets
+from glue.core import message as msg
 from glue.core.hub import HubListener
 from glue.utils import avoid_circular
 
@@ -31,6 +32,21 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         self.observe(self._update_glue_state_from_layers, 'layers')
 
         self.current_layers_data = None
+
+        self.viewer.session.hub.subscribe(self, msg.DataUpdateMessage,
+                                          handler=self._on_data_or_subset_update)
+        self.viewer.session.hub.subscribe(self, msg.SubsetUpdateMessage,
+                                          handler=self._on_data_or_subset_update)
+
+        # The first call below looks for changes in self.viewer.layers and
+        # the second call looks for changes in self.viewer.state.layers. The
+        # second one is needed to watch for changes in e.g. layer visibility,
+        # the first one is needed because the callback function needs access
+        # to the layer artist and in some cases the new layer artist hasn't been
+        # created yet even if state.layers is up-to-date.
+        self.viewer._layer_artist_container.on_changed(self._update_layers_from_glue_state)
+        self.viewer.state.add_callback('layers', self._update_layers_from_glue_state)
+        self._update_layers_from_glue_state()
 
     def layer_data(self, layer_artist):
         if isinstance(layer_artist.state.layer, Subset):
@@ -61,6 +77,7 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
 
     @avoid_circular
     def _update_layers_from_glue_state(self, *args):
+
         new_layers_data = [self.layer_data(layer) for layer in self.viewer.layers]
 
         # During the creation of the new widgets, layers can change again, causing a
@@ -77,21 +94,6 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
     def _on_data_or_subset_update(self, msg):
         if msg.attribute in ('label', 'style'):
             self._update_layers_from_glue_state()
-
-        self.viewer.session.hub.subscribe(self, msg.DataUpdateMessage,
-                                          handler=self._on_data_or_subset_update)
-        self.viewer.session.hub.subscribe(self, msg.SubsetUpdateMessage,
-                                          handler=self._on_data_or_subset_update)
-
-        # The first call below looks for changes in self.viewer.layers and
-        # the second call looks for changes in self.viewer.state.layers. The
-        # second one is needed to watch for changes in e.g. layer visibility,
-        # the first one is needed because the callback function needs access
-        # to the layer artist and in some cases the new layer artist hasn't been
-        # created yet even if state.layers is up-to-date.
-        self.viewer._layer_artist_container.on_changed(self._update_layers_from_glue_state)
-        self.viewer.state.add_callback('layers', self._update_layers_from_glue_state)
-        self._update_layers_from_glue_state()
 
     @avoid_circular
     def _update_glue_state_from_layers(self, *args):
