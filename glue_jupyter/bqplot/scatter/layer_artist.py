@@ -13,6 +13,7 @@ from echo import CallbackProperty
 from glue.utils import ensure_numerical, color2hex
 
 __all__ = ['BqplotScatterLayerState', 'BqplotScatterLayerArtist']
+EMPTY_IMAGE = np.zeros((10, 10, 4), dtype=np.uint8)
 
 
 class BqplotScatterLayerState(ScatterLayerState):
@@ -45,7 +46,7 @@ class BqplotScatterLayerArtist(LayerArtist):
                                 visible=False, marker='arrow')
 
         self.counts = None
-        self.image = ImageGL(scales=self.scales_image)
+        self.image = ImageGL(scales=self.scales_image, image=EMPTY_IMAGE)
         on_change([(self.state, 'density_map')])(self._on_change_density_map)
         on_change([(self.state, 'bins')])(self._update_scatter)
         self._viewer_state.add_global_callback(self._update_scatter)
