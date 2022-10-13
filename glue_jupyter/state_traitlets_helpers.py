@@ -3,7 +3,7 @@ import traitlets
 from collections import defaultdict
 from traitlets.utils.bunch import Bunch
 from glue.core.state_objects import State
-from glue.core import Data, Subset, ComponentID
+from glue.core import BaseCartesianData, Subset, ComponentID
 from echo import CallbackList, CallbackDict
 from matplotlib.colors import Colormap
 from matplotlib.cm import get_cmap
@@ -78,7 +78,7 @@ class GlueStateJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, State):
             return state_to_dict(obj)
-        elif isinstance(obj, (Data, Subset, ComponentID)):
+        elif isinstance(obj, (BaseCartesianData, Subset, ComponentID)):
             return MAGIC_IGNORE
         elif isinstance(obj, Colormap):
             return obj.name
