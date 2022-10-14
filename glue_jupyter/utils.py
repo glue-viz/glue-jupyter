@@ -7,7 +7,7 @@ import PIL.Image
 import numpy as np
 from io import BytesIO as StringIO
 
-from glue.core import Data, BaseCartesianData
+from glue.core import BaseCartesianData
 
 
 def float_or_none(x):
