@@ -7,7 +7,7 @@ import PIL.Image
 import numpy as np
 from io import BytesIO as StringIO
 
-from glue.core import Data
+from glue.core import BaseCartesianData
 
 
 def float_or_none(x):
@@ -157,7 +157,7 @@ def validate_data_argument(data_collection, data):
             raise ValueError(f"'{data}' is not a valid dataset name. The "
                              f"following datasets are available:\n\n" +
                              "\n".join([f"  * '{d.label}'" for d in data_collection]))
-    elif not isinstance(data, Data):
+    elif not isinstance(data, BaseCartesianData):
         raise TypeError('The data argument should either be a glue data '
                         'object or the name of a dataset.\nThe following '
                         'datasets are available:\n\n' +
