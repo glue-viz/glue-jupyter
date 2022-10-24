@@ -45,12 +45,20 @@ def update_state_from_dict(state, changes):
             if isinstance(getattr(state, name), CallbackList):
                 callback_list = getattr(state, name)
                 for i in range(len(callback_list)):
-                    if isinstance(callback_list[i], State):
-                        update_state_from_dict(callback_list[i], changes[name][i])
-                    else:
-                        if (changes[name][i] != MAGIC_IGNORE and
-                                callback_list[i] != changes[name][i]):
-                            callback_list[i] = changes[name][i]
+                    # Note that for updates to CallbackLists, we support either
+                    # a dictionary with integer indices (specifying the elements
+                    # of the CallbackList to update) or a list. If a dict is
+                    # specified, only indices referring to existing list items
+                    # will be updated, and if a list, extra elements will be
+                    # ignored.
+                    if (isinstance(changes[name], dict) and i in changes[name]
+                            or isinstance(changes[name], list) and i < len(changes[name])):
+                        if isinstance(callback_list[i], State):
+                            update_state_from_dict(callback_list[i], changes[name][i])
+                        else:
+                            if (changes[name][i] != MAGIC_IGNORE and
+                                    callback_list[i] != changes[name][i]):
+                                callback_list[i] = changes[name][i]
             elif isinstance(getattr(state, name), CallbackDict):
                 callback_dict = getattr(state, name)
 

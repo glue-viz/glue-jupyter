@@ -44,6 +44,8 @@ def test_to_json():
     assert widget.latest_json == {"a": 1, "b": 2, "sub": [{"c": 4}]}
     widget.state.b = 5
     assert widget.latest_json == {"a": 1, "b": 5, "sub": [{"c": 4}]}
+    widget.state.sub.pop(0)
+    assert widget.latest_json == {"a": 1, "b": 5, "sub": []}
 
 
 def test_from_json():
@@ -54,9 +56,17 @@ def test_from_json():
     widget.set_state_from_json({"a": 3})
     assert widget.state.a == 3
     assert widget.latest_json == {"a": 3, "b": 2, "sub": [{"c": 3}]}
-    widget.set_state_from_json({"sub": {0: {"c": 2}}})
+    widget.set_state_from_json({"sub": [{"c": 2}]})
     assert widget.state.sub[0].c == 2
     assert widget.latest_json == {"a": 3, "b": 2, "sub": [{"c": 2}]}
+    # Giving an empty list does not clear the list - it just means that no
+    # items will be updated.
+    widget.set_state_from_json({"sub": []})
+    assert widget.latest_json == {"a": 3, "b": 2, "sub": [{"c": 2}]}
+    # We can also update lists by passing a dict with index: value pairs in
+    # cases where we just want to update some values
+    widget.set_state_from_json({"sub": {0: {'c': 9}}})
+    assert widget.latest_json == {"a": 3, "b": 2, "sub": [{"c": 9}]}
 
 
 def test_to_json_data():
