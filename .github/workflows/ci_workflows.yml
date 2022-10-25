@@ -9,7 +9,17 @@ on:
   pull_request:
 
 jobs:
+  initial_checks:
+    # Mandatory checks before CI tests
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      coverage: false
+      envs: |
+        # Code style
+        - linux: codestyle
+
   tests:
+    needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
       coverage: codecov
@@ -19,6 +29,7 @@ jobs:
         - linux: py38-test
         - linux: py39-test
         - linux: py310-test
+        - linux: py311-test
 
         - macos: py37-test
         - macos: py38-test
@@ -29,16 +40,16 @@ jobs:
         - windows: py37-test
         - windows: py38-test
         - windows: py39-test
+        - windows: py311-test
 
   no_coverage:
+    needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
       coverage: false
       pytest: false
 
       envs: |
-        - linux: codestyle
-
         - linux: py37-notebooks
         - macos: py38-notebooks
         - windows: py39-notebooks
@@ -49,6 +60,7 @@ jobs:
         - windows: py38-docs
 
   publish:
+    needs: tests
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v1
     with:
       test_extras: test
