@@ -23,6 +23,9 @@ jobs:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
       coverage: codecov
+      libraries: |
+        apt:
+          - libhdf5-dev
 
       envs: |
         - linux: py37-test
@@ -40,7 +43,6 @@ jobs:
         - windows: py37-test
         - windows: py38-test
         - windows: py39-test
-        - windows: py311-test
 
   no_coverage:
     needs: initial_checks
@@ -63,6 +65,7 @@ jobs:
     needs: tests
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v1
     with:
+      libraries: libhdf5-dev
       test_extras: test
       test_command: pytest --pyargs glue_jupyter
     secrets:
