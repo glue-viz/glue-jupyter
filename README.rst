@@ -3,7 +3,7 @@ Jupyter interface for Glue
 
 Sometimes known as “Glupyter”
 
-|Build Status|
+|Build Status| |Coverage Status| |Documentation Status|
 
 About
 ~~~~~
@@ -57,6 +57,14 @@ The test suite can be run using::
    pytest glue_jupyter
 
 .. |Build Status| image:: https://github.com/glue-viz/glue-jupyter/actions/workflows/ci_workflows.yml/badge.svg
-   :target: https://github.com/glue-viz/glue-jupyter/actions/workflows/ci_workflows.yml
+    :target: https://github.com/glue-viz/glue-jupyter/actions/
+    :alt: Glue Jupyter's GitHub Actions CI Status
+.. |Coverage Status| image:: https://codecov.io/gh/glue-viz/glue-jupyter/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/glue-viz/glue-jupyter
+    :alt: Glue Jupyter's Coverage Status
+.. |Documentation Status| image:: https://img.shields.io/readthedocs/glue-jupyter/latest.svg?logo=read%20the%20docs&logoColor=white&label=Docs&version=stable
+    :target: https://glue-jupyter.readthedocs.io/en/stable/?badge=stable
+    :alt: Glue Jupyter's Documentation Status
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
-   :target: https://mybinder.org/v2/gh/glue-viz/glue-jupyter/main?urlpath=lab/tree/notebooks
+    :target: https://mybinder.org/v2/gh/glue-viz/glue-jupyter/main?urlpath=lab/tree/notebooks
+    :alt: Launch Glue Jupyter on mybinder
