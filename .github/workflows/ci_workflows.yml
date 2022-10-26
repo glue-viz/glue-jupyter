@@ -9,16 +9,30 @@ on:
   pull_request:
 
 jobs:
+  initial_checks:
+    # Mandatory checks before CI tests
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      coverage: false
+      envs: |
+        # Code style
+        - linux: codestyle
+
   tests:
+    needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
       coverage: codecov
+      libraries: |
+        apt:
+          - libhdf5-dev
 
       envs: |
         - linux: py37-test
         - linux: py38-test
         - linux: py39-test
         - linux: py310-test
+        - linux: py311-test
 
         - macos: py37-test
         - macos: py38-test
@@ -31,14 +45,13 @@ jobs:
         - windows: py39-test
 
   no_coverage:
+    needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
       coverage: false
       pytest: false
 
       envs: |
-        - linux: codestyle
-
         - linux: py37-notebooks
         - macos: py38-notebooks
         - windows: py39-notebooks
@@ -49,8 +62,10 @@ jobs:
         - windows: py38-docs
 
   publish:
+    needs: tests
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v1
     with:
+      libraries: libhdf5-dev
       test_extras: test
       test_command: pytest --pyargs glue_jupyter
     secrets:
