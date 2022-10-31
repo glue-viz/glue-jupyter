@@ -64,27 +64,8 @@ class BqplotImageLayerArtist(ImageLayerArtist):
             return super().get_image_data(*args, **kwargs)
 
     def _update_visual_attributes(self):
-        # TODO: this is a copy of the super method, adding in the bitmap_visible state
 
-        if not self.enabled:
-            return
-
-        if self._viewer_state.color_mode == 'Colormaps':
-            color = self.state.cmap
-        else:
-            color = self.state.color
-
-        self.composite.set(self.uuid,
-                           clim=(self.state.v_min, self.state.v_max),
-                           visible=self.state.visible and self.state.bitmap_visible,
-                           zorder=self.state.zorder,
-                           color=color,
-                           contrast=self.state.contrast,
-                           bias=self.state.bias,
-                           alpha=self.state.alpha,
-                           stretch=self.state.stretch)
-
-        self.composite_image.invalidate_cache()
+        super()._update_visual_attributes()
 
         was_visble = self.contour_artist.visible
         self.contour_artist.visible = self.state.visible and self.state.contour_visible
@@ -92,6 +73,7 @@ class BqplotImageLayerArtist(ImageLayerArtist):
             # switching from invisible to visible may leave the contour lines in an inconsistemt
             # state, since we don't update them when invisible, so we have to update them
             self._update_contour_lines()
+
         self.redraw()
 
     def _update_contour_lines(self):
