@@ -34,9 +34,11 @@ class IPyWidgetView(Viewer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.initialize_figure()
         self._output_widget = Output()
         self.initialize_layer_options()
         self.initialize_toolbar()
+        self.create_layout()
 
     @property
     def toolbar_selection_tools(self):

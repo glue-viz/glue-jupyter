@@ -1,6 +1,7 @@
 import os
 import nbformat
 import numpy as np
+import bqplot
 from numpy.testing import assert_allclose
 from nbconvert.preprocessors import ExecutePreprocessor
 from glue.core import Data
@@ -17,28 +18,40 @@ def test_histogram1d(app, dataxyz):
     s.state.hist_x_min = 1.5
     s.state.hist_x_max = 4.5
     s.state.hist_n_bin = 3
-    assert s.layers[0].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
-    assert s.layers[0].hist.tolist() == [1, 1, 1]
+    assert s.figure_widget.marks[0].x.tolist() == [2, 3, 4]
+    assert s.figure_widget.marks[0].y.tolist() == [1, 1, 1]
 
     app.subset('test', dataxyz.id['x'] > 1)
     assert len(s.layers) == 2
     assert s.layers[1].layer['y'].tolist() == [3, 4]
-    assert s.layers[1].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
-    assert s.layers[1].hist.tolist() == [0, 1, 1]
+    assert s.figure_widget.marks[1].x.tolist() == [2, 3, 4]
+    assert s.figure_widget.marks[1].y.tolist() == [0, 1, 1]
 
     tool = s.toolbar.tools['bqplot:xrange']
     tool.activate()
     tool.interact.brushing = True
-    tool.interact.selected = [2.5, 3.5]
+    tool.interact.selected = [2.5, 4.5]
     tool.interact.brushing = False
 
     assert len(s.layers) == 3
-    assert s.layers[2].bins.tolist() == [1.5, 2.5, 3.5, 4.5]
-    assert s.layers[2].hist.tolist() == [0, 1, 0]
+    # what should happen? empty selection
+    # assert s.figure_widget.marks[2].x.tolist() == [1.5, 2.5, 3.5, 4.5]
+    # assert s.figure_widget.marks[2].y.tolist() == [0, 1, 0]
 
     # s.state.hist_n_bin = 6
     # assert s.layers[2].bins.tolist() == [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
     # assert s.layers[2].hist.tolist() == [0, 1, 0, 0, 0, 0]
+
+
+def test_histogram1d_log(app, dataxyz):
+    s = app.histogram1d(x='y', data=dataxyz)
+    assert s.state.y_log is False
+    prev_scale = s.scale_y
+    assert isinstance(s.figure_widget.scale_y, bqplot.LinearScale)
+    s.state.y_log = True
+    assert isinstance(s.figure_widget.scale_y, bqplot.LogScale)
+    s.state.y_log = False
+    assert s.scale_y is prev_scale
 
 
 def test_histogram1d_multiple_subsets(app, data_unlinked, datax):
@@ -48,7 +61,9 @@ def test_histogram1d_multiple_subsets(app, data_unlinked, datax):
     app.subset('test2', data_unlinked.id['a'] > 1)
     assert viewer.layers[0].enabled
     assert viewer.layers[1].enabled
-    assert not viewer.layers[2].enabled
+    assert not viewer.layers[0].state.disabled
+    assert not viewer.layers[1].state.disabled
+    assert viewer.layers[2].state.disabled
 
 
 def test_interact(app, dataxyz):

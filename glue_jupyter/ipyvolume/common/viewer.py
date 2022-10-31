@@ -23,10 +23,13 @@ class IpyvolumeBaseView(IPyWidgetView):
 
     def __init__(self, *args, **kwargs):
 
+        super(IpyvolumeBaseView, self).__init__(*args, **kwargs)
+
+        self.create_layout()
+
+    def initialize_figure(self):
         self.figure = ipv.figure(animation_exponent=1.)
         self.figure.selector = ''
-
-        super(IpyvolumeBaseView, self).__init__(*args, **kwargs)
 
         # FIXME: hack for the movie maker to have access to the figure
         self.state.figure = self.figure
@@ -51,8 +54,6 @@ class IpyvolumeBaseView(IPyWidgetView):
         self.state.add_callback('visible_axes', self._update_axes_visibility)
 
         self._figure_widget = ipv.gcc()
-
-        self.create_layout()
 
     def _update_axes_visibility(self, *args):
         with self.figure:
