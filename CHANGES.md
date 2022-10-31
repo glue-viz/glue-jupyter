@@ -1,5 +1,14 @@
 # Full changelog
 
+## v0.14.2 - 2022-10-31
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+- Fix compatibility of image viewer with recent versions of glue-core by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/331
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.14.1...v0.14.2
+
 ## v0.14.1 - 2022-10-26
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
