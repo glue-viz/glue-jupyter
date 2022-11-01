@@ -141,7 +141,7 @@ class GlueState(traitlets.Any):
 
         state = self.get(obj)
 
-        # To avoid unecessary messages, we now check if the serialized version
+        # To avoid unnecessary messages, we now check if the serialized version
         # of the state has actually changed since the last time it was sent to
         # front-end. In some cases it can happen that a glue state change doesn't
         # result in any actual change to the JSON because some items are ignored
