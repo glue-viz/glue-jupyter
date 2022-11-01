@@ -72,7 +72,7 @@ and for a 3-d scatter plot, use `~glue_jupyter.JupyterApplication.scatter3d`::
     >>> scatter3d = app.scatter3d(data=table)
 
 Other available visualizations include
-:`~glue_jupyter.JupyterApplication.profile1d` for collapsing n-dimesnional
+:`~glue_jupyter.JupyterApplication.profile1d` for collapsing n-dimensional
 datasets down to one dimension, `~glue_jupyter.JupyterApplication.imshow` for
 images (including image slices through n-dimensional datasets), and
 `~glue_jupyter.JupyterApplication.volshow` for volume renderings.

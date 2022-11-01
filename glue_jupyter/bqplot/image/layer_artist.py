@@ -67,10 +67,10 @@ class BqplotImageLayerArtist(ImageLayerArtist):
 
         super()._update_visual_attributes()
 
-        was_visble = self.contour_artist.visible
+        was_visible = self.contour_artist.visible
         self.contour_artist.visible = self.state.visible and self.state.contour_visible
-        if not was_visble and self.contour_artist.visible:
-            # switching from invisible to visible may leave the contour lines in an inconsistemt
+        if not was_visible and self.contour_artist.visible:
+            # switching from invisible to visible may leave the contour lines in an inconsistent
             # state, since we don't update them when invisible, so we have to update them
             self._update_contour_lines()
 
