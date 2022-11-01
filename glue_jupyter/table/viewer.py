@@ -109,7 +109,7 @@ class TableBase(v.VuetifyTemplate):
         components = []
         for cid in self.data.main_components + self.data.derived_components:
             # NOTE: we need to use a loop here instead of using 'not in' because
-            # this doesn't work corectly with ComponentIDs (which override __eq__)
+            # this doesn't work correctly with ComponentIDs (which override __eq__)
             for hidden_cid in self.hidden_components:
                 if cid is hidden_cid:
                     break
