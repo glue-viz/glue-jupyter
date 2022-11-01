@@ -52,7 +52,7 @@ def _assign(object, value):
     setattr(object, trait, value)
 
 
-def calculation(inputs, output=None, initial_calulation=True):
+def calculation(inputs, output=None, initial_calculation=True):
     def decorator(f):
         def calculate(*ignore_args):
             values = [getattr(input, 'value') for input in inputs]
@@ -61,7 +61,7 @@ def calculation(inputs, output=None, initial_calulation=True):
                 _assign(output, result)
         for input in inputs:
             input.observe(calculate, 'value')
-        if initial_calulation:
+        if initial_calculation:
             calculate()
     return decorator
 
