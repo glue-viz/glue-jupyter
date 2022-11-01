@@ -12,7 +12,7 @@ def ipywidgets_layout_factory(viewer):
 
     # Take all the different widgets and construct a standard layout
     # for the viewers, based on ipywidgets HBox and VBox. This can be
-    # overriden in sub-classes to create alternate layouts.
+    # overridden in sub-classes to create alternate layouts.
 
     layout_toolbar = HBox([viewer.toolbar_selection_tools,
                            viewer.toolbar_active_subset,
