@@ -46,10 +46,10 @@ class JupyterApplication(Application):
     Parameters
     ----------
     data_collection : `~glue.core.data_collection.DataCollection`
-        A pre-existing data collection. By default, a new data collection is
+        A preexisting data collection. By default, a new data collection is
         created.
     session : `~glue.core.session.Session`
-        A pre-existing session object. By default, a new session object is
+        A preexisting session object. By default, a new session object is
         created.
     settings : dict or None
         Initial settings to override defaults
