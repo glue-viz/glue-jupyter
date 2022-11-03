@@ -1,4 +1,4 @@
-from ipywidgets import FloatSlider, VBox
+from ipywidgets import FloatSlider, IntText, VBox
 
 from ...link import link
 
@@ -15,7 +15,10 @@ class HistogramLayerStateWidget(VBox):
                                           description='opacity')
         link((self.state, 'alpha'), (self.widget_opacity, 'value'))
 
-        super().__init__([self.widget_opacity])
+        self.widget_zorder = IntText(description='z-order')
+        link((self.state, 'zorder'), (self.widget_zorder, 'value'))
+
+        super().__init__([self.widget_opacity, self.widget_zorder])
 
     def cleanup(self):
         pass

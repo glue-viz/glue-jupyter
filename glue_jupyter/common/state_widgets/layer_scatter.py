@@ -1,4 +1,4 @@
-from ipywidgets import Checkbox, FloatSlider, VBox, IntSlider
+from ipywidgets import Checkbox, FloatSlider, VBox, IntSlider, IntText
 from glue_jupyter.widgets import Color, Size
 
 from ...link import link, dlink
@@ -34,6 +34,9 @@ class ScatterLayerStateWidget(VBox):
         self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy',
                                               label='vy attribute')
 
+        self.widget_zorder = IntText(description='z-order')
+        link((self.state, 'zorder'), (self.widget_zorder, 'value'))
+
         dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'),
               lambda value: None if value else 'none')
         dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'),
@@ -48,4 +51,4 @@ class ScatterLayerStateWidget(VBox):
         super().__init__([self.widget_visible, self.widget_fill, self.widget_opacity,
                           self.widget_size, self.widget_color,
                           self.widget_vector, self.widget_vector_x,
-                          self.widget_vector_y])
+                          self.widget_vector_y, self.widget_zorder])
