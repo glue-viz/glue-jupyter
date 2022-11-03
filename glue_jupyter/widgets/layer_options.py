@@ -23,6 +23,8 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
     layers = traitlets.List().tag(sync=True, **widgets.widget_serialization)
     selected = traitlets.Int(0).tag(sync=True)
     color_menu_open = traitlets.Bool(False).tag(sync=True)
+    current_panel = traitlets.Instance(widgets.DOMWidget, allow_none=True) \
+                             .tag(sync=True, **widgets.widget_serialization)
 
     def __init__(self, viewer):
         super().__init__()
@@ -32,6 +34,8 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         self.observe(self._update_glue_state_from_layers, 'layers')
 
         self.current_layers_data = None
+        self.current_layer = None
+        self.current_panel = None
 
         self.viewer.session.hub.subscribe(self, msg.DataUpdateMessage,
                                           handler=self._on_data_or_subset_update)
@@ -80,6 +84,9 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
 
         new_layers_data = [self.layer_data(layer) for layer in self.viewer.layers]
 
+        # If we're updating layers from a z-order change, update the index of the selected layer
+        index = next((i for i, l in enumerate(new_layers_data) if l == self.current_layer), None)
+
         # During the creation of the new widgets, layers can change again, causing a
         # recursive loop. Short circuit this by checking if the content of the layers has
         # actually changed.
@@ -91,6 +98,11 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         self.layers = [self.layer_to_dict(layer_artist, i) for i, layer_artist in
                        enumerate(self.viewer.layers)]
 
+        if index is not None:
+            self.selected = index
+        else:
+            self._update_current_layer_info(self.selected)
+
     def _on_data_or_subset_update(self, msg):
         if msg.attribute in ('label', 'style'):
             self._update_layers_from_glue_state()
@@ -100,3 +112,12 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         for layer_data, layer in zip(self.layers, self.viewer.layers):
             layer.state.visible = layer_data['visible']
             layer.state.color = layer_data['color']
+
+    @traitlets.observe('selected')
+    def _on_selected_change(self, change):
+        self._update_current_layer_info(change["new"])
+
+    def _update_current_layer_info(self, index):
+        if index < len(self.layers):
+            self.current_layer = self.current_layers_data[index]
+            self.current_panel = self.layers[index]["layer_panel"]
