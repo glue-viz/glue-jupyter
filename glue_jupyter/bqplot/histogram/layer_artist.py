@@ -112,7 +112,9 @@ class BqplotHistogramLayerArtist(LayerArtist):
 
         if not self.enabled:
             return
-        # TODO: set visual attrs
+        # TODO: set other visual attrs
+        sorted_layers = sorted(self.view.layers, key=lambda layer: layer.state.zorder)
+        self.view.figure.marks = [layer.bars for layer in sorted_layers]
         self.redraw()
 
     def _update_histogram(self, force=False, **kwargs):
