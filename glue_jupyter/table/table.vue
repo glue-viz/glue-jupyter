@@ -15,7 +15,7 @@
       <template v-slot:header="props">
         <thead>
           <tr>
-            <th style="padding: 0 10px; width: 40px">#</th>
+            <th :style="'padding: 0 10px; width: '+Math.ceil(Math.log10(total_length))*20+'px'">#</th>
             <th style="padding: 0 1px; width: 30px" v-if="selection_enabled">
               <v-btn icon color="primary" text small @click="apply_filter">
                 <v-icon>filter_list</v-icon>
