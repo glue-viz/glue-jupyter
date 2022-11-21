@@ -18,7 +18,7 @@ def test_table_filter(app, dataxyz):
     assert len(table.widget_table.selections) == 2
 
 
-def test_table_add_remove_data(app, dataxyz, dataxz):
+def test_table_add_remove_data(app, dataxyz, dataxz, data_empty):
     table = app.new_data_viewer(TableViewer, data=None, show=True)
     assert len(table.layers) == 0
     assert table.widget_table.total_length == 0
