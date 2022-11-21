@@ -30,7 +30,7 @@ def test_table_add_remove_data(app, dataxyz, dataxz, data_empty):
     table.remove_data(data_empty)
 
     table.add_data(dataxyz)
-    assert table.widget_table.data is dataxz
+    assert table.widget_table.data is dataxyz
     assert table.widget_table.total_length == 3
 
     assert table.widget_table.items, "table should fill automatically"
