@@ -33,6 +33,11 @@ def data_unlinked():
 
 
 @pytest.fixture
+def data_empty():
+    return Data(label="empty data")
+
+
+@pytest.fixture
 def data_4d():
     return Data(x=np.arange(120).reshape((4, 2, 3, 5)), label='Data 4D')
 
