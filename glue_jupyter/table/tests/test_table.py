@@ -18,11 +18,21 @@ def test_table_filter(app, dataxyz):
     assert len(table.widget_table.selections) == 2
 
 
-def test_table_add_remove_data(app, dataxyz, dataxz):
+def test_table_add_remove_data(app, dataxyz, dataxz, data_empty):
     table = app.new_data_viewer(TableViewer, data=None, show=True)
     assert len(table.layers) == 0
     assert table.widget_table.total_length == 0
+
+    app.add_data(data_empty)
+    table.add_data(data_empty)
+    assert len(table.layers) == 1
+    assert table.widget_table.total_length == 0
+    table.remove_data(data_empty)
+
     table.add_data(dataxyz)
+    assert table.widget_table.data is dataxyz
+    assert table.widget_table.total_length == 3
+
     assert table.widget_table.items, "table should fill automatically"
     assert table.widget_table.items[0]['z'] == dataxyz['z'][0]
     assert table.widget_table.total_length, "total length should grow"

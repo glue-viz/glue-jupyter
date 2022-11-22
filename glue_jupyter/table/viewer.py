@@ -127,7 +127,7 @@ class TableGlue(TableBase):
         self._update()
 
     def __len__(self):
-        if self.data is None:
+        if self.data is None or len(self.data.shape) == 0:
             return 0
         return self.data.shape[0]
 
