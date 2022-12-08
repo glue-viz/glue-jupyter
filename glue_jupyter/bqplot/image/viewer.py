@@ -55,6 +55,13 @@ class BqplotImageView(BqplotBaseView):
                                 css_selector=".plotarea_events")
         self._vl.observe(self._on_view_change, names=['view_data'])
 
+    def _update_data(self, *args, **kwargs):
+        super()._update_data(*args, **kwargs)
+        try:
+            self.state._reference_data_changed(force=True)
+        except TypeError:  # older glue-core versions did not have force=True
+            self.state._reference_data_changed()
+
     def _reset_limits(self, old, new):
         if new is not old:
             self.state.reset_limits()
