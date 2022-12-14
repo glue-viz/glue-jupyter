@@ -1,3 +1,4 @@
+from itertools import product
 from glue.core.subset import SubsetState
 
 
@@ -34,4 +35,8 @@ def test_redraw_empty_subset(app, dataxz):
     layer_artist = s.layers[-1]
     subset = layer_artist.layer
     subset.subset_state = SubsetState()
-    assert all(layer_artist.bars.y == 0)
+
+    # Test each combination of cumulative, normalize, and y_log
+    for flags in product([True, False], repeat=3):
+        s.state.cumulative, s.state.normalize, s.state.y_log = flags
+        assert all(layer_artist.bars.y == 0)
