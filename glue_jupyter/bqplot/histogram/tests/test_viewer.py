@@ -1,3 +1,6 @@
+from itertools import permutations
+
+
 def test_non_hex_colors(app, dataxyz):
 
     # Make sure non-hex colors such as '0.4' and 'red', which are valid
@@ -22,3 +25,15 @@ def test_remove(app, dataxz, dataxyz):
     assert len(s.figure.marks) == 2
     s.remove_data(dataxz)
     assert len(s.figure.marks) == 0
+
+
+def test_zorder(app, data_volume, dataxz, dataxyz):
+    s = app.histogram1d(data=dataxyz)
+    s.add_data(dataxz)
+    s.add_data(data_volume)
+    xyz, xz, vol = s.layers
+
+    for p in permutations([1, 2, 3]):
+        vol.state.zorder, xz.state.zorder, xyz.state.zorder = p
+        it = iter(s.figure.marks)
+        assert all(layer.bars in it for layer in s.layers)

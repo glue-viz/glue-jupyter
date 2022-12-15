@@ -1,3 +1,6 @@
+from itertools import permutations
+
+
 def test_scatter2d_nd(app, data_4d):
     # Regression test for a bug that meant that arrays with more than one
     # dimension did not work correctly.
@@ -45,3 +48,15 @@ def test_remove(app, dataxz, dataxyz):
     assert len(s.figure.marks) == 6
     s.remove_data(dataxz)
     assert len(s.figure.marks) == 0
+
+
+def test_zorder(app, data_volume, dataxz, dataxyz):
+    s = app.scatter2d(data=dataxyz)
+    s.add_data(dataxz)
+    s.add_data(data_volume)
+    xyz, xz, vol = s.layers
+
+    for p in permutations([1, 2, 3]):
+        vol.state.zorder, xz.state.zorder, xyz.state.zorder = p
+        it = iter(s.figure.marks)
+        assert all(layer.scatter in it for layer in s.layers)
