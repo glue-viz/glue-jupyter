@@ -1,5 +1,33 @@
 # Full changelog
 
+## v0.15.0 - 2022-12-19
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+- Set row number column width in Table widget dynamically from no. of digits
+- by @kecnry in https://github.com/glue-viz/glue-jupyter/pull/337
+- Fix bug where empty histogram layer does not redraw by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/338
+
+#### New Features
+
+- Allow empty `Data` to be loaded into the Table Viewer by @duytnguyendtn in https://github.com/glue-viz/glue-jupyter/pull/336
+- Allow adjusting z-order for scatter and histogram layers by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/334
+
+#### Other Changes
+
+- Corrected spelling errors by @jsoref in https://github.com/glue-viz/glue-jupyter/pull/333
+- Updated `ipyvolume` and `scikit-image` requirements for numpy 1.24 compatibility
+- by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/341
+
+### New Contributors
+
+- @jsoref made their first contribution in https://github.com/glue-viz/glue-jupyter/pull/333
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.14.2...v0.15.0
+
 ## v0.14.2 - 2022-10-31
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
