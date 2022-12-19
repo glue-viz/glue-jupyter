@@ -58,7 +58,7 @@ class BqplotHistogramLayerArtist(LayerArtist):
         if self.bins is None:
             return  # can happen when the subset is empty
 
-        if self.bins.size == 0 or self.hist_unscaled.sum() == 0:
+        if self.bins.size == 0:
             return
 
         self.hist = self.hist_unscaled.astype(float)
@@ -66,9 +66,9 @@ class BqplotHistogramLayerArtist(LayerArtist):
 
         if self._viewer_state.cumulative:
             self.hist = self.hist.cumsum()
-            if self._viewer_state.normalize:
+            if self._viewer_state.normalize and self.hist.max() > 0:
                 self.hist /= self.hist.max()
-        elif self._viewer_state.normalize:
+        elif self._viewer_state.normalize and self.hist.sum() > 0:
             self.hist /= (self.hist.sum() * dx)
 
         # TODO this won't work for log ...
@@ -92,18 +92,22 @@ class BqplotHistogramLayerArtist(LayerArtist):
             self.state._y_max *= 1.2
 
         if self._viewer_state.y_log:
-            self.state._y_min = self.hist[self.hist > 0].min() / 10
+            keep = self.hist > 0
+            if np.any(keep):
+                self.state._y_min = self.hist[keep].min() / 10
+            else:
+                self.state._y_min = 0
         else:
             self.state._y_min = 0
 
         largest_y_max = max(getattr(layer, '_y_max', 0)
                             for layer in self._viewer_state.layers)
-        if largest_y_max != self._viewer_state.y_max:
+        if np.isfinite(largest_y_max) and largest_y_max != self._viewer_state.y_max:
             self._viewer_state.y_max = largest_y_max
 
         smallest_y_min = min(getattr(layer, '_y_min', np.inf)
                              for layer in self._viewer_state.layers)
-        if smallest_y_min != self._viewer_state.y_min:
+        if np.isfinite(smallest_y_min) and smallest_y_min != self._viewer_state.y_min:
             self._viewer_state.y_min = smallest_y_min
 
         self.redraw()

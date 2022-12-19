@@ -1,4 +1,5 @@
-from itertools import permutations
+from itertools import permutations, product
+from glue.core.subset import SubsetState
 
 
 def test_non_hex_colors(app, dataxyz):
@@ -25,6 +26,20 @@ def test_remove(app, dataxz, dataxyz):
     assert len(s.figure.marks) == 2
     s.remove_data(dataxz)
     assert len(s.figure.marks) == 0
+
+
+def test_redraw_empty_subset(app, dataxz):
+    s = app.histogram1d(data=dataxz)
+    s.add_data(dataxz)
+    app.data_collection.new_subset_group(subset_state=dataxz.id['x'] > 1, label='empty_test')
+    layer_artist = s.layers[-1]
+    subset = layer_artist.layer
+    subset.subset_state = SubsetState()
+
+    # Test each combination of cumulative, normalize, and y_log
+    for flags in product([True, False], repeat=3):
+        s.state.cumulative, s.state.normalize, s.state.y_log = flags
+        assert all(layer_artist.bars.y == 0)
 
 
 def test_zorder(app, data_volume, dataxz, dataxyz):
