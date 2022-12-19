@@ -1,4 +1,4 @@
-from itertools import product
+from itertools import permutations, product
 from glue.core.subset import SubsetState
 
 
@@ -40,3 +40,15 @@ def test_redraw_empty_subset(app, dataxz):
     for flags in product([True, False], repeat=3):
         s.state.cumulative, s.state.normalize, s.state.y_log = flags
         assert all(layer_artist.bars.y == 0)
+
+
+def test_zorder(app, data_volume, dataxz, dataxyz):
+    s = app.histogram1d(data=dataxyz)
+    s.add_data(dataxz)
+    s.add_data(data_volume)
+    xyz, xz, vol = s.layers
+
+    for p in permutations([1, 2, 3]):
+        vol.state.zorder, xz.state.zorder, xyz.state.zorder = p
+        it = iter(s.figure.marks)
+        assert all(layer.bars in it for layer in s.layers)
