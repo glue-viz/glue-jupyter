@@ -95,10 +95,10 @@ def grid_slice(xmin, xmax, shape, ymin, ymax):
 
 def get_ioloop():
     import IPython
-    import zmq
+    from tornado.ioloop import IOLoop
     ipython = IPython.get_ipython()
     if ipython and hasattr(ipython, 'kernel'):
-        return zmq.eventloop.ioloop.IOLoop.instance()
+        return IOLoop.instance()
 
 
 def debounced(delay_seconds=0.5, method=False):
