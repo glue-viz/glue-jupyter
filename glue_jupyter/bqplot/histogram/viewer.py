@@ -26,6 +26,23 @@ class BqplotHistogramView(BqplotBaseView):
 
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:xrange']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.state.add_callback('x_att', self._update_axes)
+        self.state.add_callback('x_log', self._update_axes)
+        self.state.add_callback('normalize', self._update_axes)
+        self._update_axes()
+
+    def _update_axes(self, *args):
+
+        if self.state.x_att is not None:
+            self.state.x_axislabel = self.state.x_att.label
+
+        if self.state.normalize:
+            self.state.y_axislabel = 'Normalized number'
+        else:
+            self.state.y_axislabel = 'Number'
+
     def _roi_to_subset_state(self, roi):
         # TODO: copy paste from glue/viewers/histogram/qt/data_viewer.py
         # TODO Does subset get applied to all data or just visible data?

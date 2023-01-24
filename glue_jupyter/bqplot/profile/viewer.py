@@ -30,6 +30,30 @@ class BqplotProfileView(BqplotBaseView):
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:panzoom_x', 'bqplot:panzoom_y',
              'bqplot:xrange']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.state.add_callback('x_att', self._update_axes)
+        self.state.add_callback('normalize', self._update_axes)
+        self.state.add_callback('x_display_unit', self._update_axes)
+        self.state.add_callback('y_display_unit', self._update_axes)
+        self._update_axes()
+
+    def _update_axes(self, *args):
+
+        if self.state.x_att is not None:
+            if self.state.x_display_unit:
+                self.state.x_axislabel = self.state.x_att.label + f' [{self.state.x_display_unit}]'
+            else:
+                self.state.x_axislabel = self.state.x_att.label
+
+        if self.state.normalize:
+            self.state.y_axislabel = 'Normalized data values'
+        else:
+            if self.state.y_display_unit:
+                self.state.y_axislabel = f'Data values [{self.state.y_display_unit}]'
+            else:
+                self.state.y_axislabel = 'Data values'
+
     def _roi_to_subset_state(self, roi):
 
         x = roi.to_polygon()[0]

@@ -44,11 +44,21 @@ class BqplotImageView(BqplotBaseView):
         self.state.add_callback('reference_data', self._reset_limits, echo_old=True)
         self.state.add_callback('x_att', self._reset_limits, echo_old=True)
         self.state.add_callback('y_att', self._reset_limits, echo_old=True)
+        self.state.add_callback('x_att_world', self._update_axes)
+        self.state.add_callback('y_att_world', self._update_axes)
 
         self._setup_view_listener()
 
         on_change([(self.state, 'aspect')])(self._sync_figure_aspect)
         self._sync_figure_aspect()
+
+    def _update_axes(self, *args):
+
+        if self.state.x_att_world is not None:
+            self.state.x_axislabel = self.state.x_att_world.label
+
+        if self.state.y_att_world is not None:
+            self.state.y_axislabel = self.state.y_att_world.label
 
     def _setup_view_listener(self):
         self._vl = ViewListener(widget=self.figure,
