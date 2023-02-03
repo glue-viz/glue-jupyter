@@ -33,7 +33,9 @@ class IPyWidgetView(Viewer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._output_widget = None if self.session.application._settings['disable_output_widget'] else Output()
+        self._output_widget = (None
+                               if self.session.application._settings['disable_output_widget']
+                               else Output())
         self.initialize_layer_options()
         self.initialize_toolbar()
 
