@@ -60,3 +60,21 @@ def test_zorder(app, data_volume, dataxz, dataxyz):
         vol.state.zorder, xz.state.zorder, xyz.state.zorder = p
         it = iter(s.figure.marks)
         assert all(layer.scatter in it for layer in s.layers)
+
+
+def test_limits_init(app, dataxz, dataxyz):
+
+    # Regression test for a bug that caused the bqplot limits
+    # to not match the glue state straight after initialization
+
+    s = app.scatter2d(data=dataxyz)
+
+    assert s.state.x_min == 0.92
+    assert s.state.x_max == 3.08
+    assert s.state.y_min == 1.92
+    assert s.state.y_max == 4.08
+
+    assert s.scale_x.min == 0.92
+    assert s.scale_x.max == 3.08
+    assert s.scale_y.min == 1.92
+    assert s.scale_y.max == 4.08
