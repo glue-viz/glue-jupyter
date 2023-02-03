@@ -36,7 +36,7 @@ class BqplotHistogramView(BqplotBaseView):
     def _update_axes(self, *args):
 
         if self.state.x_att is not None:
-            self.state.x_axislabel = self.state.x_att.label
+            self.state.x_axislabel = str(self.state.x_att)
 
         if self.state.normalize:
             self.state.y_axislabel = 'Normalized number'

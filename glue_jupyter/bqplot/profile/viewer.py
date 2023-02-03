@@ -42,9 +42,9 @@ class BqplotProfileView(BqplotBaseView):
 
         if self.state.x_att is not None:
             if self.state.x_display_unit:
-                self.state.x_axislabel = self.state.x_att.label + f' [{self.state.x_display_unit}]'
+                self.state.x_axislabel = str(self.state.x_att) + f' [{self.state.x_display_unit}]'
             else:
-                self.state.x_axislabel = self.state.x_att.label
+                self.state.x_axislabel = str(self.state.x_att)
 
         if self.state.normalize:
             self.state.y_axislabel = 'Normalized data values'

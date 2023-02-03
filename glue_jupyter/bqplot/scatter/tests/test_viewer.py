@@ -20,8 +20,8 @@ def test_scatter2d_categorical(app, datacat):
     scatter.state.layers[0].vector_visible = True
     scatter.state.layers[0].size_mode = 'Linear'
     scatter.state.layers[0].cmap_mode = 'Linear'
-    assert scatter.state.x_att.label == 'a'
-    assert scatter.state.y_att.label == 'b'
+    assert str(scatter.state.x_att) == 'a'
+    assert str(scatter.state.y_att) == 'b'
 
 
 def test_non_hex_colors(app, dataxyz):

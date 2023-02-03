@@ -55,10 +55,10 @@ class BqplotImageView(BqplotBaseView):
     def _update_axes(self, *args):
 
         if self.state.x_att_world is not None:
-            self.state.x_axislabel = self.state.x_att_world.label
+            self.state.x_axislabel = str(self.state.x_att_world)
 
         if self.state.y_att_world is not None:
-            self.state.y_axislabel = self.state.y_att_world.label
+            self.state.y_axislabel = str(self.state.y_att_world)
 
     def _setup_view_listener(self):
         self._vl = ViewListener(widget=self.figure,
