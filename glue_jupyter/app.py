@@ -75,7 +75,7 @@ class JupyterApplication(Application):
             for key, value in settings.items():
                 self.set_setting(key, value)
 
-        self.output = None if self._settings['disable_output_widget'] else widgets.Output()
+        self.output = None if self.get_setting('disable_output_widget') else widgets.Output()
         self.widget_data_collection = widgets.SelectMultiple()
         self.widget_subset_select = SubsetSelect(session=self.session)
         self.widget_subset_mode = SelectionModeMenu(session=self.session)

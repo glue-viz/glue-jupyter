@@ -1,5 +1,6 @@
 import bqplot
 from functools import partial
+from contextlib import nullcontext
 
 from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
@@ -213,7 +214,7 @@ class BqplotBaseView(IPyWidgetView):
 
     def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
-        with self._output_widget:
+        with self._output_widget or nullcontext():
             if len(self.layers) > 0:
                 subset_state = self._roi_to_subset_state(roi)
                 cmd = ApplySubsetState(data_collection=self._data,
