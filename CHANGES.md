@@ -1,5 +1,25 @@
 # Full changelog
 
+## v0.16.0 - 2023-02-03
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+- Fix updating of image viewer when data is modified by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/339
+- Fix initial limits of viewers by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/344
+
+#### New Features
+
+- Initial support for unit conversion in profile viewer by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/311
+
+#### Other Changes
+
+- MNT: Replace zmq ioloop with tornado by @pllim in https://github.com/glue-viz/glue-jupyter/pull/343
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.15.0...v0.16.0
+
 ## v0.15.0 - 2022-12-19
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
