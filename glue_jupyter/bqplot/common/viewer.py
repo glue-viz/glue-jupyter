@@ -97,6 +97,8 @@ class BqplotBaseView(IPyWidgetView):
         self.state.add_callback('y_min', self._update_bqplot_limits)
         self.state.add_callback('y_max', self._update_bqplot_limits)
 
+        self._update_bqplot_limits()
+
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
         self.create_layout()
