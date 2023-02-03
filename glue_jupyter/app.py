@@ -67,18 +67,23 @@ class JupyterApplication(Application):
             REQUIRED_PLUGINS.clear()
             load_plugins()
 
-        self.output = widgets.Output()
-        self.widget_data_collection = widgets.SelectMultiple()
-        self.widget_subset_select = SubsetSelect(session=self.session)
-        self.widget_subset_mode = SelectionModeMenu(session=self.session)
-        self.widget = widgets.VBox(children=[self.widget_subset_mode, self.output])
-
         self._settings['new_subset_on_selection_tool_change'] = [False, bool]
         self._settings['single_global_active_tool'] = [True, bool]
+        self._settings['disable_output_widget'] = [False, bool]
 
         if settings is not None:
             for key, value in settings.items():
                 self.set_setting(key, value)
+
+        self.output = None if self._settings['disable_output_widget'] else widgets.Output()
+        self.widget_data_collection = widgets.SelectMultiple()
+        self.widget_subset_select = SubsetSelect(session=self.session)
+        self.widget_subset_mode = SelectionModeMenu(session=self.session)
+
+        if self.output is None:
+            self.widget = widgets.VBox(children=[self.widget_subset_mode])
+        else:
+            self.widget = widgets.VBox(children=[self.widget_subset_mode, self.output])
 
         self._viewer_refs = []
 
