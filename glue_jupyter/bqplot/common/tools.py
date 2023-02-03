@@ -1,3 +1,5 @@
+from contextlib import nullcontext
+
 import os
 from bqplot import PanZoom
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
@@ -132,7 +134,7 @@ class BqplotRectangleMode(BqplotSelectionTool):
     def update_selection(self, *args):
         if self.interact.brushing:
             return
-        with self.viewer._output_widget:
+        with self.viewer._output_widget or nullcontext():
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
                 y = self.interact.selected_y
@@ -142,7 +144,7 @@ class BqplotRectangleMode(BqplotSelectionTool):
                     self.finalize_callback()
 
     def update_from_roi(self, roi):
-        with self.viewer._output_widget:
+        with self.viewer._output_widget or nullcontext():
             if isinstance(roi, RectangularROI):
                 self.interact.selected_x = [roi.xmin, roi.xmax]
                 self.interact.selected_y = [roi.ymin, roi.ymax]
@@ -161,7 +163,7 @@ class BqplotRectangleMode(BqplotSelectionTool):
                 self.finalize_callback()
 
     def activate(self):
-        with self.viewer._output_widget:
+        with self.viewer._output_widget or nullcontext():
             self.interact.selected_x = None
             self.interact.selected_y = None
         super().activate()
@@ -203,7 +205,7 @@ class BqplotCircleMode(BqplotSelectionTool):
     def update_selection(self, *args):
         if self.interact.brushing:
             return
-        with self.viewer._output_widget:
+        with self.viewer._output_widget or nullcontext():
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
                 y = self.interact.selected_y
@@ -242,7 +244,7 @@ class BqplotCircleMode(BqplotSelectionTool):
                 self.finalize_callback()
 
     def activate(self):
-        with self.viewer._output_widget:
+        with self.viewer._output_widget or nullcontext():
             self.interact.selected_x = None
             self.interact.selected_y = None
         super().activate()
@@ -299,7 +301,7 @@ class BqplotXRangeMode(BqplotSelectionTool):
         self.interact.observe(self.update_selection, "brushing")
 
     def update_selection(self, *args):
-        with self.viewer._output_widget:
+        with self.viewer._output_widget or nullcontext():
             if self.interact.selected is not None:
                 x = self.interact.selected
                 if x is not None and len(x):
@@ -307,7 +309,7 @@ class BqplotXRangeMode(BqplotSelectionTool):
                     self.viewer.apply_roi(roi)
 
     def activate(self):
-        with self.viewer._output_widget:
+        with self.viewer._output_widget or nullcontext():
             self.interact.selected = None
         super().activate()
 
@@ -331,7 +333,7 @@ class BqplotYRangeMode(BqplotSelectionTool):
         self.interact.observe(self.update_selection, "brushing")
 
     def update_selection(self, *args):
-        with self.viewer._output_widget:
+        with self.viewer._output_widget or nullcontext():
             if self.interact.selected is not None:
                 y = self.interact.selected
                 if y is not None and len(y):
@@ -339,7 +341,7 @@ class BqplotYRangeMode(BqplotSelectionTool):
                     self.viewer.apply_roi(roi)
 
     def activate(self):
-        with self.viewer._output_widget:
+        with self.viewer._output_widget or nullcontext():
             self.interact.selected = None
         super().activate()
 

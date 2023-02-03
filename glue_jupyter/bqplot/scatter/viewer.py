@@ -27,3 +27,17 @@ class BqplotScatterView(BqplotBaseView):
 
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:rectangle', 'bqplot:circle',
              'bqplot:xrange', 'bqplot:yrange']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.state.add_callback('x_att', self._update_axes)
+        self.state.add_callback('y_att', self._update_axes)
+        self._update_axes()
+
+    def _update_axes(self, *args):
+
+        if self.state.x_att is not None:
+            self.state.x_axislabel = str(self.state.x_att)
+
+        if self.state.y_att is not None:
+            self.state.y_axislabel = str(self.state.y_att)

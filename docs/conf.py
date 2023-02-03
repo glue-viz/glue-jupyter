@@ -178,7 +178,7 @@ texinfo_documents = [
 intersphinx_cache_limit = 10     # days to keep the cached inventories
 intersphinx_mapping = {
     # 'sphinx': ('https://www.sphinx-doc.org/en/latest/', None),
-    'python': ('https://docs.python.org/3.7', None),
+    'python': ('https://docs.python.org/3.11', None),
     # 'matplotlib': ('https://matplotlib.org', None),
     # 'numpy': ('https://docs.scipy.org/doc/numpy', None),
     # 'astropy': ('http://docs.astropy.org/en/stable/', None),

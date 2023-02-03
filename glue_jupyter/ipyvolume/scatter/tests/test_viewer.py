@@ -14,9 +14,9 @@ def test_scatter3d_categorical(app, datacat):
     # show the correct categorical labels on the axes.
     app.add_data(datacat)
     scatter = app.scatter3d(data=datacat)
-    assert scatter.state.x_att.label == 'a'
-    assert scatter.state.y_att.label == 'b'
-    assert scatter.state.z_att.label == 'b'
+    assert str(scatter.state.x_att) == 'a'
+    assert str(scatter.state.y_att) == 'b'
+    assert str(scatter.state.z_att) == 'b'
 
 
 def test_non_hex_colors(app, dataxyz):
@@ -38,11 +38,11 @@ def test_labels(app, dataxyz):
     # test the syncing of attributes to labels
     app.add_data(dataxyz)
     scatter = app.scatter3d(data=dataxyz)
-    assert scatter.state.x_att.label == 'x'
+    assert str(scatter.state.x_att) == 'x'
     assert scatter.figure.xlabel == 'x'
-    assert scatter.state.y_att.label == 'y'
+    assert str(scatter.state.y_att) == 'y'
     assert scatter.figure.zlabel == 'y'
-    assert scatter.state.z_att.label == 'z'
+    assert str(scatter.state.z_att) == 'z'
     assert scatter.figure.ylabel == 'z'
 
     scatter.state.x_att = dataxyz.id['y']

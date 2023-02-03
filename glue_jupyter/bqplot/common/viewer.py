@@ -1,5 +1,6 @@
 import bqplot
 from functools import partial
+from contextlib import nullcontext
 
 from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
@@ -65,28 +66,13 @@ class BqplotBaseView(IPyWidgetView):
         self.state.remove_callback('layers', self._sync_layer_artist_container)
         self.state.add_callback('layers', self._sync_layer_artist_container, priority=10000)
 
-        def update_axes(*ignore):
-            try:
-                # Extract units from data
-                x_unit = self.state.reference_data.get_component(self.state.x_att_world).units
-            except AttributeError:
-                # If no data loaded yet, ignore units
-                x_unit = ""
-            finally:
-                # Append units to axis label
-                self.axis_x.label = str(self.state.x_att) + " " + str(x_unit)
-            if self.is2d:
-                self.axis_y.label = str(self.state.y_att)
-                try:
-                    y_unit = self.state.reference_data.get_component(self.state.y_att_world).units
-                except AttributeError:
-                    y_unit = ""
-                finally:
-                    self.axis_y.label = str(self.state.y_att) + " " + str(y_unit)
+        self.state.add_callback('x_axislabel', self.update_x_axislabel)
+        # self.state.add_callback('x_axislabel_weight', self.update_x_axislabel)
+        # self.state.add_callback('x_axislabel_size', self.update_x_axislabel)
 
-        self.state.add_callback('x_att', update_axes)
-        if self.is2d:
-            self.state.add_callback('y_att', update_axes)
+        self.state.add_callback('y_axislabel', self.update_y_axislabel)
+        # self.state.add_callback('y_axislabel_weight', self.update_y_axislabel)
+        # self.state.add_callback('y_axislabel_size', self.update_y_axislabel)
 
         self.scale_x.observe(self.update_glue_scales, names=['min', 'max'])
         self.scale_y.observe(self.update_glue_scales, names=['min', 'max'])
@@ -102,6 +88,12 @@ class BqplotBaseView(IPyWidgetView):
         on_change([(self.state, 'show_axes')])(self._sync_show_axes)
 
         self.create_layout()
+
+    def update_x_axislabel(self, *event):
+        self.axis_x.label = self.state.x_axislabel
+
+    def update_y_axislabel(self, *event):
+        self.axis_y.label = self.state.y_axislabel
 
     def _update_bqplot_limits(self, *args):
 
@@ -224,7 +216,7 @@ class BqplotBaseView(IPyWidgetView):
 
     def apply_roi(self, roi, use_current=False):
         # TODO: partial copy paste from glue/viewers/matplotlib/qt/data_viewer.py
-        with self._output_widget:
+        with self._output_widget or nullcontext():
             if len(self.layers) > 0:
                 subset_state = self._roi_to_subset_state(roi)
                 cmd = ApplySubsetState(data_collection=self._data,

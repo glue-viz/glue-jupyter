@@ -153,7 +153,8 @@ class BqplotProfileLayerArtist(LayerArtist):
         if force or any(prop in changed for prop in ('layer', 'x_att', 'attribute',
                                                      'function', 'normalize',
                                                      'v_min', 'v_max',
-                                                     'as_steps')):
+                                                     'as_steps',
+                                                     'x_display_unit', 'y_display_unit')):
             self._calculate_profile(reset=force)
             force = True
 
