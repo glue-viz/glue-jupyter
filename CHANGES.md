@@ -1,5 +1,16 @@
 # Full changelog
 
+## v0.16.1 - 2023-02-07
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+- Don't set scale limits if glue state limits are None by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/345
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.16.0...v0.16.1
+
 ## v0.16.0 - 2023-02-03
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
