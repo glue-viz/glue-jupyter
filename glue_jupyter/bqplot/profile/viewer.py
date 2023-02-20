@@ -90,8 +90,9 @@ class BqplotProfileView(BqplotBaseView):
         # Construct tick_labels dictionary
         tick_labels = dict(zip(tick_values, tick_labels))
 
-        self.axis_x.tick_values = tick_values
-        self.axis_x.tick_labels = tick_labels
+        with self.axis_x.hold_sync():
+            self.axis_x.tick_values = tick_values
+            self.axis_x.tick_labels = tick_labels
 
     def _update_axes(self, *args):
 
