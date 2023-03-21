@@ -11,6 +11,7 @@ from .layer_artist import BqplotProfileLayerArtist
 
 from astropy import units as u
 from astropy.visualization.wcsaxes.formatter_locator import ScalarFormatterLocator
+from astropy.wcs.wcsapi import SlicedLowLevelWCS
 
 from glue.core.component_id import PixelComponentID
 from glue_jupyter.common.state_widgets.layer_profile import ProfileLayerStateWidget
@@ -47,17 +48,28 @@ class BqplotProfileView(BqplotBaseView):
         self.formatter_locator = ScalarFormatterLocator(number=5, unit=u.one, format='%.3g')
         self.scale_x.observe(self._update_labels, names=['min', 'max'])
         self.scale_y.observe(self._update_labels, names=['min', 'max'])
+        self.state.add_callback('x_display_unit', self._update_labels)
+        self.state.add_callback('x_show_world', self._update_labels)
 
     def _update_labels(self, *args):
 
-        if not isinstance(self.state.x_att, PixelComponentID):
+        if not isinstance(self.state.x_att, PixelComponentID) or not self.state.x_show_world:
             self.axis_x.tick_values = None
             self.axis_x.tick_labels = None
             return
 
         # Get WCS to use to convert pixel coordinates to world coordinates
         # TODO: slice WCS with >1 dimensions
-        wcs_sub = self.state.reference_data.coords
+        coords = self.state.reference_data.coords
+
+        if coords.pixel_n_dim > 1:
+            # As in ProfileLayerState.update_profile, we slice out other dimensions
+            # TODO: if axes are correlated we should warn the user somehow
+            # that the values are only true for a certain slice
+            slices = tuple(slice(None) if idx == self.state.x_att.axis else 0 for idx in range(coords.pixel_n_dim))
+            wcs_sub = SlicedLowLevelWCS(coords, slices)
+        else:
+            wcs_sub = self.state.reference_data.coords
 
         # TODO: make sure we deal correctly with units when non-standard unit is given
 
@@ -81,7 +93,7 @@ class BqplotProfileView(BqplotBaseView):
         # Round tick_values to nearest int to avoid issues with dict lookup of
         # labels.
         # TODO: can we avoid this and make tick_labels more robust?
-        tick_values = np.round(tick_values).astype(int)
+        tick_values = np.round(tick_values).astype(int).tolist()
 
         # Determine custom labels
         # TODO: determine how to do pretty formatting for exponential notation
