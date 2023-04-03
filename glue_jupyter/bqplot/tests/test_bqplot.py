@@ -1,10 +1,11 @@
 import os
+
 import nbformat
 import numpy as np
-from numpy.testing import assert_allclose
-from nbconvert.preprocessors import ExecutePreprocessor
 from glue.core import Data
 from glue.core.roi import EllipticalROI
+from nbconvert.preprocessors import ExecutePreprocessor
+from numpy.testing import assert_allclose
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -227,6 +228,17 @@ def test_scatter2d_cmap_mode(app, dataxyz):
 
     assert l1.scatter.color is None
     l1.state.cmap_att = 'x'
+    l1.state.cmap_mode = 'Linear'
+    assert l1.state.cmap_name == 'Gray'
+    l1.state.cmap_vmin = 0
+    l1.state.cmap_vmax = 10
+    assert l1.scatter.color is not None
+
+
+def test_scatter2d_cmap_mode_categorical(app, datacat):
+    s = app.scatter2d(a='a', a='b', data=datacat)
+    l1 = s.layers[0]
+    l1.state.cmap_att = 'a'
     l1.state.cmap_mode = 'Linear'
     assert l1.state.cmap_name == 'Gray'
     l1.state.cmap_vmin = 0
