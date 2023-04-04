@@ -1,15 +1,16 @@
-import bqplot
 import numpy as np
-from echo import CallbackProperty
+import bqplot
+from ..compatibility import ScatterGL, ImageGL
+
 from glue.core.data import Subset
-from glue.core.exceptions import IncompatibleAttribute
-from glue.utils import color2hex, ensure_numerical
-from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.scatter.state import ScatterLayerState
+from glue.core.exceptions import IncompatibleAttribute
+from glue.viewers.common.layer_artist import LayerArtist
 
 from ...link import dlink, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
-from ..compatibility import ImageGL, ScatterGL
+from echo import CallbackProperty
+from glue.utils import ensure_numerical, color2hex
 
 __all__ = ['BqplotScatterLayerState', 'BqplotScatterLayerArtist']
 EMPTY_IMAGE = np.zeros((10, 10, 4), dtype=np.uint8)
@@ -105,8 +106,7 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _on_change_cmap_mode_or_att(self, ignore=None):
         if self.state.cmap_mode == 'Linear' and self.state.cmap_att is not None:
-            self.scatter.color = (ensure_numerical(self.layer.data[self.state.cmap_att])
-                                  .astype(np.float32).ravel())
+            self.scatter.color = self.layer.data[self.state.cmap_att].astype(np.float32).ravel()
         else:
             self.scatter.color = None
 
@@ -244,7 +244,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         scale = self.state.size_scaling
         if self.state.size_mode == 'Linear' and self.state.size_att is not None:
             self.scatter.default_size = int(scale * 25)
-            self.scatter.size = ensure_numerical(self.layer.data[self.state.size_att].ravel())
+            self.scatter.size = self.layer.data[self.state.size_att].ravel()
             self.scale_size.min = float_or_none(self.state.size_vmin)
             self.scale_size.max = float_or_none(self.state.size_vmax)
             self._workaround_unselected_style()
