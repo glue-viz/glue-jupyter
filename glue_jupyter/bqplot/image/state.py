@@ -15,6 +15,9 @@ class BqplotImageViewerState(ImageViewerState):
                                                       'to the axes width/height (0 means no '
                                                       'padding)')
 
+    def _reference_data_changed(self, *args, **kwargs):
+        return super()._reference_data_changed(*args, force=False)
+
 
 class BqplotImageLayerState(ImageLayerState):
     c_min = DDCProperty(docstring='The lower level used for the contours')
