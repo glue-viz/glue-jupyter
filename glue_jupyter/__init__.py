@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from pkg_resources import get_distribution, DistributionNotFound
+import importlib.metadata
 
 from IPython.display import display
 
@@ -10,11 +10,7 @@ __all__ = ['jglue', 'example_data_xyz', 'example_image', 'example_volume',
            'JupyterApplication', 'set_layout_factory', 'get_layout_factory',
            '__version__']
 
-try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
-    # package is not installed
-    pass
+__version__ = importlib.metadata.version(__name__)
 
 LAYOUT_FACTORY = None
 
