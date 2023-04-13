@@ -50,6 +50,7 @@ class BqplotProfileView(BqplotBaseView):
         self.scale_y.observe(self._update_labels, names=['min', 'max'])
         self.state.add_callback('x_display_unit', self._update_labels)
         self.state.add_callback('x_show_world', self._update_labels)
+        self.state.add_callback('x_display_unit', self._update_labels)
 
     def _update_labels(self, *args):
 
@@ -94,6 +95,16 @@ class BqplotProfileView(BqplotBaseView):
         # labels.
         # TODO: can we avoid this and make tick_labels more robust?
         tick_values = np.round(tick_values).astype(int).tolist()
+
+        # Convert world coordinates to display units
+        # TODO: right now we need to strip and add back the quantity-ness
+        # because we can't rely just on astropy's unit conversion, we need to
+        # use our own converter. For custom units, u.Unit may fail.
+        converter = UnitConverter()
+        tick_values_world = converter.to_unit(self.state.reference_data,
+                                              self.state.reference_data.world_component_ids[self.state.x_att.axis],
+                                              tick_values_world.value,
+                                              self.state.x_display_unit) * u.Unit(self.state.x_display_unit)
 
         # Determine custom labels
         # TODO: determine how to do pretty formatting for exponential notation
