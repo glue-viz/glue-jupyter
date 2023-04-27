@@ -3,9 +3,24 @@ from astropy.wcs import WCS
 import numpy as np
 from numpy.testing import assert_allclose, assert_equal
 
+from astropy import units as u
+
 from glue.core import Data
 from glue.core.roi import XRangeROI
+from glue.config import unit_converter, settings
 from glue.plugins.wcs_autolinking.wcs_autolinking import WCSLink
+
+
+def setup_function(func):
+    func.ORIGINAL_UNIT_CONVERTER = settings.UNIT_CONVERTER
+
+
+def teardown_function(func):
+    settings.UNIT_CONVERTER = func.ORIGINAL_UNIT_CONVERTER
+
+
+def teardown_module():
+    unit_converter._members.pop('test-spectral')
 
 
 def test_non_hex_colors(app, dataxyz):
@@ -34,7 +49,19 @@ def test_remove(app, data_image, data_volume):
     assert len(s.figure.marks) == 0
 
 
+@unit_converter('test-spectral')
+class SpectralUnitConverter:
+
+    def equivalent_units(self, data, cid, units):
+        return map(str, u.Unit(units).find_equivalent_units(include_prefix_units=True, equivalencies=u.spectral()))
+
+    def to_unit(self, data, cid, values, original_units, target_units):
+        return (values * u.Unit(original_units)).to_value(target_units, equivalencies=u.spectral())
+
+
 def test_unit_conversion(app):
+
+    settings.UNIT_CONVERTER = 'test-spectral'
 
     wcs1 = WCS(naxis=1)
     wcs1.wcs.ctype = ['FREQ']
@@ -117,3 +144,14 @@ def test_unit_conversion(app):
 
     assert len(d2.subsets) == 1
     assert_equal(d2.subsets[0].to_mask(), [0, 0, 1])
+
+    viewer.state.x_display_unit = 'cm'
+
+    roi = XRangeROI(15, 35)
+    viewer.apply_roi(roi)
+
+    assert len(d1.subsets) == 1
+    assert_equal(d1.subsets[0].to_mask(), [1, 0, 0])
+
+    assert len(d2.subsets) == 1
+    assert_equal(d2.subsets[0].to_mask(), [0, 1, 1])
