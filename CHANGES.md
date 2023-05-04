@@ -1,5 +1,20 @@
 # Full changelog
 
+## v0.16.3 - 2023-05-04
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+- Fix subset creation with unit flip by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/354
+
+#### Other Changes
+
+- Remove codecov from test dependencies by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/351
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.16.2...v0.16.3
+
 ## v0.16.2 - 2023-04-13
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
