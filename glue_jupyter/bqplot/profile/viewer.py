@@ -65,6 +65,10 @@ class BqplotProfileView(BqplotBaseView):
                                      self.state.x_att, np.array([lo, hi]),
                                      self.state.x_display_unit)
 
+        # Sometimes unit conversions can cause the min/max to be swapped
+        if lo > hi:
+            lo, hi = hi, lo
+
         roi_new = RangeROI(min=lo, max=hi, orientation='x')
 
         return roi_to_subset_state(roi_new, x_att=self.state.x_att)
