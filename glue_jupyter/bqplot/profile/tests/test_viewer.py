@@ -53,10 +53,12 @@ def test_remove(app, data_image, data_volume):
 class SpectralUnitConverter:
 
     def equivalent_units(self, data, cid, units):
-        return map(str, u.Unit(units).find_equivalent_units(include_prefix_units=True, equivalencies=u.spectral()))
+        return map(str, u.Unit(units).find_equivalent_units(include_prefix_units=True,
+                                                            equivalencies=u.spectral()))
 
     def to_unit(self, data, cid, values, original_units, target_units):
-        return (values * u.Unit(original_units)).to_value(target_units, equivalencies=u.spectral())
+        return (values * u.Unit(original_units)).to_value(target_units,
+                                                          equivalencies=u.spectral())
 
 
 def test_unit_conversion(app):
