@@ -193,21 +193,26 @@ class BqplotScatterLayerArtist(LayerArtist):
             try:
                 mask = self.layer.to_mask()
             except IncompatibleAttribute:
+                self.scatter.selected = []
+                self.quiver.selected = []
+                self._set_subset_styles()
                 self.disable("Could not compute subset")
-                self._clear_selection()
                 return
 
             selected_indices = np.nonzero(mask)[0].tolist()
 
             self.scatter.selected = selected_indices
-            self.scatter.selected_style = {}
-            self.scatter.unselected_style = {'fill': 'none', 'stroke': 'none'}
             self.quiver.selected = selected_indices
-            self.quiver.selected_style = {}
-            self.quiver.unselected_style = {'fill': 'none', 'stroke': 'none'}
+            self._set_subset_styles()
 
         else:
             self._clear_selection()
+
+    def _set_subset_styles(self):
+        self.scatter.selected_style = {}
+        self.scatter.unselected_style = {'fill': 'none', 'stroke': 'none'}
+        self.quiver.selected_style = {}
+        self.quiver.unselected_style = {'fill': 'none', 'stroke': 'none'}
 
     def _clear_selection(self):
         self.scatter.selected = None
