@@ -1,5 +1,16 @@
 # Full changelog
 
+## v0.16.4 - 2023-05-25
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+- Make sure invalid subsets don't display by @jfoster17 in https://github.com/glue-viz/glue-jupyter/pull/355
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.16.3...v0.16.4
+
 ## v0.16.3 - 2023-05-04
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
