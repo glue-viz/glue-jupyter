@@ -291,22 +291,43 @@ class BqplotXRangeMode(BqplotSelectionTool):
     action_text = 'X range ROI'
     tool_tip = 'Select a range of x values'
 
-    def __init__(self, viewer, **kwargs):
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
         super().__init__(viewer, **kwargs)
 
         self.interact = BrushIntervalSelector(scale=self.viewer.scale_x,
                                               color=INTERACT_COLOR)
 
+        if roi is not None:
+            self.update_from_roi(roi)
+
         self.interact.observe(self.update_selection, "brushing")
+        self.interact.observe(self.on_selection_change, "selected")
+        self.finalize_callback = finalize_callback
 
     def update_selection(self, *args):
+        if self.interact.brushing:
+            return
         with self.viewer._output_widget or nullcontext():
             if self.interact.selected is not None:
                 x = self.interact.selected
                 if x is not None and len(x):
                     roi = RangeROI(min=min(x), max=max(x), orientation='x')
                     self.viewer.apply_roi(roi)
+                    if self.finalize_callback is not None:
+                        self.finalize_callback()
+
+    def update_from_roi(self, roi):
+        with self.viewer._output_widget or nullcontext():
+            if isinstance(roi, RangeROI):
+                self.interact.selected = [roi.min, roi.max]
+            else:
+                raise TypeError(f'Cannot initialize a BqplotXRangeMode from a {type(roi)}')
+
+    def on_selection_change(self, *args):
+        if self.interact.selected is None:
+            if self.finalize_callback is not None:
+                self.finalize_callback()
 
     def activate(self):
         with self.viewer._output_widget or nullcontext():
@@ -322,7 +343,7 @@ class BqplotYRangeMode(BqplotSelectionTool):
     action_text = 'Y range ROI'
     tool_tip = 'Select a range of y values'
 
-    def __init__(self, viewer, **kwargs):
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
         super().__init__(viewer, **kwargs)
 
@@ -330,15 +351,36 @@ class BqplotYRangeMode(BqplotSelectionTool):
                                               orientation='vertical',
                                               color=INTERACT_COLOR)
 
+        if roi is not None:
+            self.update_from_roi(roi)
+
         self.interact.observe(self.update_selection, "brushing")
+        self.interact.observe(self.on_selection_change, "selected")
+        self.finalize_callback = finalize_callback
 
     def update_selection(self, *args):
+        if self.interact.brushing:
+            return
         with self.viewer._output_widget or nullcontext():
             if self.interact.selected is not None:
                 y = self.interact.selected
                 if y is not None and len(y):
                     roi = RangeROI(min=min(y), max=max(y), orientation='y')
                     self.viewer.apply_roi(roi)
+                    if self.finalize_callback is not None:
+                        self.finalize_callback()
+
+    def update_from_roi(self, roi):
+        with self.viewer._output_widget or nullcontext():
+            if isinstance(roi, RangeROI):
+                self.interact.selected = [roi.min, roi.max]
+            else:
+                raise TypeError(f'Cannot initialize a BqplotYRangeMode from a {type(roi)}')
+
+    def on_selection_change(self, *args):
+        if self.interact.selected is None:
+            if self.finalize_callback is not None:
+                self.finalize_callback()
 
     def activate(self):
         with self.viewer._output_widget or nullcontext():
