@@ -1,12 +1,15 @@
 from astropy.wcs import WCS
 
 import numpy as np
+import pytest
 from numpy.testing import assert_allclose, assert_equal
 
 from astropy import units as u
 
 from glue.core import Data
+from glue.core.edit_subset_mode import AndNotMode
 from glue.core.roi import XRangeROI
+from glue.core.subset import AndState, InvertState, RangeSubsetState
 from glue.config import unit_converter, settings
 from glue.plugins.wcs_autolinking.wcs_autolinking import WCSLink
 
@@ -61,6 +64,7 @@ class SpectralUnitConverter:
                                                           equivalencies=u.spectral())
 
 
+@pytest.mark.filterwarnings("ignore:No observer defined on WCS.*")
 def test_unit_conversion(app):
 
     settings.UNIT_CONVERTER = 'test-spectral'
@@ -157,3 +161,80 @@ def test_unit_conversion(app):
 
     assert len(d2.subsets) == 1
     assert_equal(d2.subsets[0].to_mask(), [0, 1, 1])
+
+
+def test_composite_xrange(app):
+    session = app.session
+
+    wcs2 = WCS(naxis=1)
+    wcs2.wcs.ctype = ['WAVE']
+    wcs2.wcs.crval = [10]
+    wcs2.wcs.cdelt = [10]
+    wcs2.wcs.crpix = [1]
+    wcs2.wcs.cunit = ['cm']
+
+    d2 = Data(f2=[2000, 1000, 3000])
+    d2.get_component('f2').units = 'mJy'
+    d2.coords = wcs2
+
+    data_collection = session.data_collection
+    data_collection.append(d2)
+
+    viewer = app.profile1d(data=d2)
+    tool = viewer.toolbar.tools['bqplot:xrange']
+    tool.activate()
+    tool.interact.brushing = True
+    tool.interact.selected = [15, 35]
+    tool.interact.brushing = False
+
+    session.edit_subset_mode.mode = AndNotMode
+
+    tool.interact.brushing = True
+    tool.interact.selected = [25, 45]
+    tool.interact.brushing = False
+    tool.deactivate()
+
+    sbst = session.data_collection.subset_groups[0].subset_state
+    assert isinstance(sbst, AndState)
+    assert isinstance(sbst.state1, RangeSubsetState)
+    assert (isinstance(sbst.state2, InvertState) and
+            isinstance(sbst.state2.state1, RangeSubsetState))
+
+
+def test_composite_yrange(app):
+    session = app.session
+
+    wcs2 = WCS(naxis=1)
+    wcs2.wcs.ctype = ['WAVE']
+    wcs2.wcs.crval = [10]
+    wcs2.wcs.cdelt = [10]
+    wcs2.wcs.crpix = [1]
+    wcs2.wcs.cunit = ['cm']
+
+    d2 = Data(f2=[2000, 1000, 3000])
+    d2.get_component('f2').units = 'mJy'
+    d2.coords = wcs2
+
+    data_collection = session.data_collection
+    data_collection.append(d2)
+
+    viewer = app.profile1d(data=d2)
+    tool = viewer.toolbar.tools['bqplot:yrange']
+
+    tool.activate()
+    tool.interact.brushing = True
+    tool.interact.selected = [1100, 1500]
+    tool.interact.brushing = False
+
+    session.edit_subset_mode.mode = AndNotMode
+
+    tool.interact.brushing = True
+    tool.interact.selected = [1450, 1550]
+    tool.interact.brushing = False
+    tool.deactivate()
+
+    sbst = session.data_collection.subset_groups[0].subset_state
+    assert isinstance(sbst, AndState)
+    assert isinstance(sbst.state1, RangeSubsetState)
+    assert (isinstance(sbst.state2, InvertState) and
+            isinstance(sbst.state2.state1, RangeSubsetState))
