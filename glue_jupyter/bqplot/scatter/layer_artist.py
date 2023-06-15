@@ -132,6 +132,14 @@ class BqplotScatterLayerArtist(LayerArtist):
     def redraw(self):
         self.update()
 
+    def clear(self):
+        if self.scatter is not None:
+            self.scatter.x = []
+            self.scatter.y = []
+        if self.quiver is not None:
+            self.quiver.x = []
+            self.quiver.y = []
+
     def _workaround_unselected_style(self, change=None):
         # see https://github.com/bloomberg/bqplot/issues/606
         if isinstance(self.layer, Subset):
@@ -178,13 +186,36 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.state.layer is None):
             return
 
+        try:
+            if not self.state.density_map:
+                x = ensure_numerical(self.layer[self._viewer_state.x_att].ravel())
+                # if x.dtype.kind == 'M':
+                #     x = datetime64_to_mpl(x)
+
+        except (IncompatibleAttribute, IndexError):
+            # The following includes a call to self.clear()
+            self.disable_invalid_attributes(self._viewer_state.x_att)
+            return
+        else:
+            self.enable()
+
+        try:
+            if not self.state.density_map:
+                y = ensure_numerical(self.layer[self._viewer_state.y_att].ravel())
+                # if y.dtype.kind == 'M':
+                #     y = datetime64_to_mpl(y)
+        except (IncompatibleAttribute, IndexError):
+            # The following includes a call to self.clear()
+            self.disable_invalid_attributes(self._viewer_state.y_att)
+            return
+        else:
+            self.enable()
+
         if self.state.density_map:
             pass
         else:
-            self.scatter.x = (ensure_numerical(self.layer.data[self._viewer_state.x_att])
-                              .astype(np.float32).ravel())
-            self.scatter.y = (ensure_numerical(self.layer.data[self._viewer_state.y_att])
-                              .astype(np.float32).ravel())
+            self.scatter.x = x.astype(np.float32).ravel()
+            self.scatter.y = y.astype(np.float32).ravel()
             self.quiver.x = self.scatter.x
             self.quiver.y = self.scatter.y
 

@@ -78,3 +78,31 @@ def test_limits_init(app, dataxz, dataxyz):
     assert s.scale_x.max == 3.08
     assert s.scale_y.min == 1.92
     assert s.scale_y.max == 4.08
+
+
+def test_incompatible_data(app):
+
+    # Regression test for a bug that caused the scatter viewer to raise an
+    # exception if an incompatible dataset was present, and also for a bug
+    # that occurred when trying to remove the original dataset
+
+    d1 = app.add_data(data={'x': [1, 2, 3], 'y': [1, 2, 1]})[0]
+    d2 = app.add_data(data={'x': [2, 3, 4], 'y': [2, 3, 2]})[0]
+
+    s = app.scatter2d(data=d1)
+    s.add_data(d2)
+
+    assert s.state.x_att is d1.id['x']
+    assert s.state.y_att is d1.id['y']
+
+    assert len(s.layers) == 2
+    assert s.layers[0].enabled
+    assert not s.layers[1].enabled
+
+    app.data_collection.remove(d1)
+
+    assert s.state.x_att is d2.id['x']
+    assert s.state.y_att is d2.id['y']
+
+    assert len(s.layers) == 1
+    assert s.layers[0].enabled
