@@ -188,7 +188,7 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         try:
             if not self.state.density_map:
-                x = ensure_numerical(self.layer[self._viewer_state.x_att].ravel())
+                x = ensure_numerical(self.layer.data[self._viewer_state.x_att].ravel())
                 # if x.dtype.kind == 'M':
                 #     x = datetime64_to_mpl(x)
 
@@ -201,7 +201,7 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         try:
             if not self.state.density_map:
-                y = ensure_numerical(self.layer[self._viewer_state.y_att].ravel())
+                y = ensure_numerical(self.layer.data[self._viewer_state.y_att].ravel())
                 # if y.dtype.kind == 'M':
                 #     y = datetime64_to_mpl(y)
         except (IncompatibleAttribute, IndexError):
