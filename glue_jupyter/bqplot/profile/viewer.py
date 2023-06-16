@@ -28,7 +28,7 @@ class BqplotProfileView(BqplotBaseView):
     _layer_style_widget_cls = ProfileLayerStateWidget
 
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:panzoom_x', 'bqplot:panzoom_y',
-             'bqplot:xrange']
+             'bqplot:xrange', 'bqplot:yrange']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
