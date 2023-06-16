@@ -1,14 +1,23 @@
+import os
 from contextlib import nullcontext
 
-import os
+import numpy as np
 from bqplot import PanZoom
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
 from bqplot_image_gl.interacts import BrushEllipseSelector
+from glue import __version__ as glue_version
 from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
 from glue.viewers.common.tool import Tool, CheckableTool
-import numpy as np
+from packaging.version import Version
+
+GLUE_LT_1_11 = Version(glue_version) < Version("1.11")
+
+if not GLUE_LT_1_11:
+    from glue.core.roi import CircularAnnulusROI
+else:
+    CircularAnnulusROI = None
 
 __all__ = []
 
@@ -284,6 +293,60 @@ class BqplotEllipseMode(BqplotCircleMode):
 
 
 @viewer_tool
+class BqplotCircularAnnulusMode(BqplotCircleMode):
+
+    icon = os.path.join(ICONS_DIR, 'glue_annulus.svg')
+    tool_id = 'bqplot:circannulus'
+    action_text = 'Circular Annulus ROI'
+    tool_tip = 'Define a circular annulus region of interest'
+
+    def __init__(self, *args, **kwargs):
+        if GLUE_LT_1_11:
+            raise NotImplementedError("This tool requires glue-core>=1.11")
+
+        super().__init__(*args, **kwargs)
+        self._roi = kwargs.get("roi", None)
+
+    def update_selection(self, *args):
+        if self.interact.brushing:
+            return
+        with self.viewer._output_widget or nullcontext():
+            if self.interact.selected_x is not None and self.interact.selected_y is not None:
+                x = self.interact.selected_x
+                y = self.interact.selected_y
+                # similar to https://github.com/glue-viz/glue/blob/b14ccffac6a5
+                # 271c2869ead9a562a2e66232e397/glue/core/roi.py#L1275-L1297
+                # We should now check if the radius in data coordinates is the same
+                # along x and y, as if so then we can return a circle, otherwise we
+                # make assumption to keep it circular.
+                # Need extra float casting because of strict type check in CircularAnnulusROI.
+                xc = float(x.mean())
+                yc = float(y.mean())
+                rx = abs(x[1] - x[0]) * 0.5
+                ry = abs(y[1] - y[0]) * 0.5
+                outer_r = float(rx + ry) * 0.5
+                if self._roi is None:
+                    inner_r = outer_r * 0.5  # Hardcoded for now, user can edit later.
+                else:
+                    inner_r = self._roi.inner_radius
+
+                roi = CircularAnnulusROI(xc=xc, yc=yc, inner_radius=inner_r, outer_radius=outer_r)
+
+                self._roi = roi
+                self.viewer.apply_roi(roi)
+                if self.finalize_callback is not None:
+                    self.finalize_callback()
+
+    def update_from_roi(self, roi):
+        if isinstance(roi, CircularAnnulusROI):
+            rx = ry = roi.outer_radius
+        else:
+            raise TypeError(f'Cannot initialize a BqplotCircularAnnulusMode from a {type(roi)}')
+        self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
+        self.interact.selected_y = [roi.yc - ry, roi.yc + ry]
+
+
+@viewer_tool
 class BqplotXRangeMode(BqplotSelectionTool):
 
     icon = 'glue_xrange_select'
@@ -387,17 +450,19 @@ class ROIClickAndDrag(InteractCheckableTool):
             subset_state = layer.state.layer.subset_state
             if layer.visible and isinstance(subset_state, RoiSubsetState):
                 roi = subset_state.roi
-                if roi.contains(x, y):
+                if roi.defined() and roi.contains(x, y):
                     if isinstance(roi, (EllipticalROI, CircularROI)):
-                        self._active_tool = BqplotCircleMode(self.viewer, roi=roi,
-                                                             finalize_callback=self.release)
-                        self.viewer._mouse_interact.next = self._active_tool.interact
+                        self._active_tool = BqplotCircleMode(
+                            self.viewer, roi=roi, finalize_callback=self.release)
                     elif isinstance(roi, (PolygonalROI, RectangularROI)):
-                        self._active_tool = BqplotRectangleMode(self.viewer, roi=roi,
-                                                                finalize_callback=self.release)
-                        self.viewer._mouse_interact.next = self._active_tool.interact
+                        self._active_tool = BqplotRectangleMode(
+                            self.viewer, roi=roi, finalize_callback=self.release)
+                    elif not GLUE_LT_1_11 and isinstance(roi, CircularAnnulusROI):
+                        self._active_tool = BqplotCircularAnnulusMode(
+                            self.viewer, roi=roi, finalize_callback=self.release)
                     else:
                         raise TypeError(f"Unexpected ROI type: {type(roi)}")
+                    self.viewer._mouse_interact.next = self._active_tool.interact
                     self._edit_subset_mode.edit_subset = [layer.state.layer.group]
                     break
         else:
