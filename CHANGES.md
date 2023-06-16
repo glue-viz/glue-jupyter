@@ -1,5 +1,21 @@
 # Full changelog
 
+## v0.17.0 - 2023-06-16
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+- Fixed a couple of bugs in the scatter viewer related to incompatible datasets and dataset removal by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/359
+- Fix duplicate xrange region bug when operators are used on existing regions by @pllim in https://github.com/glue-viz/glue-jupyter/pull/357
+
+#### New Features
+
+- Annulus draw tool by @pllim in https://github.com/glue-viz/glue-jupyter/pull/356
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.16.4...v0.17.0
+
 ## v0.16.4 - 2023-05-25
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
