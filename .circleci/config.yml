@@ -18,7 +18,10 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: pip install pip tox --upgrade
+          command: |
+            sudo apt update
+            sudo apt install libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 libatspi2.0-0 libxdamage1 libgbm1 libpango-1.0-0 libcairo2 libasound2
+            pip install pip tox --upgrade
       - run:
           name: Run tests
           command: tox -v
@@ -45,7 +48,10 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: pip install pip tox --upgrade
+          command: |
+            sudo apt update
+            sudo apt install libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 libatspi2.0-0 libxdamage1 libgbm1 libpango-1.0-0 libcairo2 libasound2
+            pip install pip tox --upgrade
       - run: ssh-add -D
       - add_ssh_keys:
           fingerprints: "bf:aa:ef:e3:8d:95:11:0b:75:c7:92:52:ba:fb:e0:fc"
