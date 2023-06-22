@@ -1,10 +1,5 @@
 version: 2.1
 
-workflows:
-  version: 2
-
-  figure-tests:
-
 jobs:
 
   # The following job is to run any visual comparison test, and runs on any branch
@@ -65,15 +60,15 @@ jobs:
           git pull
           git status
           git add .
-          git commit -m "Update reference figures from ${CIRCLE_BRANCH}" || echo "No changes to reference images to deploy"
+          git commit -m "Update reference images from ${CIRCLE_BRANCH}" || echo "No changes to reference images to deploy"
           git push
 
 workflows:
   version: 2
 
-  figure-tests:
+  visual-tests:
     jobs:
-      - figure:
+      - visual:
           name: << matrix.jobname >>
           matrix:
             parameters:
