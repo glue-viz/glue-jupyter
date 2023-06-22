@@ -26,11 +26,6 @@ __all__ = ['JupyterApplication']
 SUBSET_MODES = {'new': NewMode, 'replace': ReplaceMode, 'and': AndMode,
                 'or': OrMode, 'xor': XorMode, 'not': AndNotMode}
 
-for name in ['glue-float-field', 'glue-throttled-slider']:
-    file = f'{name.replace("-", "_")}.vue'
-    ipyvue.register_component_from_file(
-        None, name, os.path.join(os.path.dirname(__file__), 'widgets', file))
-
 
 def is_bool(value):
     return isinstance(value, bool)
@@ -58,6 +53,11 @@ class JupyterApplication(Application):
     def __init__(self, data_collection=None, session=None, settings=None):
 
         super(JupyterApplication, self).__init__(data_collection=data_collection, session=session)
+
+        for name in ['glue-float-field', 'glue-throttled-slider']:
+            file = f'{name.replace("-", "_")}.vue'
+            ipyvue.register_component_from_file(
+                None, name, os.path.join(os.path.dirname(__file__), 'widgets', file))
 
         try:
             from glue.main import load_plugins
