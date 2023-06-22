@@ -13,7 +13,7 @@ jobs:
     docker:
       - image: cimg/python:3.11
     environment:
-      TOXENV=<< parameters.jobname >>
+      TOXENV: << parameters.jobname >>
     steps:
       - checkout
       - run:
