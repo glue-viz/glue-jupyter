@@ -8,17 +8,26 @@ from PIL import Image
 __all__ = ['visual_widget_test']
 
 
+class DummyFigure:
+
+    def __init__(self, png_bytes):
+        self._png_bytes = png_bytes
+
+    def savefig(self, filename_or_fileobj, *args, **kwargs):
+        if isinstance(filename_or_fileobj, str):
+            with open(filename_or_fileobj, 'wb') as f:
+                f.write(self._png_bytes)
+        else:
+            filename_or_fileobj.write(self._png_bytes)
+
+
 def visual_widget_test(*args, **kwargs):
 
     tolerance = kwargs.pop("tolerance", 0)
-    style = kwargs.pop("style", {})
-    savefig_kwargs = kwargs.pop("savefig_kwargs", {})
-    savefig_kwargs["metadata"] = {"Software": None}
-    savefig_kwargs["dpi"] = 100
 
     def decorator(test_function):
         @pytest.mark.mpl_image_compare(
-            tolerance=tolerance, style=style, savefig_kwargs=savefig_kwargs, **kwargs
+            tolerance=tolerance, **kwargs
         )
         @wraps(test_function)
         def test_wrapper(tmp_path, page_session,
@@ -35,18 +44,7 @@ def visual_widget_test(*args, **kwargs):
 
             screenshot = viewer.screenshot()
 
-            with open(tmp_path / "screenshot.png", "wb") as f:
-                f.write(screenshot)
-
-            image = Image.open(tmp_path / "screenshot.png")
-            size_x, size_y = image.size
-
-            fig = plt.figure(figsize=(size_x / 100, size_y / 100))
-            ax = fig.add_axes([0, 0, 1, 1])
-            ax.imshow(image)
-            plt.axis("off")
-
-            return fig
+            return DummyFigure(screenshot)
 
         return test_wrapper
 
