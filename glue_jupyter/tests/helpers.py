@@ -1,9 +1,7 @@
 from functools import wraps
 
-import matplotlib.pyplot as plt
 import pytest
 from IPython.display import display
-from PIL import Image
 
 __all__ = ['visual_widget_test']
 
@@ -30,10 +28,8 @@ def visual_widget_test(*args, **kwargs):
             tolerance=tolerance, **kwargs
         )
         @wraps(test_function)
-        def test_wrapper(tmp_path, page_session,
-*args, **kwargs):
-            layout = test_function(tmp_path, page_session,
-*args, **kwargs)
+        def test_wrapper(tmp_path, page_session, *args, **kwargs):
+            layout = test_function(tmp_path, page_session, *args, **kwargs)
 
             layout.add_class("test-viewer")
 
