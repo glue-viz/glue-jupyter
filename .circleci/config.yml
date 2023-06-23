@@ -43,7 +43,6 @@ jobs:
       - image: cimg/python:3.9
     environment:
       TOXENV: << parameters.jobname >>
-      GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa_bfaaefe38d95110b75c79252bafbe0fc
     steps:
       - checkout
       - run:
@@ -54,10 +53,10 @@ jobs:
             pip install pip tox --upgrade
       - run: ssh-add -D
       - add_ssh_keys:
-          fingerprints: "bf:aa:ef:e3:8d:95:11:0b:75:c7:92:52:ba:fb:e0:fc"
+          fingerprints: "be:23:bb:43:77:fd:bc:2d:38:82:3e:38:06:27:0f:fe"
       - run: ssh-keyscan github.com >> ~/.ssh/known_hosts
       - run: git config --global user.email "glue@circleci" && git config --global user.name "Glue Circle CI"
-      - run: git clone git@github.com:glue-viz/glue-jupyter-visual-tests.git --depth 1 -b glue-jupyter-${CIRCLE_BRANCH} ~/glue-jupyter-visual-tests/
+      - run: git clone git@github.com:glue-viz/glue-jupyter-visual-tests.git --depth 1 ~/glue-jupyter-visual-tests/
       - run:
           name: Generate reference images
           command: tox -v -- --mpl-generate-path=/home/circleci/glue-jupyter-visual-tests/images/$TOXENV
