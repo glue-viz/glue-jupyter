@@ -13,7 +13,7 @@ def test_visual_scatter2d(
 ):
 
     np.random.seed(12345)
-    x = np.random.normal(3, 1, 1000)
+    x = np.random.normal(2, 1, 1000)
     y = np.random.normal(2, 1.5, 1000)
     c = np.hypot(x - 3, y - 2)
     s = (x - 3)
