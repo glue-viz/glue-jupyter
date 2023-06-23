@@ -48,8 +48,6 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.counts = None
         self.image = ImageGL(scales=self.scales_image, image=EMPTY_IMAGE)
         on_change([(self.state, 'density_map')])(self._on_change_density_map)
-        on_change([(self.state, 'bins')])(self._update_scatter)
-        self._viewer_state.add_global_callback(self._update_scatter)
 
         self.view.figure.marks = (list(self.view.figure.marks)
                                   + [self.image, self.scatter, self.quiver])
@@ -117,7 +115,7 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _on_change_density_map(self):
         self._update_visibility()
-        self._update_scatter()
+        self._update_density_map()
 
     def _update_visibility(self, *args):
         self.image.visible = self.state.density_map
@@ -149,7 +147,7 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.quiver.unselected_style = {'fill': 'none', 'stroke': 'none'}
 
     @debounced(method=True)
-    def update_histogram(self):
+    def _update_density_map(self):
         if isinstance(self.layer, Subset):
             data = self.layer.data
             subset_state = self.layer.subset_state
@@ -171,10 +169,8 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.image.x = range_x
                 self.image.y = range_y
                 self.image.image = self.counts.T.astype(np.float32, copy=True)
-
-    def _update_scatter(self, **changes):
-        self.update_histogram()
-        self.update()
+        else:
+            self.image.image = None
 
     def update(self):
 
@@ -212,12 +208,17 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.enable()
 
         if self.state.density_map:
-            pass
+            self.scatter.x = []
+            self.scatter.y = []
+            self.quiver.x = []
+            self.quiver.y = []
         else:
             self.scatter.x = x.astype(np.float32).ravel()
             self.scatter.y = y.astype(np.float32).ravel()
             self.quiver.x = self.scatter.x
             self.quiver.y = self.scatter.y
+
+        self._update_density_map()
 
         if isinstance(self.layer, Subset):
 
