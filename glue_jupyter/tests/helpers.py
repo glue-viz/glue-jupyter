@@ -4,10 +4,10 @@ import pytest
 from IPython.display import display
 
 try:
-    import solara
-    import playwright
-    import pytest_mpl
-    import pytest_playwright
+    import solara  # noqa
+    import playwright  # noqa
+    import pytest_mpl  # noqa
+    import pytest_playwright  # noqa
 except ImportError:
     HAS_VISUAL_TEST_DEPS = False
 else:
