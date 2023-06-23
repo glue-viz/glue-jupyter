@@ -3,6 +3,16 @@ from functools import wraps
 import pytest
 from IPython.display import display
 
+try:
+    import solara
+    import playwright
+    import pytest_mpl
+    import pytest_playwright
+except ImportError:
+    HAS_VISUAL_TEST_DEPS = False
+else:
+    HAS_VISUAL_TEST_DEPS = True
+
 __all__ = ['visual_widget_test']
 
 
@@ -24,6 +34,7 @@ def visual_widget_test(*args, **kwargs):
     tolerance = kwargs.pop("tolerance", 0)
 
     def decorator(test_function):
+        @pytest.mark.skipif("not HAS_VISUAL_TEST_DEPS")
         @pytest.mark.mpl_image_compare(
             tolerance=tolerance, **kwargs
         )
