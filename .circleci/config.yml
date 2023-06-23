@@ -40,7 +40,7 @@ jobs:
       jobname:
         type: string
     docker:
-      - image: cimg/python:3.9
+      - image: cimg/python:3.11
     environment:
       TOXENV: << parameters.jobname >>
     steps:
