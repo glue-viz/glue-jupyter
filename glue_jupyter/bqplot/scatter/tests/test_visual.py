@@ -26,4 +26,6 @@ def test_visual_scatter2d(
     scatter.state.layers[0].cmap = plt.cm.viridis
     scatter.state.layers[0].size_mode = 'Linear'
     scatter.state.layers[0].size_att = data.id['s']
-    return scatter._layout
+    figure = scatter.figure_widget
+    figure.layout = {"width": "400px", "height": "250px"}
+    return figure

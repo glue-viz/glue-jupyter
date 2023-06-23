@@ -27,7 +27,6 @@ def visual_widget_test(*args, **kwargs):
 *args, **kwargs)
 
             layout.add_class("test-viewer")
-            layout.layout = {"width": "800px", "height": "600px"}
 
             display(layout)
 
