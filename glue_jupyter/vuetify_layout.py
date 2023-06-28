@@ -3,12 +3,11 @@
 # default layout.
 
 import ipyvuetify as v
-import traitlets
 import ipywidgets as widgets
+import traitlets
 from ipywidgets import widget_serialization
-__all__ = ['vuetify_layout_factory']
 
-shared_layout = widgets.Layout()
+__all__ = ['vuetify_layout_factory']
 
 
 class LayoutWidget(v.VuetifyTemplate):
@@ -19,7 +18,6 @@ class LayoutWidget(v.VuetifyTemplate):
     open_panels = traitlets.List(default_value=[0, 1]).tag(sync=True)
 
     def __init__(self, viewer, *args, **kwargs):
-        self.layout = shared_layout
         super().__init__(*args, **kwargs)
         self.controls = dict(
             toolbar_selection_tools=viewer.toolbar_selection_tools,
