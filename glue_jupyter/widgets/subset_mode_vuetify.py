@@ -36,8 +36,8 @@ class SelectionModeMenu(v.Menu, HubListener):
                                            width=ICON_WIDTH)
             self.modes.append((name, icon, mode))
 
-            item = v.ListItem(children=[v.ListItemAction(children=[icon_name]),
-                                        v.ListItemTitle(children=[icon])])
+            item = v.ListItem(children=[v.ListItemAction(children=[icon]),
+                                        v.ListItemTitle(children=[name])])
             item.on_event('click', self._sync_state_from_ui)
             items.append(item)
 
