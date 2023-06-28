@@ -12,13 +12,13 @@ __all__ = ['SelectionModeMenu']
 
 ICON_WIDTH = 20
 
-MODES = {
-    'replace': ('glue_replace', ReplaceMode),
-    'add': ('glue_or', OrMode),
-    'and': ('glue_and', AndMode),
-    'xor': ('glue_xor', XorMode),
-    'remove': ('glue_andnot', AndNotMode),
-}
+MODES = [
+    ('replace', 'glue_replace', ReplaceMode),
+    ('add', 'glue_or', OrMode),
+    ('and', 'glue_and', AndMode),
+    ('xor', 'glue_xor', XorMode),
+    ('remove', 'glue_andnot', AndNotMode),
+]
 
 
 class SelectionModeMenu(v.Menu, HubListener):
@@ -31,7 +31,7 @@ class SelectionModeMenu(v.Menu, HubListener):
         self.modes = []
         items = []
 
-        for name, (icon_name, mode) in MODES.items():
+        for name, icon_name, mode in MODES:
             icon = widgets.Image.from_file(icon_path(icon_name, icon_format="svg"),
                                            width=ICON_WIDTH)
             self.modes.append((name, icon, mode))
