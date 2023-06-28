@@ -1,27 +1,30 @@
 from contextlib import nullcontext
 
+import glue.core.message as msg
 import ipyvuetify as v
 import ipywidgets as widgets
-
-import glue.core.message as msg
-from glue.icons import icon_path
-from glue.core.edit_subset_mode import OrMode, AndNotMode, AndMode, XorMode, ReplaceMode
+from glue.core.edit_subset_mode import AndMode, AndNotMode, OrMode, ReplaceMode, XorMode
 from glue.core.hub import HubListener
+from glue.icons import icon_path
 from glue.utils.decorators import avoid_circular
 
 __all__ = ['SelectionModeMenu']
 
 ICON_WIDTH = 20
-icon_replace = widgets.Image.from_file(icon_path("glue_replace", icon_format="svg"),
-                                       width=ICON_WIDTH)
-icon_or = widgets.Image.from_file(icon_path("glue_or", icon_format="svg"),
-                                  width=ICON_WIDTH)
-icon_and = widgets.Image.from_file(icon_path("glue_and", icon_format="svg"),
-                                   width=ICON_WIDTH)
-icon_xor = widgets.Image.from_file(icon_path("glue_xor", icon_format="svg"),
-                                   width=ICON_WIDTH)
-icon_andnot = widgets.Image.from_file(icon_path("glue_andnot", icon_format="svg"),
-                                      width=ICON_WIDTH)
+
+
+def make_lazy(name):
+    def make():
+        widgets.Image.from_file(icon_path(name, icon_format="svg"),
+                                width=ICON_WIDTH)
+    return make
+
+
+icon_replace = make_lazy("glue_replace")
+icon_or = make_lazy("glue_or")
+icon_and = make_lazy("glue_and")
+icon_xor = make_lazy("glue_xor")
+icon_andnot = make_lazy("glue_andnot")
 
 
 class SelectionModeMenu(v.Menu, HubListener):
@@ -32,11 +35,11 @@ class SelectionModeMenu(v.Menu, HubListener):
         self.session = session
 
         self.modes = [
-            ("replace", icon_replace, ReplaceMode),
-            ("add", icon_or, OrMode),
-            ("and", icon_and, AndMode),
-            ("xor", icon_xor, XorMode),
-            ("remove", icon_andnot, AndNotMode),
+            ("replace", icon_replace(), ReplaceMode),
+            ("add", icon_or(), OrMode),
+            ("and", icon_and(), AndMode),
+            ("xor", icon_xor(), XorMode),
+            ("remove", icon_andnot(), AndNotMode),
         ]
 
         items = []

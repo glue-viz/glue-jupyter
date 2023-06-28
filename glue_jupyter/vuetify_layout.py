@@ -3,7 +3,6 @@
 # default layout.
 
 import ipyvuetify as v
-import ipywidgets as widgets
 import traitlets
 from ipywidgets import widget_serialization
 
