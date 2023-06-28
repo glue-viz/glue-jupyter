@@ -12,19 +12,13 @@ __all__ = ['SelectionModeMenu']
 
 ICON_WIDTH = 20
 
-
-def make_lazy(name):
-    def make():
-        widgets.Image.from_file(icon_path(name, icon_format="svg"),
-                                width=ICON_WIDTH)
-    return make
-
-
-icon_replace = make_lazy("glue_replace")
-icon_or = make_lazy("glue_or")
-icon_and = make_lazy("glue_and")
-icon_xor = make_lazy("glue_xor")
-icon_andnot = make_lazy("glue_andnot")
+MODES = {
+    'replace': ('glue_replace', ReplaceMode),
+    'add': ('glue_or', OrMode),
+    'and': ('glue_and', AndMode),
+    'xor': ('glue_xor', XorMode),
+    'remove': ('glue_andnot', AndNotMode),
+}
 
 
 class SelectionModeMenu(v.Menu, HubListener):
@@ -34,22 +28,18 @@ class SelectionModeMenu(v.Menu, HubListener):
         self.output = output_widget
         self.session = session
 
-        self.modes = [
-            ("replace", icon_replace(), ReplaceMode),
-            ("add", icon_or(), OrMode),
-            ("and", icon_and(), AndMode),
-            ("xor", icon_xor(), XorMode),
-            ("remove", icon_andnot(), AndNotMode),
-        ]
-
+        self.modes = []
         items = []
-        for mode in self.modes:
-            item = v.ListItem(children=[v.ListItemAction(children=[mode[1]]),
-                                        v.ListItemTitle(children=[mode[0]])])
-            items.append(item)
 
-        for item in items:
+        for name, (icon_name, mode) in MODES.items():
+            icon = widgets.Image.from_file(icon_path(icon_name, icon_format="svg"),
+                                           width=ICON_WIDTH)
+            self.modes.append((name, icon, mode))
+
+            item = v.ListItem(children=[v.ListItemAction(children=[icon_name]),
+                                        v.ListItemTitle(children=[icon])])
             item.on_event('click', self._sync_state_from_ui)
+            items.append(item)
 
         mylist = v.List(children=items)
 
