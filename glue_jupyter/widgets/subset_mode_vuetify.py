@@ -1,27 +1,24 @@
 from contextlib import nullcontext
 
+import glue.core.message as msg
 import ipyvuetify as v
 import ipywidgets as widgets
-
-import glue.core.message as msg
-from glue.icons import icon_path
-from glue.core.edit_subset_mode import OrMode, AndNotMode, AndMode, XorMode, ReplaceMode
+from glue.core.edit_subset_mode import AndMode, AndNotMode, OrMode, ReplaceMode, XorMode
 from glue.core.hub import HubListener
+from glue.icons import icon_path
 from glue.utils.decorators import avoid_circular
 
 __all__ = ['SelectionModeMenu']
 
 ICON_WIDTH = 20
-icon_replace = widgets.Image.from_file(icon_path("glue_replace", icon_format="svg"),
-                                       width=ICON_WIDTH)
-icon_or = widgets.Image.from_file(icon_path("glue_or", icon_format="svg"),
-                                  width=ICON_WIDTH)
-icon_and = widgets.Image.from_file(icon_path("glue_and", icon_format="svg"),
-                                   width=ICON_WIDTH)
-icon_xor = widgets.Image.from_file(icon_path("glue_xor", icon_format="svg"),
-                                   width=ICON_WIDTH)
-icon_andnot = widgets.Image.from_file(icon_path("glue_andnot", icon_format="svg"),
-                                      width=ICON_WIDTH)
+
+MODES = [
+    ('replace', 'glue_replace', ReplaceMode),
+    ('add', 'glue_or', OrMode),
+    ('and', 'glue_and', AndMode),
+    ('xor', 'glue_xor', XorMode),
+    ('remove', 'glue_andnot', AndNotMode),
+]
 
 
 class SelectionModeMenu(v.Menu, HubListener):
@@ -31,22 +28,18 @@ class SelectionModeMenu(v.Menu, HubListener):
         self.output = output_widget
         self.session = session
 
-        self.modes = [
-            ("replace", icon_replace, ReplaceMode),
-            ("add", icon_or, OrMode),
-            ("and", icon_and, AndMode),
-            ("xor", icon_xor, XorMode),
-            ("remove", icon_andnot, AndNotMode),
-        ]
-
+        self.modes = []
         items = []
-        for mode in self.modes:
-            item = v.ListItem(children=[v.ListItemAction(children=[mode[1]]),
-                                        v.ListItemTitle(children=[mode[0]])])
-            items.append(item)
 
-        for item in items:
+        for name, icon_name, mode in MODES:
+            icon = widgets.Image.from_file(icon_path(icon_name, icon_format="svg"),
+                                           width=ICON_WIDTH)
+            self.modes.append((name, icon, mode))
+
+            item = v.ListItem(children=[v.ListItemAction(children=[icon]),
+                                        v.ListItemTitle(children=[name])])
             item.on_event('click', self._sync_state_from_ui)
+            items.append(item)
 
         mylist = v.List(children=items)
 
