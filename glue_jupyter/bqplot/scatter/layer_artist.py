@@ -170,7 +170,7 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.image.y = range_y
                 self.image.image = self.counts.T.astype(np.float32, copy=True)
         else:
-            self.image.image = None
+            self.image.image = EMPTY_IMAGE
 
     def update(self):
 
@@ -218,7 +218,13 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.quiver.x = self.scatter.x
             self.quiver.y = self.scatter.y
 
-        self._update_density_map()
+        try:
+            self._update_density_map()
+        except IncompatibleAttribute:
+            self.disable('Could not compute density map')
+            return
+        else:
+            self.enable()
 
         if isinstance(self.layer, Subset):
 
