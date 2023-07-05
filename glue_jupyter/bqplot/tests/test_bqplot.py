@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 from nbconvert.preprocessors import ExecutePreprocessor
 from glue.core import Data
-from glue.core.roi import EllipticalROI
+from glue.core.roi import CircularROI, EllipticalROI
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -271,6 +271,24 @@ def test_imshow_circular_brush(app, data_image):
     v.state.aspect = 'auto'
 
     tool = v.toolbar.tools['bqplot:circle']
+    tool.activate()
+    tool.interact.brushing = True
+    tool.interact.selected = [(1.5, 3.5), (300.5, 550)]
+    tool.interact.brushing = False
+
+    roi = data_image.subsets[0].subset_state.roi
+    assert isinstance(roi, CircularROI)
+    assert_allclose(roi.xc, 151.00)
+    assert_allclose(roi.yc, 276.75)
+    assert_allclose(roi.radius, 211.375)
+
+
+def test_imshow_elliptical_brush(app, data_image):
+
+    v = app.imshow(data=data_image)
+    v.state.aspect = 'auto'
+
+    tool = v.toolbar.tools['bqplot:ellipse']
     tool.activate()
     tool.interact.brushing = True
     tool.interact.selected = [(1.5, 3.5), (300.5, 550)]
