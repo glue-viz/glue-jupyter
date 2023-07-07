@@ -30,7 +30,7 @@ class BqplotImageView(BqplotBaseView):
     _state_cls = BqplotImageViewerState
     _options_cls = ImageViewerStateWidget
 
-    tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:rectangle', 'bqplot:circle']
+    tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:rectangle', 'bqplot:circle', 'bqplot:polygon']
 
     def __init__(self, session):
 

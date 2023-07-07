@@ -2,9 +2,9 @@ import os
 from contextlib import nullcontext
 
 import numpy as np
-from bqplot import PanZoom
+from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
-from bqplot_image_gl.interacts import BrushEllipseSelector
+from bqplot_image_gl.interacts import BrushEllipseSelector, MouseInteraction
 from glue import __version__ as glue_version
 from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
@@ -176,6 +176,78 @@ class BqplotRectangleMode(BqplotSelectionTool):
             self.interact.selected_x = None
             self.interact.selected_y = None
         super().activate()
+
+
+@viewer_tool
+class BqplotPolygonMode(BqplotSelectionTool):
+
+    icon = os.path.join(ICONS_DIR, 'glue_lasso')
+    tool_id = 'bqplot:polygon'
+    action_text = 'Polygonal ROI'
+    tool_tip = ('Lasso a region of interest\n')
+
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+
+        self.interact = MouseInteraction(x_scale=self.viewer.scale_x,
+                                         y_scale=self.viewer.scale_y,
+                                         move_throttle=70)
+        self.patch = Lines(x=[[]], y=[[]], fill_colors=['yellow'], colors=['yellow'],
+                           fill='inside', close_path=True,
+                           scales={'x': self.viewer.scale_x, 'y': self.viewer.scale_y})
+        if roi is not None:
+            self.update_from_roi(roi)
+        self.finalize_callback = finalize_callback
+
+    def update_from_roi(self, roi):
+        """
+        TOTO: This should update self.xlist and self.ylist from the existing ROI
+        """
+        with self.viewer._output_widget or nullcontext():
+            pass
+
+    def activate(self):
+        super().activate()
+
+        self.viewer.add_event_callback(self.on_msg, events=['dragstart', 'dragmove', 'dragend'])
+
+    def deactivate(self):
+        self.viewer.remove_event_callback(self.on_msg)
+        super().deactivate()
+
+    def on_msg(self, event):
+        name = event['event']
+        domain = event['domain']
+        x, y = domain['x'], domain['y']
+        if name == 'dragstart':
+            self.original_marks = list(self.viewer.figure.marks)
+            self.viewer.figure.marks = self.original_marks + [self.patch]
+            self.xlist = [x]
+            self.ylist = [y]
+        elif name == 'dragmove':
+            self.xlist.append(x)
+            self.ylist.append(y)
+            self.patch.x = self.xlist
+            self.patch.y = self.ylist
+        elif name == 'dragend':
+            if self.xlist is not None and self.ylist is not None:
+                roi = PolygonalROI(vx=self.xlist, vy=self.ylist)
+                self.viewer.apply_roi(roi)
+
+            new_marks = []
+            for mark in self.viewer.figure.marks:
+                if mark == self.patch:
+                    pass
+                else:
+                    new_marks.append(mark)
+            self.viewer.figure.marks = new_marks
+            self.xlist = []
+            self.ylist = []
+            self.patch.x = [[]]
+            self.patch.y = [[]]
+            if self.finalize_callback is not None:
+                self.finalize_callback()
 
 
 @viewer_tool
