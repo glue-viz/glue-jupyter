@@ -2,6 +2,9 @@ import numpy as np
 import bqplot
 from ..compatibility import ScatterGL
 
+from astropy.visualization import (LinearStretch, SqrtStretch,
+                                   AsinhStretch, LogStretch)
+
 from glue.core.data import Subset
 from glue.viewers.scatter.state import ScatterLayerState
 from glue.viewers.scatter.layer_artist import DensityMapLimits
@@ -16,6 +19,11 @@ from glue.utils import ensure_numerical, color2hex, datetime64_to_mpl
 
 __all__ = ['BqplotScatterLayerArtist']
 EMPTY_IMAGE = np.zeros((10, 10, 4), dtype=np.uint8)
+
+STRETCHES = {'linear': LinearStretch,
+             'sqrt': SqrtStretch,
+             'arcsinh': AsinhStretch,
+             'log': LogStretch}
 
 CMAP_PROPERTIES = set(['cmap_mode', 'cmap_att', 'cmap_vmin', 'cmap_vmax', 'cmap'])
 MARKER_PROPERTIES = set(['size_mode', 'size_att', 'size_vmin', 'size_vmax', 'size_scaling', 'size', 'fill'])
@@ -178,8 +186,8 @@ class BqplotScatterLayerArtist(LayerArtist):
                     self.density_mark.vmin = self.state.cmap_vmin
                     self.density_mark.vmax = self.state.cmap_vmax
 
-                # if force or 'stretch' in changed:
-                #     self.density_mark.set_norm(ImageNormalize(stretch=STRETCHES[self.state.stretch]()))
+                if force or 'stretch' in changed:
+                    self.density_mark.stretch = STRETCHES[self.state.stretch]()
 
                 if force or 'dpi' in changed:
                     self.density_mark.dpi = self._viewer_state.dpi

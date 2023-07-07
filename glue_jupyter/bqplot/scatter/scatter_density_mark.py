@@ -64,7 +64,9 @@ class GenericDensityMark(ImageGL):
     dpi = Float(default_value=100.)
     external_padding = Float(default_value=0.1)
 
-    def __init__(self, *, figure, histogram2d_func, cmap=None, color=None, alpha=None, vmin=None, vmax=None, dpi=None, external_padding=None):
+    stretch = Any(allow_none=True)
+
+    def __init__(self, *, figure, histogram2d_func, cmap=None, color=None, alpha=None, vmin=None, vmax=None, stretch=None, dpi=None, external_padding=None):
 
         # FIXME: need to use weakref to avoid circular references
 
@@ -85,6 +87,7 @@ class GenericDensityMark(ImageGL):
 
         self.vmin = vmin
         self.vmax = vmax
+        self.stretch = stretch
 
         if dpi is not None:
             self.dpi = dpi
@@ -99,6 +102,7 @@ class GenericDensityMark(ImageGL):
         self.observe(self._update_rendered_image, 'alpha')
         self.observe(self._update_rendered_image, 'vmin')
         self.observe(self._update_rendered_image, 'vmax')
+        self.observe(self._update_rendered_image, 'stretch')
 
         self._scale_image = ColorScale()
         self._scales = {'x': self._figure.axes[0].scale,
@@ -193,7 +197,10 @@ class GenericDensityMark(ImageGL):
 
         normalized_counts = (self._counts - vmin) / (vmax - vmin)
 
-        colormapped_counts = self.cmap(normalized_counts)
+        if self.stretch is not None:
+            stretched_counts = self.stretch(normalized_counts)
+
+        colormapped_counts = self.cmap(stretched_counts)
 
         if self.alpha is not None:
             colormapped_counts[:, :, 3] *= self.alpha
@@ -203,52 +210,3 @@ class GenericDensityMark(ImageGL):
     def set_color(self, color):
         if color is not None:
             self.cmap = make_cmap(color)
-
-
-class ScatterDensityMark(GenericDensityMark):
-    """
-    Bqplot artist to make a density plot of (x, y) scatter data.
-
-    Parameters
-    ----------
-    figure : bqplot.figure
-        The bqplot figure the density plot will be added to
-    x, y : iterable
-        The data to plot.
-    c : iterable
-        Values to use for color-encoding. This is meant to be the same as
-        the argument with the same name in :meth:`~matplotlib.axes.Axes.scatter`
-        although for now only 1D iterables of values are accepted. Note that
-        values are averaged inside each pixel of the density map *before*
-        applying the colormap, which in some cases will be different from what
-        the average color of markers would have been inside each pixel.
-    dpi : int or `None`
-        The number of dots per inch to include in the density map.
-    cmap : `matplotlib.colors.Colormap`
-        The colormap to use for the density map.
-    color : str or tuple
-        The color to use for the density map. This can be any valid
-        Matplotlib color. If specified, this takes precedence over the
-        colormap.
-    alpha : float
-        Overall transparency of the density map.
-    vmin, vmax : float or func
-        The lower and upper levels used for scaling the density map. These can
-        optionally be functions that take the density array and returns a single
-        value (e.g. a function that returns the 5% percentile, or the minimum).
-        This is useful since when zooming in/out, the optimal limits change.
-    dpi : int or `None`
-        The number of dots per inch to include in the density map. To use
-        the native resolution of the drawing device, set this to None.
-    """
-
-    def __init__(self, figure, x, y, c=None, **kwargs):
-        self.histogram2d_helper = FixedDataDensityHelper(figure, x, y, c=c)
-        super().__init__(figure=figure, histogram2d_func=self.histogram2d_helper,
-                         **kwargs)
-
-    def set_xy(self, x, y):
-        self.histogram2d_helper.set_xy(x, y)
-
-    def set_c(self, c):
-        self.histogram2d_helper.set_c(c)
