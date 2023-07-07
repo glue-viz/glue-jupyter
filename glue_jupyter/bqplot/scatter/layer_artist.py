@@ -180,8 +180,6 @@ class BqplotScatterLayerArtist(LayerArtist):
                         self.density_mark.vmin = self.density_auto_limits.min
                         self.density_mark.vmax = self.density_auto_limits.max
                 elif force or any(prop in changed for prop in CMAP_PROPERTIES):
-                    c = ensure_numerical(self.layer[self.state.cmap_att].ravel())
-                    set_mpl_artist_cmap(self.density_mark, c, self.state)
                     self.density_mark.cmap = self.state.cmap
                     self.density_mark.vmin = self.state.cmap_vmin
                     self.density_mark.vmax = self.state.cmap_vmax
