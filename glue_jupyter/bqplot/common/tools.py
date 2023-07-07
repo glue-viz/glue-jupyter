@@ -223,17 +223,14 @@ class BqplotPolygonMode(BqplotSelectionTool):
         if name == 'dragstart':
             self.original_marks = list(self.viewer.figure.marks)
             self.viewer.figure.marks = self.original_marks + [self.patch]
-            self.xlist = [x]
-            self.ylist = [y]
+            self.patch.x = [x]
+            self.patch.y = [y]
         elif name == 'dragmove':
-            self.xlist.append(x)
-            self.ylist.append(y)
-            self.patch.x = self.xlist
-            self.patch.y = self.ylist
+            self.patch.x = np.append(self.patch.x, x)
+            self.patch.y = np.append(self.patch.y, y)
         elif name == 'dragend':
-            if self.xlist is not None and self.ylist is not None:
-                roi = PolygonalROI(vx=self.xlist, vy=self.ylist)
-                self.viewer.apply_roi(roi)
+            roi = PolygonalROI(vx=self.patch.x, vy=self.patch.y)
+            self.viewer.apply_roi(roi)
 
             new_marks = []
             for mark in self.viewer.figure.marks:
@@ -242,8 +239,6 @@ class BqplotPolygonMode(BqplotSelectionTool):
                 else:
                     new_marks.append(mark)
             self.viewer.figure.marks = new_marks
-            self.xlist = []
-            self.ylist = []
             self.patch.x = [[]]
             self.patch.y = [[]]
             if self.finalize_callback is not None:
