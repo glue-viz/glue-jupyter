@@ -1,12 +1,13 @@
 import numpy as np
 import bqplot
-from ..compatibility import ScatterGL, ImageGL
+from ..compatibility import ScatterGL
 
 from glue.core.data import Subset
 from glue.viewers.scatter.state import ScatterLayerState
+from glue.viewers.scatter.layer_artist import DensityMapLimits
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
-from mpl_scatter_density.color import make_cmap
+from glue_jupyter.bqplot.scatter.scatter_density_mark import GenericDensityMark
 
 from ...link import dlink, on_change
 from ...utils import colormap_to_hexlist, debounced, float_or_none
@@ -32,6 +33,8 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         self.view = view
 
+        self.density_auto_limits = DensityMapLimits()
+
         self.scale_size = bqplot.LinearScale()
         self.scale_color = bqplot.ColorScale()
         self.scale_size_quiver = bqplot.LinearScale(min=0, max=1)
@@ -47,11 +50,15 @@ class BqplotScatterLayerArtist(LayerArtist):
                                 visible=False, marker='arrow')
 
         self.counts = None
-        self.image = ImageGL(scales=self.scales_image, image=EMPTY_IMAGE)
+        self.density_mark = GenericDensityMark(figure=self.view.figure,
+                                               vmin=self.density_auto_limits.min,
+                                               vmax=self.density_auto_limits.max,
+                                               histogram2d_func=self.compute_density_map)
+
         on_change([(self.state, 'density_map')])(self._on_change_density_map)
 
         self.view.figure.marks = (list(self.view.figure.marks)
-                                  + [self.image, self.scatter, self.quiver])
+                                  + [self.density_mark, self.scatter, self.quiver])
         self.scatter.observe(self._workaround_unselected_style, 'colors')
         self.quiver.observe(self._workaround_unselected_style, 'colors')
 
@@ -71,21 +78,32 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.state.add_callback('zorder', self._update_zorder)
 
         dlink((self.state, 'visible'), (self.scatter, 'visible'))
-        dlink((self.state, 'visible'), (self.image, 'visible'))
+        dlink((self.state, 'visible'), (self.density_mark, 'visible'))
 
         dlink((self.state, 'alpha'), (self.scatter, 'opacities'), lambda x: [x])
         dlink((self.state, 'alpha'), (self.quiver, 'opacities'), lambda x: [x])
-        dlink((self.state, 'alpha'), (self.image, 'opacity'))
+        dlink((self.state, 'alpha'), (self.density_mark, 'alpha'))
 
         dlink((self.state, 'fill'), (self.scatter, 'fill'))
 
         on_change([(self.state, 'vector_visible', 'vx_att', 'vy_att')])(self._update_quiver)
         dlink((self.state, 'vector_visible'), (self.quiver, 'visible'))
 
+    def compute_density_map(self, *args, **kwargs):
+        try:
+            density_map = self.state.compute_density_map(*args, **kwargs)
+        except IncompatibleAttribute:
+            self.disable_invalid_attributes(self._viewer_state.x_att,
+                                            self._viewer_state.y_att)
+            return np.array([[np.nan]])
+        else:
+            self.enable()
+        return density_map
+
     def remove(self):
         marks = self.view.figure.marks[:]
-        marks.remove(self.image)
-        self.image = None
+        marks.remove(self.density_mark)
+        self.density_mark = None
         marks.remove(self.scatter)
         self.scatter = None
         marks.remove(self.quiver)
@@ -98,10 +116,10 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _on_change_density_map(self):
         self._update_visibility()
-        self._update_density_map()
+        self.density_mark._update_rendered_image()
 
     def _update_visibility(self, *args):
-        self.image.visible = self.state.density_map
+        self.density_mark.visible = self.state.density_map
         self.scatter.visible = not self.state.density_map
         self.quiver.visible = not self.state.density_map and self.state.vector_visible
 
@@ -129,37 +147,9 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.quiver.unselected_style = {'fill': 'white', 'stroke': 'none'}
             self.quiver.unselected_style = {'fill': 'none', 'stroke': 'none'}
 
-    @debounced(method=True)
-    def _update_density_map(self):
-        if isinstance(self.layer, Subset):
-            data = self.layer.data
-            subset_state = self.layer.subset_state
-        else:
-            data = self.layer
-            subset_state = None
-        if self.state.density_map:
-            bins = [self.state.bins, self.state.bins]
-            range_x = [self.view.scale_x.min, self.view.scale_x.max]
-            range_y = [self.view.scale_y.min, self.view.scale_y.max]
-            range = [range_x, range_y]
-            self.counts = data.compute_histogram([self._viewer_state.x_att,
-                                                  self._viewer_state.y_att],
-                                                 subset_state=subset_state,
-                                                 bins=bins, range=range)
-            self.scale_image.min = 0
-            self.scale_image.max = np.nanmax(self.counts).item()
-            with self.image.hold_sync():
-                self.image.x = range_x
-                self.image.y = range_y
-                self.image.image = self.counts.T.astype(np.float32, copy=True)
-        else:
-            self.image.image = EMPTY_IMAGE
-
-        self._update_color()
-
     def update(self):
 
-        if (self.image is None or
+        if (self.density_mark is None or
                 self.scatter is None or
                 self.quiver is None or
                 self._viewer_state.x_att is None or
@@ -197,19 +187,12 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter.y = []
             self.quiver.x = []
             self.quiver.y = []
+            self.density_mark._update_counts()
         else:
             self.scatter.x = x.astype(np.float32).ravel()
             self.scatter.y = y.astype(np.float32).ravel()
             self.quiver.x = self.scatter.x
             self.quiver.y = self.scatter.y
-
-        try:
-            self._update_density_map()
-        except IncompatibleAttribute:
-            self.disable('Could not compute density map')
-            return
-        else:
-            self.enable()
 
         if isinstance(self.layer, Subset):
 
@@ -287,9 +270,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         if self.state.cmap_mode == 'Linear' and self.state.cmap_att is not None:
 
             if self.state.density_map:
-                colors = colormap_to_hexlist(make_cmap(self.state.cmap))
-                # self.scale_image.colors = colors
-                # self.scale_color.colors = colors
+                self.density_mark.cmap = self.state.cmap
             else:
                 self.scatter.color = self.layer.data[self.state.cmap_att].astype(np.float32).ravel()
                 self.quiver.color = self.scatter.color
@@ -297,12 +278,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         else:
 
             if self.state.density_map:
-                cmap = make_cmap(self.state.color)
-                # self.scale_image.colors = colors
-                # self.scale_color.colors = colors
-                if self.counts is not None:
-                    print(self.counts)
-                    self.image.image = cmap(self.counts / np.nanmax(self.counts))
+                self.density_mark.set_color(self.state.color)
             else:
                 self.scatter.color = None
                 self.quiver.color = None
