@@ -97,8 +97,6 @@ class GlueStateJSONEncoder(json.JSONEncoder):
         if hasattr(obj, 'dtype'):
             return obj.item()
 
-
-
         return json.JSONEncoder.default(self, obj)
 
 

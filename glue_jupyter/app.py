@@ -1,9 +1,7 @@
-import os
 import weakref
 
 import ipywidgets as widgets
 from IPython.display import display
-import ipyvue
 
 from glue.core.application_base import Application
 from glue.core.link_helpers import LinkSame
@@ -13,7 +11,8 @@ from glue.core.command import ApplySubsetState
 from glue.core.edit_subset_mode import (NewMode, ReplaceMode, AndMode, OrMode,
                                         XorMode, AndNotMode)
 
-from glue_jupyter.utils import _update_not_none, validate_data_argument, _register_custom_vue_components
+from glue_jupyter.utils import (_update_not_none, validate_data_argument,
+                                _register_custom_vue_components)
 from glue_jupyter.widgets.subset_select_vuetify import SubsetSelect
 from glue_jupyter.widgets.subset_mode_vuetify import SelectionModeMenu
 
