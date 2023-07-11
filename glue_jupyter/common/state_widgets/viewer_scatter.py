@@ -1,14 +1,15 @@
 import ipyvuetify as v
 import traitlets
+
 from ...state_traitlets_helpers import GlueState
 from ...vuetify_helpers import link_glue_choices
 
-__all__ = ['ScatterViewerStateWidget']
+__all__ = ["ScatterViewerStateWidget"]
 
 
 class ScatterViewerStateWidget(v.VuetifyTemplate):
 
-    template_file = (__file__, 'viewer_scatter.vue')
+    template_file = (__file__, "viewer_scatter.vue")
 
     glue_state = GlueState().tag(sync=True)
 
@@ -25,5 +26,5 @@ class ScatterViewerStateWidget(v.VuetifyTemplate):
         self.viewer_state = viewer_state
         self.glue_state = viewer_state
 
-        link_glue_choices(self, viewer_state, 'x_att')
-        link_glue_choices(self, viewer_state, 'y_att')
+        link_glue_choices(self, viewer_state, "x_att")
+        link_glue_choices(self, viewer_state, "y_att")

@@ -1,20 +1,16 @@
 import math
-import numpy as np
 
+import numpy as np
 from bqplot import ColorScale
 from bqplot_image_gl import ImageGL
 from bqplot_image_gl.viewlistener import ViewListener
-
-from traitlets import Float, Instance, Any
-
 from matplotlib.colors import Colormap
-
-from mpl_scatter_density.fixed_data_density_helper import FixedDataDensityHelper
 from mpl_scatter_density.color import make_cmap
+from traitlets import Any, Float, Instance
 
 from ...utils import debounced
 
-__all__ = ['GenericDensityMark']
+__all__ = ["GenericDensityMark"]
 
 EMPTY_IMAGE = np.zeros((10, 10, 4), dtype=np.uint8)
 
@@ -55,18 +51,30 @@ class GenericDensityMark(ImageGL):
         This is useful since when zooming in/out, the optimal limits change.
     """
 
-
     cmap = Instance(Colormap, allow_none=True)
-    alpha = Float(default_value=1.)
+    alpha = Float(default_value=1.0)
     vmin = Any(allow_none=True)
     vmax = Any(allow_none=True)
 
-    dpi = Float(default_value=100.)
+    dpi = Float(default_value=100.0)
     external_padding = Float(default_value=0.1)
 
     stretch = Any(allow_none=True)
 
-    def __init__(self, *, figure, histogram2d_func, cmap=None, color=None, alpha=None, vmin=None, vmax=None, stretch=None, dpi=None, external_padding=None):
+    def __init__(
+        self,
+        *,
+        figure,
+        histogram2d_func,
+        cmap=None,
+        color=None,
+        alpha=None,
+        vmin=None,
+        vmax=None,
+        stretch=None,
+        dpi=None,
+        external_padding=None,
+    ):
 
         # FIXME: need to use weakref to avoid circular references
 
@@ -80,7 +88,7 @@ class GenericDensityMark(ImageGL):
         elif cmap is not None:
             self.cmap = cmap
         else:
-            self.set_color('black')
+            self.set_color("black")
 
         if alpha is not None:
             self.alpha = alpha
@@ -95,40 +103,41 @@ class GenericDensityMark(ImageGL):
         if external_padding is not None:
             self.external_padding = external_padding
 
-        self.observe(self._debounced_update_counts, 'dpi')
-        self.observe(self._debounced_update_counts, 'external_padding')
+        self.observe(self._debounced_update_counts, "dpi")
+        self.observe(self._debounced_update_counts, "external_padding")
 
-        self.observe(self._update_rendered_image, 'cmap')
-        self.observe(self._update_rendered_image, 'alpha')
-        self.observe(self._update_rendered_image, 'vmin')
-        self.observe(self._update_rendered_image, 'vmax')
-        self.observe(self._update_rendered_image, 'stretch')
+        self.observe(self._update_rendered_image, "cmap")
+        self.observe(self._update_rendered_image, "alpha")
+        self.observe(self._update_rendered_image, "vmin")
+        self.observe(self._update_rendered_image, "vmax")
+        self.observe(self._update_rendered_image, "stretch")
 
         self._scale_image = ColorScale()
-        self._scales = {'x': self._figure.axes[0].scale,
-                       'y': self._figure.axes[1].scale,
-                       'image': self._scale_image}
+        self._scales = {
+            "x": self._figure.axes[0].scale,
+            "y": self._figure.axes[1].scale,
+            "image": self._scale_image,
+        }
 
         super().__init__(image=EMPTY_IMAGE, scales=self._scales)
 
-        self._figure.axes[0].scale.observe(self._debounced_update_counts, 'min')
-        self._figure.axes[0].scale.observe(self._debounced_update_counts, 'max')
-        self._figure.axes[1].scale.observe(self._debounced_update_counts, 'min')
-        self._figure.axes[1].scale.observe(self._debounced_update_counts, 'max')
+        self._figure.axes[0].scale.observe(self._debounced_update_counts, "min")
+        self._figure.axes[0].scale.observe(self._debounced_update_counts, "max")
+        self._figure.axes[1].scale.observe(self._debounced_update_counts, "min")
+        self._figure.axes[1].scale.observe(self._debounced_update_counts, "max")
 
         self._shape = None
         self._setup_view_listener()
 
     def _setup_view_listener(self):
-        self._vl = ViewListener(widget=self._figure,
-                                css_selector=".plotarea_events")
-        self._vl.observe(self._on_view_change, names=['view_data'])
+        self._vl = ViewListener(widget=self._figure, css_selector=".plotarea_events")
+        self._vl.observe(self._on_view_change, names=["view_data"])
 
     def _on_view_change(self, *args):
         views = sorted(self._vl.view_data)
         if len(views) > 0:
             first_view = self._vl.view_data[views[0]]
-            self._shape = (int(first_view['height']), int(first_view['width']))
+            self._shape = (int(first_view["height"]), int(first_view["width"]))
         else:
             self._shape = None
         self._debounced_update_counts()
@@ -156,10 +165,16 @@ class GenericDensityMark(ImageGL):
 
         # Expand beyond the boundary
         if self.external_padding != 0:
-            dx = (xmax - xmin)
-            dy = (ymax - ymin)
-            xmin, xmax = xmin - dx * self.external_padding, xmax + dx * self.external_padding
-            ymin, ymax = ymin - dy * self.external_padding, ymax + dy * self.external_padding
+            dx = xmax - xmin
+            dy = ymax - ymin
+            xmin, xmax = (
+                xmin - dx * self.external_padding,
+                xmax + dx * self.external_padding,
+            )
+            ymin, ymax = (
+                ymin - dy * self.external_padding,
+                ymax + dy * self.external_padding,
+            )
             nx *= math.ceil(1 + 2 * self.external_padding)
             ny *= math.ceil(1 + 2 * self.external_padding)
 
@@ -169,7 +184,9 @@ class GenericDensityMark(ImageGL):
             ny = max(1, int(ny * self.dpi / 100))
 
         # Get the array and assign it to the artist
-        image = self._histogram2d_func(bins=(ny, nx), range=[(ymin, ymax), (xmin, xmax)])
+        image = self._histogram2d_func(
+            bins=(ny, nx), range=[(ymin, ymax), (xmin, xmax)],
+        )
 
         with self.hold_sync():
             if image is not None:

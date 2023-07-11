@@ -1,40 +1,63 @@
-import numpy as np
 import bqplot
-from ..compatibility import ScatterGL
+import numpy as np
+from astropy.visualization import AsinhStretch, LinearStretch, LogStretch, SqrtStretch
 
-from astropy.visualization import (LinearStretch, SqrtStretch,
-                                   AsinhStretch, LogStretch)
-
-from glue.core.data import Subset
-from glue.viewers.scatter.state import ScatterLayerState
-from glue.viewers.scatter.layer_artist import DensityMapLimits
 from glue.core.exceptions import IncompatibleAttribute
+from glue.utils import color2hex, datetime64_to_mpl, ensure_numerical
 from glue.viewers.common.layer_artist import LayerArtist
+from glue.viewers.scatter.layer_artist import DensityMapLimits
+from glue.viewers.scatter.state import ScatterLayerState
 from glue_jupyter.bqplot.scatter.scatter_density_mark import GenericDensityMark
 
-from ...link import dlink, on_change
-from ...utils import colormap_to_hexlist, debounced, float_or_none
-from echo import CallbackProperty
-from glue.utils import ensure_numerical, color2hex, datetime64_to_mpl
+from ...utils import colormap_to_hexlist, float_or_none
+from ..compatibility import ScatterGL
 
-__all__ = ['BqplotScatterLayerArtist']
+__all__ = ["BqplotScatterLayerArtist"]
 EMPTY_IMAGE = np.zeros((10, 10, 4), dtype=np.uint8)
 
-STRETCHES = {'linear': LinearStretch,
-             'sqrt': SqrtStretch,
-             'arcsinh': AsinhStretch,
-             'log': LogStretch}
+STRETCHES = {
+    "linear": LinearStretch,
+    "sqrt": SqrtStretch,
+    "arcsinh": AsinhStretch,
+    "log": LogStretch,
+}
 
-CMAP_PROPERTIES = set(['cmap_mode', 'cmap_att', 'cmap_vmin', 'cmap_vmax', 'cmap'])
-MARKER_PROPERTIES = set(['size_mode', 'size_att', 'size_vmin', 'size_vmax', 'size_scaling', 'size', 'fill'])
-DENSITY_PROPERTIES = set(['dpi', 'stretch', 'density_contrast'])
-VISUAL_PROPERTIES = (CMAP_PROPERTIES | MARKER_PROPERTIES | DENSITY_PROPERTIES |
-                     set(['color', 'alpha', 'zorder', 'visible']))
+CMAP_PROPERTIES = {"cmap_mode", "cmap_att", "cmap_vmin", "cmap_vmax", "cmap"}
+MARKER_PROPERTIES = {
+    "size_mode",
+    "size_att",
+    "size_vmin",
+    "size_vmax",
+    "size_scaling",
+    "size",
+    "fill",
+}
+DENSITY_PROPERTIES = {"dpi", "stretch", "density_contrast"}
+VISUAL_PROPERTIES = (
+    CMAP_PROPERTIES
+    | MARKER_PROPERTIES
+    | DENSITY_PROPERTIES
+    | {"color", "alpha", "zorder", "visible"}
+)
 
-LIMIT_PROPERTIES = set(['x_min', 'x_max', 'y_min', 'y_max'])
-DATA_PROPERTIES = set(['layer', 'x_att', 'y_att', 'cmap_mode', 'size_mode', 'density_map',
-                       'vector_visible', 'vx_att', 'vy_att', 'vector_arrowhead', 'vector_mode',
-                       'vector_origin', 'line_visible', 'markers_visible', 'vector_scaling'])
+LIMIT_PROPERTIES = {"x_min", "x_max", "y_min", "y_max"}
+DATA_PROPERTIES = {
+    "layer",
+    "x_att",
+    "y_att",
+    "cmap_mode",
+    "size_mode",
+    "density_map",
+    "vector_visible",
+    "vx_att",
+    "vy_att",
+    "vector_arrowhead",
+    "vector_mode",
+    "vector_origin",
+    "line_visible",
+    "markers_visible",
+    "vector_scaling",
+}
 
 
 class BqplotScatterLayerArtist(LayerArtist):
@@ -43,15 +66,18 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def __init__(self, view, viewer_state, layer_state=None, layer=None):
 
-        super(BqplotScatterLayerArtist, self).__init__(viewer_state,
-                                                       layer_state=layer_state, layer=layer)
+        super().__init__(
+            viewer_state,
+            layer_state=layer_state,
+            layer=layer,
+        )
 
         # Watch for changes in the viewer state which would require the
         # layers to be redrawn
         self._viewer_state.add_global_callback(self._update_scatter)
         self.state.add_global_callback(self._update_scatter)
 
-        self.state.add_callback('zorder', self._update_zorder)
+        self.state.add_callback("zorder", self._update_zorder)
 
         self.view = view
 
@@ -59,9 +85,11 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         self.scale_size_scatter = bqplot.LinearScale()
         self.scale_color_scatter = bqplot.ColorScale()
-        self.scales_scatter = dict(self.view.scales,
-                                   size=self.scale_size_scatter,
-                                   color=self.scale_color_scatter)
+        self.scales_scatter = dict(
+            self.view.scales,
+            size=self.scale_size_scatter,
+            color=self.scale_color_scatter,
+        )
 
         self.scatter_mark = ScatterGL(scales=self.scales_scatter, x=[0, 1], y=[0, 1])
 
@@ -70,31 +98,44 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.scale_size_vector = bqplot.LinearScale(min=0, max=1)
         self.scale_color_vector = bqplot.ColorScale()
         self.scale_rotation_vector = bqplot.LinearScale(min=-np.pi, max=np.pi)
-        self.scales_vector = dict(self.view.scales,
-                                  size=self.scale_size_vector,
-                                  color=self.scale_color_vector,
-                                  rotation=self.scale_rotation_vector)
-        self.vector_mark = ScatterGL(scales=self.scales_vector, x=[0, 1], y=[0, 1],
-                                     visible=False, marker='arrow')
+        self.scales_vector = dict(
+            self.view.scales,
+            size=self.scale_size_vector,
+            color=self.scale_color_vector,
+            rotation=self.scale_rotation_vector,
+        )
+        self.vector_mark = ScatterGL(
+            scales=self.scales_vector,
+            x=[0, 1],
+            y=[0, 1],
+            visible=False,
+            marker="arrow",
+        )
 
         # Density map
 
         self.density_auto_limits = DensityMapLimits()
-        self.density_mark = GenericDensityMark(figure=self.view.figure,
-                                               vmin=self.density_auto_limits.min,
-                                               vmax=self.density_auto_limits.max,
-                                               histogram2d_func=self.compute_density_map)
+        self.density_mark = GenericDensityMark(
+            figure=self.view.figure,
+            vmin=self.density_auto_limits.min,
+            vmax=self.density_auto_limits.max,
+            histogram2d_func=self.compute_density_map,
+        )
 
-        self.view.figure.marks = (list(self.view.figure.marks)
-                                  + [self.density_mark, self.scatter_mark, self.vector_mark])
-
+        self.view.figure.marks = list(self.view.figure.marks) + [
+            self.density_mark,
+            self.scatter_mark,
+            self.vector_mark,
+        ]
 
     def compute_density_map(self, *args, **kwargs):
         try:
             density_map = self.state.compute_density_map(*args, **kwargs)
         except IncompatibleAttribute:
-            self.disable_invalid_attributes(self._viewer_state.x_att,
-                                            self._viewer_state.y_att)
+            self.disable_invalid_attributes(
+                self._viewer_state.x_att,
+                self._viewer_state.y_att,
+            )
             return np.array([[np.nan]])
         else:
             self.enable()
@@ -105,7 +146,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         try:
             if not self.state.density_map:
                 x = ensure_numerical(self.layer[self._viewer_state.x_att].ravel())
-                if x.dtype.kind == 'M':
+                if x.dtype.kind == "M":
                     x = datetime64_to_mpl(x)
 
         except (IncompatibleAttribute, IndexError):
@@ -118,7 +159,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         try:
             if not self.state.density_map:
                 y = ensure_numerical(self.layer[self._viewer_state.y_att].ravel())
-                if y.dtype.kind == 'M':
+                if y.dtype.kind == "M":
                     y = datetime64_to_mpl(y)
         except (IncompatibleAttribute, IndexError):
             # The following includes a call to self.clear()
@@ -140,7 +181,11 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter_mark.x = []
             self.scatter_mark.y = []
 
-        if self.state.vector_visible and self.state.vx_att is not None and self.state.vy_att is not None:
+        if (
+            self.state.vector_visible
+            and self.state.vx_att is not None
+            and self.state.vy_att is not None
+        ):
 
             vx = ensure_numerical(self.layer[self.state.vx_att].ravel())
             vy = ensure_numerical(self.layer[self.state.vy_att].ravel())
@@ -174,8 +219,8 @@ class BqplotScatterLayerArtist(LayerArtist):
 
             if self.state.density_map:
 
-                if self.state.cmap_mode == 'Fixed':
-                    if force or 'color' in changed or 'cmap_mode' in changed:
+                if self.state.cmap_mode == "Fixed":
+                    if force or "color" in changed or "cmap_mode" in changed:
                         self.density_mark.set_color(self.state.color)
                         self.density_mark.vmin = self.density_auto_limits.min
                         self.density_mark.vmax = self.density_auto_limits.max
@@ -184,49 +229,63 @@ class BqplotScatterLayerArtist(LayerArtist):
                     self.density_mark.vmin = self.state.cmap_vmin
                     self.density_mark.vmax = self.state.cmap_vmax
 
-                if force or 'stretch' in changed:
+                if force or "stretch" in changed:
                     self.density_mark.stretch = STRETCHES[self.state.stretch]()
 
-                if force or 'dpi' in changed:
+                if force or "dpi" in changed:
                     self.density_mark.dpi = self._viewer_state.dpi
 
-                if force or 'density_contrast' in changed:
+                if force or "density_contrast" in changed:
                     self.density_auto_limits.contrast = self.state.density_contrast
                     self.density_mark._update_rendered_image()
 
             else:
 
-                    if self.state.cmap_mode == 'Fixed' or self.state.cmap_att is None:
-                        if force or 'color' in changed or 'cmap_mode' in changed or 'fill' in changed:
-                            self.scatter_mark.color = None
-                            self.scatter_mark.colors = [color2hex(self.state.color)]
-                    elif force or any(prop in changed for prop in CMAP_PROPERTIES) or 'fill' in changed:
-                        self.scatter_mark.color = ensure_numerical(self.layer[self.state.cmap_att].ravel())
-                        self.scale_color_scatter.colors = colormap_to_hexlist(self.state.cmap)
-                        self.scale_color_scatter.min = float_or_none(self.state.cmap_vmin)
-                        self.scale_color_scatter.max = float_or_none(self.state.cmap_vmax)
+                if self.state.cmap_mode == "Fixed" or self.state.cmap_att is None:
+                    if force or "color" in changed or "cmap_mode" in changed or "fill" in changed:
+                        self.scatter_mark.color = None
+                        self.scatter_mark.colors = [color2hex(self.state.color)]
+                elif force or any(prop in changed for prop in CMAP_PROPERTIES) or "fill" in changed:
+                    self.scatter_mark.color = ensure_numerical(
+                        self.layer[self.state.cmap_att].ravel(),
+                    )
+                    self.scale_color_scatter.colors = colormap_to_hexlist(
+                        self.state.cmap,
+                    )
+                    self.scale_color_scatter.min = float_or_none(self.state.cmap_vmin)
+                    self.scale_color_scatter.max = float_or_none(self.state.cmap_vmax)
 
-                    if force or any(prop in changed for prop in MARKER_PROPERTIES):
+                if force or any(prop in changed for prop in MARKER_PROPERTIES):
 
-                        if self.state.size_mode == 'Fixed' or self.state.size_att is None:
-                            self.scatter_mark.default_size = int(self.state.size * self.state.size_scaling)
-                            self.scatter_mark.size = None
-                            self.scale_size_scatter.min = 0
-                            self.scale_size_scatter.max = 1
-                        else:
-                            self.scatter_mark.default_size = int(self.state.size_scaling * 25)
-                            self.scatter_mark.size = ensure_numerical(self.layer[self.state.size_att].ravel())
-                            self.scale_size_scatter.min = float_or_none(self.state.size_vmin)
-                            self.scale_size_scatter.max = float_or_none(self.state.size_vmax)
+                    if self.state.size_mode == "Fixed" or self.state.size_att is None:
+                        self.scatter_mark.default_size = int(
+                            self.state.size * self.state.size_scaling,
+                        )
+                        self.scatter_mark.size = None
+                        self.scale_size_scatter.min = 0
+                        self.scale_size_scatter.max = 1
+                    else:
+                        self.scatter_mark.default_size = int(self.state.size_scaling * 25)
+                        self.scatter_mark.size = ensure_numerical(
+                            self.layer[self.state.size_att].ravel()
+                        )
+                        self.scale_size_scatter.min = float_or_none(self.state.size_vmin)
+                        self.scale_size_scatter.max = float_or_none(self.state.size_vmax)
 
-        if self.state.vector_visible and self.state.vx_att is not None and self.state.vy_att is not None:
+        if (
+            self.state.vector_visible
+            and self.state.vx_att is not None
+            and self.state.vy_att is not None
+        ):
 
-            if self.state.cmap_mode == 'Fixed':
-                if force or 'color' in changed or 'cmap_mode' in changed:
+            if self.state.cmap_mode == "Fixed":
+                if force or "color" in changed or "cmap_mode" in changed:
                     self.vector_mark.color = None
                     self.vector_mark.colors = [color2hex(self.state.color)]
             elif force or any(prop in changed for prop in CMAP_PROPERTIES):
-                self.vector_mark.color = ensure_numerical(self.layer[self.state.cmap_att].ravel())
+                self.vector_mark.color = ensure_numerical(
+                    self.layer[self.state.cmap_att].ravel(),
+                )
                 self.scale_color_vector.colors = colormap_to_hexlist(self.state.cmap)
                 self.scale_color_vector.min = float_or_none(self.state.cmap_vmin)
                 self.scale_color_vector.max = float_or_none(self.state.cmap_vmax)
@@ -236,25 +295,27 @@ class BqplotScatterLayerArtist(LayerArtist):
             if mark is None:
                 continue
 
-            if force or 'alpha' in changed:
+            if force or "alpha" in changed:
                 mark.opacities = [self.state.alpha]
 
-            if force or 'visible' in changed:
+            if force or "visible" in changed:
                 if mark is self.density_mark:
-                    mark.visible = (self.state.visible and
-                                       self.state.density_map and
-                                       self.state.markers_visible)
+                    mark.visible = (
+                        self.state.visible and self.state.density_map and self.state.markers_visible
+                    )
                 else:
                     mark.visible = self.state.visible
 
     def _update_scatter(self, force=False, **kwargs):
 
-        if (self.density_mark is None or
-                self.scatter_mark is None or
-                self.vector_mark is None or
-                self._viewer_state.x_att is None or
-                self._viewer_state.y_att is None or
-                self.state.layer is None):
+        if (
+            self.density_mark is None
+            or self.scatter_mark is None
+            or self.vector_mark is None
+            or self._viewer_state.x_att is None
+            or self._viewer_state.y_att is None
+            or self.state.layer is None
+        ):
             return
 
         # NOTE: we need to evaluate this even if force=True so that the cache
@@ -294,5 +355,8 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _update_zorder(self, *args):
         sorted_layers = sorted(self.view.layers, key=lambda layer: layer.state.zorder)
-        self.view.figure.marks = [item for layer in sorted_layers
-                                  for item in (layer.density_mark, layer.scatter_mark, layer.vector_mark)]
+        self.view.figure.marks = [
+            item
+            for layer in sorted_layers
+            for item in (layer.density_mark, layer.scatter_mark, layer.vector_mark)
+        ]

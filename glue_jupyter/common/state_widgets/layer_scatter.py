@@ -1,29 +1,17 @@
-from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox
-from glue.config import colormaps
-from glue.utils import color2hex
-
-from ...link import link
-
 import ipyvuetify as v
 import traitlets
+
+from glue.config import colormaps
+
 from ...state_traitlets_helpers import GlueState
-from ...vuetify_helpers import link_glue_choices, link_glue
+from ...vuetify_helpers import link_glue, link_glue_choices
 
-
-from ipywidgets import Checkbox, FloatSlider, VBox, IntSlider, IntText
-from glue_jupyter.widgets import Color, Size
-
-from ...link import link, dlink
-from ...widgets import LinkedDropdown
-
-from glue.viewers.scatter.state import ScatterLayerState
-
-__all__ = ['ScatterLayerStateWidget']
+__all__ = ["ScatterLayerStateWidget"]
 
 
 class ScatterLayerStateWidget(v.VuetifyTemplate):
 
-    template_file = (__file__, 'layer_scatter.vue')
+    template_file = (__file__, "layer_scatter.vue")
 
     glue_state = GlueState().tag(sync=True)
 
@@ -66,21 +54,20 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
 
         # Color
 
-        link_glue_choices(self, layer_state, 'cmap_mode')
-        link_glue_choices(self, layer_state, 'cmap_att')
+        link_glue_choices(self, layer_state, "cmap_mode")
+        link_glue_choices(self, layer_state, "cmap_att")
 
-        self.cmap_items = [dict(
-            text=cmap[0],
-            value=cmap[1].name
-        ) for cmap in colormaps.members]
+        self.cmap_items = [
+            {"text": cmap[0], "value": cmap[1].name} for cmap in colormaps.members
+        ]
 
         # Points
 
-        link_glue_choices(self, layer_state, 'points_mode')
-        link_glue_choices(self, layer_state, 'size_mode')
-        link_glue_choices(self, layer_state, 'size_att')
+        link_glue_choices(self, layer_state, "points_mode")
+        link_glue_choices(self, layer_state, "size_mode")
+        link_glue_choices(self, layer_state, "size_att")
 
-        link_glue(self, 'dpi', layer_state.viewer_state)
+        link_glue(self, "dpi", layer_state.viewer_state)
 
         # TODO: make sliders for dpi and size scaling logarithmic
 
@@ -88,8 +75,8 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
 
         # Vectors
 
-        link_glue_choices(self, layer_state, 'vx_att')
-        link_glue_choices(self, layer_state, 'vy_att')
+        link_glue_choices(self, layer_state, "vx_att")
+        link_glue_choices(self, layer_state, "vy_att")
 
     def vue_set_colormap(self, data):
         cmap = None
