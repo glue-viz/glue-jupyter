@@ -298,13 +298,10 @@ class BqplotScatterLayerArtist(LayerArtist):
             if force or "alpha" in changed:
                 mark.opacities = [self.state.alpha]
 
-            if force or "visible" in changed:
-                if mark is self.density_mark:
-                    mark.visible = (
-                        self.state.visible and self.state.density_map and self.state.markers_visible
-                    )
-                else:
-                    mark.visible = self.state.visible
+        if force or "visible" in changed:
+            self.scatter_mark.visible = self.state.visible and self.state.markers_visible
+            self.density_mark.visible = self.state.visible and self.state.density_map and self.state.markers_visible
+            self.vector_mark.visible = self.state.visible and self.state.vector_visible
 
     def _update_scatter(self, force=False, **kwargs):
 
