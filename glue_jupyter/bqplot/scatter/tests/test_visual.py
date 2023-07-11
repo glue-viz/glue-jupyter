@@ -56,6 +56,9 @@ def test_visual_scatter2d_density(
 
     data2 = app.add_data(a={"x": xx, "y": yy})[0]
 
+    app.add_link(data1, 'x', data2, 'x')
+    app.add_link(data1, 'y', data2, 'y')
+
     scatter = app.scatter2d(show=False, data=data1)
     scatter.add_data(data2)
 
@@ -64,6 +67,8 @@ def test_visual_scatter2d_density(
     scatter.state.layers[0].cmap = plt.cm.viridis
     scatter.state.layers[0].size_mode = 'Linear'
     scatter.state.layers[0].size_att = data1.id['s']
+
+    scatter.state.layers[1].zorder = 0.5
 
     figure = scatter.figure_widget
     figure.layout = {"width": "400px", "height": "250px"}
