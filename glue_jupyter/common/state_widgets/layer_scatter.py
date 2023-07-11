@@ -1,54 +1,100 @@
+from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox
+from glue.config import colormaps
+from glue.utils import color2hex
+
+from ...link import link
+
+import ipyvuetify as v
+import traitlets
+from ...state_traitlets_helpers import GlueState
+from ...vuetify_helpers import link_glue_choices, link_glue
+
+
 from ipywidgets import Checkbox, FloatSlider, VBox, IntSlider, IntText
 from glue_jupyter.widgets import Color, Size
 
 from ...link import link, dlink
 from ...widgets import LinkedDropdown
 
+from glue.viewers.scatter.state import ScatterLayerState
+
 __all__ = ['ScatterLayerStateWidget']
 
 
-class ScatterLayerStateWidget(VBox):
+class ScatterLayerStateWidget(v.VuetifyTemplate):
+
+    template_file = (__file__, 'layer_scatter.vue')
+
+    glue_state = GlueState().tag(sync=True)
+
+    # Color
+
+    cmap_mode_items = traitlets.List().tag(sync=True)
+    cmap_mode_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    cmap_att_items = traitlets.List().tag(sync=True)
+    cmap_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    cmap_items = traitlets.List().tag(sync=True)
+
+    # Points
+
+    points_mode_items = traitlets.List().tag(sync=True)
+    points_mode_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    size_mode_items = traitlets.List().tag(sync=True)
+    size_mode_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    size_att_items = traitlets.List().tag(sync=True)
+    size_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    dpi = traitlets.Float().tag(sync=True)
+
+    # Vectors
+
+    vx_att_items = traitlets.List().tag(sync=True)
+    vx_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    vy_att_items = traitlets.List().tag(sync=True)
+    vy_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
 
     def __init__(self, layer_state):
+        super().__init__()
 
-        self.state = layer_state
+        self.layer_state = layer_state
+        self.glue_state = layer_state
 
-        self.widget_visible = Checkbox(description='visible', value=self.state.visible)
-        link((self.state, 'visible'), (self.widget_visible, 'value'))
+        # Color
 
-        self.widget_fill = Checkbox(description='fill', value=self.state.fill)
-        link((self.state, 'fill'), (self.widget_fill, 'value'))
+        link_glue_choices(self, layer_state, 'cmap_mode')
+        link_glue_choices(self, layer_state, 'cmap_att')
 
-        self.widget_opacity = FloatSlider(min=0, max=1, step=0.01, value=self.state.alpha,
-                                          description='opacity')
-        link((self.state, 'alpha'), (self.widget_opacity, 'value'))
+        self.cmap_items = [dict(
+            text=cmap[0],
+            value=cmap[1].name
+        ) for cmap in colormaps.members]
 
-        self.widget_color = Color(state=self.state)
-        self.widget_size = Size(state=self.state)
+        # Points
 
-        self.widget_vector = Checkbox(description='show vectors', value=self.state.vector_visible)
-        link((self.state, 'vector_visible'), (self.widget_vector, 'value'))
+        link_glue_choices(self, layer_state, 'points_mode')
+        link_glue_choices(self, layer_state, 'size_mode')
+        link_glue_choices(self, layer_state, 'size_att')
 
-        self.widget_vector_x = LinkedDropdown(self.state, 'vx_att', ui_name='vx',
-                                              label='vx attribute')
-        self.widget_vector_y = LinkedDropdown(self.state, 'vy_att', ui_name='vy',
-                                              label='vy attribute')
+        link_glue(self, 'dpi', layer_state.viewer_state)
 
-        self.widget_zorder = IntText(description='z-order')
-        link((self.state, 'zorder'), (self.widget_zorder, 'value'))
+        # TODO: make sliders for dpi and size scaling logarithmic
 
-        dlink((self.widget_vector, 'value'), (self.widget_vector_x.layout, 'display'),
-              lambda value: None if value else 'none')
-        dlink((self.widget_vector, 'value'), (self.widget_vector_y.layout, 'display'),
-              lambda value: None if value else 'none')
+        # FIXME: moving any sliders causes a change in the colormap
 
-        # TODO: the following shouldn't be necessary ideally
-        if hasattr(self.state, 'bins'):
-            self.widget_bins = IntSlider(min=0, max=1024, value=self.state.bins,
-                                         description='bin count')
-            link((self.state, 'bins'), (self.widget_bins, 'value'))
+        # Vectors
 
-        super().__init__([self.widget_visible, self.widget_fill, self.widget_opacity,
-                          self.widget_size, self.widget_color,
-                          self.widget_vector, self.widget_vector_x,
-                          self.widget_vector_y, self.widget_zorder])
+        link_glue_choices(self, layer_state, 'vx_att')
+        link_glue_choices(self, layer_state, 'vy_att')
+
+    def vue_set_colormap(self, data):
+        cmap = None
+        for member in colormaps.members:
+            if member[1].name == data:
+                cmap = member[1]
+                break
+        self.layer_state.cmap = cmap
