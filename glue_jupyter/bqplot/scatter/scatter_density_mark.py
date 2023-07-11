@@ -21,11 +21,6 @@ class GenericDensityMark(ImageGL):
     """
     Bqplot mark to make a density plot given a helper histogram function.
 
-    This is a more generic form of ``ScatterDensityMark``. Here, we can
-    initialize the class with a histogram function that just takes bins and the
-    range of values, and returns a density array. This is useful for cases
-    where the data might be changing dynamically over time.
-
     Parameters
     ----------
     figure : bqplot.figure
@@ -216,6 +211,8 @@ class GenericDensityMark(ImageGL):
 
         if self.stretch is not None:
             stretched_counts = self.stretch(normalized_counts)
+        else:
+            stretched_counts = normalized_counts
 
         colormapped_counts = self.cmap(stretched_counts)
 
