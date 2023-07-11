@@ -1,7 +1,9 @@
+import os
 import functools
 import collections
 import time
 
+import ipyvue
 import matplotlib
 import PIL.Image
 import numpy as np
@@ -164,3 +166,10 @@ def validate_data_argument(data_collection, data):
                         '\n'.join([f"  * '{d.label}'" for d in data_collection]))
     else:
         return data
+
+
+def _register_custom_vue_components():
+    for name in ['glue-float-field', 'glue-throttled-slider']:
+        file = f'{name.replace("-", "_")}.vue'
+        ipyvue.register_component_from_file(
+            None, name, os.path.join(os.path.dirname(__file__), 'widgets', file))
