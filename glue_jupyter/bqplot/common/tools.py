@@ -193,8 +193,8 @@ class BqplotPolygonMode(BqplotSelectionTool):
         self.interact = MouseInteraction(x_scale=self.viewer.scale_x,
                                          y_scale=self.viewer.scale_y,
                                          move_throttle=70)
-        self.patch = Lines(x=[[]], y=[[]], fill_colors=[INTERACT_COLOR], colors=[INTERACT_COLOR], opacities=[0.6],
-                           fill='inside', close_path=True,
+        self.patch = Lines(x=[[]], y=[[]], fill_colors=[INTERACT_COLOR], colors=[INTERACT_COLOR],
+                           opacities=[0.6], fill='inside', close_path=True,
                            scales={'x': self.viewer.scale_x, 'y': self.viewer.scale_y})
         if roi is not None:
             self.update_from_roi(roi)
