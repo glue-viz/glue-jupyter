@@ -181,7 +181,7 @@ class BqplotRectangleMode(BqplotSelectionTool):
 @viewer_tool
 class BqplotPolygonMode(BqplotSelectionTool):
 
-    icon = os.path.join(ICONS_DIR, 'glue_lasso')
+    icon = 'glue_lasso'
     tool_id = 'bqplot:polygon'
     action_text = 'Polygonal ROI'
     tool_tip = ('Lasso a region of interest\n')
