@@ -71,12 +71,14 @@ def app(dataxyz, datax, dataxz, data_volume, data_image):
 ORIGINAL_DISPLAY = None
 
 
+def noop(*args, **kwargs):
+    pass
+
+
 def pytest_configure(config):
     global ORIGINAL_DISPLAY
     import IPython.display as idisp
     ORIGINAL_DISPLAY = idisp.display
-    def noop(*args, **kwargs):
-        pass
     idisp.display = noop
 
 
