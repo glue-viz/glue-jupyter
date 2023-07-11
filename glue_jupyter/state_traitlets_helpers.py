@@ -73,7 +73,8 @@ def update_state_from_dict(state, changes):
             else:
                 if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:
                     if 'cmap' in name:
-                        setattr(state, name, get_cmap(changes[name]))
+                        if changes[name] != state.cmap.name:
+                            setattr(state, name, get_cmap(changes[name]))
                     else:
                         setattr(state, name, changes[name])
 
@@ -95,6 +96,8 @@ class GlueStateJSONEncoder(json.JSONEncoder):
         #  is a numpy dtype, and if it is, convert to python type
         if hasattr(obj, 'dtype'):
             return obj.item()
+
+
 
         return json.JSONEncoder.default(self, obj)
 
