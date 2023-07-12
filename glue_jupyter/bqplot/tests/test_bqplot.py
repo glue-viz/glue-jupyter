@@ -85,23 +85,9 @@ def test_scatter2d(app, dataxyz, dataxz):
     s.layers[0].state.size_mode = 'Linear'
 
     layer = s.layers[0]
-    assert not layer.quiver.visible
+    assert not layer.vector_mark.visible
     layer.state.vector_visible = True
-    assert layer.quiver.visible
-
-
-def test_scatter2d_density(app, dataxyz):
-    s = app.scatter2d(x='x', y='y', data=dataxyz)
-    s.layers[0].state.points_mode = 'density'
-    assert s.layers[0].state.density_map is True
-
-    s.state.x_min = 0.9
-    s.state.x_max = 3.1
-    s.state.y_min = 1.9
-    s.state.y_max = 5.1
-    assert s.layers[0].state.density_map is True
-    s.layers[0].state.bins = 2
-    assert s.layers[0].image.image.tolist() == [[2.0, 0], [0, 1.0]]
+    assert layer.vector_mark.visible
 
 
 def test_scatter2d_subset(app, dataxyz, dataxz):
@@ -112,14 +98,13 @@ def test_scatter2d_subset(app, dataxyz, dataxz):
     assert s.layers[1].layer['y'].tolist() == [4]
     assert s.layers[1].layer['z'].tolist() == [7]
 
-    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
-    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
-    assert s.layers[1].scatter.selected == [2]
+    assert s.layers[1].scatter_mark.x.tolist() == [3]
+    assert s.layers[1].scatter_mark.y.tolist() == [4]
 
-    s.state.y_att = 'z'
-    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
-    assert s.layers[1].scatter.y.tolist() == [5, 6, 7]
-    assert s.layers[1].scatter.selected == [2]
+    s.state.y_att = dataxyz.id['z']
+
+    assert s.layers[1].scatter_mark.x.tolist() == [3]
+    assert s.layers[1].scatter_mark.y.tolist() == [7]
 
 
 def test_scatter2d_multiple_subsets(app, data_unlinked, dataxz):
@@ -147,9 +132,8 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     assert s.layers[1].layer['y'].tolist() == [3, 4]
     assert s.layers[1].layer['z'].tolist() == [6, 7]
 
-    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
-    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
-    assert s.layers[1].scatter.selected.tolist() == [1, 2]
+    assert s.layers[1].scatter_mark.x.tolist() == [2, 3]
+    assert s.layers[1].scatter_mark.y.tolist() == [3, 4]
 
     # 1d y brushing is not working for bqplot
     # s.button_action.value = 'brush y'
@@ -161,9 +145,9 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     # assert s.layers[1].layer['y'].tolist() == [2, 3]
     # assert s.layers[1].layer['z'].tolist() == [5, 6]
 
-    # assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
-    # assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
-    # assert s.layers[1].scatter.selected == [0, 1]
+    # assert s.layers[1].scatter_mark.x.tolist() == [1, 2, 3]
+    # assert s.layers[1].scatter_mark.y.tolist() == [2, 3, 4]
+    # assert s.layers[1].scatter_mark.selected == [0, 1]
 
     # 2d brushing
     # format of 'selected' (x1, y1), (x2, y2)
@@ -178,15 +162,16 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     assert s.layers[1].layer['y'].tolist() == [4]
     assert s.layers[1].layer['z'].tolist() == [7]
 
-    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
-    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
-    assert s.layers[1].scatter.selected == [2]
+    assert s.layers[1].scatter_mark.x.tolist() == [3]
+    assert s.layers[1].scatter_mark.y.tolist() == [4]
 
     # nothing should change when we change modes
     s.toolbar.active_tool = tool1d
-    assert s.layers[1].scatter.selected == [2]
+    assert s.layers[1].scatter_mark.x.tolist() == [3]
+    assert s.layers[1].scatter_mark.y.tolist() == [4]
     s.toolbar.active_tool = tool2d
-    assert s.layers[1].scatter.selected == [2]
+    assert s.layers[1].scatter_mark.x.tolist() == [3]
+    assert s.layers[1].scatter_mark.y.tolist() == [4]
 
     # 2d brushing
     # format of 'selected' (x1, y1), (x2, y2)
@@ -201,22 +186,23 @@ def test_scatter2d_brush(app, dataxyz, dataxz):
     assert s.layers[1].layer['y'].tolist() == [4]
     assert s.layers[1].layer['z'].tolist() == [7]
 
-    assert s.layers[1].scatter.x.tolist() == [1, 2, 3]
-    assert s.layers[1].scatter.y.tolist() == [2, 3, 4]
-    assert s.layers[1].scatter.selected == [2]
+    assert s.layers[1].scatter_mark.x.tolist() == [3]
+    assert s.layers[1].scatter_mark.y.tolist() == [4]
 
     # nothing should change when we change modes
     s.toolbar.active_tool = tool1d
-    assert s.layers[1].scatter.selected == [2]
+    assert s.layers[1].scatter_mark.x.tolist() == [3]
+    assert s.layers[1].scatter_mark.y.tolist() == [4]
     s.toolbar.active_tool = tool_circle
-    assert s.layers[1].scatter.selected == [2]
+    assert s.layers[1].scatter_mark.x.tolist() == [3]
+    assert s.layers[1].scatter_mark.y.tolist() == [4]
 
 
 def test_scatter2d_properties(app, dataxyz, dataxz):
     s = app.scatter2d(x='x', y='y', data=dataxyz)
     l1 = s.layers[0]
     l1.state.color = 'green'
-    assert l1.scatter.colors == ['#008000']
+    assert l1.scatter_mark.colors == ['#008000']
 
 
 def test_scatter2d_cmap_mode(app, dataxyz):
@@ -225,13 +211,13 @@ def test_scatter2d_cmap_mode(app, dataxyz):
     assert l1.state.cmap_mode == 'Fixed', 'expected default value'
     assert l1.state.cmap_name == 'Gray'
 
-    assert l1.scatter.color is None
+    assert l1.scatter_mark.color is None
     l1.state.cmap_att = 'x'
     l1.state.cmap_mode = 'Linear'
     assert l1.state.cmap_name == 'Gray'
     l1.state.cmap_vmin = 0
     l1.state.cmap_vmax = 10
-    assert l1.scatter.color is not None
+    assert l1.scatter_mark.color is not None
 
 
 def test_scatter2d_and_histogram(app, dataxyz):
@@ -320,12 +306,12 @@ def test_imshow_nonfloat(app):
 def test_show_axes(app, dataxyz):
     s = app.scatter2d(x='x', y='y', data=dataxyz)
     assert s.state.show_axes
-    assert s.viewer_options.widget_show_axes.value
+    assert s.viewer_options.glue_state.show_axes
     margin_initial = s.figure.fig_margin
     s.state.show_axes = False
-    assert not s.viewer_options.widget_show_axes.value
+    assert not s.viewer_options.glue_state.show_axes
     assert s.figure.fig_margin != margin_initial
-    s.viewer_options.widget_show_axes.value = True
+    s.viewer_options.glue_state.show_axes = True
     assert s.state.show_axes
     assert s.figure.fig_margin == margin_initial
 

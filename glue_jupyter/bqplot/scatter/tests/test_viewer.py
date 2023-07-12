@@ -59,7 +59,7 @@ def test_zorder(app, data_volume, dataxz, dataxyz):
     for p in permutations([1, 2, 3]):
         vol.state.zorder, xz.state.zorder, xyz.state.zorder = p
         it = iter(s.figure.marks)
-        assert all(layer.scatter in it for layer in s.layers)
+        assert all(layer.scatter_mark in it for layer in s.layers)
 
 
 def test_limits_init(app, dataxz, dataxyz):

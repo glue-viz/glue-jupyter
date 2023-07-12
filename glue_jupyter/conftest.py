@@ -66,3 +66,22 @@ def app(dataxyz, datax, dataxz, data_volume, data_image):
     app.add_link(data_volume, 'Pixel Axis 1 [y]', dataxyz, 'y')
     app.add_link(data_volume, 'Pixel Axis 2 [x]', dataxyz, 'x')
     return app
+
+
+# ORIGINAL_DISPLAY = None
+
+
+# def noop(*args, **kwargs):
+#     pass
+
+
+# def pytest_configure(config):
+#     global ORIGINAL_DISPLAY
+#     import IPython.display as idisp
+#     ORIGINAL_DISPLAY = idisp.display
+#     idisp.display = noop
+
+
+# def pytest_unconfigure(config):
+#     import IPython.display as idisp
+#     idisp.display = ORIGINAL_DISPLAY
