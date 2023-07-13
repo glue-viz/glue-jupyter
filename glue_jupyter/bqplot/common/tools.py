@@ -4,7 +4,7 @@ from contextlib import nullcontext
 import numpy as np
 from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
-from bqplot_image_gl.interacts import BrushEllipseSelector, MouseInteraction
+from bqplot_image_gl.interacts import BrushEllipseSelector
 from glue import __version__ as glue_version
 from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
@@ -180,7 +180,12 @@ class BqplotRectangleMode(BqplotSelectionTool):
 
 @viewer_tool
 class BqplotPolygonMode(BqplotSelectionTool):
-
+    """
+    Since Bqplot LassoSelector does not allow us to get the coordinates of the
+    selection (see https://github.com/bqplot/bqplot/pull/674), we simply use
+    a callback on the default viewer MouseInteraction and a patch to
+    display the selection.
+    """
     icon = 'glue_lasso'
     tool_id = 'bqplot:polygon'
     action_text = 'Polygonal ROI'
@@ -190,9 +195,6 @@ class BqplotPolygonMode(BqplotSelectionTool):
 
         super().__init__(viewer, **kwargs)
 
-        self.interact = MouseInteraction(x_scale=self.viewer.scale_x,
-                                         y_scale=self.viewer.scale_y,
-                                         move_throttle=70)
         self.patch = Lines(x=[[]], y=[[]], fill_colors=[INTERACT_COLOR], colors=[INTERACT_COLOR],
                            opacities=[0.6], fill='inside', close_path=True,
                            scales={'x': self.viewer.scale_x, 'y': self.viewer.scale_y})
@@ -208,12 +210,31 @@ class BqplotPolygonMode(BqplotSelectionTool):
             pass
 
     def activate(self):
-        super().activate()
+        """
+        We do not call super().activate() because we don't have a separate interact,
+        instead we just add a callback to the default viewer MouseInteraction.
+        """
 
+        # We need to make sure any existing callbacks associated with this
+        # viewer are cleared. This can happen if the user switches between
+        # different viewers without deactivating the tool.
+        try:
+            self.viewer.remove_event_callback(self.on_msg)
+        except KeyError:
+            pass
+
+        # Disable any active tool in other viewers
+        if self.viewer.session.application.get_setting('single_global_active_tool'):
+            for viewer in self.viewer.session.application.viewers:
+                if viewer is not self.viewer:
+                    viewer.toolbar.active_tool = None
         self.viewer.add_event_callback(self.on_msg, events=['dragstart', 'dragmove', 'dragend'])
 
     def deactivate(self):
-        self.viewer.remove_event_callback(self.on_msg)
+        try:
+            self.viewer.remove_event_callback(self.on_msg)
+        except KeyError:
+            pass
         super().deactivate()
 
     def on_msg(self, event):
