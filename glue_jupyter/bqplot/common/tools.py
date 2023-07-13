@@ -204,10 +204,11 @@ class BqplotPolygonMode(BqplotSelectionTool):
 
     def update_from_roi(self, roi):
         """
-        TOTO: This should update self.xlist and self.ylist from the existing ROI
+        While other tools allow the user to click and drag to reposition a selection,
+        this probably does not make sense for a polygonal selection, so we do not do
+        not support this.
         """
-        with self.viewer._output_widget or nullcontext():
-            pass
+        pass
 
     def activate(self):
         """
