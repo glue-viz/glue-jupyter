@@ -26,7 +26,7 @@ class BqplotScatterView(BqplotBaseView):
     _layer_style_widget_cls = ScatterLayerStateWidget
 
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:rectangle', 'bqplot:circle',
-             'bqplot:xrange', 'bqplot:yrange']
+             'bqplot:xrange', 'bqplot:yrange', 'bqplot:polygon']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

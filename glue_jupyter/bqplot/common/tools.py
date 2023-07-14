@@ -2,7 +2,7 @@ import os
 from contextlib import nullcontext
 
 import numpy as np
-from bqplot import PanZoom
+from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
 from bqplot_image_gl.interacts import BrushEllipseSelector
 from glue import __version__ as glue_version
@@ -176,6 +176,95 @@ class BqplotRectangleMode(BqplotSelectionTool):
             self.interact.selected_x = None
             self.interact.selected_y = None
         super().activate()
+
+
+@viewer_tool
+class BqplotPolygonMode(BqplotSelectionTool):
+    """
+    Since Bqplot LassoSelector does not allow us to get the coordinates of the
+    selection (see https://github.com/bqplot/bqplot/pull/674), we simply use
+    a callback on the default viewer MouseInteraction and a patch to
+    display the selection.
+    """
+    icon = 'glue_lasso'
+    tool_id = 'bqplot:polygon'
+    action_text = 'Polygonal ROI'
+    tool_tip = ('Lasso a region of interest\n')
+
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+
+        self.patch = Lines(x=[[]], y=[[]], fill_colors=[INTERACT_COLOR], colors=[INTERACT_COLOR],
+                           opacities=[0.6], fill='inside', close_path=True,
+                           scales={'x': self.viewer.scale_x, 'y': self.viewer.scale_y})
+        if roi is not None:
+            self.update_from_roi(roi)
+        self.finalize_callback = finalize_callback
+
+    def update_from_roi(self, roi):
+        """
+        While other tools allow the user to click and drag to reposition a selection,
+        this probably does not make sense for a polygonal selection, so we do not do
+        not support this.
+        """
+        pass
+
+    def activate(self):
+        """
+        We do not call super().activate() because we don't have a separate interact,
+        instead we just add a callback to the default viewer MouseInteraction.
+        """
+
+        # We need to make sure any existing callbacks associated with this
+        # viewer are cleared. This can happen if the user switches between
+        # different viewers without deactivating the tool.
+        try:
+            self.viewer.remove_event_callback(self.on_msg)
+        except KeyError:
+            pass
+
+        # Disable any active tool in other viewers
+        if self.viewer.session.application.get_setting('single_global_active_tool'):
+            for viewer in self.viewer.session.application.viewers:
+                if viewer is not self.viewer:
+                    viewer.toolbar.active_tool = None
+        self.viewer.add_event_callback(self.on_msg, events=['dragstart', 'dragmove', 'dragend'])
+
+    def deactivate(self):
+        try:
+            self.viewer.remove_event_callback(self.on_msg)
+        except KeyError:
+            pass
+        super().deactivate()
+
+    def on_msg(self, event):
+        name = event['event']
+        domain = event['domain']
+        x, y = domain['x'], domain['y']
+        if name == 'dragstart':
+            self.original_marks = list(self.viewer.figure.marks)
+            self.viewer.figure.marks = self.original_marks + [self.patch]
+            self.patch.x = [x]
+            self.patch.y = [y]
+        elif name == 'dragmove':
+            self.patch.x = np.append(self.patch.x, x)
+            self.patch.y = np.append(self.patch.y, y)
+        elif name == 'dragend':
+            roi = PolygonalROI(vx=self.patch.x, vy=self.patch.y)
+            self.viewer.apply_roi(roi)
+
+            new_marks = []
+            for mark in self.viewer.figure.marks:
+                if mark == self.patch:
+                    pass
+                else:
+                    new_marks.append(mark)
+            self.viewer.figure.marks = new_marks
+            self.patch.x = [[]]
+            self.patch.y = [[]]
+            if self.finalize_callback is not None:
+                self.finalize_callback()
 
 
 @viewer_tool
