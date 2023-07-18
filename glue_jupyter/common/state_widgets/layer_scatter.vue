@@ -1,32 +1,28 @@
 <template>
-    <div>
-        <div class="text-subtitle-2 mt-4 mb-2 font-weight-bold">Color</div>
+    <div class="glue-layer-scatter">
+        <div class="text-subtitle-2 font-weight-bold">Color</div>
         <div>
             <v-select label="color" :items="cmap_mode_items" v-model="cmap_mode_selected" hide-details />
         </div>
         <template v-if="glue_state.cmap_mode === 'Linear'">
             <div>
-                <v-select label="attribute" :items="cmap_att_items" v-model="cmap_att_selected" hide-details
-                    class="margin-bottom: 16px" />
+                <v-select label="attribute" :items="cmap_att_items" v-model="cmap_att_selected" hide-details />
             </div>
             <div>
-                <v-text-field label="min" v-model="glue_state.cmap_vmin" hide-details
-                    class="margin-bottom: 16px"></v-text-field>
+                <v-text-field label="min" v-model="glue_state.cmap_vmin" hide-details></v-text-field>
             </div>
             <div>
-                <v-text-field label="max" v-model="glue_state.cmap_vmax" hide-details
-                    class="margin-bottom: 16px"></v-text-field>
+                <v-text-field label="max" v-model="glue_state.cmap_vmax" hide-details></v-text-field>
             </div>
             <div>
-                <v-select label="colormap" :items="cmap_items" :value="glue_state.cmap" @change="set_colormap" hide-details
-                    class="margin-bottom: 16px" />
+                <v-select label="colormap" :items="cmap_items" :value="glue_state.cmap" @change="set_colormap" hide-details/>
             </div>
         </template>
         <div>
             <v-subheader class="pl-0 slider-label">opacity</v-subheader>
             <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="glue_state.alpha" hide-details />
         </div>
-        <div class="text-subtitle-2 mt-4 mb-2 font-weight-bold">Points</div>
+        <div class="text-subtitle-2 font-weight-bold">Points</div>
         <div>
             <v-subheader class="pl-0 slider-label">show points</v-subheader>
             <v-switch v-model="glue_state.markers_visible" hide-details style="margin-top: 0" />
@@ -40,16 +36,13 @@
             </div>
             <template v-if="glue_state.size_mode === 'Linear'">
                 <div>
-                    <v-select label="attribute" :items="size_att_items" v-model="size_att_selected" hide-details
-                        class="margin-bottom: 16px" />
+                    <v-select label="attribute" :items="size_att_items" v-model="size_att_selected" hide-details />
                 </div>
                 <div>
-                    <v-text-field label="min" v-model="glue_state.size_vmin" hide-details
-                        class="margin-bottom: 16px"></v-text-field>
+                    <v-text-field label="min" v-model="glue_state.size_vmin" hide-details></v-text-field>
                 </div>
                 <div>
-                    <v-text-field label="max" v-model="glue_state.size_vmax" hide-details
-                        class="margin-bottom: 16px"></v-text-field>
+                    <v-text-field label="max" v-model="glue_state.size_vmax" hide-details></v-text-field>
                 </div>
             </template>
             <template v-if="glue_state.density_map">
@@ -75,17 +68,17 @@
                 </div>
             </template>
         </template>
-        <div class="text-subtitle-2 mt-4 mb-2 font-weight-bold">Vectors</div>
+        <div class="text-subtitle-2 font-weight-bold" :style="glue_state.markers_visible ? {} : {marginTop: '6px'}">Vectors</div>
         <div>
             <v-subheader class="pl-0 slider-label">show vectors</v-subheader>
-            <v-switch v-model="glue_state.vector_visible" hide-details />
+            <v-switch v-model="glue_state.vector_visible" hide-details style="margin-top: 0"/>
         </div>
         <template v-if="glue_state.vector_visible">
             <div>
                 <v-select label="vx" :items="vx_att_items" v-model="vx_att_selected" hide-details />
             </div>
             <div>
-                <v-select label="vy" :items="vy_att_items" v-model="vy_att_selected" hide-details style="margin-bottom: 16px" />
+                <v-select label="vy" :items="vy_att_items" v-model="vy_att_selected" hide-details />
             </div>
         </template>
     </div>
@@ -93,8 +86,9 @@
 <script>
 </script>
 <style id="layer_scatter">
-.v-subheader.slider-label {
+.glue-layer-scatter .v-subheader.slider-label {
     font-size: 12px;
     height: 16px;
+    margin-top: 6px;
 }
 </style>

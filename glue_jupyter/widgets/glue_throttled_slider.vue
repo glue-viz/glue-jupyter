@@ -4,7 +4,7 @@
             @input="throttledSetValue"
             :max="max"
             :step="step"
-            :hide="hideDetails" />
+            :hide-details="hideDetails" />
 </template>
 
 <script>
