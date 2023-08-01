@@ -6,7 +6,7 @@ from glue.core.exceptions import IncompatibleAttribute
 from glue.utils import color2hex, datetime64_to_mpl, ensure_numerical
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.scatter.layer_artist import DensityMapLimits
-from glue.viewers.scatter.state import ScatterLayerState
+from glue.viewers.scatter.state import ScatterLayerState as BqplotScatterLayerState
 from glue_jupyter.bqplot.scatter.scatter_density_mark import GenericDensityMark
 
 from ...utils import colormap_to_hexlist, float_or_none
@@ -62,7 +62,7 @@ DATA_PROPERTIES = {
 
 class BqplotScatterLayerArtist(LayerArtist):
 
-    _layer_state_cls = ScatterLayerState
+    _layer_state_cls = BqplotScatterLayerState
 
     def __init__(self, view, viewer_state, layer_state=None, layer=None):
 
