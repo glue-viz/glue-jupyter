@@ -1,5 +1,6 @@
 import bqplot
 import numpy as np
+import warnings
 from astropy.visualization import AsinhStretch, LinearStretch, LogStretch, SqrtStretch
 
 from glue.core.exceptions import IncompatibleAttribute
@@ -14,6 +15,7 @@ from ..compatibility import ScatterGL
 
 __all__ = ["BqplotScatterLayerArtist"]
 EMPTY_IMAGE = np.zeros((10, 10, 4), dtype=np.uint8)
+
 
 STRETCHES = {
     "linear": LinearStretch,
@@ -58,6 +60,12 @@ DATA_PROPERTIES = {
     "markers_visible",
     "vector_scaling",
 }
+
+
+# Kept for backward compatibility with <= 0.17
+class BqplotScatterLayerState(ScatterLayerState):
+    warnings.warn("`BqplotScatterLayerState` is deprecated and will be removed "
+                  " in a future version. Use `ScatterLayerState` instead")
 
 
 class BqplotScatterLayerArtist(LayerArtist):
