@@ -27,6 +27,10 @@ INTERACT_COLOR = '#cbcbcb'
 ICONS_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'icons')
 
 
+class TrueCircularROI(CircularROI):
+    pass
+
+
 class InteractCheckableTool(CheckableTool):
 
     def __init__(self, viewer):
@@ -275,7 +279,7 @@ class BqplotCircleMode(BqplotSelectionTool):
     action_text = 'Circular ROI'
     tool_tip = 'Define a circular region of interest'
 
-    def __init__(self, viewer, roi=None, finalize_callback=None, strict_circle=False, **kwargs):
+    def __init__(self, viewer, roi=None, finalize_callback=None, strict_circle=None, **kwargs):
 
         super().__init__(viewer, **kwargs)
 
@@ -291,6 +295,7 @@ class BqplotCircleMode(BqplotSelectionTool):
         border_style['stroke'] = INTERACT_COLOR
         self.interact.style = style
         self.interact.border_style = border_style
+        self._strict_circle = strict_circle
 
         if roi is not None:
             self.update_from_roi(roi)
@@ -299,7 +304,6 @@ class BqplotCircleMode(BqplotSelectionTool):
         self.interact.observe(self.on_selection_change, "selected_x")
         self.interact.observe(self.on_selection_change, "selected_y")
         self.finalize_callback = finalize_callback
-        self._strict_circle = strict_circle
 
     def update_selection(self, *args):
         if self.interact.brushing:
@@ -320,7 +324,7 @@ class BqplotCircleMode(BqplotSelectionTool):
                 # We use a tolerance of 1e-2 below to match the tolerance set in glue-core
                 # https://github.com/glue-viz/glue/blob/6b968b352bc5ad68b95ad5e3bb25550782a69ee8/glue/viewers/matplotlib/state.py#L198
                 if self._strict_circle:
-                    roi = CircularROI(xc=xc, yc=yc, radius=np.sqrt((rx**2 + ry**2) * 0.5))
+                    roi = TrueCircularROI(xc=xc, yc=yc, radius=np.sqrt((rx**2 + ry**2) * 0.5))
                 elif np.allclose(rx, ry, rtol=1e-2):
                     roi = CircularROI(xc=xc, yc=yc, radius=(rx + ry) * 0.5)
                 else:
@@ -332,6 +336,8 @@ class BqplotCircleMode(BqplotSelectionTool):
     def update_from_roi(self, roi):
         if isinstance(roi, CircularROI):
             rx = ry = roi.radius
+            if isinstance(roi, TrueCircularROI) and self._strict_circle is not False:
+                self._strict_circle = True
         elif isinstance(roi, EllipticalROI):
             if self._strict_circle:
                 rx, ry = np.sqrt((roi.radius_x ** 2 + roi.radius_y ** 2) * 0.5)
@@ -364,7 +370,7 @@ class BqplotTrueCircleMode(BqplotCircleMode):
 
         super().__init__(viewer, **kwargs)
 
-        if not kwargs.pop('strict_circle', True):
+        if kwargs.pop('strict_circle', True) is False:
             raise ValueError('BqplotTrueCircleMode cannot have strict_circle=False')
         self._strict_circle = True
 

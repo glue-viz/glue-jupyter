@@ -4,7 +4,8 @@ import numpy as np
 from numpy.testing import assert_allclose
 from nbconvert.preprocessors import ExecutePreprocessor
 from glue.core import Data
-from glue.core.roi import CircularROI, EllipticalROI
+from glue.core.roi import EllipticalROI
+from ..common.tools import TrueCircularROI
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -282,7 +283,7 @@ def test_imshow_true_circular_brush(app, data_image):
     tool.interact.brushing = False
 
     roi = data_image.subsets[0].subset_state.roi
-    assert isinstance(roi, CircularROI)
+    assert isinstance(roi, TrueCircularROI)
     assert_allclose(roi.xc, 151.00)
     assert_allclose(roi.yc, 276.75)
     assert_allclose(roi.radius, 220.2451)
