@@ -279,7 +279,7 @@ class BqplotCircleMode(BqplotSelectionTool):
     action_text = 'Circular ROI'
     tool_tip = 'Define a circular region of interest'
 
-    def __init__(self, viewer, roi=None, finalize_callback=None, strict_circle=None, **kwargs):
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
         super().__init__(viewer, **kwargs)
 
@@ -295,7 +295,7 @@ class BqplotCircleMode(BqplotSelectionTool):
         border_style['stroke'] = INTERACT_COLOR
         self.interact.style = style
         self.interact.border_style = border_style
-        self._strict_circle = strict_circle
+        self._strict_circle = False
 
         if roi is not None:
             self.update_from_roi(roi)
@@ -336,7 +336,7 @@ class BqplotCircleMode(BqplotSelectionTool):
     def update_from_roi(self, roi):
         if isinstance(roi, CircularROI):
             rx = ry = roi.radius
-            if isinstance(roi, TrueCircularROI) and self._strict_circle is not False:
+            if isinstance(roi, TrueCircularROI):
                 self._strict_circle = True
         elif isinstance(roi, EllipticalROI):
             if self._strict_circle:
@@ -369,9 +369,6 @@ class BqplotTrueCircleMode(BqplotCircleMode):
     def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
         super().__init__(viewer, **kwargs)
-
-        if kwargs.pop('strict_circle', True) is False:
-            raise ValueError('BqplotTrueCircleMode cannot have strict_circle=False')
         self._strict_circle = True
 
 
