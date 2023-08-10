@@ -90,7 +90,10 @@ class JupyterApplication(Application):
         """
         Parse and add links.
         """
-        from glue.qglue import parse_links
+        try:
+            from glue.core.parsers import parse_links
+        except ImportError:  # older versions of glue
+            from glue.qglue import parse_links
         self.data_collection.add_link(parse_links(self.data_collection, links))
 
     def add_link(self, data1, attribute1, data2, attribute2):

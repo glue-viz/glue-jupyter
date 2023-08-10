@@ -50,7 +50,11 @@ def jglue(*args, settings=None, show=False, links=None, **kwargs):
     for that class for more details.
     """
 
-    from glue.qglue import parse_data, parse_links
+    try:
+        from glue.core.parsers import parse_data, parse_links
+    except ImportError:  # older versions of glue
+        from glue.qglue import parse_data, parse_links
+
     from glue.core.data_factories import load_data
 
     japp = JupyterApplication(settings=settings)
