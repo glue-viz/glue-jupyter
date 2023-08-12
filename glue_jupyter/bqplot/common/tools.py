@@ -27,6 +27,10 @@ INTERACT_COLOR = '#cbcbcb'
 ICONS_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'icons')
 
 
+class TrueCircularROI(CircularROI):
+    pass
+
+
 class InteractCheckableTool(CheckableTool):
 
     def __init__(self, viewer):
@@ -291,6 +295,7 @@ class BqplotCircleMode(BqplotSelectionTool):
         border_style['stroke'] = INTERACT_COLOR
         self.interact.style = style
         self.interact.border_style = border_style
+        self._strict_circle = False
 
         if roi is not None:
             self.update_from_roi(roi)
@@ -309,17 +314,19 @@ class BqplotCircleMode(BqplotSelectionTool):
                 y = self.interact.selected_y
                 # similar to https://github.com/glue-viz/glue/blob/b14ccffac6a5
                 # 271c2869ead9a562a2e66232e397/glue/core/roi.py#L1275-L1297
-                # We should now check if the radius in data coordinates is the same
-                # along x and y, as if so then we can return a circle, otherwise we
-                # should return an ellipse.
+                # If _strict_circle set, enforce returning a circle; otherwise check
+                # if the radius in data coordinates is (nearly) the same along x and y,
+                # to return a circle as well, else we should return an ellipse.
                 xc = x.mean()
                 yc = y.mean()
                 rx = abs(x[1] - x[0])/2
                 ry = abs(y[1] - y[0])/2
                 # We use a tolerance of 1e-2 below to match the tolerance set in glue-core
                 # https://github.com/glue-viz/glue/blob/6b968b352bc5ad68b95ad5e3bb25550782a69ee8/glue/viewers/matplotlib/state.py#L198
-                if np.allclose(rx, ry, rtol=1e-2):
-                    roi = CircularROI(xc=xc, yc=yc, radius=rx)
+                if self._strict_circle:
+                    roi = TrueCircularROI(xc=xc, yc=yc, radius=np.sqrt((rx**2 + ry**2) * 0.5))
+                elif np.allclose(rx, ry, rtol=1e-2):
+                    roi = CircularROI(xc=xc, yc=yc, radius=(rx + ry) * 0.5)
                 else:
                     roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
                 self.viewer.apply_roi(roi)
@@ -329,8 +336,13 @@ class BqplotCircleMode(BqplotSelectionTool):
     def update_from_roi(self, roi):
         if isinstance(roi, CircularROI):
             rx = ry = roi.radius
+            if isinstance(roi, TrueCircularROI):
+                self._strict_circle = True
         elif isinstance(roi, EllipticalROI):
-            rx, ry = roi.radius_x, roi.radius_y
+            if self._strict_circle:
+                rx, ry = np.sqrt((roi.radius_x ** 2 + roi.radius_y ** 2) * 0.5)
+            else:
+                rx, ry = roi.radius_x, roi.radius_y
         else:
             raise TypeError(f'Cannot initialize a BqplotCircleMode from a {type(roi)}')
         self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
@@ -346,6 +358,18 @@ class BqplotCircleMode(BqplotSelectionTool):
             self.interact.selected_x = None
             self.interact.selected_y = None
         super().activate()
+
+
+@viewer_tool
+class BqplotTrueCircleMode(BqplotCircleMode):
+
+    tool_id = 'bqplot:truecircle'
+    tool_tip = 'Define a strictly circular region of interest'
+
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+        self._strict_circle = True
 
 
 @viewer_tool
@@ -582,7 +606,10 @@ class ROIClickAndDrag(InteractCheckableTool):
             if layer.visible and isinstance(subset_state, RoiSubsetState):
                 roi = subset_state.roi
                 if roi.defined() and roi.contains(x, y):
-                    if isinstance(roi, (EllipticalROI, CircularROI)):
+                    if isinstance(roi, EllipticalROI):
+                        self._active_tool = BqplotEllipseMode(
+                            self.viewer, roi=roi, finalize_callback=self.release)
+                    elif isinstance(roi, CircularROI):
                         self._active_tool = BqplotCircleMode(
                             self.viewer, roi=roi, finalize_callback=self.release)
                     elif isinstance(roi, (PolygonalROI, RectangularROI)):
