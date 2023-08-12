@@ -253,10 +253,12 @@ class BqplotScatterLayerArtist(LayerArtist):
                     if force or "color" in changed or "cmap_mode" in changed or "fill" in changed:
                         self.scatter_mark.color = None
                         self.scatter_mark.colors = [color2hex(self.state.color)]
+                        self.scatter_mark.fill = self.state.fill
                 elif force or any(prop in changed for prop in CMAP_PROPERTIES) or "fill" in changed:
                     self.scatter_mark.color = ensure_numerical(
                         self.layer[self.state.cmap_att].ravel(),
                     )
+                    self.scatter_mark.fill = self.state.fill
                     self.scale_color_scatter.colors = colormap_to_hexlist(
                         self.state.cmap,
                     )
