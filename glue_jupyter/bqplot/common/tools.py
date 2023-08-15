@@ -441,7 +441,8 @@ class BqplotCircularAnnulusMode(BqplotCircleMode):
                 if self._roi is None:
                     inner_r = outer_r * 0.5  # Hardcoded for now, user can edit later.
                 else:
-                    inner_r = self._roi.inner_radius
+                    # Resizing only changes outer r, avoid having inner_r >= outer_r afterwards.
+                    inner_r = min(self._roi.inner_radius, outer_r * 0.999999)
 
                 roi = CircularAnnulusROI(xc=xc, yc=yc, inner_radius=inner_r, outer_radius=outer_r)
 
