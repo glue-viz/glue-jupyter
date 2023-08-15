@@ -323,15 +323,8 @@ def test_imshow_circular_annulus_brush(app, data_image):
     assert_allclose(roi.outer_radius, 211.375)
     assert_allclose(roi.inner_radius, 105.6875)
 
-    tool.interact.brushing = True
-    tool.interact.selected = [(150.0, 400.0), (150.0, 450.0)]
-    tool.interact.brushing = False
-
-    # roi = data_image.subsets[0].subset_state.roi
-    assert_allclose(roi.xc, 151.00)
-    # assert_allclose(roi.yc, 326.75)  # trying to use `move`, but this is not how it works...
-    assert_allclose(roi.outer_radius, 211.375)
-    assert_allclose(roi.inner_radius, 105.6875)
+    # should try to test `move` and `resize` as well, but this probably
+    # needs to go through `update_selection` directly
 
 
 def test_imshow_equal_aspect(app, data_image):
