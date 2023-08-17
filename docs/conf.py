@@ -56,7 +56,7 @@ intersphinx_mapping = {
     'ipywidgets': ('https://ipywidgets.readthedocs.io/en/stable/', None),
     'traitlets': ('https://traitlets.readthedocs.io/en/stable/', None),
     'glue': ('https://glue-core.readthedocs.io/en/latest/', None),
-    'glue-qt': ('https://docs.glueviz.org/en/latest/', None),
+    'glueviz': ('https://docs.glueviz.org/en/latest/', None),
 }
 
 # -- Options for HTML output -------------------------------------------------
