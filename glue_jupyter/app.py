@@ -161,16 +161,16 @@ class JupyterApplication(Application):
 
         This function can be called directly with the name of a viewer
         as the first parameter for any viewer types registered in the
-        viewer_registry. Thus if a plug-in defines a viewer class as
+        viewer_registry. Thus if a plug-in defines a viewer class as::
 
-        from glue_jupyter.registries import viewer_registry
-        @viewer_registry("pluginviewer")
-        class PluginViewer(Viewer):
-            ...
+            from glue_jupyter.registries import viewer_registry
+            @viewer_registry("pluginviewer")
+            class PluginViewer(Viewer):
+                ...
 
-        then this viewer can be created in a glue-jupyter app via:
+        then this viewer can be created in a glue-jupyter app via::
 
-        s = app.new_data_viewer('pluginviewer')
+            s = app.new_data_viewer('pluginviewer')
 
         This is the preferred way to call viewers defined in external plugins.
         """
