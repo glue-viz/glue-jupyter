@@ -202,17 +202,48 @@ class BqplotPolygonMode(BqplotSelectionTool):
         self.patch = Lines(x=[[]], y=[[]], fill_colors=[INTERACT_COLOR], colors=[INTERACT_COLOR],
                            opacities=[0.6], fill='inside', close_path=True,
                            scales={'x': self.viewer.scale_x, 'y': self.viewer.scale_y})
+
+        self.interact = BrushSelector(x_scale=self.viewer.scale_x,
+                                      y_scale=self.viewer.scale_y,
+                                      color=INTERACT_COLOR)
+
         if roi is not None:
             self.update_from_roi(roi)
+
+        self.interact.observe(self.update_selection, "brushing")
+        self.interact.observe(self.on_selection_change, "selected_x")
+        self.interact.observe(self.on_selection_change, "selected_y")
         self.finalize_callback = finalize_callback
+
+    def update_selection(self, *args):
+        if self.interact.brushing:
+            return
+        with self.viewer._output_widget or nullcontext():
+            if self.interact.selected_x is not None and self.interact.selected_y is not None:
+                x = self.interact.selected_x
+                y = self.interact.selected_y
+                dx = x.mean() - self._roi.centroid()[0]
+                dy = y.mean() - self._roi.centroid()[1]
+
+                roi = PolygonalROI(vx=np.array(self._roi.vx) + dx, vy=np.array(self._roi.vy) + dy)
+
+                self._roi = roi
+                self.viewer.apply_roi(roi)
+                if self.finalize_callback is not None:
+                    self.finalize_callback()
 
     def update_from_roi(self, roi):
         """
-        While other tools allow the user to click and drag to reposition a selection,
-        this probably does not make sense for a polygonal selection, so we do not do
-        not support this.
+        This could potentially be extended to Circular and Rectangular ROIs
+        using their `to_polygon` methods.
         """
-        pass
+        with self.viewer._output_widget or nullcontext():
+            if isinstance(roi, PolygonalROI):
+                self.patch.x = roi.vx
+                self.patch.y = roi.vy
+                self._roi = roi
+            else:
+                raise TypeError(f'Cannot initialize a BqplotPolygonMode from a {type(roi)}')
 
     def activate(self):
         """
@@ -242,6 +273,11 @@ class BqplotPolygonMode(BqplotSelectionTool):
             pass
         super().deactivate()
 
+    def on_selection_change(self, *args):
+        if self.interact.selected_x is None or self.interact.selected_y is None:
+            if self.finalize_callback is not None:
+                self.finalize_callback()
+
     def on_msg(self, event):
         name = event['event']
         domain = event['domain']
@@ -257,6 +293,7 @@ class BqplotPolygonMode(BqplotSelectionTool):
         elif name == 'dragend':
             roi = PolygonalROI(vx=self.patch.x, vy=self.patch.y)
             self.viewer.apply_roi(roi)
+            self._roi = roi
 
             new_marks = []
             for mark in self.viewer.figure.marks:
@@ -613,8 +650,11 @@ class ROIClickAndDrag(InteractCheckableTool):
                     elif isinstance(roi, CircularROI):
                         self._active_tool = BqplotCircleMode(
                             self.viewer, roi=roi, finalize_callback=self.release)
-                    elif isinstance(roi, (PolygonalROI, RectangularROI)):
+                    elif isinstance(roi, RectangularROI):
                         self._active_tool = BqplotRectangleMode(
+                            self.viewer, roi=roi, finalize_callback=self.release)
+                    elif isinstance(roi, PolygonalROI):
+                        self._active_tool = BqplotPolygonMode(
                             self.viewer, roi=roi, finalize_callback=self.release)
                     elif not GLUE_LT_1_11 and isinstance(roi, CircularAnnulusROI):
                         self._active_tool = BqplotCircularAnnulusMode(
