@@ -3,6 +3,7 @@ import nbformat
 import numpy as np
 from numpy.testing import assert_allclose
 from nbconvert.preprocessors import ExecutePreprocessor
+from glue.config import viewer_tool
 from glue.core import Data
 from glue.core.roi import CircularAnnulusROI, EllipticalROI
 from ..common.tools import TrueCircularROI
@@ -271,24 +272,6 @@ def test_imshow_circular_brush(app, data_image):
     assert_allclose(roi.radius_y, 273.25)
 
 
-def test_imshow_true_circular_brush(app, data_image):
-
-    v = app.imshow(data=data_image)
-    v.state.aspect = 'auto'
-
-    tool = v.toolbar.tools['bqplot:truecircle']
-    tool.activate()
-    tool.interact.brushing = True
-    tool.interact.selected = [(1.5, 3.5), (300.5, 550)]
-    tool.interact.brushing = False
-
-    roi = data_image.subsets[0].subset_state.roi
-    assert isinstance(roi, TrueCircularROI)
-    assert_allclose(roi.xc, 151.00)
-    assert_allclose(roi.yc, 276.75)
-    assert_allclose(roi.radius, 220.2451)
-
-
 def test_imshow_elliptical_brush(app, data_image):
     v = app.imshow(data=data_image)
     v.state.aspect = 'auto'
@@ -305,12 +288,39 @@ def test_imshow_elliptical_brush(app, data_image):
     assert_allclose(roi.yc, 276.75)
 
 
+# Tools that are not part of the default set of BqplotImageView; manually added for testing
+def test_imshow_true_circular_brush(app, data_image):
+
+    v = app.imshow(data=data_image)
+    v.state.aspect = 'auto'
+
+    tool_id = 'bqplot:truecircle'
+    mode_cls = viewer_tool.members[tool_id]
+    v.toolbar.add_tool(mode_cls(v))
+
+    tool = v.toolbar.tools[tool_id]
+    tool.activate()
+    tool.interact.brushing = True
+    tool.interact.selected = [(1.5, 3.5), (300.5, 550)]
+    tool.interact.brushing = False
+
+    roi = data_image.subsets[0].subset_state.roi
+    assert isinstance(roi, TrueCircularROI)
+    assert_allclose(roi.xc, 151.00)
+    assert_allclose(roi.yc, 276.75)
+    assert_allclose(roi.radius, 220.2451)
+
+
 def test_imshow_circular_annulus_brush(app, data_image):
 
     v = app.imshow(data=data_image)
     v.state.aspect = 'auto'
 
-    tool = v.toolbar.tools['bqplot:circannulus']
+    tool_id = 'bqplot:circannulus'
+    mode_cls = viewer_tool.members[tool_id]
+    v.toolbar.add_tool(mode_cls(v))
+
+    tool = v.toolbar.tools[tool_id]
     tool.activate()
     tool.interact.brushing = True
     tool.interact.selected = [(1.5, 3.5), (300.5, 550)]
