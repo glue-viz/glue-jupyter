@@ -188,12 +188,13 @@ class BqplotPolygonMode(BqplotSelectionTool):
     Since Bqplot LassoSelector does not allow us to get the coordinates of the
     selection (see https://github.com/bqplot/bqplot/pull/674), we simply use
     a callback on the default viewer MouseInteraction and a patch to
-    display the selection.
+    display the selection. The parent class defaults to setting polygon vertices
+    by clicking in the selector.
     """
-    icon = 'glue_lasso'
+    icon = 'glue_point'
     tool_id = 'bqplot:polygon'
     action_text = 'Polygonal ROI'
-    tool_tip = ('Lasso a region of interest\n')
+    tool_tip = 'Define a polygonal region of interest'
 
     def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
@@ -210,6 +211,7 @@ class BqplotPolygonMode(BqplotSelectionTool):
         if roi is not None:
             self.update_from_roi(roi)
 
+        self._lasso = False
         self.interact.observe(self.update_selection, "brushing")
         self.interact.observe(self.on_selection_change, "selected_x")
         self.interact.observe(self.on_selection_change, "selected_y")
@@ -267,6 +269,8 @@ class BqplotPolygonMode(BqplotSelectionTool):
         self.viewer.add_event_callback(self.on_msg, events=['dragstart', 'dragmove', 'dragend'])
 
     def deactivate(self):
+        if len(self.patch.x) > 1:
+            self.close_vertices()
         try:
             self.viewer.remove_event_callback(self.on_msg)
         except KeyError:
@@ -282,30 +286,56 @@ class BqplotPolygonMode(BqplotSelectionTool):
         name = event['event']
         domain = event['domain']
         x, y = domain['x'], domain['y']
-        if name == 'dragstart':
+        if name == 'dragstart' and len(self.patch.x) < 1:
             self.original_marks = list(self.viewer.figure.marks)
             self.viewer.figure.marks = self.original_marks + [self.patch]
             self.patch.x = [x]
             self.patch.y = [y]
-        elif name == 'dragmove':
+        elif name == 'dragmove' and self._lasso:
             self.patch.x = np.append(self.patch.x, x)
             self.patch.y = np.append(self.patch.y, y)
         elif name == 'dragend':
-            roi = PolygonalROI(vx=self.patch.x, vy=self.patch.y)
-            self.viewer.apply_roi(roi)
-            self._roi = roi
+            # If new point is within 2% of maximum extent of the origin, finalise the polygon.
+            sz = max(self.patch.x) - min(self.patch.x), max(self.patch.y) - min(self.patch.y)
+            if self._lasso or (abs(x - self.patch.x[0]) < 0.02 * sz[0] and
+                               abs(y - self.patch.y[0]) < 0.02 * sz[1]):
+                self.close_vertices()
+            else:
+                self.patch.x = np.append(self.patch.x, x)
+                self.patch.y = np.append(self.patch.y, y)
 
-            new_marks = []
-            for mark in self.viewer.figure.marks:
-                if mark == self.patch:
-                    pass
-                else:
-                    new_marks.append(mark)
-            self.viewer.figure.marks = new_marks
-            self.patch.x = [[]]
-            self.patch.y = [[]]
-            if self.finalize_callback is not None:
-                self.finalize_callback()
+    def close_vertices(self):
+        roi = PolygonalROI(vx=self.patch.x, vy=self.patch.y)
+        self.viewer.apply_roi(roi)
+
+        new_marks = []
+        for mark in self.viewer.figure.marks:
+            if mark == self.patch:
+                pass
+            else:
+                new_marks.append(mark)
+        self.viewer.figure.marks = new_marks
+        self.patch.x = [[]]
+        self.patch.y = [[]]
+        if self.finalize_callback is not None:
+            self.finalize_callback()
+
+
+@viewer_tool
+class BqplotLassoMode(BqplotPolygonMode):
+    """
+    Subclass that defaults to creating a continous (lasso) polygonal selection
+    by dragging the pointer along the outline.
+    """
+
+    icon = 'glue_lasso'
+    tool_id = 'bqplot:lasso'
+    tool_tip = 'Lasso a region of interest'
+
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+        self._lasso = True
 
 
 @viewer_tool
