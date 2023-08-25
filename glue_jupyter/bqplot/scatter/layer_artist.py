@@ -271,7 +271,8 @@ class BqplotScatterLayerArtist(LayerArtist):
                     else:
                         self.scatter_mark.default_size = int(self.state.size_scaling * 7)
                         s = ensure_numerical(self.layer[self.state.size_att].ravel())
-                        s = (s - self.state.size_vmin) / (self.state.size_vmax - self.state.size_vmin)
+                        s = ((s - self.state.size_vmin) /
+                             (self.state.size_vmax - self.state.size_vmin))
                         np.clip(s, 0, 1, out=s)
                         s *= 0.95
                         s += 0.05
