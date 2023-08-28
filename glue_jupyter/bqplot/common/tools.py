@@ -136,6 +136,7 @@ class BqplotRectangleMode(BqplotSelectionTool):
                                       y_scale=self.viewer.scale_y,
                                       color=INTERACT_COLOR)
 
+        self._roi = kwargs.get("roi", None)
         if roi is not None:
             self.update_from_roi(roi)
 
@@ -151,12 +152,15 @@ class BqplotRectangleMode(BqplotSelectionTool):
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
                 y = self.interact.selected_y
-                roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y))
+                theta = None if self._roi is None else self._roi.theta
+                roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y), theta=theta)  # noqa: E501
+                self._roi = roi
                 self.viewer.apply_roi(roi)
                 if self.finalize_callback is not None:
                     self.finalize_callback()
 
     def update_from_roi(self, roi):
+        self._roi = roi
         with self.viewer._output_widget or nullcontext():
             if isinstance(roi, RectangularROI):
                 self.interact.selected_x = [roi.xmin, roi.xmax]
@@ -166,9 +170,6 @@ class BqplotRectangleMode(BqplotSelectionTool):
                 self.interact.selected_y = [np.min(roi.vy), np.max(roi.vy)]
             else:
                 raise TypeError(f'Cannot initialize a BqplotRectangleMode from a {type(roi)}')
-            # FIXME: the brush selector does not actually update unless the
-            # widget is resized/refreshed, see
-            # https://github.com/bloomberg/bqplot/issues/1067
 
     def on_selection_change(self, *args):
         if self.interact.selected_x is None or self.interact.selected_y is None:
@@ -297,6 +298,7 @@ class BqplotCircleMode(BqplotSelectionTool):
         self.interact.border_style = border_style
         self._strict_circle = False
 
+        self._roi = kwargs.get("roi", None)
         if roi is not None:
             self.update_from_roi(roi)
 
@@ -328,12 +330,15 @@ class BqplotCircleMode(BqplotSelectionTool):
                 elif np.allclose(rx, ry, rtol=1e-2):
                     roi = CircularROI(xc=xc, yc=yc, radius=(rx + ry) * 0.5)
                 else:
-                    roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry)
+                    theta = 0 if (self._roi is None or not hasattr(self._roi, "theta")) else self._roi.theta  # noqa: E501
+                    roi = EllipticalROI(xc=xc, yc=yc, radius_x=rx, radius_y=ry, theta=theta)
+                self._roi = roi
                 self.viewer.apply_roi(roi)
                 if self.finalize_callback is not None:
                     self.finalize_callback()
 
     def update_from_roi(self, roi):
+        self._roi = roi
         if isinstance(roi, CircularROI):
             rx = ry = roi.radius
             if isinstance(roi, TrueCircularROI):
@@ -396,6 +401,7 @@ class BqplotEllipseMode(BqplotCircleMode):
         self.interact.style = style
         self.interact.border_style = border_style
 
+        self._roi = kwargs.get("roi", None)
         if roi is not None:
             self.update_from_roi(roi)
 
@@ -452,6 +458,7 @@ class BqplotCircularAnnulusMode(BqplotCircleMode):
                     self.finalize_callback()
 
     def update_from_roi(self, roi):
+        self._roi = roi
         if isinstance(roi, CircularAnnulusROI):
             rx = ry = roi.outer_radius
         else:
