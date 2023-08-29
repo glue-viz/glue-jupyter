@@ -187,11 +187,13 @@ class BqplotPolygonMode(BqplotSelectionTool):
     """
     Since Bqplot LassoSelector does not allow us to get the coordinates of the
     selection (see https://github.com/bqplot/bqplot/pull/674), we simply use
-    a callback on the default viewer MouseInteraction and a patch to
-    display the selection. The parent class defaults to setting polygon vertices
-    by clicking in the selector.
+    a callback on the default viewer MouseInteraction and a patch to display
+    the selection. The parent class defaults to setting polygon vertices by
+    clicking in the selector.
+    The polygon is closed by clicking within 2 % distance (of maximum extent)
+    of the initial vertex, or on deactivating the tool.
     """
-    icon = 'glue_point'
+    icon = os.path.join(ICONS_DIR, 'glue_polygon')
     tool_id = 'bqplot:polygon'
     action_text = 'Polygonal ROI'
     tool_tip = 'Define a polygonal region of interest'
@@ -236,8 +238,11 @@ class BqplotPolygonMode(BqplotSelectionTool):
 
     def update_from_roi(self, roi):
         """
-        This could potentially be extended to Circular and Rectangular ROIs
-        using their `to_polygon` methods.
+        Dragging with the `BrushSelector` using this method is still somewhat
+        unintuitive, as the ROI position is not updated live; rather the target
+        (centroid) position has to be set using the bounding bax shape.
+        The method could potentially be extended to Circular and Rectangular
+        ROIs using their `to_polygon` methods.
         """
         with self.viewer._output_widget or nullcontext():
             if isinstance(roi, PolygonalROI):
