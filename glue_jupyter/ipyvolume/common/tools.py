@@ -31,14 +31,14 @@ class IPyVolumeCheckableTool(CheckableTool):
 
 
 @viewer_tool
-class IpyvolumeLassoMode(IPyVolumeCheckableTool):
+class IpyvolumePolygonMode(IPyVolumeCheckableTool):
 
-    icon = 'glue_lasso'
-    tool_id = 'ipyvolume:lasso'
+    icon = 'glue_polygon'
+    tool_id = 'ipyvolume:polygon'
     action_text = 'Polygon ROI'
     tool_tip = 'Define a polygonal region of interest'
 
-    selector = 'lasso'
+    selector = 'polygon'
 
     def on_selection(self, data, other=None):
 
@@ -52,6 +52,17 @@ class IpyvolumeLassoMode(IPyVolumeCheckableTool):
                 roi_2d = PolygonalROI(vx=vx, vy=vy)
                 roi = Projected3dROI(roi_2d, self.projection_matrix)
                 self.viewer.apply_roi(roi)
+
+
+@viewer_tool
+class IpyvolumeLassoMode(IpyvolumePolygonMode):
+
+    icon = 'glue_lasso'
+    tool_id = 'ipyvolume:lasso'
+    action_text = 'Lasso ROI'
+    tool_tip = 'Lasso a region of interest'
+
+    selector = 'lasso'
 
 
 @viewer_tool

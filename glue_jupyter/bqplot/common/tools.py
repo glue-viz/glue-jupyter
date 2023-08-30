@@ -187,13 +187,16 @@ class BqplotPolygonMode(BqplotSelectionTool):
     """
     Since Bqplot LassoSelector does not allow us to get the coordinates of the
     selection (see https://github.com/bqplot/bqplot/pull/674), we simply use
-    a callback on the default viewer MouseInteraction and a patch to
-    display the selection.
+    a callback on the default viewer MouseInteraction and a patch to display
+    the selection. The parent class defaults to setting polygon vertices by
+    clicking in the selector.
+    The polygon is closed by clicking within 2 % distance (of maximum extent)
+    of the initial vertex, or on deactivating the tool.
     """
-    icon = 'glue_lasso'
+    icon = os.path.join(ICONS_DIR, 'glue_polygon')
     tool_id = 'bqplot:polygon'
     action_text = 'Polygonal ROI'
-    tool_tip = ('Lasso a region of interest\n')
+    tool_tip = 'Define a polygonal region of interest'
 
     def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
@@ -202,17 +205,52 @@ class BqplotPolygonMode(BqplotSelectionTool):
         self.patch = Lines(x=[[]], y=[[]], fill_colors=[INTERACT_COLOR], colors=[INTERACT_COLOR],
                            opacities=[0.6], fill='inside', close_path=True,
                            scales={'x': self.viewer.scale_x, 'y': self.viewer.scale_y})
+
+        self.interact = BrushSelector(x_scale=self.viewer.scale_x,
+                                      y_scale=self.viewer.scale_y,
+                                      color=INTERACT_COLOR)
+
         if roi is not None:
             self.update_from_roi(roi)
+
+        self._lasso = False
+        self.interact.observe(self.update_selection, "brushing")
+        self.interact.observe(self.on_selection_change, "selected_x")
+        self.interact.observe(self.on_selection_change, "selected_y")
         self.finalize_callback = finalize_callback
+
+    def update_selection(self, *args):
+        if self.interact.brushing:
+            return
+        with self.viewer._output_widget or nullcontext():
+            if self.interact.selected_x is not None and self.interact.selected_y is not None:
+                x = self.interact.selected_x
+                y = self.interact.selected_y
+                dx = x.mean() - self._roi.centroid()[0]
+                dy = y.mean() - self._roi.centroid()[1]
+
+                roi = PolygonalROI(vx=np.array(self._roi.vx) + dx, vy=np.array(self._roi.vy) + dy)
+
+                self._roi = roi
+                self.viewer.apply_roi(roi)
+                if self.finalize_callback is not None:
+                    self.finalize_callback()
 
     def update_from_roi(self, roi):
         """
-        While other tools allow the user to click and drag to reposition a selection,
-        this probably does not make sense for a polygonal selection, so we do not do
-        not support this.
+        Dragging with the `BrushSelector` using this method is still somewhat
+        unintuitive, as the ROI position is not updated live; rather the target
+        (centroid) position has to be set using the bounding bax shape.
+        The method could potentially be extended to Circular and Rectangular
+        ROIs using their `to_polygon` methods.
         """
-        pass
+        with self.viewer._output_widget or nullcontext():
+            if isinstance(roi, PolygonalROI):
+                self.patch.x = roi.vx
+                self.patch.y = roi.vy
+                self._roi = roi
+            else:
+                raise TypeError(f'Cannot initialize a BqplotPolygonMode from a {type(roi)}')
 
     def activate(self):
         """
@@ -236,39 +274,73 @@ class BqplotPolygonMode(BqplotSelectionTool):
         self.viewer.add_event_callback(self.on_msg, events=['dragstart', 'dragmove', 'dragend'])
 
     def deactivate(self):
+        if len(self.patch.x) > 1:
+            self.close_vertices()
         try:
             self.viewer.remove_event_callback(self.on_msg)
         except KeyError:
             pass
         super().deactivate()
 
+    def on_selection_change(self, *args):
+        if self.interact.selected_x is None or self.interact.selected_y is None:
+            if self.finalize_callback is not None:
+                self.finalize_callback()
+
     def on_msg(self, event):
         name = event['event']
         domain = event['domain']
         x, y = domain['x'], domain['y']
-        if name == 'dragstart':
+        if name == 'dragstart' and len(self.patch.x) < 1:
             self.original_marks = list(self.viewer.figure.marks)
             self.viewer.figure.marks = self.original_marks + [self.patch]
             self.patch.x = [x]
             self.patch.y = [y]
-        elif name == 'dragmove':
+        elif name == 'dragmove' and self._lasso:
             self.patch.x = np.append(self.patch.x, x)
             self.patch.y = np.append(self.patch.y, y)
         elif name == 'dragend':
-            roi = PolygonalROI(vx=self.patch.x, vy=self.patch.y)
-            self.viewer.apply_roi(roi)
+            # If new point is within 2% of maximum extent of the origin, finalise the polygon.
+            sz = max(self.patch.x) - min(self.patch.x), max(self.patch.y) - min(self.patch.y)
+            if self._lasso or (abs(x - self.patch.x[0]) < 0.02 * sz[0] and
+                               abs(y - self.patch.y[0]) < 0.02 * sz[1]):
+                self.close_vertices()
+            else:
+                self.patch.x = np.append(self.patch.x, x)
+                self.patch.y = np.append(self.patch.y, y)
 
-            new_marks = []
-            for mark in self.viewer.figure.marks:
-                if mark == self.patch:
-                    pass
-                else:
-                    new_marks.append(mark)
-            self.viewer.figure.marks = new_marks
-            self.patch.x = [[]]
-            self.patch.y = [[]]
-            if self.finalize_callback is not None:
-                self.finalize_callback()
+    def close_vertices(self):
+        roi = PolygonalROI(vx=self.patch.x, vy=self.patch.y)
+        self.viewer.apply_roi(roi)
+
+        new_marks = []
+        for mark in self.viewer.figure.marks:
+            if mark == self.patch:
+                pass
+            else:
+                new_marks.append(mark)
+        self.viewer.figure.marks = new_marks
+        self.patch.x = [[]]
+        self.patch.y = [[]]
+        if self.finalize_callback is not None:
+            self.finalize_callback()
+
+
+@viewer_tool
+class BqplotLassoMode(BqplotPolygonMode):
+    """
+    Subclass that defaults to creating a continous (lasso) polygonal selection
+    by dragging the pointer along the outline.
+    """
+
+    icon = 'glue_lasso'
+    tool_id = 'bqplot:lasso'
+    tool_tip = 'Lasso a region of interest'
+
+    def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
+
+        super().__init__(viewer, **kwargs)
+        self._lasso = True
 
 
 @viewer_tool
@@ -613,8 +685,11 @@ class ROIClickAndDrag(InteractCheckableTool):
                     elif isinstance(roi, CircularROI):
                         self._active_tool = BqplotCircleMode(
                             self.viewer, roi=roi, finalize_callback=self.release)
-                    elif isinstance(roi, (PolygonalROI, RectangularROI)):
+                    elif isinstance(roi, RectangularROI):
                         self._active_tool = BqplotRectangleMode(
+                            self.viewer, roi=roi, finalize_callback=self.release)
+                    elif isinstance(roi, PolygonalROI):
+                        self._active_tool = BqplotPolygonMode(
                             self.viewer, roi=roi, finalize_callback=self.release)
                     elif not GLUE_LT_1_11 and isinstance(roi, CircularAnnulusROI):
                         self._active_tool = BqplotCircularAnnulusMode(
