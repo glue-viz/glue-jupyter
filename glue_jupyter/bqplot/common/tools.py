@@ -170,6 +170,9 @@ class BqplotRectangleMode(BqplotSelectionTool):
                 self.interact.selected_y = [np.min(roi.vy), np.max(roi.vy)]
             else:
                 raise TypeError(f'Cannot initialize a BqplotRectangleMode from a {type(roi)}')
+            # FIXME: the brush selector does not actually update unless the
+            # widget is resized/refreshed, see
+            # https://github.com/bloomberg/bqplot/issues/1067
 
     def on_selection_change(self, *args):
         if self.interact.selected_x is None or self.interact.selected_y is None:
