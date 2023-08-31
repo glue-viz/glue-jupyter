@@ -9,10 +9,10 @@
                 <v-select label="attribute" :items="cmap_att_items" v-model="cmap_att_selected" hide-details />
             </div>
             <div>
-                <v-text-field label="min" v-model="glue_state.cmap_vmin" hide-details></v-text-field>
+                <glue-float-field label="min" :value.sync="glue_state.cmap_vmin" />
             </div>
             <div>
-                <v-text-field label="max" v-model="glue_state.cmap_vmax" hide-details></v-text-field>
+                <glue-float-field label="max" :value.sync="glue_state.cmap_vmax" />
             </div>
             <div>
                 <v-select label="colormap" :items="cmap_items" :value="glue_state.cmap" @change="set_colormap" hide-details/>
@@ -39,10 +39,10 @@
                     <v-select label="attribute" :items="size_att_items" v-model="size_att_selected" hide-details />
                 </div>
                 <div>
-                    <v-text-field label="min" v-model="glue_state.size_vmin" hide-details></v-text-field>
+                    <glue-float-field label="min" :value.sync="glue_state.size_vmin" />
                 </div>
                 <div>
-                    <v-text-field label="max" v-model="glue_state.size_vmax" hide-details></v-text-field>
+                    <glue-float-field label="max" :value.sync="glue_state.size_vmax" />
                 </div>
             </template>
             <template v-if="glue_state.density_map">

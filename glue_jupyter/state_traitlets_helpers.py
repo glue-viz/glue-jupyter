@@ -72,7 +72,7 @@ def update_state_from_dict(state, changes):
                                 callback_dict[k] = changes[name][k]
             else:
                 if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:
-                    if 'cmap' in name:
+                    if name == 'cmap':
                         if changes[name] != state.cmap.name:
                             setattr(state, name, get_cmap(changes[name]))
                     else:
