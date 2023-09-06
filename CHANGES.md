@@ -1,5 +1,38 @@
 # Full changelog
 
+## v0.18.0 - 2023-09-06
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+- Fix density map in scatter viewer for many points by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/363
+- Restore, but deprecate BqplotScatterLayerState by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/375
+- Keep `scatter_mark.fill` updated from `self.state.fill` by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/384
+- Prevent destruction of `CircularAnnulusROI` by resizing below `inner_radius` by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/383
+- Enable dragging BqplotLassoMode with BrushSelector by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/391
+- Fix issues with adjusting min/max values for size and cmap by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/395
+- Make bqplot linear scatter sizes more closely match matplotlib viewer by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/394
+
+#### New Features
+
+- Make vuetify Solara compatible by @maartenbreddels in https://github.com/glue-viz/glue-jupyter/pull/366
+- Add polygon/lasso selection mode by @jfoster17 in https://github.com/glue-viz/glue-jupyter/pull/371
+- Improve layout of density scatter by @mariobuikhuizen in https://github.com/glue-viz/glue-jupyter/pull/374
+- Allow enforcing persistenly circular ROI in draw tool  by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/376
+- Switch to Sphinx book theme and fix documentation warnings by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/386
+- Complement BqplotLassoMode with genuine PolygonMode by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/391
+- Keep subset menu open when deleting a subset by @kecnry in https://github.com/glue-viz/glue-jupyter/pull/393
+- Preserve rotation angle under dragging for ellipse and rectangle selection tools by @pllim in https://github.com/glue-viz/glue-jupyter/pull/396
+
+#### Other Changes
+
+- Add infrastructure for visual tests and first tests by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/360
+- Fix compatibility with future glue-core changes by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/380
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.17.0...v0.18.0
+
 ## v0.17.0 - 2023-06-16
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
