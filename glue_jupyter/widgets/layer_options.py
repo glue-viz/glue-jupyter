@@ -58,8 +58,12 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         else:
             label = layer_artist.state.layer.label
 
+        color = getattr(layer_artist.state, 'color', '')
+        if color:
+            color = color2hex(color)
+
         return {
-            'color': color2hex(getattr(layer_artist.state, 'color', '')),
+            'color': color,
             'label': label,
             'visible': layer_artist.state.visible,
         }
