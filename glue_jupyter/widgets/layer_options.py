@@ -8,7 +8,7 @@ import traitlets
 import ipywidgets as widgets
 from glue.core import message as msg
 from glue.core.hub import HubListener
-from glue.utils import avoid_circular
+from glue.utils import avoid_circular, color2hex
 
 from ..vuetify_helpers import WidgetCache
 
@@ -59,7 +59,7 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
             label = layer_artist.state.layer.label
 
         return {
-            'color': getattr(layer_artist.state, 'color', ''),
+            'color': color2hex(getattr(layer_artist.state, 'color', '')),
             'label': label,
             'visible': layer_artist.state.visible,
         }
