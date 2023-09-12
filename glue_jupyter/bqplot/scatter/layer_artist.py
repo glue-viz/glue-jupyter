@@ -11,9 +11,7 @@ from glue.viewers.scatter.state import ScatterLayerState
 from glue_jupyter.bqplot.scatter.scatter_density_mark import GenericDensityMark
 
 from ...utils import colormap_to_hexlist, float_or_none
-from ..compatibility import ScatterGL
-
-from bqplot_image_gl import LinesGL
+from ..compatibility import ScatterGL, LinesGL
 
 USE_GL = False
 
