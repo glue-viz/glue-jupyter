@@ -13,7 +13,7 @@ from glue_jupyter.bqplot.scatter.scatter_density_mark import GenericDensityMark
 from ...utils import colormap_to_hexlist, float_or_none
 from ..compatibility import ScatterGL, LinesGL
 
-USE_GL = False
+USE_GL = True
 
 __all__ = ["BqplotScatterLayerArtist"]
 EMPTY_IMAGE = np.zeros((10, 10, 4), dtype=np.uint8)
@@ -114,14 +114,8 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         # Line
 
-        self.scale_color_line = bqplot.ColorScale()
-        self.scales_line = dict(
-            self.view.scales,
-            color=self.scale_color_line,
-        )
-
         lines_cls = LinesGL if USE_GL else bqplot.Lines
-        self.line_mark = lines_cls(scales=self.scales_line, x=[0, 1], y=[0, 1])
+        self.line_mark = lines_cls(scales=self.view.scales, x=[0.], y=[0.])
         self.line_mark.colors = [color2hex(self.state.color)]
         self.line_mark.opacities = [self.state.alpha]
 
@@ -218,8 +212,8 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.line_mark.x = x.astype(np.float32).ravel()
             self.line_mark.y = y.astype(np.float32).ravel()
         else:
-            self.line_mark.x = []
-            self.line_mark.y = []
+            self.line_mark.x = [0.]
+            self.line_mark.y = [0.]
 
         if (
             self.state.vector_visible
@@ -404,8 +398,8 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter_mark.x = []
             self.scatter_mark.y = []
         if self.line_mark is not None:
-            self.line_mark.x = []
-            self.line_mark.y = []
+            self.line_mark.x = [0.]
+            self.line_mark.y = [0.]
         if self.vector_mark is not None:
             self.vector_mark.x = []
             self.vector_mark.y = []
