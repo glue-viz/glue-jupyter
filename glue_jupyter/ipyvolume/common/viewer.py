@@ -49,6 +49,7 @@ class IpyvolumeBaseView(IPyWidgetView):
             self.state.add_callback('z_max', self.limits_to_scales)
 
         self.state.add_callback('visible_axes', self._update_axes_visibility)
+        self.state.add_callback('native_aspect', self._update_aspect)
 
         self._figure_widget = ipv.gcc()
 
@@ -62,6 +63,9 @@ class IpyvolumeBaseView(IPyWidgetView):
             else:
                 ipv.style.axes_off()
                 ipv.style.box_off()
+
+    def _update_aspect(self, *args):
+        self.figure.box_size = self.state.aspect.tolist()
 
     @property
     def figure_widget(self):

@@ -1,3 +1,5 @@
+import numpy as np
+
 from glue.viewers.common.state import ViewerState
 from echo import (CallbackProperty, SelectionCallbackProperty)
 from glue.core.data_combo_helper import ComponentIDComboHelper
@@ -30,7 +32,7 @@ class ViewerState3D(ViewerState):
     visible_axes = CallbackProperty(True)
     # perspective_view = CallbackProperty(False)
     # clip_data = CallbackProperty(False)
-    # native_aspect = CallbackProperty(False)
+    native_aspect = CallbackProperty(False)
 
     limits_cache = CallbackProperty()
 
@@ -76,16 +78,18 @@ class ViewerState3D(ViewerState):
         self.z_lim_helper._cache = self.limits_cache
         self.z_lim_helper._update_attribute()
 
-    # @property
-    # def aspect(self):
-    #     # TODO: this could be cached based on the limits, but is not urgent
-    #     aspect = np.array([1, 1, 1], dtype=float)
-    #     if self.native_aspect:
-    #         aspect[0] = 1.
-    #         aspect[1] = (self.y_max - self.y_min) / (self.x_max - self.x_min)
-    #         aspect[2] = (self.z_max - self.z_min) / (self.x_max - self.x_min)
-    #         aspect /= aspect.max()
-    #     return aspect
+    @property
+    def aspect(self):
+        # note that for ipyvolume, we use axis in the order x, z, y in order to have
+        # the z axis of glue pointing up
+        # TODO: this could be cached based on the limits, but is not urgent
+        aspect = np.array([1, 1, 1], dtype=float)
+        if self.native_aspect:
+            aspect[0] = 1.
+            aspect[1] = (self.z_max - self.z_min) / (self.x_max - self.x_min)
+            aspect[2] = (self.y_max - self.y_min) / (self.x_max - self.x_min)
+            aspect /= aspect.max()
+        return aspect
 
     # def reset(self):
     #     pass
