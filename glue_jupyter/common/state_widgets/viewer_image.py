@@ -1,9 +1,11 @@
 from glue.viewers.image.state import AggregateSlice
 from glue.core.coordinate_helpers import world_axis
 import ipyvuetify as v
+import ipywidgets as widgets
 import traitlets
 from ...state_traitlets_helpers import GlueState
 from ...vuetify_helpers import link_glue_choices
+from ...widgets import AxesLimits
 
 
 __all__ = ['ImageViewerStateWidget']
@@ -27,6 +29,8 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
     y_att_world_selected = traitlets.Int(allow_none=True).tag(sync=True)
 
     sliders = traitlets.List().tag(sync=True)
+
+    axes_limits_widget = traitlets.Any().tag(sync=True, **widgets.widget_serialization)
 
     def __init__(self, viewer_state):
         super().__init__()
@@ -53,6 +57,8 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
             viewer_state.add_callback(prop, self._sync_sliders_from_state)
 
         self._sync_sliders_from_state()
+
+        self.axes_limits_widget = AxesLimits(viewer_state)
 
     def _sync_sliders_from_state(self, *not_used):
 
