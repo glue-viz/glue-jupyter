@@ -1,6 +1,7 @@
 import traitlets
 import ipyvuetify as v
 from echo import delay_callback
+from ..link import dlink
 from ..state_traitlets_helpers import GlueState
 
 __all__ = ['AxesLimits']
@@ -19,6 +20,10 @@ class AxesLimits(v.VuetifyTemplate):
     def __init__(self, viewer_state):
         super().__init__()
         self.glue_state = viewer_state
+        dlink((self.glue_state, 'x_min'), (self, 'x_min'))
+        dlink((self.glue_state, 'x_max'), (self, 'x_max'))
+        dlink((self.glue_state, 'y_min'), (self, 'y_min'))
+        dlink((self.glue_state, 'y_max'), (self, 'y_max'))
 
     def vue_apply_limits(self, data):
         self._cache = (self.x_min, self.x_max, self.y_min, self.y_max)
