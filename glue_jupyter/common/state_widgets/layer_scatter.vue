@@ -68,6 +68,11 @@
                 </div>
             </template>
         </template>
+        <div class="text-subtitle-2 font-weight-bold" :style="glue_state.markers_visible ? {} : {marginTop: '6px'}">Line</div>
+        <div>
+            <v-subheader class="pl-0 slider-label">show line</v-subheader>
+            <v-switch v-model="glue_state.line_visible" hide-details style="margin-top: 0"/>
+        </div>
         <div class="text-subtitle-2 font-weight-bold" :style="glue_state.markers_visible ? {} : {marginTop: '6px'}">Vectors</div>
         <div>
             <v-subheader class="pl-0 slider-label">show vectors</v-subheader>
