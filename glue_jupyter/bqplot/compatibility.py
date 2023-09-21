@@ -9,5 +9,9 @@ else:
 
     ScatterGL = bqplot_gl.marks.ScatterGL
 
+try:
+    from bqplot_gl import LinesGL
+except ImportError:
+    from bqplot_image_gl import LinesGL
 
-__all__ = ["ScatterGL", "ImageGL"]
+__all__ = ["ScatterGL", "ImageGL", "LinesGL"]

@@ -38,6 +38,11 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
 
     dpi = traitlets.Float().tag(sync=True)
 
+    # Line
+
+    linestyle_items = traitlets.List().tag(sync=True)
+    linestyle_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
     # Vectors
 
     vx_att_items = traitlets.List().tag(sync=True)
@@ -72,6 +77,10 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
         # TODO: make sliders for dpi and size scaling logarithmic
 
         # FIXME: moving any sliders causes a change in the colormap
+
+        # Line
+
+        link_glue_choices(self, layer_state, "linestyle")
 
         # Vectors
 
