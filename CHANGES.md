@@ -1,5 +1,22 @@
 # Full changelog
 
+## v0.19.0 - 2023-09-21
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+- Ensure that layer widget color is a hex value by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/397
+
+#### New Features
+
+- Added implementation of lines in scatter viewer by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/398
+- Expose opacity in profile viewer by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/400
+- Allow native aspect ratio in ipyvolume viewers by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/399
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.18.0...v0.19.0
+
 ## v0.18.0 - 2023-09-06
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
