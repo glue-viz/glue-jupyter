@@ -11,10 +11,12 @@ from .layer_artist import BqplotProfileLayerArtist
 
 from glue_jupyter.common.state_widgets.layer_profile import ProfileLayerStateWidget
 from glue_jupyter.common.state_widgets.viewer_profile import ProfileViewerStateWidget
+from glue_jupyter.registries import viewer_registry
 
 __all__ = ['BqplotProfileView']
 
 
+@viewer_registry("profile")
 class BqplotProfileView(BqplotBaseView):
 
     allow_duplicate_data = False
