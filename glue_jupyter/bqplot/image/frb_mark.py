@@ -5,7 +5,7 @@
 import math
 import numpy as np
 
-from bqplot import ColorScale
+from bqplot import ColorScale, ColorAxis
 from bqplot_image_gl import ImageGL
 
 from ...utils import debounced
@@ -37,6 +37,9 @@ class FRBImage(ImageGL):
         self.viewer.figure.axes[0].scale.observe(self.debounced_update, 'max')
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'min')
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'max')
+
+        # Colorbar?
+        self.viewer.figure.axes.append(ColorAxis(scale=self.scale_image))
 
         # NOTE: we deliberately don't call .update() here because when FRBImage
         # is created for the main composite image layer the composite arrays
