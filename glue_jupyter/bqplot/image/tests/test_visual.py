@@ -22,11 +22,11 @@ def test_visual_incompatible_subset(
     app = jglue()
     data1 = app.add_data(image={"image": im})[0]
     data2 = app.add_data(catalog={"x": x, "y": y})[0]
-    scatter = app.imshow(data=data1, show=False)
     state1 = data1.pixel_component_ids[1] > 32
     app.data_collection.new_subset_group('image[x] > 32', state1)
     state2 = data2.id['x'] > 1
     app.data_collection.new_subset_group('x > 1', state2)
-    figure = scatter.figure_widget
+    image = app.imshow(data=data1, show=False)
+    figure = image.figure_widget
     figure.layout = {"width": "400px", "height": "250px"}
     return figure

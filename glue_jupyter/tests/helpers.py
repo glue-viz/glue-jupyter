@@ -49,6 +49,9 @@ def visual_widget_test(*args, **kwargs):
             viewer = page_session.locator(".test-viewer")
             viewer.wait_for()
 
+            # Wait for an additional 2 seconds
+            page_session.wait_for_timeout(2000)
+
             screenshot = viewer.screenshot()
 
             return DummyFigure(screenshot)
