@@ -17,7 +17,7 @@ def test_non_hex_colors(app, dataxyz):
     dataxyz.subsets[0].style.color = 'purple'
 
 
-def test_remove(app, dataxz, dataxyz):
+def test_remove_from_viewer(app, dataxz, dataxyz):
     s = app.histogram1d(data=dataxyz)
     s.add_data(dataxz)
     app.data_collection.new_subset_group(subset_state=dataxz.id['x'] > 1, label='test')
@@ -26,6 +26,20 @@ def test_remove(app, dataxz, dataxyz):
     assert len(s.figure.marks) == 2
     s.remove_data(dataxz)
     assert len(s.figure.marks) == 0
+
+
+def test_remove_from_data_collection(app, dataxz, dataxyz):
+    s = app.histogram1d(data=dataxyz)
+    s.add_data(dataxz)
+    app.data_collection.new_subset_group(subset_state=dataxz.id['x'] > 1, label='test')
+    assert len(s.figure.marks) == 4
+    s.state.hist_n_bin = 30
+    app.data_collection.remove(dataxyz)
+    assert len(s.figure.marks) == 2
+    s.state.hist_n_bin = 20
+    app.data_collection.remove(dataxz)
+    assert len(s.figure.marks) == 0
+    s.state.hist_n_bin = 10
 
 
 def test_redraw_empty_subset(app, dataxz):
