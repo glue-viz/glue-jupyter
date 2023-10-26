@@ -1,4 +1,5 @@
 from glue_jupyter.common.state3d import VolumeViewerState
+from glue_jupyter.registries import viewer_registry
 
 from .layer_artist import IpyvolumeVolumeLayerArtist
 from .layer_style_widget import Volume3DLayerStateWidget
@@ -12,6 +13,7 @@ from ..common.viewer import IpyvolumeBaseView
 __all__ = ['IpyvolumeVolumeView']
 
 
+@viewer_registry("volume")
 class IpyvolumeVolumeView(IpyvolumeBaseView):
 
     _state_cls = VolumeViewerState

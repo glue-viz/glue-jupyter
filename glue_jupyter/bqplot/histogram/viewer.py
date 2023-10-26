@@ -7,10 +7,12 @@ from ..common.viewer import BqplotBaseView
 from .layer_artist import BqplotHistogramLayerArtist
 from glue_jupyter.common.state_widgets.layer_histogram import HistogramLayerStateWidget
 from glue_jupyter.common.state_widgets.viewer_histogram import HistogramViewerStateWidget
+from glue_jupyter.registries import viewer_registry
 
 __all__ = ['BqplotHistogramView']
 
 
+@viewer_registry("histogram")
 class BqplotHistogramView(BqplotBaseView):
 
     allow_duplicate_data = False

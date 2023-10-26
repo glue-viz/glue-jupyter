@@ -14,10 +14,12 @@ from glue_jupyter.common.state_widgets.layer_scatter import ScatterLayerStateWid
 from glue_jupyter.common.state_widgets.layer_image import (ImageLayerStateWidget,
                                                            ImageSubsetLayerStateWidget)
 from glue_jupyter.common.state_widgets.viewer_image import ImageViewerStateWidget
+from glue_jupyter.registries import viewer_registry
 
 __all__ = ['BqplotImageView']
 
 
+@viewer_registry("image")
 class BqplotImageView(BqplotBaseView):
 
     allow_duplicate_data = False
