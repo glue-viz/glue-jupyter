@@ -264,7 +264,7 @@ class BqplotScatterLayerArtist(LayerArtist):
                     self.density_mark.vmax = self.state.cmap_vmax
 
                 if force or "stretch" in changed:
-                    self.density_mark.stretch = STRETCHES[self.state.stretch]()
+                    self.density_mark.stretch = self.state.stretch_object
 
                 if force or "dpi" in changed:
                     self.density_mark.dpi = self._viewer_state.dpi
