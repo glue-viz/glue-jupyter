@@ -22,7 +22,6 @@ class BqplotImageView(BqplotBaseView):
 
     allow_duplicate_data = False
     allow_duplicate_subset = False
-    large_data_size = 2e7
 
     _layer_style_widget_cls = {BqplotImageLayerArtist: ImageLayerStateWidget,
                                BqplotImageSubsetLayerArtist: ImageSubsetLayerStateWidget,

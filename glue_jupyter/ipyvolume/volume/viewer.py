@@ -14,8 +14,6 @@ __all__ = ['IpyvolumeVolumeView']
 
 class IpyvolumeVolumeView(IpyvolumeBaseView):
 
-    large_data_size = 1e8
-
     _state_cls = VolumeViewerState
     _options_cls = Viewer3DStateWidget
     _data_artist_cls = IpyvolumeVolumeLayerArtist
