@@ -17,7 +17,6 @@ class BqplotScatterView(BqplotBaseView):
 
     allow_duplicate_data = False
     allow_duplicate_subset = False
-    large_data_size = 1e7
 
     _state_cls = ScatterViewerState
     _options_cls = ScatterViewerStateWidget

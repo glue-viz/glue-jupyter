@@ -211,7 +211,6 @@ class TableViewerStateWidget(widgets.VBox):
 class TableViewer(IPyWidgetView):
     allow_duplicate_data = False
     allow_duplicate_subset = False
-    large_data_size = 1e100  # Basically infinite (a googol)
 
     _state_cls = TableState
     _options_cls = TableViewerStateWidget

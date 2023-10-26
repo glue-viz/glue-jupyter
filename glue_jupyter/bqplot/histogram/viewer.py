@@ -15,7 +15,6 @@ class BqplotHistogramView(BqplotBaseView):
 
     allow_duplicate_data = False
     allow_duplicate_subset = False
-    large_data_size = 1e5
     is2d = False
 
     _state_cls = HistogramViewerState

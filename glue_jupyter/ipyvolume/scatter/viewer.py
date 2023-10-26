@@ -11,7 +11,6 @@ class IpyvolumeScatterView(IpyvolumeBaseView):
 
     allow_duplicate_data = False
     allow_duplicate_subset = False
-    large_data_size = 1e7
 
     _state_cls = Scatter3DViewerState
     _options_cls = Viewer3DStateWidget
