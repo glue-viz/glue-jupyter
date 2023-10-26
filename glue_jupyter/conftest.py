@@ -68,20 +68,20 @@ def app(dataxyz, datax, dataxz, data_volume, data_image):
     return app
 
 
-# ORIGINAL_DISPLAY = None
+ORIGINAL_DISPLAY = None
 
 
-# def noop(*args, **kwargs):
-#     pass
+def noop(*args, **kwargs):
+    pass
 
 
-# def pytest_configure(config):
-#     global ORIGINAL_DISPLAY
-#     import IPython.display as idisp
-#     ORIGINAL_DISPLAY = idisp.display
-#     idisp.display = noop
+def pytest_configure(config):
+    global ORIGINAL_DISPLAY
+    import IPython.display as idisp
+    ORIGINAL_DISPLAY = idisp.display
+    idisp.display = noop
 
 
-# def pytest_unconfigure(config):
-#     import IPython.display as idisp
-#     idisp.display = ORIGINAL_DISPLAY
+def pytest_unconfigure(config):
+    import IPython.display as idisp
+    idisp.display = ORIGINAL_DISPLAY
