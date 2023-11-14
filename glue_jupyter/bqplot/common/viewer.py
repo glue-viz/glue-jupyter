@@ -26,6 +26,11 @@ class BqplotBaseView(IPyWidgetView):
 
     def __init__(self, session, state=None):
         super(BqplotBaseView, self).__init__(session, state=state)
+        self.create_layout()
+
+    def initialize_layer_options(self):
+        self.initialize_main()
+        super().initialize_layer_options()
 
     def initialize_main(self):
         # if we allow padding, we sometimes get odd behaviour with the interacts
