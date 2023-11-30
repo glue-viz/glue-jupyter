@@ -3,4 +3,4 @@ from .viewer import *  # noqa
 
 
 def setup():
-    from viewer import BqplotHistogramView # noqa
+    pass

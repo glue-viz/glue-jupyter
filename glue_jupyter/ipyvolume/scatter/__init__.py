@@ -4,4 +4,4 @@ from .viewer import *  # noqa
 
 
 def setup():
-    from viewer import IpyvolumeScatterView  # noqa
+    pass
