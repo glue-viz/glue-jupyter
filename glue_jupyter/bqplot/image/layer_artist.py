@@ -67,6 +67,10 @@ class BqplotImageLayerArtist(ImageLayerArtist):
 
         super()._update_visual_attributes()
 
+        if self.state.visible and not self.state.bitmap_visible:
+            self.composite.set(self.uuid, visible=False)
+            self.composite_image.invalidate_cache()
+
         was_visible = self.contour_artist.visible
         self.contour_artist.visible = self.state.visible and self.state.contour_visible
         if not was_visible and self.contour_artist.visible:
