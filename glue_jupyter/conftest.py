@@ -68,20 +68,31 @@ def app(dataxyz, datax, dataxz, data_volume, data_image):
     return app
 
 
-ORIGINAL_DISPLAY = None
+try:
+    import solara  # noqa: F401
+except ImportError:
+    SOLARA_INSTALLED = False
+else:
+    SOLARA_INSTALLED = True
 
 
-def noop(*args, **kwargs):
-    pass
+# Tweak IPython's display to not print out lots of __repr__s for widgets to
+# standard output. However, if we are using solara, we shouldn't do this as
+# it seems to cause issues.
 
+if not SOLARA_INSTALLED:
 
-def pytest_configure(config):
-    global ORIGINAL_DISPLAY
-    import IPython.display as idisp
-    ORIGINAL_DISPLAY = idisp.display
-    idisp.display = noop
+    ORIGINAL_DISPLAY = None
 
+    def noop(*args, **kwargs):
+        pass
 
-def pytest_unconfigure(config):
-    import IPython.display as idisp
-    idisp.display = ORIGINAL_DISPLAY
+    def pytest_configure(config):
+        global ORIGINAL_DISPLAY
+        import IPython.display as idisp
+        ORIGINAL_DISPLAY = idisp.display
+        idisp.display = noop
+
+    def pytest_unconfigure(config):
+        import IPython.display as idisp
+        idisp.display = ORIGINAL_DISPLAY
