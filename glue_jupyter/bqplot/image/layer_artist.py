@@ -116,7 +116,7 @@ class BqplotImageLayerArtist(ImageLayerArtist):
         if force or any(prop in changed for prop in ('v_min', 'v_max', 'contrast',
                                                      'bias', 'alpha', 'color_mode',
                                                      'cmap', 'color', 'zorder',
-                                                     'visible', 'stretch',
+                                                     'visible', 'stretch', 'stretch_parameters',
                                                      'bitmap_visible', 'contour_visible')):
             self._update_visual_attributes()
         if force or 'levels' in changed:
