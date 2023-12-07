@@ -1,5 +1,31 @@
 # Full changelog
 
+## v0.20.0 - 2023-12-07
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+* Fix support for bitmap_visible in image viewer by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/412
+
+#### New Features
+
+* Make use of latest improvements to custom stretches in glue-core by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/409
+
+#### Documentation
+
+* Fix docs failure related to theme warning by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/408
+
+#### Other Changes
+
+* Don't set large data limits since the warning appears too late anyway by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/406
+* Add regression test for bug that caused histogram viewer to crash when removing datasets by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/407
+* add histogram, scatter, and volume viewers to registry by @kecnry in https://github.com/glue-viz/glue-jupyter/pull/402
+* Fix visual tests with solara by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/415
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.19.0...v0.20.0
+
 ## v0.19.0 - 2023-09-21
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
