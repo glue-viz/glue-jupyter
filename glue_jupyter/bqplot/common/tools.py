@@ -153,7 +153,21 @@ class BqplotRectangleMode(BqplotSelectionTool):
                 x = self.interact.selected_x
                 y = self.interact.selected_y
                 theta = None if self._roi is None else self._roi.theta
-                roi = RectangularROI(xmin=min(x), xmax=max(x), ymin=min(y), ymax=max(y), theta=theta)  # noqa: E501
+                x_min = min(x)
+                x_max = max(x)
+                y_min = min(y)
+                y_max = max(y)
+                # Avoid drawing invisible shape.
+                if isinstance(self._roi, RectangularROI):
+                    dx = abs(x_max - x_min)
+                    dy = abs(y_max - y_min)
+                    if dx < 1:
+                        x_min = self._roi.xmin
+                        x_max = self._roi.xmax
+                    if dy < 1:
+                        y_min = self._roi.ymin
+                        y_max = self._roi.ymax
+                roi = RectangularROI(xmin=x_min, xmax=x_max, ymin=y_min, ymax=y_max, theta=theta)
                 self._roi = roi
                 self.viewer.apply_roi(roi)
                 if self.finalize_callback is not None:
@@ -398,6 +412,17 @@ class BqplotCircleMode(BqplotSelectionTool):
                 yc = y.mean()
                 rx = abs(x[1] - x[0])/2
                 ry = abs(y[1] - y[0])/2
+                # Avoid drawing invisible shape.
+                if isinstance(self._roi, CircularROI):
+                    if rx < 1:
+                        rx = self._roi.radius
+                    if ry < 1:
+                        ry = self._roi.radius
+                elif isinstance(self._roi, EllipticalROI):
+                    if rx < 1:
+                        rx = self._roi.radius_x
+                    if ry < 1:
+                        ry = self._roi.radius_y
                 # We use a tolerance of 1e-2 below to match the tolerance set in glue-core
                 # https://github.com/glue-viz/glue/blob/6b968b352bc5ad68b95ad5e3bb25550782a69ee8/glue/viewers/matplotlib/state.py#L198
                 if self._strict_circle:
@@ -519,7 +544,11 @@ class BqplotCircularAnnulusMode(BqplotCircleMode):
                 rx = abs(x[1] - x[0]) * 0.5
                 ry = abs(y[1] - y[0]) * 0.5
                 outer_r = float(rx + ry) * 0.5
-                if self._roi is None:
+                # Avoid drawing invisible shape.
+                if isinstance(self._roi, CircularAnnulusROI) and outer_r < 2:
+                    outer_r = self._roi.outer_radius
+                    inner_r = self._roi.inner_radius
+                elif self._roi is None:
                     inner_r = outer_r * 0.5  # Hardcoded for now, user can edit later.
                 else:
                     # Resizing only changes outer r, avoid having inner_r >= outer_r afterwards.
