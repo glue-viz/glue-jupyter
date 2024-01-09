@@ -2,6 +2,7 @@
     <v-text-field
             :label="label"
             :suffix="suffix"
+            :step="step"
             v-model="displayValue"
             type="number"
             :rules="[validNumber]"
@@ -13,7 +14,7 @@
        Only when `value` is changed externally, `displayValue` will be update according to the current `value`.
     */
     module.exports = {
-        props: ['value', 'label', 'suffix'],
+        props: ['value', 'label', 'suffix', 'step'],
         data: function() {
             return {
                 // default value is the one that was intially passed
