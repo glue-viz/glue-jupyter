@@ -1,12 +1,16 @@
 import json
-import matplotlib
 import traitlets
 from collections import defaultdict
 from traitlets.utils.bunch import Bunch
 from glue.core.state_objects import State
 from glue.core import BaseCartesianData, Subset, ComponentID
+from glue.utils.matplotlib import MATPLOTLIB_GE_36
 from echo import CallbackList, CallbackDict
 from matplotlib.colors import Colormap
+if MATPLOTLIB_GE_36:
+    from matplotlib import colormaps
+else:
+    from matplotlib import cm as colormaps
 
 MAGIC_IGNORE = '611cfa3b-ebb5-42d2-b5c7-ba9bce8b51a4'
 
@@ -74,7 +78,7 @@ def update_state_from_dict(state, changes):
                 if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:
                     if name == 'cmap':
                         if changes[name] != state.cmap.name:
-                            setattr(state, name, matplotlib.colormaps[changes[name]])
+                            setattr(state, name, colormap.get_cmap(changes[name]))
                     else:
                         setattr(state, name, changes[name])
 
