@@ -78,7 +78,7 @@ def update_state_from_dict(state, changes):
                 if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:
                     if name == 'cmap':
                         if changes[name] != state.cmap.name:
-                            setattr(state, name, colormap.get_cmap(changes[name]))
+                            setattr(state, name, colormaps.get_cmap(changes[name]))
                     else:
                         setattr(state, name, changes[name])
 
