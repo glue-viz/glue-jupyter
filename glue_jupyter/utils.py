@@ -2,14 +2,19 @@ import os
 import functools
 import collections
 import time
-
-import ipyvue
-import matplotlib
-import PIL.Image
-import numpy as np
 from io import BytesIO as StringIO
 
+import ipyvue
+import PIL.Image
+import numpy as np
+
 from glue.core import BaseCartesianData
+from glue.utils.matplotlib import MATPLOTLIB_GE_36
+
+if MATPLOTLIB_GE_36:
+    from matplotlib import colormaps
+else:
+    from matplotlib import cm as colormaps
 
 
 def float_or_none(x):
@@ -27,7 +32,7 @@ def rgba_to_png_data(rgba):
 def scalar_to_png_data(data, colormap='viridis'):
     mask = ~np.isfinite(data)
     intensity = np.ma.masked_array(data, mask)
-    colormap = matplotlib.cm.get_cmap(colormap)
+    colormap = colormaps.get_cmap(colormap)
     colormap.set_bad(alpha=0)
     data = colormap(intensity, bytes=True)
     return rgba_to_png_data(data)
