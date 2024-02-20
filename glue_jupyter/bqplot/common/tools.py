@@ -48,6 +48,8 @@ class InteractCheckableTool(CheckableTool):
 
     def deactivate(self):
         self.viewer._mouse_interact.next = None
+        if hasattr(self, '_roi'):
+            self._roi = None
 
 
 class BqplotSelectionTool(InteractCheckableTool):
