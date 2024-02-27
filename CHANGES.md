@@ -1,5 +1,19 @@
 # Full changelog
 
+## v0.20.1 - 2024-02-27
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+* Support setting step value in glue-float-field by @rosteen in https://github.com/glue-viz/glue-jupyter/pull/417
+* Use `mpl.colormaps.get_cmap` for compatibility with matplotlib 3.9 by @pllim in https://github.com/glue-viz/glue-jupyter/pull/422
+* Set `InteractCheckableTool._roi` to `None` on `deactivate` by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/420
+* Set Bqplot*Modes to observe only one `selected` state in BrushSelector by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/419
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.20.0...v0.20.1
+
 ## v0.20.0 - 2023-12-07
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
