@@ -19,6 +19,7 @@ class BqplotImageViewerState(ImageViewerState):
 class BqplotImageLayerState(ImageLayerState):
     c_min = DDCProperty(docstring='The lower level used for the contours')
     c_max = DDCProperty(docstring='The upper level used for the contours')
+    c_display_unit = DDSCProperty(docstring='The units to use to display contour levels')
     level_mode = DDSCProperty(0, docstring='How to distribute the contour levels')
     n_levels = DDCProperty(5, docstring='The number of levels, in Linear mode')
     levels = CallbackProperty(docstring='List of values where to create the contour lines')
@@ -48,11 +49,21 @@ class BqplotImageLayerState(ImageLayerState):
                                                              percentile='contour_percentile',
                                                              lower='c_min', upper='c_max')
 
+        def format_unit(unit):
+            if unit is None:
+                return 'Native units'
+            else:
+                return unit
+
+        BqplotImageLayerState.c_display_unit.set_display_func(self, format_unit)
+
         self.add_callback('n_levels', self._update_levels)
         self.add_callback('c_min', self._update_levels)
         self.add_callback('c_max', self._update_levels)
         self.add_callback('level_mode', self._update_levels)
         self.add_callback('levels', self._update_labels)
+        self.add_callback('c_display_unit', self._convert_units_c_limits, echo_old=True)
+
         self._update_levels()
 
     def _update_priority(self, name):
@@ -72,3 +83,32 @@ class BqplotImageLayerState(ImageLayerState):
     def _update_labels(self, ignore=None):
         # TODO: we may want to have ways to configure this in the future
         self.labels = ["{0:.4g}".format(level) for level in self.levels]
+
+    def _convert_units_c_limits(self, old_unit, new_unit):
+
+        if (
+            getattr(self, '_previous_attribute', None) is self.attribute and
+            old_unit != new_unit and
+            self.layer is not None
+        ):
+
+            limits = np.hstack([self.c_min, self.c_max, self.levels])
+
+            converter = UnitConverter()
+
+            limits_native = converter.to_native(self.layer,
+                                                self.attribute, limits,
+                                                old_unit)
+
+            limits_new = converter.to_unit(self.layer,
+                                           self.attribute, limits_native,
+                                           new_unit)
+
+            with delay_callback(self, 'c_min', 'c_max', 'levels'):
+                self.c_min, self.c_max = sorted(limits_new[:2])
+                self.levels = tuple(limits_new[2:])
+
+        # Make sure that we keep track of what attribute the limits
+        # are for - if the attribute changes, we should not try and
+        # update the limits.
+        self._previous_attribute = self.attribute
