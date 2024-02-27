@@ -143,8 +143,7 @@ class BqplotRectangleMode(BqplotSelectionTool):
             self.update_from_roi(roi)
 
         self.interact.observe(self.update_selection, "brushing")
-        self.interact.observe(self.on_selection_change, "selected_x")
-        self.interact.observe(self.on_selection_change, "selected_y")
+        self.interact.observe(self.on_selection_change, "selected")
         self.finalize_callback = finalize_callback
 
     def update_selection(self, *args):
@@ -221,8 +220,7 @@ class BqplotPolygonMode(BqplotSelectionTool):
 
         self._lasso = False
         self.interact.observe(self.update_selection, "brushing")
-        self.interact.observe(self.on_selection_change, "selected_x")
-        self.interact.observe(self.on_selection_change, "selected_y")
+        self.interact.observe(self.on_selection_change, "selected")
         self.finalize_callback = finalize_callback
 
     def update_selection(self, *args):
@@ -380,8 +378,7 @@ class BqplotCircleMode(BqplotSelectionTool):
             self.update_from_roi(roi)
 
         self.interact.observe(self.update_selection, "brushing")
-        self.interact.observe(self.on_selection_change, "selected_x")
-        self.interact.observe(self.on_selection_change, "selected_y")
+        self.interact.observe(self.on_selection_change, "selected")
         self.finalize_callback = finalize_callback
 
     def update_selection(self, *args):
@@ -483,8 +480,7 @@ class BqplotEllipseMode(BqplotCircleMode):
             self.update_from_roi(roi)
 
         self.interact.observe(self.update_selection, "brushing")
-        self.interact.observe(self.on_selection_change, "selected_x")
-        self.interact.observe(self.on_selection_change, "selected_y")
+        self.interact.observe(self.on_selection_change, "selected")
         self.finalize_callback = finalize_callback
 
 
