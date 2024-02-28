@@ -1,11 +1,12 @@
 import numpy as np
 
-from echo import CallbackProperty
+from echo import CallbackProperty, delay_callback
 from glue.viewers.matplotlib.state import (DeferredDrawCallbackProperty as DDCProperty,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
 from glue.viewers.image.state import ImageViewerState, ImageLayerState
 from glue.core.state_objects import StateAttributeLimitsHelper
+from glue.core.units import find_unit_choices, UnitConverter
 
 
 class BqplotImageViewerState(ImageViewerState):
@@ -62,8 +63,10 @@ class BqplotImageLayerState(ImageLayerState):
         self.add_callback('c_max', self._update_levels)
         self.add_callback('level_mode', self._update_levels)
         self.add_callback('levels', self._update_labels)
+        self.add_callback('attribute', self._update_c_display_unit_choices)
         self.add_callback('c_display_unit', self._convert_units_c_limits, echo_old=True)
 
+        self._update_c_display_unit_choices()
         self._update_levels()
 
     def _update_priority(self, name):
@@ -77,12 +80,25 @@ class BqplotImageLayerState(ImageLayerState):
 
     def _update_levels(self, ignore=None):
         if self.level_mode == "Linear":
-            # TODO: this is exclusive begin/end point, is that a good choise?
-            self.levels = np.linspace(self.c_min, self.c_max, self.n_levels+2)[1:-1].tolist()
+            self.levels = np.linspace(self.c_min, self.c_max, self.n_levels).tolist()
 
     def _update_labels(self, ignore=None):
         # TODO: we may want to have ways to configure this in the future
         self.labels = ["{0:.4g}".format(level) for level in self.levels]
+
+    def _update_c_display_unit_choices(self, *args):
+
+        if self.layer is None:
+            BqplotImageLayerState.c_display_unit.set_choices(self, [])
+            return
+
+        component = self.layer.get_component(self.attribute)
+        if component.units:
+            c_choices = find_unit_choices([(self.layer, self.attribute, component.units)])
+        else:
+            c_choices = ['']
+        BqplotImageLayerState.c_display_unit.set_choices(self, c_choices)
+        self.c_display_unit = component.units
 
     def _convert_units_c_limits(self, old_unit, new_unit):
 

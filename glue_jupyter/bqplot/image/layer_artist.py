@@ -4,6 +4,7 @@ from glue_jupyter.bqplot.image.state import BqplotImageLayerState
 from glue.viewers.image.layer_artist import BaseImageLayerArtist, ImageLayerArtist, ImageSubsetArray
 from glue.viewers.image.state import ImageSubsetLayerState
 from glue.core.fixed_resolution_buffer import ARRAY_CACHE, PIXEL_CACHE
+from glue.core.units import find_unit_choices, UnitConverter
 from ...link import link
 
 from bqplot_image_gl import Contour
@@ -87,6 +88,17 @@ class BqplotImageLayerArtist(ImageLayerArtist):
         if contour_data is None:
             self.contour_artist.contour_lines = []
             return
+
+        # As the levels may be specified in a different unit we should convert
+        # the data to match the units of the levels (we do it this way around
+        # so that the labels are shown in the new units)
+
+        converter = UnitConverter()
+
+        contour_data = converter.to_unit(self.state.layer,
+                                         self.state.attribute,
+                                         contour_data,
+                                         self.state.c_display_unit)
 
         for level in self.state.levels:
             if level not in self._contour_line_cache:
