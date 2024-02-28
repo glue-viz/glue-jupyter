@@ -4,7 +4,7 @@ from glue_jupyter.bqplot.image.state import BqplotImageLayerState
 from glue.viewers.image.layer_artist import BaseImageLayerArtist, ImageLayerArtist, ImageSubsetArray
 from glue.viewers.image.state import ImageSubsetLayerState
 from glue.core.fixed_resolution_buffer import ARRAY_CACHE, PIXEL_CACHE
-from glue.core.units import find_unit_choices, UnitConverter
+from glue.core.units import UnitConverter
 from ...link import link
 
 from bqplot_image_gl import Contour
