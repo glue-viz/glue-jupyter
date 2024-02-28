@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.testing import assert_allclose
-import matplotlib.pyplot as plt
 
 from glue_jupyter import jglue
 from glue_jupyter.tests.helpers import visual_widget_test
