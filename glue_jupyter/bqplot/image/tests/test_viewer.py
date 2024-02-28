@@ -40,7 +40,7 @@ def test_contour_levels(app, data_image, data_volume):
     layer.state.c_min = 0
     layer.state.c_max = 10
     layer.state.n_levels = 3
-    assert layer.state.levels == [2.5, 5, 7.5]
+    assert layer.state.levels == [0, 5, 10]
     # since we start invisible, we don't compute the contour lines
     assert len(layer.contour_artist.contour_lines) == 0
     # make the visible, so we trigger a compute
@@ -48,9 +48,9 @@ def test_contour_levels(app, data_image, data_volume):
     assert len(layer.contour_artist.contour_lines) == 3
     layer.state.level_mode = 'Custom'
     layer.state.n_levels = 1
-    assert layer.state.levels == [2.5, 5, 7.5]
+    assert layer.state.levels == [0, 5, 10]
     layer.state.level_mode = 'Linear'
-    assert layer.state.levels == [5]
+    assert layer.state.levels == [0]
     assert len(layer.contour_artist.contour_lines) == 1
 
     # test the visual attributes
@@ -81,7 +81,7 @@ def test_contour_state(app, data_image):
         {'level_mode': 'Linear', 'levels': [2, 3]}
     )
     # Without priority of levels, this gets set to [2, 3]
-    assert layer.state.levels == [2.5, 5, 7.5]
+    assert layer.state.levels == [0, 5, 10]
 
 
 def test_add_markers_zoom(app, data_image, data_volume, dataxyz):
