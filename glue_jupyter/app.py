@@ -234,7 +234,7 @@ class JupyterApplication(Application):
 
     def histogram1d(self, *, data=None, x=None, widget='bqplot', color=None,
                     x_min=None, x_max=None, n_bin=None, normalize=False,
-                    cumulative=False, viewer_state=None, layer_state=None,
+                    cumulative=False, random_subset=None, viewer_state=None, layer_state=None,
                     show=True):
         """
         Open an interactive histogram viewer.
@@ -262,6 +262,10 @@ class JupyterApplication(Application):
             Whether to normalize the histogram.
         cumulative : bool, optional
             Whether to show a cumulative histogram.
+        random_subset : int, optional
+            The maximum number of elements to use when computing a histogram.
+            If there are more than this number of data points, a random subset
+            is used.
         viewer_state : `~glue.viewers.common.state.ViewerState`
             The initial state for the viewer (advanced).
         layer_state : `~glue.viewers.common.state.LayerState`
@@ -294,7 +298,7 @@ class JupyterApplication(Application):
         # glue.viewers.histogram.state for this API it make more sense to call
         # it x_min and x_max, and for consistency with the rest
         _update_not_none(viewer_state, hist_x_min=x_min, hist_x_max=x_max, hist_n_bin=n_bin,
-                         normalize=normalize, cumulative=cumulative)
+                         normalize=normalize, cumulative=cumulative, random_subset=random_subset)
         viewer_state_obj.update_from_dict(viewer_state)
 
         view = self.new_data_viewer(viewer_cls, data=data,
