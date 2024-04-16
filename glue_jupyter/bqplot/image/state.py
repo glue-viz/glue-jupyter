@@ -6,7 +6,7 @@ from glue.viewers.matplotlib.state import (DeferredDrawCallbackProperty as DDCPr
 
 from glue.viewers.image.state import ImageViewerState, ImageLayerState
 from glue.core.state_objects import StateAttributeLimitsHelper
-from glue.core.units import find_unit_choices, UnitConverter
+from glue.core.units import UnitConverter
 
 
 class BqplotImageViewerState(ImageViewerState):
