@@ -98,7 +98,7 @@ class BqplotImageLayerArtist(ImageLayerArtist):
         contour_data = converter.to_unit(self.state.layer,
                                          self.state.attribute,
                                          contour_data,
-                                         self.state.c_display_unit)
+                                         self.state.attribute_display_unit)
 
         for level in self.state.levels:
             if level not in self._contour_line_cache:

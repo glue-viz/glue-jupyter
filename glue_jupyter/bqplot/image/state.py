@@ -20,7 +20,6 @@ class BqplotImageViewerState(ImageViewerState):
 class BqplotImageLayerState(ImageLayerState):
     c_min = DDCProperty(docstring='The lower level used for the contours')
     c_max = DDCProperty(docstring='The upper level used for the contours')
-    c_display_unit = DDSCProperty(docstring='The units to use to display contour levels')
     level_mode = DDSCProperty(0, docstring='How to distribute the contour levels')
     n_levels = DDCProperty(5, docstring='The number of levels, in Linear mode')
     levels = CallbackProperty(docstring='List of values where to create the contour lines')
@@ -56,17 +55,13 @@ class BqplotImageLayerState(ImageLayerState):
             else:
                 return unit
 
-        BqplotImageLayerState.c_display_unit.set_display_func(self, format_unit)
-
         self.add_callback('n_levels', self._update_levels)
         self.add_callback('c_min', self._update_levels)
         self.add_callback('c_max', self._update_levels)
         self.add_callback('level_mode', self._update_levels)
         self.add_callback('levels', self._update_labels)
-        self.add_callback('attribute', self._update_c_display_unit_choices)
-        self.add_callback('c_display_unit', self._convert_units_c_limits, echo_old=True)
+        self.add_callback('attribute_display_unit', self._convert_units_c_limits, echo_old=True)
 
-        self._update_c_display_unit_choices()
         self._update_levels()
 
     def _update_priority(self, name):
@@ -85,20 +80,6 @@ class BqplotImageLayerState(ImageLayerState):
     def _update_labels(self, ignore=None):
         # TODO: we may want to have ways to configure this in the future
         self.labels = ["{0:.4g}".format(level) for level in self.levels]
-
-    def _update_c_display_unit_choices(self, *args):
-
-        if self.layer is None:
-            BqplotImageLayerState.c_display_unit.set_choices(self, [])
-            return
-
-        component = self.layer.get_component(self.attribute)
-        if component.units:
-            c_choices = find_unit_choices([(self.layer, self.attribute, component.units)])
-        else:
-            c_choices = ['']
-        BqplotImageLayerState.c_display_unit.set_choices(self, c_choices)
-        self.c_display_unit = component.units
 
     def _convert_units_c_limits(self, old_unit, new_unit):
 
