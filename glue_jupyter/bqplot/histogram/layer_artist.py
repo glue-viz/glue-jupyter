@@ -138,7 +138,8 @@ class BqplotHistogramLayerArtist(LayerArtist):
         changed = self.pop_changed_properties()
 
         if force or any(prop in changed for prop in ('layer', 'x_att', 'hist_x_min',
-                                                     'hist_x_max', 'hist_n_bin', 'x_log')):
+                                                     'hist_x_max', 'hist_n_bin', 'x_log',
+                                                     'random_subset')):
             self._calculate_histogram()
             force = True  # make sure scaling and visual attributes are updated
 
