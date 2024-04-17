@@ -1,11 +1,12 @@
 import numpy as np
 
-from echo import CallbackProperty
+from echo import CallbackProperty, delay_callback
 from glue.viewers.matplotlib.state import (DeferredDrawCallbackProperty as DDCProperty,
                                            DeferredDrawSelectionCallbackProperty as DDSCProperty)
 
 from glue.viewers.image.state import ImageViewerState, ImageLayerState
 from glue.core.state_objects import StateAttributeLimitsHelper
+from glue.core.units import UnitConverter
 
 
 class BqplotImageViewerState(ImageViewerState):
@@ -31,6 +32,7 @@ class BqplotImageLayerState(ImageLayerState):
     contour_visible = CallbackProperty(False, 'whether to show the image as contours')
 
     def __init__(self, *args, **kwargs):
+
         super(BqplotImageLayerState, self).__init__(*args, **kwargs)
 
         BqplotImageLayerState.level_mode.set_choices(self, ['Linear', 'Custom'])
@@ -53,6 +55,8 @@ class BqplotImageLayerState(ImageLayerState):
         self.add_callback('c_max', self._update_levels)
         self.add_callback('level_mode', self._update_levels)
         self.add_callback('levels', self._update_labels)
+        self.add_callback('attribute_display_unit', self._convert_units_c_limits, echo_old=True)
+
         self._update_levels()
 
     def _update_priority(self, name):
@@ -66,9 +70,37 @@ class BqplotImageLayerState(ImageLayerState):
 
     def _update_levels(self, ignore=None):
         if self.level_mode == "Linear":
-            # TODO: this is exclusive begin/end point, is that a good choise?
-            self.levels = np.linspace(self.c_min, self.c_max, self.n_levels+2)[1:-1].tolist()
+            self.levels = np.linspace(self.c_min, self.c_max, self.n_levels).tolist()
 
     def _update_labels(self, ignore=None):
         # TODO: we may want to have ways to configure this in the future
         self.labels = ["{0:.4g}".format(level) for level in self.levels]
+
+    def _convert_units_c_limits(self, old_unit, new_unit):
+
+        if (
+            getattr(self, '_previous_attribute', None) is self.attribute and
+            old_unit != new_unit and
+            self.layer is not None
+        ):
+
+            limits = np.hstack([self.c_min, self.c_max, self.levels])
+
+            converter = UnitConverter()
+
+            limits_native = converter.to_native(self.layer,
+                                                self.attribute, limits,
+                                                old_unit)
+
+            limits_new = converter.to_unit(self.layer,
+                                           self.attribute, limits_native,
+                                           new_unit)
+
+            with delay_callback(self, 'c_min', 'c_max', 'levels'):
+                self.c_min, self.c_max = sorted(limits_new[:2])
+                self.levels = tuple(limits_new[2:])
+
+        # Make sure that we keep track of what attribute the limits
+        # are for - if the attribute changes, we should not try and
+        # update the limits.
+        self._previous_attribute = self.attribute
