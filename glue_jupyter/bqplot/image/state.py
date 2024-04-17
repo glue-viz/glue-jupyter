@@ -32,6 +32,7 @@ class BqplotImageLayerState(ImageLayerState):
     contour_visible = CallbackProperty(False, 'whether to show the image as contours')
 
     def __init__(self, *args, **kwargs):
+
         super(BqplotImageLayerState, self).__init__(*args, **kwargs)
 
         BqplotImageLayerState.level_mode.set_choices(self, ['Linear', 'Custom'])
@@ -48,12 +49,6 @@ class BqplotImageLayerState(ImageLayerState):
         self.contour_lim_helper = StateAttributeLimitsHelper(self, attribute='attribute',
                                                              percentile='contour_percentile',
                                                              lower='c_min', upper='c_max')
-
-        def format_unit(unit):
-            if unit is None:
-                return 'Native units'
-            else:
-                return unit
 
         self.add_callback('n_levels', self._update_levels)
         self.add_callback('c_min', self._update_levels)
