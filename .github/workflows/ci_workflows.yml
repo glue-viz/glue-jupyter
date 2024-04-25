@@ -20,7 +20,7 @@ jobs:
 
   tests:
     needs: initial_checks
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    uses: astrofrog/github-actions-workflows/.github/workflows/tox.yml@tox-mac-image
     with:
       coverage: codecov
       libraries: |
