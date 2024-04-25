@@ -1,5 +1,21 @@
 # Full changelog
 
+## v0.21.0 - 2024-04-25
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### New Features
+
+* Expose ability to use a random subset of data for computing histograms by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/424
+* Implement unit conversion for contour levels by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/423
+
+#### Other Changes
+
+* Pin solara to <1.29 for now due to issue with patched rcParams by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/425
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.20.1...v0.21.0
+
 ## v0.20.1 - 2024-02-27
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
