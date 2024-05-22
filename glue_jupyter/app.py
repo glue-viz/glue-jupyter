@@ -371,7 +371,7 @@ class JupyterApplication(Application):
         view.layers[0].state.update_from_dict(layer_state)
         return view
 
-    def scatter3d(self, *, data=None, x=None, y=None, z=None, show=True):
+    def scatter3d(self, *, data=None, x=None, y=None, z=None, widget='ipyvolume', show=True):
         """
         Open an interactive 3d scatter plot viewer.
 
@@ -387,17 +387,26 @@ class JupyterApplication(Application):
             The attribute to show on the y axis.
         z : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the z axis.
+        widget : {'ipyvolume', 'vispy'}
+            Whether to use ipyvolume or VisPy as the front-end.
         show : bool, optional
             Whether to show the view immediately (`True`) or whether to only
             show it later if the ``show()`` method is called explicitly
             (`False`).
         """
 
-        from .ipyvolume import IpyvolumeScatterView
+        if widget == 'ipyvolume':
+            from .ipyvolume import IpyvolumeScatterView
+            viewer_cls = IpyvolumeScatterView
+        elif widget == 'vispy':
+            from glue_vispy_viewers.scatter.jupyter import JupyterVispyScatterViewer
+            viewer_cls = JupyterVispyScatterViewer
+        else:
+            raise ValueError("widget= should be 'ipyvolume' or 'vispy'")
 
         data = validate_data_argument(self.data_collection, data)
 
-        view = self.new_data_viewer(IpyvolumeScatterView, data=data, show=show)
+        view = self.new_data_viewer(viewer_cls, data=data, show=show)
         if x is not None:
             x = data.id[x]
             view.state.x_att = x
@@ -500,7 +509,7 @@ class JupyterApplication(Application):
 
         return view
 
-    def volshow(self, *, data=None, x=None, y=None, z=None, show=True):
+    def volshow(self, *, data=None, x=None, y=None, z=None, widget='ipyvolume', show=True):
         """
         Open an interactive volume viewer.
 
@@ -519,16 +528,26 @@ class JupyterApplication(Application):
         z : str or `~glue.core.component_id.ComponentID`, optional
             The attribute to show on the z axis. This should be one of the
             pixel axis attributes.
+        widget : {'ipyvolume', 'vispy'}
+            Whether to use ipyvolume or VisPy as the front-end.
         show : bool, optional
             Whether to show the view immediately (`True`) or whether to only
             show it later if the ``show()`` method is called explicitly
             (`False`).
          """
-        from .ipyvolume import IpyvolumeVolumeView
+
+        if widget == 'ipyvolume':
+            from .ipyvolume import IpyvolumeVolumeView
+            viewer_cls = IpyvolumeVolumeView
+        elif widget == 'vispy':
+            from glue_vispy_viewers.volume.jupyter import JupyterVispyVolumeViewer
+            viewer_cls = JupyterVispyVolumeViewer
+        else:
+            raise ValueError("widget= should be 'ipyvolume' or 'vispy'")
 
         data = validate_data_argument(self.data_collection, data)
 
-        view = self.new_data_viewer(IpyvolumeVolumeView, data=data, show=show)
+        view = self.new_data_viewer(viewer_cls, data=data, show=show)
 
         if x is not None:
             x = data.id[x]
