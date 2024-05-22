@@ -1,5 +1,5 @@
 {
-  "glue_jupyter.bqplot.image.tests.test_visual.test_contour_units[chromium]": "fa4f68c5c62e1437c1666c656ba02376396f6c75b6f7956f712c760569a2045b",
-  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d[chromium]": "fbdd9fe2649a0d72813c03e77af6233909df64207cb834f28da479f50b9e7a1d",
-  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density[chromium]": "d843a816a91e37cb0212c7caae913d7563f6c2eb42b49fa18345a5952e093b2f"
+  "glue_jupyter.bqplot.image.tests.test_visual.test_contour_units[chromium]": "53ed6a698cd0fe879f92a7c428e14878e80b2640a8e09d69bb82c3847041bfb9",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d[chromium]": "91fe92465a858548adcfba167b4402c61b927dd4da61dd1ed486f9fed84d5915",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density[chromium]": "d3bd7a7ff60cff14154f50bd75c5b8821cbd25009b01600691ca35b568783c43"
 }
