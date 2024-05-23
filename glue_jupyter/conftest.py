@@ -76,6 +76,9 @@ else:
     SOLARA_INSTALLED = True
 
 
+import vispy  # noqa
+vispy.use('jupyter_rfb')
+
 # Tweak IPython's display to not print out lots of __repr__s for widgets to
 # standard output. However, if we are using solara, we shouldn't do this as
 # it seems to cause issues.
