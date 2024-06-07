@@ -4,6 +4,9 @@
             <v-select :items="x_att_items" label="x axis" v-model="x_att_selected"/>
         </div>
         <div>
+            <v-text-field type="number" step="1" label="number of bins" v-model="glue_state.hist_n_bin" />
+        </div>
+        <div>
             <v-btn-toggle dense multiple :value="modeSet" @change="modeSetChange">
 
                 <v-tooltip bottom>
