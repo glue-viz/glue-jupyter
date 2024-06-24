@@ -7,6 +7,12 @@
             <v-text-field type="number" step="1" label="number of bins" v-model="glue_state.hist_n_bin" />
         </div>
         <div>
+            <glue-float-field label="x-min" :value.sync="glue_state.hist_x_min" />-->
+        </div>
+        <div>
+            <glue-float-field label="x-max" :value.sync="glue_state.hist_x_max" />-->
+        </div>
+        <div>
             <v-btn-toggle dense multiple :value="modeSet" @change="modeSetChange">
 
                 <v-tooltip bottom>
