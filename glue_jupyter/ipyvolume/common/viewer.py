@@ -36,8 +36,8 @@ class IpyvolumeBaseView(IPyWidgetView):
         def attribute_to_label(attribute):
             return 'null' if attribute is None else attribute.label
 
-        dlink((self.state, 'x_att'), (self.figure, 'xlabel'), attribute_to_label)
-        dlink((self.state, 'y_att'), (self.figure, 'zlabel'), attribute_to_label)
+        dlink((self.state, 'x_att'), (self.figure, 'zlabel'), attribute_to_label)
+        dlink((self.state, 'y_att'), (self.figure, 'xlabel'), attribute_to_label)
         dlink((self.state, 'z_att'), (self.figure, 'ylabel'), attribute_to_label)
 
         self.state.add_callback('x_min', self.limits_to_scales)
