@@ -18,3 +18,5 @@ class HistogramViewerStateWidget(v.VuetifyTemplate):
         self.glue_state = viewer_state
 
         link_glue_choices(self, viewer_state, 'x_att')
+
+    def axis_to_bins(self):
