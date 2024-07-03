@@ -32,6 +32,15 @@
                     </template>
                     <span>cumulative</span>
                 </v-tooltip>
+
+                <v-tooltip bottom>
+                     <template v-slot:activator="{ on }">
+                         <v-btn v-on="on" small value="axis_to_bins">
+                             <v-icon>trending_down</v-icon>
+                         </v-btn>
+                     </template>
+                     <span>resize_axis</span>
+                </v-tooltip bottom>
             </v-btn-toggle>
         </div>
 
