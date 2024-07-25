@@ -35,7 +35,7 @@
 
                 <v-tooltip bottom>
                      <template v-slot:activator="{ on }">
-                         <v-btn v-on="on" small value="axis_to_bins">
+                         <v-btn v-on="on" small value="vue_axis_to_bins">
                              <v-icon>trending_down</v-icon>
                          </v-btn>
                      </template>
