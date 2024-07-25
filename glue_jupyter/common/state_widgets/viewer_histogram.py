@@ -3,6 +3,7 @@ import traitlets
 from ...state_traitlets_helpers import GlueState
 from ...vuetify_helpers import link_glue_choices
 
+
 __all__ = ['HistogramViewerStateWidget']
 
 
@@ -19,4 +20,8 @@ class HistogramViewerStateWidget(v.VuetifyTemplate):
 
         link_glue_choices(self, viewer_state, 'x_att')
 
-    def axis_to_bins(self):
+    def vue_axis_to_bins(self):
+        self.glue_state.update_bins_to_view()
+        self.glue_state.x_axislabel = "Updated Bins"
+        print('Triggered axis to bins')
+        pass
