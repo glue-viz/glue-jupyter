@@ -86,12 +86,10 @@ class IpyvolumeBaseView(IPyWidgetView):
             self._session.command_stack.do(cmd)
 
     def limits_to_scales(self, *args):
-        if self.state.x_min is not None and self.state.x_max is not None:
-            self.figure.xlim = self.state.y_min, self.state.y_max
         if self.state.y_min is not None and self.state.y_max is not None:
+            self.figure.xlim = self.state.y_min, self.state.y_max
+        if self.state.x_min is not None and self.state.x_max is not None:
             self.figure.zlim = self.state.x_min, self.state.x_max
-        # if self.state.z_min is not None and self.state.z_max is not None:
-        #     self.figure.zlim = self.state.z_min, self.state.z_max
         if hasattr(self.state, 'z_min'):
             if self.state.z_min is not None and self.state.z_max is not None:
                 self.figure.ylim = self.state.z_min, self.state.z_max
