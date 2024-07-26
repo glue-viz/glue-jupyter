@@ -32,16 +32,13 @@
                     </template>
                     <span>cumulative</span>
                 </v-tooltip>
-
-                <v-tooltip bottom>
-                     <template v-slot:activator="{ on }">
-                         <v-btn v-on="on" small value="vue_axis_to_bins">
-                             <v-icon>trending_down</v-icon>
-                         </v-btn>
-                     </template>
-                     <span>resize_axis</span>
-                </v-tooltip bottom>
             </v-btn-toggle>
+        </div>
+
+        <div>
+          <v-btn icon color="primary" text small @click="axis_to_bins">
+              <v-icon>Fit Axes to Bins</v-icon>
+          </v-btn>
         </div>
 
         <v-switch v-model="glue_state.show_axes" label="Show axes" hide-details/>

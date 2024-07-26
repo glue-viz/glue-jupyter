@@ -21,7 +21,7 @@ class HistogramViewerStateWidget(v.VuetifyTemplate):
         link_glue_choices(self, viewer_state, 'x_att')
 
     def vue_axis_to_bins(self):
-        self.glue_state.update_bins_to_view()
         self.glue_state.x_axislabel = "Updated Bins"
+        self.glue_state.update_bins_to_view()
         print('Triggered axis to bins')
         pass
