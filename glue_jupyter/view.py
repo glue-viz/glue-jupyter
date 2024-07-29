@@ -26,6 +26,7 @@ class IPyWidgetView(Viewer):
 
     _layer_artist_container_cls = IPyWidgetLayerArtistContainer
     _default_mouse_mode_cls = None
+    _toolbar_cls = BasicJupyterToolbar
 
     inherit_tools = True
     tools = []
@@ -149,7 +150,7 @@ class IPyWidgetView(Viewer):
 
         from glue.config import viewer_tool
 
-        self.toolbar = BasicJupyterToolbar(self)
+        self.toolbar = self._toolbar_cls(self)
 
         # Need to include tools and subtools declared by parent classes unless
         # specified otherwise

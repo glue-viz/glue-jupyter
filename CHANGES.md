@@ -1,5 +1,21 @@
 # Full changelog
 
+## v0.22.0 - 2024-06-26
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### New Features
+
+* Add support for 3D VisPy viewers by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/453
+
+#### Other Changes
+
+* Allow viewers to use BasicJupyterToolbar subclasses by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/452
+* Updated image hashes by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/454
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.21.0...v0.22.0
+
 ## v0.21.0 - 2024-04-25
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
