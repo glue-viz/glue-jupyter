@@ -25,6 +25,8 @@ class IpyvolumeBaseView(IPyWidgetView):
 
         self.figure = ipv.figure(animation_exponent=1.)
         self.figure.selector = ''
+        self.figure.width = 600
+        self._figure_widget = self.figure
 
         super(IpyvolumeBaseView, self).__init__(*args, **kwargs)
 
@@ -50,8 +52,6 @@ class IpyvolumeBaseView(IPyWidgetView):
 
         self.state.add_callback('visible_axes', self._update_axes_visibility)
         self.state.add_callback('native_aspect', self._update_aspect)
-
-        self._figure_widget = self.figure
 
         self.create_layout()
 
