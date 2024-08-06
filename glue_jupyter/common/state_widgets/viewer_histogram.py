@@ -20,5 +20,5 @@ class HistogramViewerStateWidget(v.VuetifyTemplate):
 
         link_glue_choices(self, viewer_state, 'x_att')
 
-    def vue_axis_to_bins(self, *args):
+    def vue_bins_to_axis(self, *args):
         self.glue_state.update_bins_to_view()

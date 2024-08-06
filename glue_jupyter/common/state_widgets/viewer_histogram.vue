@@ -13,11 +13,10 @@
             <glue-float-field label="x-max" :value.sync="glue_state.hist_x_max" />-->
         </div>
         <div>
-            <v-toolbar title="Toolbar">
-                <v-toolbar-items>
+            <v-toolbar density="compact" >
                   <v-tooltip>
                     <template v-slot:activator="{ on }">
-                         <v-btn v-on="on" small value="normalize">
+                         <v-btn v-on="on" size="x-small" value="normalize">
                              <v-icon>unfold_more</v-icon>
                          </v-btn>
                      </template>
@@ -25,17 +24,17 @@
                   </v-tooltip>
                   <v-tooltip bottom>
                     <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" small value="cumulative">
+                        <v-btn v-on="on" size="x-small" value="cumulative">
                             <v-icon>trending_up</v-icon>
                         </v-btn>
                     </template>
                     <span>cumulative</span>
                   </v-tooltip>
 
-                  <v-btn variant="outlined" small @click="bins_to_axes">
+                  <v-btn variant="outlined" size="x-small" @click="bins_to_axes">
                       Fit Bins to Axes
                   </v-btn>
-              </v-toolbar-items>
+            </v-toolbar>
         </div>
         <v-switch v-model="glue_state.show_axes" label="Show axes" hide-details/>
     </div>
