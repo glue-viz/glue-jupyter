@@ -32,8 +32,8 @@
                     <span>cumulative</span>
                   </v-tooltip>
 
-                  <v-btn variant="outlined" small @click="axis_to_bins">
-                      Fit Axes to Bins
+                  <v-btn variant="outlined" small @click="bins_to_axes">
+                      Fit Bins to Axes
                   </v-btn>
               </v-toolbar-items>
         </div>
