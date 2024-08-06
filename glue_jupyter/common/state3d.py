@@ -85,7 +85,7 @@ class ViewerState3D(ViewerState):
         # TODO: this could be cached based on the limits, but is not urgent
         aspect = np.array([1, 1, 1], dtype=float)
         if self.native_aspect:
-            aspect[0] = 1.
+            aspect[0] = 1.0
             aspect[1] = (self.z_max - self.z_min) / (self.x_max - self.x_min)
             aspect[2] = (self.y_max - self.y_min) / (self.x_max - self.x_min)
             aspect /= aspect.max()
