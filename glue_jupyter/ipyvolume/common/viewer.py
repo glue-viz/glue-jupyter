@@ -33,13 +33,13 @@ class IpyvolumeBaseView(IPyWidgetView):
         # FIXME: hack for the movie maker to have access to the figure
         self.state.figure = self.figure
 
-        # note that for ipyvolume, we use axis in the order x, z, y in order to have
+        # note that for ipyvolume, we use axis in the order z, x, y in order to have
         # the z axis of glue pointing up
         def attribute_to_label(attribute):
             return 'null' if attribute is None else attribute.label
 
-        dlink((self.state, 'x_att'), (self.figure, 'xlabel'), attribute_to_label)
-        dlink((self.state, 'y_att'), (self.figure, 'zlabel'), attribute_to_label)
+        dlink((self.state, 'x_att'), (self.figure, 'zlabel'), attribute_to_label)
+        dlink((self.state, 'y_att'), (self.figure, 'xlabel'), attribute_to_label)
         dlink((self.state, 'z_att'), (self.figure, 'ylabel'), attribute_to_label)
 
         self.state.add_callback('x_min', self.limits_to_scales)
@@ -86,12 +86,10 @@ class IpyvolumeBaseView(IPyWidgetView):
             self._session.command_stack.do(cmd)
 
     def limits_to_scales(self, *args):
-        if self.state.x_min is not None and self.state.x_max is not None:
-            self.figure.xlim = self.state.x_min, self.state.x_max
         if self.state.y_min is not None and self.state.y_max is not None:
-            self.figure.zlim = self.state.y_min, self.state.y_max
-        # if self.state.z_min is not None and self.state.z_max is not None:
-        #     self.figure.zlim = self.state.z_min, self.state.z_max
+            self.figure.xlim = self.state.y_min, self.state.y_max
+        if self.state.x_min is not None and self.state.x_max is not None:
+            self.figure.zlim = self.state.x_min, self.state.x_max
         if hasattr(self.state, 'z_min'):
             if self.state.z_min is not None and self.state.z_max is not None:
                 self.figure.ylim = self.state.z_min, self.state.z_max

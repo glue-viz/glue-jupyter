@@ -106,6 +106,8 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
             data *= mask
         else:
             data = self.layer[self.state.attribute]
+
+        data = np.transpose(data, (2, 0, 1))
         finite_mask = np.isfinite(data)
         finite_data = data[finite_mask]
         finite_mask_normalized = finite_data - finite_data.min()

@@ -39,15 +39,15 @@ def test_labels(app, dataxyz):
     app.add_data(dataxyz)
     scatter = app.scatter3d(data=dataxyz)
     assert str(scatter.state.x_att) == 'x'
-    assert scatter.figure.xlabel == 'x'
+    assert scatter.figure.zlabel == 'x'
     assert str(scatter.state.y_att) == 'y'
-    assert scatter.figure.zlabel == 'y'
+    assert scatter.figure.xlabel == 'y'
     assert str(scatter.state.z_att) == 'z'
     assert scatter.figure.ylabel == 'z'
 
     scatter.state.x_att = dataxyz.id['y']
-    assert scatter.figure.xlabel == 'y'
+    assert scatter.figure.zlabel == 'y'
     scatter.state.y_att = dataxyz.id['z']
-    assert scatter.figure.zlabel == 'z'
+    assert scatter.figure.xlabel == 'z'
     scatter.state.z_att = dataxyz.id['x']
     assert scatter.figure.ylabel == 'x'
