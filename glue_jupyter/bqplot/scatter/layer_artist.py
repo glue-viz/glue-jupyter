@@ -9,6 +9,7 @@ from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.scatter.layer_artist import DensityMapLimits
 from glue.viewers.scatter.state import ScatterLayerState
 from glue_jupyter.bqplot.scatter.scatter_density_mark import GenericDensityMark
+from glue.core.units import UnitConverter
 
 from ...utils import colormap_to_hexlist, float_or_none
 from ..compatibility import ScatterGL, LinesGL
@@ -175,7 +176,6 @@ class BqplotScatterLayerArtist(LayerArtist):
                 x = ensure_numerical(self.layer[self._viewer_state.x_att].ravel())
                 if x.dtype.kind == "M":
                     x = datetime64_to_mpl(x)
-
         except (IncompatibleAttribute, IndexError):
             # The following includes a call to self.clear()
             self.disable_invalid_attributes(self._viewer_state.x_att)
@@ -194,6 +194,18 @@ class BqplotScatterLayerArtist(LayerArtist):
             return
         else:
             self.enable()
+
+        converter = UnitConverter()
+
+        x = converter.to_unit(self._viewer_state.x_att.parent,
+                              self._viewer_state.x_att,
+                              x,
+                              self._viewer_state.x_display_unit)
+
+        y = converter.to_unit(self._viewer_state.y_att.parent,
+                              self._viewer_state.y_att,
+                              y,
+                              self._viewer_state.y_display_unit)
 
         if self.state.markers_visible:
 

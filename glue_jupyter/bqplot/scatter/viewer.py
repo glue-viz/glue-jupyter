@@ -36,7 +36,13 @@ class BqplotScatterView(BqplotBaseView):
     def _update_axes(self, *args):
 
         if self.state.x_att is not None:
-            self.state.x_axislabel = str(self.state.x_att)
+            if self.state.x_display_unit:
+                self.state.x_axislabel = str(self.state.x_att) + f' [{self.state.x_display_unit}]'
+            else:
+                self.state.x_axislabel = str(self.state.x_att)
 
         if self.state.y_att is not None:
-            self.state.y_axislabel = str(self.state.y_att)
+            if self.state.y_display_unit:
+                self.state.y_axislabel = str(self.state.y_att) + f' [{self.state.y_display_unit}]'
+            else:
+                self.state.y_axislabel = str(self.state.y_att)
