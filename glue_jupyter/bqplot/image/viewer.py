@@ -34,9 +34,8 @@ class BqplotImageView(BqplotBaseView):
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:rectangle', 'bqplot:circle',
              'bqplot:ellipse', 'bqplot:polygon', 'bqplot:lasso']
 
-    def __init__(self, session):
-
-        super(BqplotImageView, self).__init__(session)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.shape = None
 

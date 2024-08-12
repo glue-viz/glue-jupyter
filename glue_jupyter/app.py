@@ -660,11 +660,17 @@ class JupyterApplication(Application):
         finally:
             os.chdir(start_dir)
 
+    def __gluestate__(self, context):
+        viewers = [context.id(v) for v in self.viewers]
+        data = self.session.data_collection
+        from glue.main import _loaded_plugins
+        return dict(session=context.id(self.session), viewers=viewers,
+                    data=context.id(data), plugins=_loaded_plugins)
+
     @classmethod
     def __setgluestate__(cls, rec, context):
         self = super(JupyterApplication, cls).__setgluestate__(rec, context)
-        for tab in rec['viewers']:
-            for v in tab:
-                viewer = context.object(v)
-                self._viewer_refs.append(weakref.ref(viewer))
+        for v in rec['viewers']:
+            viewer = context.object(v)
+            self._viewer_refs.append(weakref.ref(viewer))
         return self

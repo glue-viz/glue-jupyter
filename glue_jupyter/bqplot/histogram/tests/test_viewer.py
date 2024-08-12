@@ -1,5 +1,6 @@
 from itertools import permutations, product
 from glue.core.subset import SubsetState
+from glue.core.tests.test_state import clone
 
 
 def test_non_hex_colors(app, dataxyz):
@@ -66,3 +67,13 @@ def test_zorder(app, data_volume, dataxz, dataxyz):
         vol.state.zorder, xz.state.zorder, xyz.state.zorder = p
         it = iter(s.figure.marks)
         assert all(layer.bars in it for layer in s.layers)
+
+
+def test_session(app, dataxz, dataxyz):
+
+    # Test that the viewer can be saved and restored from a session file
+
+    v = app.histogram1d(data=dataxyz)
+    v.add_data(dataxz)
+    app.data_collection.new_subset_group(subset_state=dataxz.id['x'] > 1, label='subset')
+    clone(app)

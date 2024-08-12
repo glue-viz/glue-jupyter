@@ -12,6 +12,7 @@ from glue.core.roi import XRangeROI
 from glue.core.subset import AndState, InvertState, RangeSubsetState
 from glue.config import unit_converter, settings
 from glue.plugins.wcs_autolinking.wcs_autolinking import WCSLink
+from glue.core.tests.test_state import clone
 
 
 def setup_function(func):
@@ -238,3 +239,11 @@ def test_composite_yrange(app):
     assert isinstance(sbst.state1, RangeSubsetState)
     assert (isinstance(sbst.state2, InvertState) and
             isinstance(sbst.state2.state1, RangeSubsetState))
+
+
+def test_session(app, data_volume):
+
+    # Test that the viewer can be saved and restored from a session file
+
+    v = app.scatter2d(data=data_volume)
+    clone(app)
