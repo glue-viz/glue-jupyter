@@ -29,6 +29,8 @@ def test_contour_units(
 
     assert_allclose(image.state.layers[0].levels, [0.1, 0.3, 0.5, 0.7, 0.9])
 
+    image.state.layers[0].attribute_display_unit = 'mm'
+    image.state.layers[0].attribute_display_unit = 'km'
     image.state.layers[0].attribute_display_unit = 'm'
 
     assert_allclose(image.state.layers[0].levels, [100, 300, 500, 700, 900])
