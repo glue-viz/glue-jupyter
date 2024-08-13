@@ -56,6 +56,7 @@ class BqplotImageLayerState(ImageLayerState):
         self.add_callback('level_mode', self._update_levels)
         self.add_callback('levels', self._update_labels)
         self.add_callback('attribute_display_unit', self._convert_units_c_limits, echo_old=True)
+        self._convert_units_c_limits(None, None)
 
         self._update_levels()
 
