@@ -14,6 +14,8 @@ TRANSLATION = {
     "glue.viewers.scatter.layer_artist.ScatterLayerArtist": "glue_jupyter.bqplot.scatter.BqplotScatterLayerArtist",
     "glue.viewers.image.state.ImageLayerState": "glue_jupyter.bqplot.image.state.BqplotImageLayerState",
     "glue.viewers.image.state.ImageViewerState": "glue_jupyter.bqplot.image.state.BqplotImageViewerState",
+    "glue_vispy_viewers.scatter.qt.scatter_viewer.VispyScatterViewer": "glue_vispy_viewers.scatter.jupyter.scatter_viewer.JupyterVispyScatterViewer",
+    "glue_vispy_viewers.volume.qt.volume_viewer.VispyVolumeViewer": "glue_vispy_viewers.volume.jupyter.volume_viewer.JupyterVispyVolumeViewer",
 }
 
 

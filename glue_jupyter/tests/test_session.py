@@ -8,4 +8,4 @@ def test_qt_to_jupyter_session():
 
     app = JupyterApplication.restore_session(os.path.join(DATA, 'qt_session.glu'))
 
-    assert len(app.viewers) == 4
+    assert len(app.viewers) == 6
