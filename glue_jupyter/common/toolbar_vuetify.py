@@ -1,3 +1,4 @@
+from mimetypes import guess_type
 import os
 import ipyvuetify as v
 import traitlets
@@ -70,14 +71,21 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
     def add_tool(self, tool):
         self.tools[tool.tool_id] = tool
         # TODO: we should ideally just incorporate this check into icon_path directly.
+        ext = os.path.splitext(tool.icon)[1][1:] or "svg"
         if os.path.exists(tool.icon):
             path = tool.icon
         else:
-            path = icon_path(tool.icon, icon_format='svg')
+            path = icon_path(tool.icon, icon_format=ext)
+
+        format = guess_type(path)[0]
+        image_prefix = "image/"
+        if format is None or not format.startswith(image_prefix):
+            raise ValueError(f"Invalid or unknown image MIME type for: {path}")
+        format = format[len(image_prefix):]
         self.tools_data = {
             **self.tools_data,
             tool.tool_id: {
                 'tooltip': tool.tool_tip,
-                'img': read_icon(path, 'svg+xml')
+                'img': read_icon(path, format)
             }
         }
