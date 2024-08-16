@@ -661,17 +661,13 @@ class JupyterApplication(Application):
             os.chdir(start_dir)
 
     def __gluestate__(self, context):
-        viewers = [context.id(v) for v in self.viewers]
-        data = self.session.data_collection
-        from glue.main import _loaded_plugins
-        return dict(session=context.id(self.session), viewers=viewers,
-                    data=context.id(data), plugins=_loaded_plugins)
+        state = super().__gluestate__(context)
+        state['viewers'] = [context.id(v) for v in self.viewers]
+        return state
 
     @classmethod
     def __setgluestate__(cls, rec, context):
-        self = cls(data_collection=context.object(rec['data']))
-        # manually register the newly-created session, which the viewers need
-        context.register_object(rec['session'], self.session)
+        self = super().__setgluestate__(rec, context)
         for v in rec['viewers']:
             viewer = context.object(v)
             self._viewer_refs.append(weakref.ref(viewer))
