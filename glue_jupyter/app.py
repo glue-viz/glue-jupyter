@@ -669,7 +669,9 @@ class JupyterApplication(Application):
 
     @classmethod
     def __setgluestate__(cls, rec, context):
-        self = super(JupyterApplication, cls).__setgluestate__(rec, context)
+        self = cls(data_collection=context.object(rec['data']))
+        # manually register the newly-created session, which the viewers need
+        context.register_object(rec['session'], self.session)
         for v in rec['viewers']:
             viewer = context.object(v)
             self._viewer_refs.append(weakref.ref(viewer))
