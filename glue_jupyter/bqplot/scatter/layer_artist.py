@@ -64,6 +64,8 @@ DATA_PROPERTIES = {
     "linewidth",
     "markers_visible",
     "vector_scaling",
+    "x_display_unit",
+    "y_display_unit"
 }
 
 
