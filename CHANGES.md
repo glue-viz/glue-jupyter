@@ -1,5 +1,22 @@
 # Full changelog
 
+## v0.22.1 - 2024-08-20
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+* Remove debug panel in ipyvolume viewers by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/457
+* Updates for ipyvolume viewer issues by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/456
+* Fix issue with contour labels not updating after unit change by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/461
+
+#### Other Changes
+
+* Allow using non-SVG icons in toolbar by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/465
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.22.0...v0.22.1
+
 ## v0.22.0 - 2024-06-26
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
