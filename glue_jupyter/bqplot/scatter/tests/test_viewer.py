@@ -158,6 +158,9 @@ def test_unit_conversion(app):
     assert viewer.layers[2].enabled
     assert viewer.layers[3].enabled
 
+    assert viewer.state.x_axislabel == 'a [m]'
+    assert viewer.state.y_axislabel == 'b [s]'
+
     assert_allclose(viewer.layers[0].scatter_mark.x, [1, 2, 3])
     assert_allclose(viewer.layers[0].scatter_mark.y, [2, 3, 4])
     assert_allclose(viewer.layers[1].scatter_mark.x, [2, 1, 3])
@@ -198,6 +201,9 @@ def test_unit_conversion(app):
     viewer.state.x_display_unit = 'km'
     viewer.state.y_display_unit = 'ms'
 
+    assert viewer.state.x_axislabel == 'a [km]'
+    assert viewer.state.y_axislabel == 'b [ms]'
+
     assert_allclose(viewer.layers[0].scatter_mark.x, [1e-3, 2e-3, 3e-3])
     assert_allclose(viewer.layers[0].scatter_mark.y, [2e3, 3e3, 4e3])
     assert_allclose(viewer.layers[1].scatter_mark.x, [2e-3, 1e-3, 3e-3])
@@ -233,6 +239,9 @@ def test_unit_conversion(app):
 
     viewer.state.x_display_unit = 'm'
     viewer.state.y_display_unit = 's'
+#
+    assert viewer.state.x_axislabel == 'a [m]'
+    assert viewer.state.y_axislabel == 'b [s]'
 
     assert_allclose(viewer.layers[0].scatter_mark.x, [1, 2, 3])
     assert_allclose(viewer.layers[0].scatter_mark.y, [2, 3, 4])

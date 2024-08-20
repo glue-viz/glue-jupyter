@@ -34,6 +34,8 @@ class BqplotScatterView(BqplotBaseView):
         super().__init__(*args, **kwargs)
         self.state.add_callback('x_att', self._update_axes)
         self.state.add_callback('y_att', self._update_axes)
+        self.state.add_callback('x_display_unit', self._update_axes)
+        self.state.add_callback('y_display_unit', self._update_axes)
         self._update_axes()
 
     def _update_axes(self, *args):
