@@ -69,6 +69,7 @@ class GenericDensityMark(ImageGL):
         stretch=None,
         dpi=None,
         external_padding=None,
+        visible=True,
     ):
 
         # FIXME: need to use weakref to avoid circular references
@@ -91,6 +92,7 @@ class GenericDensityMark(ImageGL):
         self.vmin = vmin
         self.vmax = vmax
         self.stretch = stretch
+        self.visible = visible
 
         if dpi is not None:
             self.dpi = dpi
@@ -194,7 +196,7 @@ class GenericDensityMark(ImageGL):
 
     def _update_rendered_image(self, *args, **kwargs):
 
-        if self._counts is None:
+        if self._counts is None or not self.visible:
             self.image = EMPTY_IMAGE
             return
 
