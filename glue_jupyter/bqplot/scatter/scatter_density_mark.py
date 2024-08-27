@@ -108,6 +108,7 @@ class GenericDensityMark(ImageGL):
         self.observe(self._update_rendered_image, "vmin")
         self.observe(self._update_rendered_image, "vmax")
         self.observe(self._update_rendered_image, "stretch")
+        self.observe(self._update_rendered_image, "visible")
 
         self._scale_image = ColorScale()
         self._scales = {
