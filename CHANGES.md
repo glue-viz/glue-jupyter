@@ -1,5 +1,16 @@
 # Full changelog
 
+## v0.22.2 - 2024-09-03
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+* Disable scatter viewer density map image broadcast when not visible by @kecnry in https://github.com/glue-viz/glue-jupyter/pull/467
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.22.1...v0.22.2
+
 ## v0.22.1 - 2024-08-20
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
