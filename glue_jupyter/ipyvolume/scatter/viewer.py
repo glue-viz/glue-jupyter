@@ -1,4 +1,6 @@
 from glue_jupyter.common.state3d import Scatter3DViewerState
+from glue_jupyter.registries import viewer_registry
+
 from .layer_artist import IpyvolumeScatterLayerArtist
 from .layer_style_widget import Scatter3DLayerStateWidget
 from ..common.viewer_options_widget import Viewer3DStateWidget
@@ -7,6 +9,7 @@ from ..common.viewer import IpyvolumeBaseView
 __all__ = ['IpyvolumeScatterView']
 
 
+@viewer_registry("scatter3d")
 class IpyvolumeScatterView(IpyvolumeBaseView):
 
     allow_duplicate_data = False
