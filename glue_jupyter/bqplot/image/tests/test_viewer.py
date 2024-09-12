@@ -125,5 +125,5 @@ def test_session(app, data_image):
 
     # Test that the viewer can be saved and restored from a session file
 
-    v = app.imshow(data=data_image)
+    app.imshow(data=data_image)
     clone(app)

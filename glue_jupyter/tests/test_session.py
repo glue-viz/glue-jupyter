@@ -1,8 +1,8 @@
 import os
 from glue_jupyter.app import JupyterApplication
-import glue_jupyter.session  # TODO: register via usual plugin infrastructure
-
+from glue_jupyter import session  # noqa
 DATA = os.path.join(os.path.dirname(__file__), 'data')
+
 
 def test_qt_to_jupyter_session():
 

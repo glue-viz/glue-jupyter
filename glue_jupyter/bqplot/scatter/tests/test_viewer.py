@@ -113,5 +113,5 @@ def test_session(app, dataxyz):
 
     # Test that the viewer can be saved and restored from a session file
 
-    v = app.scatter2d(data=dataxyz)
+    app.scatter2d(data=dataxyz)
     clone(app)
