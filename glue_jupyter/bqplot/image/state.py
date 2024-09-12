@@ -33,8 +33,6 @@ class BqplotImageLayerState(ImageLayerState):
 
     def __init__(self, *args, **kwargs):
 
-        super(BqplotImageLayerState, self).__init__(*args, **kwargs)
-
         BqplotImageLayerState.level_mode.set_choices(self, ['Linear', 'Custom'])
         percentile_display = {100: 'Min/Max',
                               99.5: '99.5%',
@@ -46,6 +44,9 @@ class BqplotImageLayerState(ImageLayerState):
         BqplotImageLayerState.contour_percentile.set_choices(self, [100, 99.5, 99, 95, 90,
                                                                     'Custom'])
         BqplotImageLayerState.contour_percentile.set_display_func(self, percentile_display.get)
+
+        super(BqplotImageLayerState, self).__init__(*args, **kwargs)
+
         self.contour_lim_helper = StateAttributeLimitsHelper(self, attribute='attribute',
                                                              percentile='contour_percentile',
                                                              lower='c_min', upper='c_max')

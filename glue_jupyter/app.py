@@ -1,3 +1,4 @@
+import os
 import weakref
 
 import ipywidgets as widgets
@@ -625,3 +626,49 @@ class JupyterApplication(Application):
 
     def add_widget(self, widget, label=None, tab=None):
         pass
+
+    @staticmethod
+    def restore_session(path):
+        """
+        Reload a previously-saved session
+
+        Parameters
+        ----------
+        path : `str`
+            Path to the file to load.
+
+        Returns
+        -------
+        app : :class:`Application`
+            The loaded application.
+        """
+        from glue.core.state import GlueUnSerializer
+
+        # In case relative paths are needed in the session file, we do the
+        # loading while setting the current directory to the directory
+        # in which the session file is so that relative paths are interpreted
+        # as relative to the session file.
+        start_dir = os.path.abspath('.')
+        session_dir = os.path.dirname(path) or '.'
+        session_file = os.path.basename(path)
+
+        try:
+            os.chdir(session_dir)
+            with open(session_file) as infile:
+                state = GlueUnSerializer.load(infile)
+            return state.object('__main__')
+        finally:
+            os.chdir(start_dir)
+
+    def __gluestate__(self, context):
+        state = super().__gluestate__(context)
+        state['viewers'] = [context.id(v) for v in self.viewers]
+        return state
+
+    @classmethod
+    def __setgluestate__(cls, rec, context):
+        self = super().__setgluestate__(rec, context)
+        for v in rec['viewers']:
+            viewer = context.object(v)
+            self._viewer_refs.append(weakref.ref(viewer))
+        return self

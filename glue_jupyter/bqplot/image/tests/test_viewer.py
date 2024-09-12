@@ -1,4 +1,5 @@
 import glue_jupyter.state_traitlets_helpers
+from glue.core.tests.test_state import clone
 
 
 def test_non_hex_colors(app, data_image):
@@ -118,3 +119,11 @@ def test_add_markers_zoom(app, data_image, data_volume, dataxyz):
     assert im.state.x_max == 63.5
     assert im.state.y_min == -0.5
     assert im.state.y_max == 63.5
+
+
+def test_session(app, data_image):
+
+    # Test that the viewer can be saved and restored from a session file
+
+    app.imshow(data=data_image)
+    clone(app)

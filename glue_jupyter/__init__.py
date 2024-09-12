@@ -117,3 +117,7 @@ def example_image(shape=64, limits=[-4, 4]):
     data = Data()
     data.add_component(intensity, label='intensity')
     return data
+
+
+def setup_translate_qt_to_jupyter_session():
+    import glue_jupyter.session  # noqa

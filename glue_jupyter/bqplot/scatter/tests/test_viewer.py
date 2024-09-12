@@ -1,4 +1,5 @@
 from itertools import permutations
+from glue.core.tests.test_state import clone
 
 
 def test_scatter2d_nd(app, data_4d):
@@ -106,3 +107,11 @@ def test_incompatible_data(app):
 
     assert len(s.layers) == 1
     assert s.layers[0].enabled
+
+
+def test_session(app, dataxyz):
+
+    # Test that the viewer can be saved and restored from a session file
+
+    app.scatter2d(data=dataxyz)
+    clone(app)
