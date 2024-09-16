@@ -146,6 +146,7 @@ class BqplotScatterLayerArtist(LayerArtist):
             vmin=self.density_auto_limits.min,
             vmax=self.density_auto_limits.max,
             histogram2d_func=self.compute_density_map,
+            visible=False
         )
 
         self.view.figure.marks = list(self.view.figure.marks) + [
