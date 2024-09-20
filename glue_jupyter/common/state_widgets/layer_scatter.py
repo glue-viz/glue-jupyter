@@ -1,3 +1,5 @@
+from enum import member
+
 import ipyvuetify as v
 import traitlets
 
@@ -51,6 +53,9 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
     vy_att_items = traitlets.List().tag(sync=True)
     vy_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
 
+    vector_origin_items = traitlets.List().tag(sync=True)
+
+
     def __init__(self, layer_state):
         super().__init__()
 
@@ -94,3 +99,12 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
                 cmap = member[1]
                 break
         self.layer_state.cmap = cmap
+
+    def vue_set_vector_origin(self, data):
+        origin = 'tail'
+        vector_origins = ['tail', 'middle', 'bottom']
+        for an_origin in vector_origins:
+            if data == an_origin:
+                origin = an_origin
+                break
+        self.layer_state.vector_origin = origin
