@@ -51,6 +51,10 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
     vy_att_items = traitlets.List().tag(sync=True)
     vy_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
 
+    vector_origin_items = traitlets.List().tag(sync=True)
+    vector_origin_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+
     def __init__(self, layer_state):
         super().__init__()
 
@@ -86,6 +90,7 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
 
         link_glue_choices(self, layer_state, "vx_att")
         link_glue_choices(self, layer_state, "vy_att")
+        link_glue_choices(self, layer_state, "vector_origin")
 
     def vue_set_colormap(self, data):
         cmap = None

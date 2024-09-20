@@ -95,11 +95,11 @@
                 <v-select label="vy" :items="vy_att_items" v-model="vy_att_selected" hide-details />
             </div>
             <div>
-                <v-select label="origin" :items=vector_origin />
+                <v-select label="vector origin" :items="vector_origin_items" :v-model="vector_origin_selected" hide-details/>
             </div>
             <div>
                 <v-subheader class="pl-0 slider-label">vector size</v-subheader>
-                <glue-throttled-slider wait="300" min="0" max="100" step="1" :value.sync="glue_state.vector_scaling"
+                <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="glue_state.vector_scaling"
                     hide-details />
             </div>
         </template>
@@ -114,11 +114,3 @@
     margin-top: 6px;
 }
 </style>
-
-<script>
-  export default {
-      data: () => ({
-        vector_origin: ['tail', 'middle', 'tip']
-      }),
-  }
-</script>
