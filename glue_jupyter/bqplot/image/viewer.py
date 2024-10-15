@@ -34,14 +34,14 @@ class BqplotImageView(BqplotBaseView):
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:rectangle', 'bqplot:circle',
              'bqplot:ellipse', 'bqplot:polygon', 'bqplot:lasso']
 
-    def __init__(self, session):
+    def __init__(self, session, compression='png'):
 
         super(BqplotImageView, self).__init__(session)
 
         self.shape = None
 
         self._composite = CompositeArray()
-        self._composite_image = FRBImage(self, self._composite)
+        self._composite_image = FRBImage(self, self._composite, compression=compression)
         self.figure.marks = list(self.figure.marks) + [self._composite_image]
         self.state.add_callback('reference_data', self._reset_limits, echo_old=True)
         self.state.add_callback('x_att', self._reset_limits, echo_old=True)
