@@ -17,7 +17,7 @@ EMPTY_IMAGE = np.zeros((10, 10, 4), dtype=np.uint8)
 
 class FRBImage(ImageGL):
 
-    def __init__(self, viewer, array_maker):
+    def __init__(self, viewer, array_maker, compression='png'):
 
         # FIXME: need to use weakref to avoid circular references
         self.viewer = viewer
@@ -29,7 +29,7 @@ class FRBImage(ImageGL):
                        'y': self.viewer.scale_y,
                        'image': self.scale_image}
 
-        super().__init__(image=EMPTY_IMAGE, scales=self.scales)
+        super().__init__(image=EMPTY_IMAGE, scales=self.scales, compression=compression)
 
         self.array_maker = array_maker
 
