@@ -1,5 +1,20 @@
 # Full changelog
 
+## v0.23.0 - 2024-10-18
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### New Features
+
+* Choose 'png' image compression in BqplotImageView by default by @bmorris3 in https://github.com/glue-viz/glue-jupyter/pull/470
+
+### New Contributors
+
+* @bmorris3 made their first contribution in https://github.com/glue-viz/glue-jupyter/pull/470
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.22.2...v0.23.0
+
 ## v0.22.2 - 2024-09-03
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
