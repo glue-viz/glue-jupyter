@@ -38,6 +38,8 @@ class FRBImage(ImageGL):
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'min')
         self.viewer.figure.axes[1].scale.observe(self.debounced_update, 'max')
 
+        self._latest_hash = None
+
         # NOTE: we deliberately don't call .update() here because when FRBImage
         # is created for the main composite image layer the composite arrays
         # haven't been set up yet, and for subset layers the layer gets force
@@ -62,7 +64,7 @@ class FRBImage(ImageGL):
         if value > previous_value:  # no point updating if the value is smaller than before
             self.debounced_update()
 
-    def update(self, *args, **kwargs):
+    def update(self, *args, force=False, **kwargs):
 
         # Shape can be (0, 0) when viewer was created and then destroyed.
         if self.shape is None or np.allclose(self.shape, 0):
@@ -75,6 +77,11 @@ class FRBImage(ImageGL):
         ymax = self.viewer.figure.axes[1].scale.max
 
         if xmin is None or xmax is None or ymin is None or ymax is None:
+            return
+
+        current_hash = (xmin, xmax, ymin, ymax, self.external_padding)
+
+        if not force and current_hash == self._latest_hash:
             return
 
         ny, nx = self.shape
@@ -103,5 +110,7 @@ class FRBImage(ImageGL):
         else:
             self.image = EMPTY_IMAGE
 
+        self._latest_hash = current_hash
+
     def invalidate_cache(self):
-        self.update()
+        self.update(force=True)

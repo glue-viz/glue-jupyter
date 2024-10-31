@@ -54,6 +54,15 @@ class BqplotImageView(BqplotBaseView):
         on_change([(self.state, 'aspect')])(self._sync_figure_aspect)
         self._sync_figure_aspect()
 
+    def _update_bqplot_limits(self, *args, **kwargs):
+        # When the user explicitly changes the limits, we want the update to
+        # be immediate - debouncing should be ideally used mostly for preventing
+        # many successive updates from the front-end, e.g. when panning, but
+        # programmatically changing things should be immediate.
+        super()._update_bqplot_limits(*args, **kwargs)
+        if hasattr(self, '_composite_image'):
+            self._composite_image.update()
+
     def _update_axes(self, *args):
 
         if self.state.x_att_world is not None:
