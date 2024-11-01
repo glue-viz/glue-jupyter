@@ -34,7 +34,7 @@ class ViewerState3D(ViewerState):
     # clip_data = CallbackProperty(False)
     native_aspect = CallbackProperty(False)
 
-    limits_cache = CallbackProperty()
+    _limits_cache = CallbackProperty()
 
     # def _update_priority(self, name):
     #     if name == 'layers':
@@ -48,34 +48,34 @@ class ViewerState3D(ViewerState):
 
         super(ViewerState3D, self).__init__(**kwargs)
 
-        if self.limits_cache is None:
-            self.limits_cache = {}
+        if self._limits_cache is None:
+            self._limits_cache = {}
 
         self.x_lim_helper = StateAttributeLimitsHelper(self, attribute='x_att',
                                                        lower='x_min', upper='x_max',
-                                                       cache=self.limits_cache)
+                                                       cache=self._limits_cache)
 
         self.y_lim_helper = StateAttributeLimitsHelper(self, attribute='y_att',
                                                        lower='y_min', upper='y_max',
-                                                       cache=self.limits_cache)
+                                                       cache=self._limits_cache)
 
         self.z_lim_helper = StateAttributeLimitsHelper(self, attribute='z_att',
                                                        lower='z_min', upper='z_max',
-                                                       cache=self.limits_cache)
+                                                       cache=self._limits_cache)
 
-        # TODO: if limits_cache is re-assigned to a different object, we need to
-        # update the attribute helpers. However if in future we make limits_cache
+        # TODO: if _limits_cache is re-assigned to a different object, we need to
+        # update the attribute helpers. However if in future we make _limits_cache
         # into a smart dictionary that can call callbacks when elements are
         # changed then we shouldn't always call this. It'd also be nice to
         # avoid this altogether and make it more clean.
-        self.add_callback('limits_cache', nonpartial(self._update_limits_cache))
+        self.add_callback('_limits_cache', nonpartial(self._update_limits_cache))
 
     def _update_limits_cache(self):
-        self.x_lim_helper._cache = self.limits_cache
+        self.x_lim_helper._cache = self._limits_cache
         self.x_lim_helper._update_attribute()
-        self.y_lim_helper._cache = self.limits_cache
+        self.y_lim_helper._cache = self._limits_cache
         self.y_lim_helper._update_attribute()
-        self.z_lim_helper._cache = self.limits_cache
+        self.z_lim_helper._cache = self._limits_cache
         self.z_lim_helper._update_attribute()
 
     @property
