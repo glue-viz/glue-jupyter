@@ -1,5 +1,20 @@
 # Full changelog
 
+## v0.23.1 - 2024-11-05
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+* Make limits cache private for serialization by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/474
+
+#### Other Changes
+
+* Try and improve responsiveness when debounced isn't really needed by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/472
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.23.0...v0.23.1
+
 ## v0.23.0 - 2024-10-18
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
