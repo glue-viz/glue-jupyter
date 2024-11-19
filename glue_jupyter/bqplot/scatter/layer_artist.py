@@ -226,6 +226,8 @@ class BqplotScatterLayerArtist(LayerArtist):
             vy = ensure_numerical(self.layer[self.state.vy_att].ravel())
 
             size = 50
+
+            # if self.vector_mark.
             scale = 1
 
             length = np.sqrt(vx**2 + vy**2)
