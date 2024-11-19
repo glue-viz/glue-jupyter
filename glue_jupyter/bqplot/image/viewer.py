@@ -1,3 +1,5 @@
+from threading import Thread
+
 from glue.viewers.image.composite_array import CompositeArray
 from bqplot_image_gl.viewlistener import ViewListener
 
@@ -49,7 +51,8 @@ class BqplotImageView(BqplotBaseView):
         self.state.add_callback('x_att_world', self._update_axes)
         self.state.add_callback('y_att_world', self._update_axes)
 
-        self._setup_view_listener()
+        t = Thread(target = self._setup_view_listener)
+        t.start()
 
         on_change([(self.state, 'aspect')])(self._sync_figure_aspect)
         self._sync_figure_aspect()
