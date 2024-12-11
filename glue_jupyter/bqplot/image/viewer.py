@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from glue.viewers.image.composite_array import CompositeArray
 from bqplot_image_gl.viewlistener import ViewListener
 
@@ -81,9 +83,17 @@ class BqplotImageView(BqplotBaseView):
             self.state.reset_limits()
 
     def _on_view_change(self, *args):
-        views = sorted(self._vl.view_data)
+        # Order view_data by focused_at and then resized_at, latest change first
+        views = sorted(
+            self._vl.view_data.values(),
+            key=lambda x: (
+                datetime.fromisoformat(x['focused_at']),
+                datetime.fromisoformat(x['resized_at'])
+            ),
+            reverse=True
+        )
         if len(views) > 0:
-            first_view = self._vl.view_data[views[0]]
+            first_view = views[0]
             self.shape = (int(first_view['height']), int(first_view['width']))
             self._composite_image.update()
         else:
