@@ -58,11 +58,11 @@ DATA_PROPERTIES = {
     "vector_arrowhead",
     "vector_mode",
     "vector_origin",
-    "vector_scaling",
     "line_visible",
     "linestyle",
     "linewidth",
     "markers_visible",
+    "vector_scaling",
 }
 
 
@@ -226,8 +226,6 @@ class BqplotScatterLayerArtist(LayerArtist):
             vy = ensure_numerical(self.layer[self.state.vy_att].ravel())
 
             size = 50
-
-            # if self.vector_mark.
             scale = 1
 
             length = np.sqrt(vx**2 + vy**2)

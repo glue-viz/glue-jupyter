@@ -95,7 +95,7 @@
                 <v-select label="vy" :items="vy_att_items" v-model="vy_att_selected" hide-details />
             </div>
             <div>
-                <v-select label="vector origin" :items="vector_origin_items" :v-model="vector_origin_selected" hide-details/>
+                <v-select label="vector origin" :items="vector_origin_items" v-model="vector_origin_selected" hide-details/>
             </div>
             <div>
                 <v-subheader class="pl-0 slider-label">vector size</v-subheader>

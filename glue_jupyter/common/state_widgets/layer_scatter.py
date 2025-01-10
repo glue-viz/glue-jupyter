@@ -54,7 +54,6 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
     vector_origin_items = traitlets.List().tag(sync=True)
     vector_origin_selected = traitlets.Int(allow_none=True).tag(sync=True)
 
-
     def __init__(self, layer_state):
         super().__init__()
 
