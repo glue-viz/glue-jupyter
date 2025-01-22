@@ -226,7 +226,7 @@ class BqplotScatterLayerArtist(LayerArtist):
             vy = ensure_numerical(self.layer[self.state.vy_att].ravel())
 
             size = 50
-            scale = 1
+            scale = self.state.vector_scaling
 
             length = np.sqrt(vx**2 + vy**2)
             angle = np.arctan2(vy, vx)
