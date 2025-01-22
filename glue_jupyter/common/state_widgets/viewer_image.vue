@@ -28,6 +28,9 @@
                 v-if="glue_state.slices && glue_state.slices.length > 0"
                 wait="300" :max="slider.max" :value.sync="glue_state.slices[slider.index]" hide-details />
         </div>
+        <div>
+            <jupyter-widget :widget="axes_limits_widget"></jupyter-widget>
+        </div>
     </div>
 </template>
 <script>
