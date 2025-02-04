@@ -114,8 +114,9 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         # Line
 
-        lines_cls = LinesGL if USE_GL else bqplot.Lines
-        self.line_mark = lines_cls(scales=self.view.scales, x=[0.], y=[0.])
+        lines_gl_cls = LinesGL
+        lines_cls = bqplot.Lines
+        self.line_mark = lines_gl_cls(scales=self.view.scales, x=[0.], y=[0.])
         self.line_mark.colors = [color2hex(self.state.color)]
         self.line_mark.opacities = [self.state.alpha]
 
@@ -222,6 +223,7 @@ class BqplotScatterLayerArtist(LayerArtist):
             and self.state.vy_att is not None
         ):
 
+            self.vector_mark.visible = True
             vx = ensure_numerical(self.layer[self.state.vx_att].ravel())
             vy = ensure_numerical(self.layer[self.state.vy_att].ravel())
 
@@ -315,11 +317,19 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.line_mark.colors = [color2hex(self.state.color)]
             if force or "linewidth" in changed:
                 self.line_mark.stroke_width = self.state.linewidth
+
             if force or "linestyle" in changed:
-                if self.state.linestyle == 'dashdot':
+                for a_markset in self.view.figure.marks:
+                    if isinstance(a_markset, LinesGL):
+                        self.view.figure.marks.remove(a_markset)
+                self.line_mark_vanilla = self.lines_cls(scales=self.view.scales, x=[0.], y=[0.])
+                self.line_mark_vanilla.colors = [color2hex(self.state.color)]
+                self.line_mark_vanilla.stroke_width = self.state.linewidth
+                if self.state.linestyle == "dashdot":
                     self.line_mark.line_style = 'dash_dotted'
                 else:
                     self.line_mark.line_style = self.state.linestyle
+                self.view.figure.marks.append(self.line_mark_vanilla)
 
         if (
             self.state.vector_visible
@@ -328,6 +338,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         ):
 
             if self.state.cmap_mode == "Fixed":
+                breakpoint()
                 if force or "color" in changed or "cmap_mode" in changed:
                     self.vector_mark.color = None
                     self.vector_mark.colors = [color2hex(self.state.color)]
@@ -338,6 +349,7 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.scale_color_vector.colors = colormap_to_hexlist(self.state.cmap)
                 self.scale_color_vector.min = float_or_none(self.state.cmap_vmin)
                 self.scale_color_vector.max = float_or_none(self.state.cmap_vmax)
+
 
         for mark in [self.scatter_mark, self.line_mark, self.vector_mark, self.density_mark]:
 
@@ -356,6 +368,7 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _update_scatter(self, force=False, **kwargs):
 
+        print( "_update_scatter triggered")
         if (
             self.density_mark is None
             or self.scatter_mark is None
