@@ -115,10 +115,16 @@ class BqplotScatterLayerArtist(LayerArtist):
         # Line
 
         lines_gl_cls = LinesGL
+        self.line_mark_gl = lines_gl_cls(scales=self.view.scales, x=[0.], y=[0.])
+        self.line_mark_gl.colors = [color2hex(self.state.color)]
+        self.line_mark_gl.opacities = [self.state.alpha]
+
+        # duplicate lines using base bqplot.Lines for linestyle default visible=False
         lines_cls = bqplot.Lines
-        self.line_mark = lines_gl_cls(scales=self.view.scales, x=[0.], y=[0.])
+        self.line_mark = lines_cls(scales=self.view.scales, x=[0.], y=[0.])
         self.line_mark.colors = [color2hex(self.state.color)]
         self.line_mark.opacities = [self.state.alpha]
+        self.line_mark.visible = False
 
         # Vectors
 
@@ -153,6 +159,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.view.figure.marks = list(self.view.figure.marks) + [
             self.density_mark,
             self.scatter_mark,
+            self.line_mark_gl,
             self.line_mark,
             self.vector_mark,
         ]
@@ -211,9 +218,13 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter_mark.y = []
 
         if self.state.line_visible:
+            self.line_mark_gl.x = x.astype(np.float32).ravel()
+            self.line_mark_gl.y = y.astype(np.float32).ravel()
             self.line_mark.x = x.astype(np.float32).ravel()
             self.line_mark.y = y.astype(np.float32).ravel()
         else:
+            self.line_mark_gl.x = [0.]
+            self.line_mark_gl.y = [0.]
             self.line_mark.x = [0.]
             self.line_mark.y = [0.]
 
@@ -314,22 +325,20 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         if self.state.line_visible:
             if force or "color" in changed:
+                self.line_mark_gl.colors = [color2hex(self.state.color)]
                 self.line_mark.colors = [color2hex(self.state.color)]
             if force or "linewidth" in changed:
+                self.line_mark_gl.stroke_width = self.state.linewidth
                 self.line_mark.stroke_width = self.state.linewidth
 
             if force or "linestyle" in changed:
-                for a_markset in self.view.figure.marks:
-                    if isinstance(a_markset, LinesGL):
-                        self.view.figure.marks.remove(a_markset)
-                self.line_mark_vanilla = self.lines_cls(scales=self.view.scales, x=[0.], y=[0.])
-                self.line_mark_vanilla.colors = [color2hex(self.state.color)]
-                self.line_mark_vanilla.stroke_width = self.state.linewidth
+                self.line_mark_gl.visible = False
+                self.line_mark.visible = True
                 if self.state.linestyle == "dashdot":
                     self.line_mark.line_style = 'dash_dotted'
                 else:
                     self.line_mark.line_style = self.state.linestyle
-                self.view.figure.marks.append(self.line_mark_vanilla)
+                self.view.figure.marks.append(self.line_mark)
 
         if (
             self.state.vector_visible
@@ -351,7 +360,7 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.scale_color_vector.max = float_or_none(self.state.cmap_vmax)
 
 
-        for mark in [self.scatter_mark, self.line_mark, self.vector_mark, self.density_mark]:
+        for mark in [self.scatter_mark, self.line_mark_gl, self.line_mark, self.vector_mark, self.density_mark]:
 
             if mark is None:
                 continue
@@ -361,7 +370,12 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         if force or "visible" in changed:
             self.scatter_mark.visible = self.state.visible and self.state.markers_visible
-            self.line_mark.visible = self.state.visible and self.state.line_visible
+            if "linestyle" in changed:
+                self.line_mark_gl.visible = False
+                self.line_mark.visible = True
+                self.line_mark.visible = self.state.visible and self.state.line_visible
+            else:
+                self.line_mark_gl.visible = self.state.visible and self.state.line_visible
             self.density_mark.visible = (self.state.visible and self.state.density_map
                                          and self.state.markers_visible)
             self.vector_mark.visible = self.state.visible and self.state.vector_visible
@@ -372,7 +386,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         if (
             self.density_mark is None
             or self.scatter_mark is None
-            or self.line_mark is None
+            or self.line_mark_gl is None
             or self.vector_mark is None
             or self._viewer_state.x_att is None
             or self._viewer_state.y_att is None
@@ -400,6 +414,8 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.density_mark = None
         marks.remove(self.scatter_mark)
         self.scatter_mark = None
+        marks.remove(self.line_mark_gl)
+        self.line_mark_gl = None
         marks.remove(self.line_mark)
         self.line_mark = None
         marks.remove(self.vector_mark)
@@ -411,6 +427,9 @@ class BqplotScatterLayerArtist(LayerArtist):
         if self.scatter_mark is not None:
             self.scatter_mark.x = []
             self.scatter_mark.y = []
+        if self.line_mark_gl is not None:
+            self.line_mark_gl.x = [0.]
+            self.line_mark_gl.y = [0.]
         if self.line_mark is not None:
             self.line_mark.x = [0.]
             self.line_mark.y = [0.]
@@ -425,5 +444,6 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.view.figure.marks = [
             item
             for layer in sorted_layers
-            for item in (layer.density_mark, layer.scatter_mark, layer.line_mark, layer.vector_mark)
+            for item in (layer.density_mark, layer.scatter_mark, layer.line_mark_gl,
+                         layer.line_mark, layer.vector_mark)
         ]
