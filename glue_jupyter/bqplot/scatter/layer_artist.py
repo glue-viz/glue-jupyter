@@ -479,13 +479,26 @@ class BqplotScatterLayerArtist(LayerArtist):
         """
         point_pairs = []
         for row in range(0, len(x)):
-            length = np.sqrt(vx[row]**2 + vy[row]**2)
+            length = np.sqrt(vx[row]**2 + vy[row]**2) * self.state.vector_scaling
             angle = np.arctan2(vy[row], vx[row])
             x_delta = length * np.cos(angle)
             y_delta = length * np.sin(angle)
-            x2 = x[row] + x_delta
-            y2 = y[row] + y_delta
-            point_1 = [x[row], y[row]]
+            if self.state.vector_origin == 'tail':
+                x1 = x[row]
+                y1 = y[row]
+                x2 = x[row] - x_delta
+                y2 = y[row] - y_delta
+            elif self.state.vector_origin == 'tip':
+                x1 = x[row]
+                y1 = y[row]
+                x2 = x[row] + x_delta
+                y2 = y[row] + y_delta
+            elif self.state.vector_origin == 'middle':
+                x1= x[row] - x_delta / 2
+                y1 = y[row] - y_delta / 2
+                x2 = x[row] + x_delta / 2
+                y2 = y[row] + y_delta / 2
+            point_1 = [x1, y1]
             point_pairs.append(point_1)
             point_2 = [x2, y2]
             point_pairs.append(point_2)

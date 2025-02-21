@@ -99,7 +99,7 @@
             </div>
             <div>
                 <v-subheader class="pl-0 slider-label">vector size</v-subheader>
-                <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="glue_state.vector_scaling"
+                <glue-throttled-slider wait="300" min="0.01" max="1" step="0.01" :value.sync="glue_state.vector_scaling"
                     hide-details />
             </div>
         </template>
