@@ -94,6 +94,14 @@
             <div>
                 <v-select label="vy" :items="vy_att_items" v-model="vy_att_selected" hide-details />
             </div>
+            <div>
+                <v-select label="vector origin" :items="vector_origin_items" v-model="vector_origin_selected" hide-details/>
+            </div>
+            <div>
+                <v-subheader class="pl-0 slider-label">vector size</v-subheader>
+                <glue-throttled-slider wait="300" min="0.01" max="1" step="0.01" :value.sync="glue_state.vector_scaling"
+                    hide-details />
+            </div>
         </template>
     </div>
 </template>
