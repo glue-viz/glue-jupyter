@@ -128,10 +128,6 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         # Vectors
 
-        self.vector_lines = lines_cls(scales=self.view.scales, x=[0.], y=[0.])
-        self.vector_lines.colors = [color2hex(self.state.color)]
-        self.vector_lines.visible = False
-
         self.scale_size_vector = bqplot.LinearScale(min=0, max=1)
         self.scale_color_vector = bqplot.ColorScale()
         self.scale_rotation_vector = bqplot.LinearScale(min=-np.pi, max=np.pi)
@@ -148,6 +144,11 @@ class BqplotScatterLayerArtist(LayerArtist):
             visible=False,
             marker="arrow",
         )
+
+        vector_lines_cls = bqplot.Lines
+        self.vector_lines = vector_lines_cls(scales=self.view.scales, x=[0.], y=[0.])
+        self.vector_lines.colors = [color2hex(self.state.color)]
+        self.vector_lines.visible = False
 
         # Density map
 
@@ -239,7 +240,6 @@ class BqplotScatterLayerArtist(LayerArtist):
             and self.state.vy_att is not None
         ):
 
-            self.vector_mark.visible = True
             vx = ensure_numerical(self.layer[self.state.vx_att].ravel())
             vy = ensure_numerical(self.layer[self.state.vy_att].ravel())
 
@@ -258,25 +258,20 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.vector_mark.size = length
             self.vector_mark.rotation = angle
 
+
             # maybe i need vector lines here too?
-            vector_line_coords = self._build_line_vector_points()
+            vector_line_coords = self._build_line_vector_points(x, y, vx, vy)
             x_vector_coords = vector_line_coords[:,0]
             y_vector_coords = vector_line_coords[:,1]
             self.vector_lines.x = x_vector_coords
             self.vector_lines.y = y_vector_coords
-            with open('/tmp/debug.log', 'a') as log:
-                log.write('calculated vector lines coordinates:\n')
-                log.write(f'x vector coords : {x_vector_coords[:10]}\n')
-                log.write(f'y vector coords : {y_vector_coords[:10]}\n')
-
         else:
-
             self.vector_mark.x = []
             self.vector_mark.y = []
+            self.vector_lines.x = []
+            self.vector_lines.y = []
 
     def _update_visual_attributes(self, changed, force=False):
-        with open('/tmp/debug.log', 'a') as log:
-            log.write("Updateing visual attributes\n")
 
         if not self.enabled:
             return
@@ -363,8 +358,6 @@ class BqplotScatterLayerArtist(LayerArtist):
             and self.state.vx_att is not None
             and self.state.vy_att is not None
         ):
-            with open('/tmp/debug.log', 'a') as log:
-                log.write("Vector visible \n")
             self.vector_mark.visible = False
             self.vector_lines.visible = True
 
@@ -409,7 +402,6 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.density_mark is None
             or self.scatter_mark is None
             or self.line_mark_gl is None
-            # TODO: check which of these are needed
             or self.vector_mark is None
             or self.vector_lines is None
             or self._viewer_state.x_att is None
@@ -444,6 +436,8 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.line_mark = None
         marks.remove(self.vector_mark)
         self.vector_mark = None
+        marks.remove(self.vector_lines)
+        self.vector_lines = None
         self.view.figure.marks = marks
         return super().remove()
 
@@ -460,6 +454,9 @@ class BqplotScatterLayerArtist(LayerArtist):
         if self.vector_mark is not None:
             self.vector_mark.x = []
             self.vector_mark.y = []
+        if self.vector_lines is not None:
+            self.vector_lines.x = []
+            self.vector_lines.y = []
         elif self.density_mark is not None:
             self.density_mark.image = EMPTY_IMAGE
 
@@ -469,10 +466,10 @@ class BqplotScatterLayerArtist(LayerArtist):
             item
             for layer in sorted_layers
             for item in (layer.density_mark, layer.scatter_mark, layer.line_mark_gl,
-                         layer.line_mark, layer.vector_mark)
+                         layer.line_mark, layer.vector_mark, layer.vector_lines)
         ]
 
-    def _build_line_vector_points(self):
+    def _build_line_vector_points(self, x, y, vx, vy):
         """
         Function builds an array of coordinate pairs separated by nans for plotting individual lines
         to replicate vector behaviour
@@ -480,11 +477,6 @@ class BqplotScatterLayerArtist(LayerArtist):
         Returns: np.array
             array of structure ([x1, y1], [x2, y2], [np.nan, np.nan])
         """
-        x = self._viewer_state.x_att
-        y = self._viewer_state.y_att
-        vx = self._viewer_state.vx_att
-        vy = self._viewer_state.vy_att
-
         point_pairs = []
         for row in range(0, len(x)):
             length = np.sqrt(vx[row]**2 + vy[row]**2)
@@ -495,14 +487,10 @@ class BqplotScatterLayerArtist(LayerArtist):
             y2 = y[row] + y_delta
             point_1 = [x[row], y[row]]
             point_pairs.append(point_1)
-            point_2 = [x2[row], y2[row]]
+            point_2 = [x2, y2]
             point_pairs.append(point_2)
             point_3 = [np.nan, np.nan]
             point_pairs.append(point_3)
-
-        with open('/tmp/debug.log', 'a') as f:
-            f.write('Built the vectors \n')
-            f.write('point pairs : {}\n'.format(point_pairs))
 
         return np.array(point_pairs)
 
