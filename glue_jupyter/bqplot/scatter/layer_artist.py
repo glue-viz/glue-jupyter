@@ -258,11 +258,9 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.vector_mark.size = length
             self.vector_mark.rotation = angle
 
-
-            # maybe i need vector lines here too?
             vector_line_coords = self._build_line_vector_points(x, y, vx, vy)
-            x_vector_coords = vector_line_coords[:,0]
-            y_vector_coords = vector_line_coords[:,1]
+            x_vector_coords = vector_line_coords[:, 0]
+            y_vector_coords = vector_line_coords[:, 1]
             self.vector_lines.x = x_vector_coords
             self.vector_lines.y = y_vector_coords
         else:
@@ -373,7 +371,6 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.scale_color_vector.min = float_or_none(self.state.cmap_vmin)
                 self.scale_color_vector.max = float_or_none(self.state.cmap_vmax)
 
-
         for mark in [self.scatter_mark, self.line_mark_gl, self.line_mark,
                      self.vector_mark, self.vector_lines,  self.density_mark]:
 
@@ -397,7 +394,6 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _update_scatter(self, force=False, **kwargs):
 
-        print( "_update_scatter triggered")
         if (
             self.density_mark is None
             or self.scatter_mark is None
@@ -494,7 +490,7 @@ class BqplotScatterLayerArtist(LayerArtist):
                 x2 = x[row] + x_delta
                 y2 = y[row] + y_delta
             elif self.state.vector_origin == 'middle':
-                x1= x[row] - x_delta / 2
+                x1 = x[row] - x_delta / 2
                 y1 = y[row] - y_delta / 2
                 x2 = x[row] + x_delta / 2
                 y2 = y[row] + y_delta / 2
@@ -506,7 +502,3 @@ class BqplotScatterLayerArtist(LayerArtist):
             point_pairs.append(point_3)
 
         return np.array(point_pairs)
-
-
-
-
