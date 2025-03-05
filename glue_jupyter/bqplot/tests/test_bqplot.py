@@ -87,9 +87,13 @@ def test_scatter2d(app, dataxyz, dataxz):
     s.layers[0].state.size_mode = 'Linear'
 
     layer = s.layers[0]
+    # this test is in an inbetween state while we decide on how to handle
+    # the original vector infastructure
+    # vector_mark - an arrow head where the scatter point is pointing the direction of the vector
+    # vector_lines - duplicates matplotlibs vector behaviour
     assert not layer.vector_mark.visible
     layer.state.vector_visible = True
-    assert layer.vector_mark.visible
+    assert layer.vector_lines.visible
 
 
 def test_scatter2d_subset(app, dataxyz, dataxz):
