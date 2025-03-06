@@ -5,7 +5,7 @@ import numpy as np
 from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3dROI
 
 from glue.config import viewer_tool
-from glue.viewers.common.tool import CheckableTool
+from glue.viewers.common.tool import Tool, CheckableTool
 
 __all__ = []
 
@@ -63,6 +63,24 @@ class IpyvolumeLassoMode(IpyvolumePolygonMode):
     tool_tip = 'Lasso a region of interest'
 
     selector = 'lasso'
+
+@viewer_tool
+class IpyvolumePointMode(IPyVolumeCheckableTool):
+    icon = 'glue_point'
+    tool_id = 'ipyvolume:point'
+    action_text = 'Select Point'
+    tool_tip = 'Select a single pixel for e.g. spectral slicing'
+
+    # pretty sure this is wrong
+    selector = 'point'
+
+    def on_selection(self, data, other=None):
+        if data['type'] != self.selector:
+            return
+
+        if data['device']:
+            with self.viewer._output_widget or nullcontext():
+                x1, y1 = data['device']
 
 
 @viewer_tool
