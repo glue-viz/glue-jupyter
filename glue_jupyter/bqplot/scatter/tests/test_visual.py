@@ -73,3 +73,44 @@ def test_visual_scatter2d_density(
     figure = scatter.figure_widget
     figure.layout = {"width": "400px", "height": "250px"}
     return figure
+
+
+@visual_widget_test
+def test_visual_linestyle(
+    tmp_path,
+    page_session,
+    solara_test,
+):
+
+    x = np.array([1, 2, 4, 5])
+    y = np.array([3, 2, 1, 8])
+
+    app = jglue()
+
+    data_a = app.add_data(a={"x": x, "y": y})[0]
+    data_b = app.add_data(b={"x": x, "y": y+1})[0]
+    data_c = app.add_data(c={"x": x, "y": y+2})[0]
+
+    app.add_link(data_a, 'x', data_b, 'x')
+    app.add_link(data_a, 'x', data_c, 'x')
+    app.add_link(data_a, 'y', data_b, 'y')
+    app.add_link(data_a, 'y', data_c, 'y')
+
+    scatter = app.scatter2d(show=False, data=data_a)
+    scatter.add_data(data_b)
+    scatter.add_data(data_c)
+
+    scatter.state.layers[0].line_visible = True
+    scatter.state.layers[0].linestyle = 'solid'
+    scatter.state.layers[1].line_visible = True
+    scatter.state.layers[1].linestyle = 'dashed'
+    scatter.state.layers[2].line_visible = True
+    scatter.state.layers[2].linestyle = 'dashdot'
+
+    assert scatter.layers[0].line_mark_gl.visible
+    assert not scatter.layers[1].line_mark_gl.visible
+    assert not scatter.layers[2].line_mark_gl.visible
+
+    figure = scatter.figure_widget
+    figure.layout = {"width": "800px", "height": "500px"}
+    return figure
