@@ -114,3 +114,51 @@ def test_visual_linestyle(
     figure = scatter.figure_widget
     figure.layout = {"width": "800px", "height": "500px"}
     return figure
+
+
+@visual_widget_test
+def test_visual_vector(
+    tmp_path,
+    page_session,
+    solara_test,
+):
+
+    np.random.seed(12345)
+
+    app = jglue()
+
+    datas = []
+    for label in 'abc':
+        x = np.random.normal(10, 3, 100)
+        y = np.random.normal(5, 3, 100)
+        theta = np.arctan2(y-5, x - 10)
+        vx = -np.sin(theta)
+        vy = np.cos(theta)
+
+        data = {}
+        data[label] = {"x": x, "y": y, "vx": vx, "vy": vy}
+        datas.append(app.add_data(**data)[0])
+
+    for attr in ['x', 'y', 'vx', 'vy']:
+        app.add_link(datas[0], attr, datas[1], attr)
+        app.add_link(datas[0], attr, datas[2], attr)
+
+    scatter = app.scatter2d(show=False, data=datas[0])
+    scatter.add_data(datas[1])
+    scatter.add_data(datas[2])
+
+    for index in range(3):
+        scatter.state.layers[index].vector_visible = True
+        scatter.state.layers[index].vx_att = datas[index].id['vx']
+        scatter.state.layers[index].vy_att = datas[index].id['vy']
+
+    scatter.state.layers[1].vector_origin = 'tip'
+    scatter.state.layers[2].vector_origin = 'tail'
+
+    scatter.state.layers[0].color = 'red'
+    scatter.state.layers[1].color = 'green'
+    scatter.state.layers[2].color = 'blue'
+
+    figure = scatter.figure_widget
+    figure.layout = {"width": "800px", "height": "500px"}
+    return figure
