@@ -104,8 +104,10 @@ def test_visual_linestyle(
     scatter.state.layers[0].linestyle = 'solid'
     scatter.state.layers[1].line_visible = True
     scatter.state.layers[1].linestyle = 'dashed'
+    scatter.state.layers[1].color = 'r'
     scatter.state.layers[2].line_visible = True
     scatter.state.layers[2].linestyle = 'dashdot'
+    scatter.state.layers[2].color = 'b'
 
     assert scatter.layers[0].line_mark_gl.visible
     assert not scatter.layers[1].line_mark_gl.visible
