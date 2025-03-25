@@ -6,6 +6,7 @@ from glue.core.roi import PolygonalROI, CircularROI, RectangularROI, Projected3d
 
 from glue.config import viewer_tool
 from glue.viewers.common.tool import Tool, CheckableTool
+from glue.viewers.matplotlib
 
 __all__ = []
 
