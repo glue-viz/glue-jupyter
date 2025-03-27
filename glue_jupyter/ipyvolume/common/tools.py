@@ -68,7 +68,7 @@ class IpyvolumeLassoMode(IpyvolumePolygonMode):
 @viewer_tool
 class IpyvolumePointMode(IPyVolumeCheckableTool):
     icon = 'glue_point'
-    tool_id = 'ipyvolume:point'
+    tool_id = 'select:point'
     action_text = 'Select Point'
     tool_tip = 'Select a single pixel for e.g. spectral slicing'
 
