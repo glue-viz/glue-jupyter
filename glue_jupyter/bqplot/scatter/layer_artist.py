@@ -2,7 +2,6 @@ import bqplot
 import numpy as np
 import warnings
 from astropy.visualization import AsinhStretch, LinearStretch, LogStretch, SqrtStretch
-from decorator import append
 
 from glue.core.exceptions import IncompatibleAttribute
 from glue.utils import color2hex, datetime64_to_mpl, ensure_numerical
