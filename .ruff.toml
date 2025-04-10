@@ -1,0 +1,177 @@
+extend = "pyproject.toml"
+lint.ignore = [
+    # NOTE: to find a good code to fix, run:
+    # ruff check --select="ALL" --statistics glue/<subpackage>
+
+    # flake8-unused-arguments (ARG)
+    "ARG001",  # unused-function-argument
+    "ARG002",  # unused-method-argument
+    "ARG004",  # unused-static-method-argument
+    "ARG005",  # unused-lambda-argument
+
+    # flake8-bugbear (B)
+    "B006",  # MutableArgumentDefault
+    "B007",  # UnusedLoopControlVariable
+    "B028",  # No-explicit-stacklevel
+    "B904",  # RaiseWithoutFromInsideExcept
+
+    # flake8-blind-except (BLE)
+    "BLE001",  # blind-except
+
+    # flake8-comprehensions (C4)
+    "C416",  # Unnecessary list comprehension (rewrite using `list()`)
+
+    # mccabe (C90) : code complexity
+    # TODO: configure maximum allowed complexity (default 10; 40 exceptions, 4 > 28).
+    "C901",  # McCabeComplexity
+
+    # pydocstyle (D)
+    # Missing Docstrings
+    "D100",  # undocumented-public-module
+    "D101",  # undocumented-public-class
+    "D103",  # undocumented-public-function
+    "D104",  # undocumented-public-package
+    "D202",  # blank-line-after-function
+    "D204",  # incorrect-blank-line-after-class
+    "D205",  # blank-line-after-summary
+    # Docstring Content Issues
+    "D401",  # non-imperative-mood.
+
+    # pycodestyle (E, W)
+    "E501",  # line-too-long
+
+    # flake8-errmsg (EM)  : nicer error tracebacks
+    "EM101",   # raw-string-in-exception
+    "EM102",   # f-string-in-exception
+    "EM103",   # dot-format-in-exception
+
+    # eradicate (ERA)
+    # NOTE: be careful that developer notes are kept.
+    "ERA001",  # commented-out-code
+
+    # flake8-boolean-trap (FBT)  : boolean flags should be kwargs, not args
+    # NOTE: a good thing to fix, but changes API.
+    "FBT002",  # boolean-default-value-in-function-definition
+    "FBT003",  # boolean-positional-value-in-function-call
+
+    # flake8-fixme (FIX)
+    "FIX001",  # Line contains FIXME. This should be fixed or at least FIXME replaced with TODO
+
+    # isort (I)
+    "I001",  # unsorted imports
+
+    # pep8-naming (N)
+    # NOTE: some of these can/should be fixed, but this changes the API.
+    "N801",  # invalid-class-name
+
+    # NumPy-specific rules (NPY)
+    "NPY002", # Replace legacy `np.random.rand` call with `np.random.Generator`  (2023-05-03)
+
+    # Perflint (PERF)
+    "PERF203",  # `try`-`except` within a loop incurs performance overhead
+
+    # pygrep-hooks (PGH)
+    "PGH004",  # Use specific rule codes when using `noqa`
+
+    # flake8-pie (PIE)
+    "PIE790",  # Unnecessary `pass` statement
+    "PIE808",  # Unnecessary `start` argument in `range`
+
+    # Pylint (PLC, PLE, PLR, PLW)
+    "PLR0912",  # too-many-branches
+    "PLR0913",  # too-many-args
+    "PLR0915",  # too-many-statements
+    "PLR1714",  # Consider merging multiple comparisons
+    "PLR2004",  # MagicValueComparison
+    "PLR5501",  # collapsible-else-if
+    "PLW0603",  # global-statement
+    "PLW2901",  # redefined-loop-name
+
+    # flake8-pytest-style (PT)
+    "PT011",   # pytest-raises-too-broad
+    "PT018",   # pytest-composite-assertion
+
+    # flake8-use-pathlib (PTH)
+    "PTH110",  # os-path-exists
+    "PTH118",  # os-path-join
+    "PTH120",  # os-path-dirname
+    "PTH122",  # os-path-splitext
+    "PTH123",  # builtin-open
+
+    # flake8-quotes (Q)
+    "Q000",    # Single quotes found but double quotes preferred
+
+    # flake8-return (RET)
+    "RET502",  # implicit-return-value
+    "RET503",  # implicit-return
+    "RET504",  # unnecessary-assign
+    "RET505",  # unnecessary-else-after-return
+    "RET506",  # unnecessary-else-after-raise
+
+    # flake8-raise (RSE)
+    "RSE102",  # unnecessary-paren-on-raise-exception
+
+    # flake8-bandit (S)
+    "S101",  # Use of `assert` detected
+
+    # flake8-simplify (SIM)
+    "SIM102",  # NestedIfStatements
+    "SIM105",  # UseContextlibSuppress
+    "SIM108",  # UseTernaryOperator
+    "SIM118",  # KeyInDict
+
+    # flake8-print (T20)
+    "T201",  # PrintUsed
+
+    # flake8-todos (TD)
+    "TD001",  # Invalid TODO tag
+    "TD003",  # Missing issue link on the line following this TODO
+    "TD004",  # Missing colon in TODO
+
+    # flake8-tidy-imports (TID)
+    "TID252",  # Prefer absolute imports over relative imports from parent modules
+
+    # tryceratops (TRY)
+    "TRY003",  # raise-vanilla-args
+
+    # pyupgrade (UP)
+    "UP004",  # Class `{name}` inherits from `object`
+    "UP008",  # Use `super()` instead of `super(__class__, self)`
+    "UP010",  # Unnecessary `__future__` imports
+    "UP030",  # Use implicit references for positional format fields
+    "UP031",  # Use format specifiers instead of percent format
+    "UP032",  # Use f-string instead of `format` call
+    "UP039",  # Unnecessary parentheses after class definition
+]
+
+[lint.extend-per-file-ignores]
+"__init__.py" = ["E402", "F401", "F403", "PT013"]
+".validate-notebooks.py" = ["PTH207"]  # Replace `glob` with `Path.glob` or `Path.rglob`
+
+# Do not call `getattr` with a constant; `len(matches)` used as condition; self-assignment of variable
+"glue_jupyter/link.py" = ["B009", "PLC1802", "PLW0127"]
+"glue_jupyter/utils.py" = ["D300", "Q002"]  # Use triple double quotes; single-quote docstring
+
+"glue_jupyter/app.py" = ["D208"]       # Docstring is over-indented
+
+"glue_jupyter/__init__.py" = ["EXE002"]                        # The file is executable but no shebang is present
+"glue_jupyter/tests/__init__.py" = ["EXE002"]                  # The file is executable but no shebang is present
+"glue_jupyter/tests/main_test.py" = ["EXE002"]                 # The file is executable but no shebang is present
+"glue_jupyter/ipyvolume/scatter/layer_artist.py" = ["EXE002"]  # The file is executable but no shebang is present
+
+"glue_jupyter/common/state_widgets/tests/test_viewer_image.py" = ["INP001"]  # File is part of an implicit namespace package. Add an `__init__.py`
+"glue_jupyter/widgets/subset_select_vuetify.py" = ["Q001"]          # Single-quote multiline
+
+"glue_jupyter/ipyvolume/volume/layer_style_widget.py" = ["SIM905"]  # Consider using a list literal instead of `str.split`
+"glue_jupyter/bqplot/common/tools.py" = ["SIM910"]  # Use `kwargs.get("{name}")` instead of `kwargs.get("{name}", None)`
+"glue_jupyter/data.py" = ["S310"]                   # Audit URL open for permitted schemes
+
+# TODO: fix these, on a per-subpackage basis.
+# When a general exclusion is being fixed, but it affects many subpackages, it
+# is better to fix for subpackages individually. The general exclusion should be
+# copied to these subpackage sections and fixed there.
+
+"notebooks/*" = ["F401", "W291"]  # Unused import; trailing whitespace
+"test_*.py" = ["RUF015"]  # Prefer next({iterable}) over single element slice
+
+"docs/*" = []
