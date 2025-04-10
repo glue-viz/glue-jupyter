@@ -1,5 +1,32 @@
 # Full changelog
 
+## v0.24.0 - 2025-04-07
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+* Use last focused/resized view to determine shape of BqplotImageView by @iisakkirotko in https://github.com/glue-viz/glue-jupyter/pull/475
+
+#### New Features
+
+* Add user interface to adjust bins in histogram viewer by @CyclingNinja in https://github.com/glue-viz/glue-jupyter/pull/455
+* Add support for vectors in the bqplot viewers, and vector options in the layer state panel by @CyclingNinja in https://github.com/glue-viz/glue-jupyter/pull/458
+
+#### Other Changes
+
+* Fix continuous integration by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/476
+* Add visual tests for vectors and line style by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/478
+* Add pre-commit and Ruff codestyle check setup by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/480
+
+### New Contributors
+
+* @CyclingNinja made their first contribution in https://github.com/glue-viz/glue-jupyter/pull/455
+* @iisakkirotko made their first contribution in https://github.com/glue-viz/glue-jupyter/pull/475
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.23.1...v0.24.0
+
 ## v0.23.1 - 2024-11-05
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->

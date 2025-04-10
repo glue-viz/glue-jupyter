@@ -102,7 +102,7 @@ def test_visual_linestyle(
     app.add_link(data_a, 'y', data_d, 'y')
     app.add_link(data_a, 'y', data_e, 'y')
 
-    scatter = app.scatter2d(show=True, data=data_a)
+    scatter = app.scatter2d(show=False, data=data_a)
     scatter.add_data(data_b)
     scatter.add_data(data_c)
     scatter.add_data(data_d)
