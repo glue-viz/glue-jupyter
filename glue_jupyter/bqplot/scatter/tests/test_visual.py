@@ -115,8 +115,6 @@ def test_visual_linestyle(
     scatter.state.layers[2].line_visible = True
     scatter.state.layers[2].linestyle = 'dashdot'
     scatter.state.layers[2].color = 'b'
-<<<<<<< Updated upstream
-=======
     scatter.state.layers[3].line_visible = True
     scatter.state.layers[3].linestyle = 'solid'
     scatter.state.layers[3].color = 'b'
@@ -128,7 +126,6 @@ def test_visual_linestyle(
     scatter.remove_layer(data_e)
 
     scatter.state.layers[2].zorder = 10
->>>>>>> Stashed changes
 
     assert scatter.layers[0].line_mark_gl.visible
     assert scatter.layers[0].line_mark_gl in scatter.figure.marks
