@@ -6,6 +6,7 @@ from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
 from bqplot_image_gl.interacts import BrushEllipseSelector
 from glue import __version__ as glue_version
+from glue.core.edit_subset_mode import ReplaceMode
 from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
@@ -724,3 +725,52 @@ class HomeTool(Tool):
 
     def activate(self):
         self.viewer.state.reset_limits()
+
+
+@viewer_tool
+class PointSelectTool(Tool):
+    tool_id = 'bqplot:point'
+    icon = 'glue_point'
+    action_text = 'Point'
+    tool_tip = 'Select a single pixel based on the mouse location'
+
+    _pressed = False
+
+    def __init__(self, *args, **kwargs):
+        super(PointSelectTool).__init__(*args, **kwargs)
+        self._move_callback = self._select_pixel
+        self._press_callback = self._on_press
+        self._release_callback = self._on_release
+
+    def _on_press(self, mode):
+        self._pressed = True
+        self.viewer.session.edit_subset_mode = ReplaceMode
+
+    def _on_release(self, mode):
+        self._pressed = False
+
+    def _select_pixel(self, mode):
+        """
+        Select a pixel based on the mouse location
+        """
+        if not self._pressed:
+            return
+
+        x, y = self._event_xdata, self.event_ydata
+
+        if x is None or y is None:
+            return None
+
+        x = int(round(x))
+        y = int(round(y))
+
+        slices = [slice(None)] * self.viewer.state.reference_data.ndim
+        slices[self.viewer.state.x_att.axis] = slice(x, x + 1)
+        slices[self.viewer.state.y_att.axis] = slice(y, y + 1)
+
+        subset_state = PixelSubsetState(self.viewr.state.reference_data, slices)
+
+    def activate(self):
+        self.viewer.state.reset_limits()
+
+
