@@ -75,7 +75,7 @@ def jglue(*args, settings=None, show=False, links=None, **kwargs):
     return japp
 
 
-def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz'):
+def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz', log=False):
     """
     Create an example dataset with three attributes x, y, and z set to random
     values.
@@ -87,6 +87,13 @@ def example_data_xyz(seed=42, N=500, loc=0, scale=1, label='xyz'):
     vx = x - x.mean()
     vy = y - y.mean()
     vz = z - z.mean()
+    if log:
+        x = 10**x
+        y = 10**y
+        z = 10**z
+        vx = 10**vx
+        vy = 10**vy
+        vz = 10**vz
     speed = np.sqrt(vx**2 + vy**2 + vz**2)
     data_xyz = Data(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, speed=speed, label=label)
     return data_xyz
