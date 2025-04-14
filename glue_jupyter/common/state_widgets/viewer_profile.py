@@ -1,7 +1,9 @@
 import ipyvuetify as v
+import ipywidgets as widgets
 import traitlets
 from ...state_traitlets_helpers import GlueState
 from ...vuetify_helpers import link_glue_choices
+from ...widgets import AxesLimits
 
 __all__ = ['ProfileViewerStateWidget']
 
@@ -26,6 +28,8 @@ class ProfileViewerStateWidget(v.VuetifyTemplate):
     y_display_unit_items = traitlets.List().tag(sync=True)
     y_display_unit_selected = traitlets.Int(allow_none=True).tag(sync=True)
 
+    axes_limits_widget = traitlets.Any().tag(sync=True, **widgets.widget_serialization)
+
     def __init__(self, viewer_state):
         super().__init__()
 
@@ -36,3 +40,5 @@ class ProfileViewerStateWidget(v.VuetifyTemplate):
         link_glue_choices(self, viewer_state, 'function')
         link_glue_choices(self, viewer_state, 'x_display_unit')
         link_glue_choices(self, viewer_state, 'y_display_unit')
+
+        self.axes_limits_widget = AxesLimits(viewer_state)
