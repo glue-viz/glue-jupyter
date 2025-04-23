@@ -737,7 +737,7 @@ class PointSelectTool(Tool):
     _pressed = False
 
     def __init__(self, *args, **kwargs):
-        super(PointSelectTool).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._move_callback = self._select_pixel
         self._press_callback = self._on_press
         self._release_callback = self._on_release
