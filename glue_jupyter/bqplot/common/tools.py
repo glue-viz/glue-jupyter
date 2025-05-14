@@ -728,49 +728,40 @@ class HomeTool(Tool):
 
 
 @viewer_tool
-class PointSelectTool(Tool):
+class PointSelectTool(InteractCheckableTool):
     tool_id = 'bqplot:point'
     icon = 'glue_point'
     action_text = 'Point'
     tool_tip = 'Select a single pixel based on the mouse location'
 
-    _pressed = False
+    def __init__(self, viewer, finalize_callback=None, **kwargs):
+        super().__init__(viewer, **kwargs)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._move_callback = self._select_pixel
-        self._press_callback = self._on_press
-        self._release_callback = self._on_release
+        self.interact = BrushSelector(x_scale=self.viewer.scale_x,
+                                      y_scale=self.viewer.scale_y,
+                                      color=INTERACT_COLOR)
 
-    def _on_press(self, mode):
-        self._pressed = True
-        self.viewer.session.edit_subset_mode = ReplaceMode
+        self.interact.observe(self.update_selection, "brushing")
+        self.interact.observe(self.on_selection_change, "selected")
+        self.finalize_callback = finalize_callback
 
-    def _on_release(self, mode):
-        self._pressed = False
-
-    def _select_pixel(self, mode):
-        """
-        Select a pixel based on the mouse location
-        """
-        if not self._pressed:
+    def update_selection(self, *args):
+        if self.interact.brushing:
             return
+        with self.viewer._output_widget or nullcontext():
+            if self.interact.selected_x is not None and self.interact.selected_y is not None:
+                x = self.interact.selected_x
+                y = self.interact.selected_y
 
-        x, y = self._event_xdata, self.event_ydata
-
-        if x is None or y is None:
-            return None
-
-        x = int(round(x))
-        y = int(round(y))
-
-        slices = [slice(None)] * self.viewer.state.reference_data.ndim
-        slices[self.viewer.state.x_att.axis] = slice(x, x + 1)
-        slices[self.viewer.state.y_att.axis] = slice(y, y + 1)
-
-        subset_state = PixelSubsetState(self.viewr.state.reference_data, slices)
+    def on_selection_change(self, *args):
+        if self.interact.selected_x is None and self.interact.selected_y is None:
+            if self.finalize_callback is not None:
+                self.finalize_callback()
 
     def activate(self):
-        self.viewer.state.reset_limits()
+        with self.viewer._output_widget or nullcontext():
+            self.interact.selected_x = None
+            self.interact.selected_y = None
+        super().activate()
 
 
