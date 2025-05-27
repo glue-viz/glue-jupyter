@@ -4,7 +4,7 @@ from contextlib import nullcontext
 import numpy as np
 from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
-from bqplot_image_gl.interacts import BrushEllipseSelector
+from bqplot_image_gl.interacts import BrushEllipseSelector, BrushRectangleSelector
 from glue import __version__ as glue_version
 from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
@@ -134,9 +134,17 @@ class BqplotRectangleMode(BqplotSelectionTool):
 
         super().__init__(viewer, **kwargs)
 
-        self.interact = BrushSelector(x_scale=self.viewer.scale_x,
-                                      y_scale=self.viewer.scale_y,
-                                      color=INTERACT_COLOR)
+        self.interact = BrushRectangleSelector(x_scale=self.viewer.scale_x,
+                                               y_scale=self.viewer.scale_y)
+
+        # Workaround for bug that causes the `color` trait to not be recognized
+        style = self.interact.style.copy()
+        style['fill'] = INTERACT_COLOR
+        border_style = self.interact.border_style.copy()
+        border_style['fill'] = INTERACT_COLOR
+        border_style['stroke'] = INTERACT_COLOR
+        self.interact.style = style
+        self.interact.border_style = border_style
 
         self._roi = kwargs.get("roi", None)
         if roi is not None:
@@ -166,6 +174,7 @@ class BqplotRectangleMode(BqplotSelectionTool):
             if isinstance(roi, RectangularROI):
                 self.interact.selected_x = [roi.xmin, roi.xmax]
                 self.interact.selected_y = [roi.ymin, roi.ymax]
+                self.interact.rotate = -np.degrees(roi.theta)
             elif isinstance(roi, PolygonalROI):
                 self.interact.selected_x = [np.min(roi.vx), np.max(roi.vx)]
                 self.interact.selected_y = [np.min(roi.vy), np.max(roi.vy)]
@@ -422,6 +431,7 @@ class BqplotCircleMode(BqplotSelectionTool):
                 rx, ry = np.sqrt((roi.radius_x ** 2 + roi.radius_y ** 2) * 0.5)
             else:
                 rx, ry = roi.radius_x, roi.radius_y
+            self.interact.rotate = -np.degrees(roi.theta)
         else:
             raise TypeError(f'Cannot initialize a BqplotCircleMode from a {type(roi)}')
         self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
