@@ -22,6 +22,15 @@ def _transfer_func_rgba(color, N=256, max_opacity=1):
     data[..., 3] = ramp*max_opacity
     return data
 
+def _transfer_func_cmap(cmap, N=256, max_opacity=1):
+    data = np.zeros((N, 4), dtype=np.float32)
+    ramp = np.linspace(0, 1, N)
+    colors = cmap(ramp)
+    for i in range(3):
+        data[..., i] = [c[i] for c in colors]
+    data[..., 3] = ramp*max_opacity
+    return data
+
 
 data0 = [[[1, 2]] * 2] * 2
 
@@ -113,5 +122,9 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
             self.state.percentile = 100
 
     def _update_transfer_function(self):
-        self.transfer_function.rgba = _transfer_func_rgba(self.state.color,
-                                                          max_opacity=self.state.alpha)
+        if self.state.color_mode == "Fixed":
+            self.transfer_function.rgba = _transfer_func_rgba(self.state.color,
+                                                              max_opacity=self.state.alpha)
+        else:
+            self.transfer_function.rgba = _transfer_func_cmap(self.state.cmap,
+                                                              max_opacity=self.state.alpha)
