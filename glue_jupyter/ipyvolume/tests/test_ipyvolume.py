@@ -1,8 +1,15 @@
 import os
 
 import numpy as np
+<<<<<<< HEAD
 import pytest
 from glue.core.roi import PolygonalROI, Projected3dROI
+=======
+from glue.config import stretches
+from glue.core.roi import PolygonalROI, Projected3dROI
+from matplotlib import colormaps
+from nbconvert.preprocessors import ExecutePreprocessor
+>>>>>>> 3f0ddc7 (Add tests of volume colormap mode and stretch widgets.)
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -174,6 +181,48 @@ def test_volshow_multiple_subsets(app, data_unlinked, data_volume):
     assert viewer.layers[0].enabled
     assert viewer.layers[1].enabled
     assert not viewer.layers[2].enabled
+
+
+def test_volshow_cmap_mode(app, data_volume):
+    
+    assert data_volume in app.data_collection
+    v = app.volshow(data=data_volume)
+
+    layer = v.layers[0]
+    layer_widget = v.layer_options.layers[-1]['layer_panel']
+    
+    assert layer.state.color_mode == 'Fixed'
+    assert layer.state.cmap.name == 'gray'
+
+    layer.state.color_mode = 'Linear'
+    assert layer_widget.widget_color.widget_cmap_mode.label == 'Linear'
+    assert layer_widget.widget_color.widget_cmap.label == 'Gray'
+    assert layer.state.cmap.name == 'gray'
+
+    layer.state.cmap = colormaps['viridis']
+    assert layer_widget.widget_color.widget_cmap.label == 'Viridis'
+
+    layer_widget.widget_color.widget_cmap.label = 'Hot'
+    assert layer.state.cmap == colormaps['hot']
+
+
+def test_volshow_stretch(app, data_volume):
+    
+    assert data_volume in app.data_collection
+    v = app.volshow(data=data_volume)
+
+    layer = v.layers[0]
+    layer_widget = v.layer_options.layers[-1]['layer_panel']
+    
+    assert layer.state.stretch == 'linear'
+    assert [item[1] for item in layer_widget.widget_stretch.options] == [item for item in stretches.members]
+    assert layer_widget.widget_stretch.value == 'linear'
+
+    layer.state.stretch = 'log'
+    assert layer_widget.widget_stretch.value == 'log'
+
+    layer_widget.widget_stretch.value = 'sqrt'
+    assert layer.state.stretch == 'sqrt'
 
 
 @pytest.mark.notebook
