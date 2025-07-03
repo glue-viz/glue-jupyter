@@ -12,19 +12,23 @@ from ...link import link, dlink, on_change
 __all__ = ['IpyvolumeVolumeLayerArtist']
 
 
-def _transfer_func_rgba(color, N=256, max_opacity=1):
+def _transfer_func_rgba(color, N=256, max_opacity=1, stretch=None):
     r, g, b = matplotlib.colors.to_rgb(color)
     data = np.zeros((N, 4), dtype=np.float32)
     ramp = np.linspace(0, 1, N)
+    if stretch is not None:
+        ramp = stretch(ramp)
     data[..., 0] = r
     data[..., 1] = g
     data[..., 2] = b
     data[..., 3] = ramp*max_opacity
     return data
 
-def _transfer_func_cmap(cmap, N=256, max_opacity=1):
+def _transfer_func_cmap(cmap, N=256, max_opacity=1, stretch=None):
     data = np.zeros((N, 4), dtype=np.float32)
     ramp = np.linspace(0, 1, N)
+    if stretch is not None:
+        ramp = stretch(ramp)
     colors = cmap(ramp)
     for i in range(3):
         data[..., i] = [c[i] for c in colors]
@@ -70,7 +74,7 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
 
         link((self.state, 'opacity_scale'), (self.volume, 'opacity_scale'))
 
-        on_change([(self.state, 'color', 'alpha', 'color_mode', 'cmap')])(self._update_transfer_function)
+        on_change([(self.state, 'color', 'alpha', 'color_mode', 'cmap', 'stretch', 'stretch_parameters')])(self._update_transfer_function)
 
     def clear(self):
         pass
@@ -124,7 +128,9 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
     def _update_transfer_function(self):
         if self.state.color_mode == "Fixed":
             self.transfer_function.rgba = _transfer_func_rgba(self.state.color,
-                                                              max_opacity=self.state.alpha)
+                                                              max_opacity=self.state.alpha,
+                                                              stretch=lambda x: self.state.stretch_object(x, **self.state.stretch_parameters))
         else:
             self.transfer_function.rgba = _transfer_func_cmap(self.state.cmap,
-                                                              max_opacity=self.state.alpha)
+                                                              max_opacity=self.state.alpha,
+                                                              stretch=lambda x: self.state.stretch_object(x, **self.state.stretch_parameters))
