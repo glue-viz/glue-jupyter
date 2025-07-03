@@ -93,7 +93,7 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
 
         link((self.state, 'opacity_scale'), (self.volume, 'opacity_scale'))
 
-        on_change([(self.state, 'color', 'alpha')])(self._update_transfer_function)
+        on_change([(self.state, 'color', 'alpha', 'color_mode', 'cmap')])(self._update_transfer_function)
 
     def clear(self):
         pass
