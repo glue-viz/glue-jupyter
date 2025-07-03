@@ -180,13 +180,13 @@ def test_volshow_multiple_subsets(app, data_unlinked, data_volume):
 
 
 def test_volshow_cmap_mode(app, data_volume):
-    
+
     assert data_volume in app.data_collection
     v = app.volshow(data=data_volume)
 
     layer = v.layers[0]
     layer_widget = v.layer_options.layers[-1]['layer_panel']
-    
+
     assert layer.state.color_mode == 'Fixed'
     assert layer.state.cmap.name == 'gray'
 
@@ -203,15 +203,16 @@ def test_volshow_cmap_mode(app, data_volume):
 
 
 def test_volshow_stretch(app, data_volume):
-    
+
     assert data_volume in app.data_collection
     v = app.volshow(data=data_volume)
 
     layer = v.layers[0]
     layer_widget = v.layer_options.layers[-1]['layer_panel']
-    
+
     assert layer.state.stretch == 'linear'
-    assert [item[1] for item in layer_widget.widget_stretch.options] == [item for item in stretches.members]
+    assert [item[1] for item in layer_widget.widget_stretch.options] == \
+           [item for item in stretches.members]
     assert layer_widget.widget_stretch.value == 'linear'
 
     layer.state.stretch = 'log'
@@ -219,7 +220,6 @@ def test_volshow_stretch(app, data_volume):
 
     layer_widget.widget_stretch.value = 'sqrt'
     assert layer.state.stretch == 'sqrt'
-
 
 
 def test_notebook():
