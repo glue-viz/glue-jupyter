@@ -24,6 +24,7 @@ def _transfer_func_rgba(color, N=256, max_opacity=1, stretch=None):
     data[..., 3] = ramp*max_opacity
     return data
 
+
 def _transfer_func_cmap(cmap, N=256, max_opacity=1, stretch=None):
     data = np.zeros((N, 4), dtype=np.float32)
     ramp = np.linspace(0, 1, N)
@@ -74,7 +75,9 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
 
         link((self.state, 'opacity_scale'), (self.volume, 'opacity_scale'))
 
-        on_change([(self.state, 'color', 'alpha', 'color_mode', 'cmap', 'stretch', 'stretch_parameters')])(self._update_transfer_function)
+        on_change([(self.state, 'color', 'alpha', 'color_mode',
+                    'cmap', 'stretch', 'stretch_parameters'
+                    )])(self._update_transfer_function)
 
     def clear(self):
         pass
@@ -126,11 +129,13 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
             self.state.percentile = 100
 
     def _update_transfer_function(self):
+        def stretch(x):
+            return self.state.stretch_object(x, **self.state.stretch_parameters)
         if self.state.color_mode == "Fixed":
             self.transfer_function.rgba = _transfer_func_rgba(self.state.color,
                                                               max_opacity=self.state.alpha,
-                                                              stretch=lambda x: self.state.stretch_object(x, **self.state.stretch_parameters))
+                                                              stretch=stretch)
         else:
             self.transfer_function.rgba = _transfer_func_cmap(self.state.cmap,
                                                               max_opacity=self.state.alpha,
-                                                              stretch=lambda x: self.state.stretch_object(x, **self.state.stretch_parameters))
+                                                              stretch=stretch)
