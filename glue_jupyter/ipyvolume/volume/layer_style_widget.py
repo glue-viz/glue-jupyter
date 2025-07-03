@@ -2,6 +2,7 @@ from ipywidgets import (Checkbox, VBox, Dropdown, FloatSlider,
                         FloatLogSlider)
 
 from glue_jupyter.widgets import Color
+from glue_jupyter.widgets.linked_dropdown import LinkedDropdown
 
 from ...link import link, dlink
 
@@ -67,6 +68,10 @@ class Volume3DLayerStateWidget(VBox):
                                                    value=self.state.opacity_scale)
         link((self.state, 'opacity_scale'), (self.widget_opacity_scale, 'value'))
 
+        self.widget_stretch = LinkedDropdown(self.state, 'stretch',
+                                             ui_name='stretch',
+                                             label='stretch')
+
         # FIXME: this should be fixed
         # self.widget_reset_zoom = Button(description="Reset zoom")
         # self.widget_reset_zoom.on_click(self.state.viewer_state.reset_limits)
@@ -76,4 +81,4 @@ class Volume3DLayerStateWidget(VBox):
                           self.widget_clamp_min, self.widget_clamp_max,
                           self.widget_max_resolution,  # self.widget_reset_zoom,
                           self.widget_color, self.widget_opacity,
-                          self.widget_opacity_scale])
+                          self.widget_opacity_scale, self.widget_stretch])
