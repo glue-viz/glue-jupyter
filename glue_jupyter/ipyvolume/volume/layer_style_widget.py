@@ -1,5 +1,8 @@
-from ipywidgets import (Checkbox, VBox, Dropdown, FloatSlider,
+from ipywidgets import (Checkbox, VBox, ColorPicker, Dropdown, FloatSlider,
                         FloatLogSlider)
+
+from glue.core.subset import Subset
+from glue.utils import color2hex
 
 from glue_jupyter.widgets import Color
 from glue_jupyter.widgets.linked_dropdown import LinkedDropdown
@@ -54,7 +57,11 @@ class Volume3DLayerStateWidget(VBox):
         self.widget_clamp_max = Checkbox(description='clamp maximum', value=self.state.clamp_max)
         link((self.state, 'clamp_max'), (self.widget_clamp_max, 'value'))
 
-        self.widget_color = Color(state=self.state, cmap_mode_attr='color_mode', cmap_att=None)
+        if isinstance(layer_state.layer, Subset):
+            self.widget_color = ColorPicker(value=color2hex(self.state.color), description='color')
+            link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
+        else:
+            self.widget_color = Color(state=self.state, cmap_mode_attr='color_mode', cmap_att=None)
 
         if self.state.alpha is None:
             self.state.alpha = 1
