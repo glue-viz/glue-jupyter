@@ -5,7 +5,6 @@ from glue.viewers.image.layer_artist import ImageLayerArtist, ImageSubsetLayerAr
 from glue.viewers.scatter.layer_artist import ScatterLayerArtist
 from glue.viewers.image.state import ImageViewerState
 from glue.viewers.image.viewer import MatplotlibImageMixin
-from glue.viewers.image.pixel_selection_mode import PixelSelectionTool
 
 from .base import MatplotlibJupyterViewer
 
@@ -32,7 +31,7 @@ class ImageJupyterViewer(MatplotlibImageMixin, MatplotlibJupyterViewer):
 
     tools = ['select:rectangle', 'select:xrange',
              'select:yrange', 'select:circle',
-             'select:polygon', 'image:selection_mode']
+             'select:polygon']
 
     def __init__(self, session, parent=None, state=None):
         super(ImageJupyterViewer, self).__init__(session, wcs=True, parent=parent, state=state)
