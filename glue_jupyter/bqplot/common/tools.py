@@ -6,7 +6,6 @@ from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
 from bqplot_image_gl.interacts import BrushEllipseSelector
 from glue import __version__ as glue_version
-from glue.core.edit_subset_mode import ReplaceMode
 from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
