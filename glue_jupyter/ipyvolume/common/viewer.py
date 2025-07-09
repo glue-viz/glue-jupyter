@@ -19,7 +19,7 @@ class IpyvolumeBaseView(IPyWidgetView):
 
     _options_cls = Viewer3DStateWidget
 
-    tools = ['ipyvolume:lasso', 'ipyvolume:circle', 'ipyvolume:rectangle', 'ipyvolume:point']
+    tools = ['ipyvolume:lasso', 'ipyvolume:circle', 'ipyvolume:rectangle']
 
     def __init__(self, *args, **kwargs):
 
