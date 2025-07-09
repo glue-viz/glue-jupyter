@@ -32,7 +32,7 @@ class ImageJupyterViewer(MatplotlibImageMixin, MatplotlibJupyterViewer):
 
     tools = ['select:rectangle', 'select:xrange',
              'select:yrange', 'select:circle',
-             'select:polygon', 'image:selection_mode']
+             'select:polygon', 'image:point_selection']
 
     def __init__(self, session, parent=None, state=None):
         super(ImageJupyterViewer, self).__init__(session, wcs=True, parent=parent, state=state)
