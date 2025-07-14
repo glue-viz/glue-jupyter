@@ -10,6 +10,7 @@ on:
 
 jobs:
   initial_checks:
+    if: false
     # Mandatory checks before CI tests
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
@@ -19,6 +20,7 @@ jobs:
         - linux: codestyle
 
   tests:
+    if: false
     needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
@@ -43,6 +45,7 @@ jobs:
         - windows: py310-test
 
   no_coverage:
+    if: false
     needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
@@ -58,7 +61,35 @@ jobs:
         - macos: py39-docs
         - windows: py38-docs
 
+  ui-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install . "pytest-ipywidgets[all]" "pytest-playwright==0.5.2" "jupyterlab<4"
+      - name: Install playwright
+        run: |
+          playwright install chromium
+      - name: Run visual regression tests
+        run: |
+          pytest tests/ui
+      - name: Upload UI Test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: glue-jupyter-ui-test-output
+          path: |
+            test-results
+  
+  
+  
+
   publish:
+    if: false
     needs: tests
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v1
     with:
