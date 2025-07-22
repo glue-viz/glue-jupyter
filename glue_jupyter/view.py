@@ -2,14 +2,15 @@ from ipywidgets import Output
 
 from IPython.display import display
 
-from glue.viewers.common.viewer import Viewer
-from glue.viewers.common.utils import get_viewer_tools
-from glue.core.layer_artist import LayerArtistContainer
+from glue.config import viewer_tool
 from glue.core import message as msg
+from glue.core.layer_artist import LayerArtistContainer
+from glue.viewers.common.utils import get_viewer_tools
+from glue.viewers.common.viewer import Viewer
 
 from glue_jupyter import get_layout_factory
-from glue_jupyter.utils import _update_not_none, validate_data_argument
 from glue_jupyter.common.toolbar_vuetify import BasicJupyterToolbar
+from glue_jupyter.utils import _update_not_none, validate_data_argument
 from glue_jupyter.widgets.layer_options import LayerOptionsWidget
 
 __all__ = ['IPyWidgetView', 'IPyWidgetLayerArtistContainer']
@@ -147,8 +148,6 @@ class IPyWidgetView(Viewer):
         self._layout_layer_options = LayerOptionsWidget(self)
 
     def initialize_toolbar(self):
-
-        from glue.config import viewer_tool
 
         self.toolbar = self._toolbar_cls(self)
 

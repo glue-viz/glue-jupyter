@@ -679,7 +679,8 @@ class ROIClickAndDrag(InteractCheckableTool):
             self.press(x, y)
 
     def press(self, x, y):
-        from glue_jupyter.bqplot.image.layer_artist import BqplotImageSubsetLayerArtist
+        # Avoid circular import in bqplot.common.viewer
+        from glue_jupyter.bqplot.image.layer_artist import BqplotImageSubsetLayerArtist  # noqa
         for layer in self.viewer.layers:
             if not isinstance(layer, BqplotImageSubsetLayerArtist):
                 continue

@@ -36,7 +36,7 @@ def test_adding_viewers():
         pass
 
     app = gj.jglue()
-    from glue_jupyter.table import TableViewer
+    from glue_jupyter.table import TableViewer # noqa
     viewer_cls = TableViewer
     s1 = app.new_data_viewer(viewer_cls, data=None)
     assert len(app.viewers) == 1

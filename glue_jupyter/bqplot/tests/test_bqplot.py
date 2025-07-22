@@ -6,6 +6,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from glue.config import viewer_tool
 from glue.core import Data
 from glue.core.roi import CircularAnnulusROI, EllipticalROI
+from glue.core.subset import RoiSubsetState
 from ..common.tools import TrueCircularROI
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
@@ -235,9 +236,7 @@ def test_scatter2d_and_histogram(app, dataxyz):
     tool.interact.selected = [(1.5, 3.5), (3.5, 5)]
     tool.interact.brushing = False
     assert len(s.layers) == 2
-    import glue.core.subset
-    assert isinstance(s.layers[1].layer.subset_state,
-                      glue.core.subset.RoiSubsetState)
+    assert isinstance(s.layers[1].layer.subset_state, RoiSubsetState)
 
 
 def test_imshow(app, data_image, dataxyz):
