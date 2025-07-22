@@ -6,7 +6,7 @@ from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
 from bqplot_image_gl.interacts import BrushEllipseSelector
 from glue import __version__ as glue_version
-from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
+from glue.core.roi import PointROI, RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
 from glue.viewers.common.tool import Tool, CheckableTool
@@ -751,6 +751,13 @@ class PointSelectTool(InteractCheckableTool):
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
                 y = self.interact.selected_y
+
+            if (x and y) is not None:
+                roi = PointROI(x, y)
+                self.viewer.apply_roi(roi)
+                if self.finalize_callback is not None:
+                    self.finalize_callback()
+
 
     def on_selection_change(self, *args):
         if self.interact.selected_x is None and self.interact.selected_y is None:
