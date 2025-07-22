@@ -769,5 +769,3 @@ class PointSelectTool(InteractCheckableTool):
             self.interact.selected_x = None
             self.interact.selected_y = None
         super().activate()
-
-

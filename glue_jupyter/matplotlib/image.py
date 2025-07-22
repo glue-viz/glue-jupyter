@@ -5,7 +5,6 @@ from glue.viewers.image.layer_artist import ImageLayerArtist, ImageSubsetLayerAr
 from glue.viewers.scatter.layer_artist import ScatterLayerArtist
 from glue.viewers.image.state import ImageViewerState
 from glue.viewers.image.viewer import MatplotlibImageMixin
-from glue.viewers.image.pixel_selection_mode import PixelSelectionTool
 
 from .base import MatplotlibJupyterViewer
 
