@@ -1,4 +1,5 @@
 import pytest
+import IPython.display as idisp
 import numpy as np
 from glue.core import Data
 import glue_jupyter as gj
@@ -92,10 +93,8 @@ if not SOLARA_INSTALLED:
 
     def pytest_configure(config):
         global ORIGINAL_DISPLAY
-        import IPython.display as idisp
         ORIGINAL_DISPLAY = idisp.display
         idisp.display = noop
 
     def pytest_unconfigure(config):
-        import IPython.display as idisp
         idisp.display = ORIGINAL_DISPLAY

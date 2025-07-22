@@ -4,9 +4,12 @@ import collections
 import time
 from io import BytesIO as StringIO
 
+import IPython
 import ipyvue
-import PIL.Image
 import numpy as np
+import PIL.Image
+
+from tornado.ioloop import IOLoop
 
 from glue.core import BaseCartesianData
 from glue.utils.matplotlib import MATPLOTLIB_GE_36
@@ -101,8 +104,6 @@ def grid_slice(xmin, xmax, shape, ymin, ymax):
 
 
 def get_ioloop():
-    import IPython
-    from tornado.ioloop import IOLoop
     ipython = IPython.get_ipython()
     if ipython and hasattr(ipython, 'kernel'):
         return IOLoop.instance()

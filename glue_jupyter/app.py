@@ -4,12 +4,13 @@ import ipywidgets as widgets
 from IPython.display import display
 
 from glue.core.application_base import Application
+from glue.core.command import ApplySubsetState
+from glue.core.edit_subset_mode import NewMode, ReplaceMode, AndMode, OrMode, XorMode, AndNotMode
 from glue.core.link_helpers import LinkSame
+from glue.core.parsers import parse_links
 from glue.core.roi import PolygonalROI
 from glue.core.subset import RoiSubsetState
-from glue.core.command import ApplySubsetState
-from glue.core.edit_subset_mode import (NewMode, ReplaceMode, AndMode, OrMode,
-                                        XorMode, AndNotMode)
+from glue.main import load_plugins
 
 from glue_jupyter.utils import (_update_not_none, validate_data_argument,
                                 _register_custom_vue_components)
@@ -55,13 +56,7 @@ class JupyterApplication(Application):
 
         _register_custom_vue_components()
 
-        try:
-            from glue.main import load_plugins
-            load_plugins()
-        except Exception:  # Compatibility with glue <0.16
-            from glue.main import REQUIRED_PLUGINS
-            REQUIRED_PLUGINS.clear()
-            load_plugins()
+        load_plugins()
 
         self._settings['new_subset_on_selection_tool_change'] = [False, bool]
         self._settings['single_global_active_tool'] = [True, bool]
@@ -90,10 +85,6 @@ class JupyterApplication(Application):
         """
         Parse and add links.
         """
-        try:
-            from glue.core.parsers import parse_links
-        except ImportError:  # older versions of glue
-            from glue.qglue import parse_links
         self.data_collection.add_link(parse_links(self.data_collection, links))
 
     def add_link(self, data1, attribute1, data2, attribute2):
