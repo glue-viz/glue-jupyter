@@ -1,10 +1,9 @@
 import pytest
-import playwright.sync_api
 import glue_jupyter as gj
 import numpy as np
 
 @pytest.mark.parametrize("compression", ["png"])
-def test_elliptical_selection(solara_test, page_session: playwright.sync_api.Page, assert_solara_snapshot, compression, request):
+def test_elliptical_selection(solara_test, page_session, assert_solara_snapshot, compression, request):
     page_session.set_viewport_size({ "width": 500, "height": 600 })
     points = gj.example_data_xyz(loc=0, scale=1, N=10*1000)
     app = gj.jglue(points=points)
@@ -34,7 +33,7 @@ def test_elliptical_selection(solara_test, page_session: playwright.sync_api.Pag
 
 
 @pytest.mark.parametrize("compression", ["png"])
-def test_elliptical_selection_rotate(solara_test, page_session: playwright.sync_api.Page, assert_solara_snapshot, compression, request):
+def test_elliptical_selection_rotate(solara_test, page_session, assert_solara_snapshot, compression, request):
     page_session.set_viewport_size({ "width": 500, "height": 600 })
     points = gj.example_data_xyz(loc=0, scale=1, N=10*1000)
     app = gj.jglue(points=points)
@@ -63,7 +62,7 @@ def test_elliptical_selection_rotate(solara_test, page_session: playwright.sync_
     from glue.core.edit_subset_mode import ReplaceMode
 
     subset_to_update = app.session.data_collection.subset_groups[0]
-    setattr(subset_to_update.subset_state.roi, "theta", np.radians(45))
+    subset_to_update.subset_state.roi.theta = np.radians(45)
     app.session.edit_subset_mode._combine_data(subset_to_update.subset_state, override_mode=ReplaceMode)
     page_session.wait_for_timeout(100)
 
@@ -71,7 +70,7 @@ def test_elliptical_selection_rotate(solara_test, page_session: playwright.sync_
 
 
 @pytest.mark.parametrize("compression", ["png"])
-def test_rectangular_selection(solara_test, page_session: playwright.sync_api.Page, assert_solara_snapshot, compression, request):
+def test_rectangular_selection(solara_test, page_session, assert_solara_snapshot, compression, request):
     page_session.set_viewport_size({ "width": 500, "height": 600 })
     points = gj.example_data_xyz(loc=0, scale=1, N=10*1000)
     app = gj.jglue(points=points)
@@ -101,7 +100,7 @@ def test_rectangular_selection(solara_test, page_session: playwright.sync_api.Pa
 
 
 @pytest.mark.parametrize("compression", ["png"])
-def test_rectangular_selection_rotate(solara_test, page_session: playwright.sync_api.Page, assert_solara_snapshot, compression, request):
+def test_rectangular_selection_rotate(solara_test, page_session, assert_solara_snapshot, compression, request):
     page_session.set_viewport_size({ "width": 500, "height": 600 })
     points = gj.example_data_xyz(loc=0, scale=1, N=10*1000)
     app = gj.jglue(points=points)
@@ -130,7 +129,7 @@ def test_rectangular_selection_rotate(solara_test, page_session: playwright.sync
     from glue.core.edit_subset_mode import ReplaceMode
 
     subset_to_update = app.session.data_collection.subset_groups[0]
-    setattr(subset_to_update.subset_state.roi, "theta", np.radians(45))
+    subset_to_update.subset_state.roi.theta = np.radians(45)
     app.session.edit_subset_mode._combine_data(subset_to_update.subset_state, override_mode=ReplaceMode)
     page_session.wait_for_timeout(100)
 
