@@ -32,15 +32,28 @@ jobs:
         - linux: py39-test
         - linux: py310-test
         - linux: py311-test
+        - linux: py312-test
+        - linux: py313-test
 
         - macos: py38-test
         - macos: py39-test
         # One of these to be switched to arm64 running natively once the PLAT var is supported.
         - macos: py311-test
+        - macos: py312-test
+        - macos: py313-test
 
         - windows: py38-test
         - windows: py39-test
         - windows: py310-test
+        - windows: py311-test
+        - windows: py312-test
+        - windows: py313-test
+
+        # test against some dev versions of some packages
+        - linux: py311-test-all-dev
+        - linux: py311-test-all
+        - macos: py312-test-dev
+        - windows: py313-test-dev
 
   no_coverage:
     needs: initial_checks
