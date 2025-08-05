@@ -64,6 +64,8 @@ def test_elliptical_selection_rotate(solara_test, page_session, assert_solara_sn
     subset_to_update = app.session.data_collection.subset_groups[0]
     subset_to_update.subset_state.roi.theta = np.radians(45)
     app.session.edit_subset_mode._combine_data(subset_to_update.subset_state, override_mode=ReplaceMode)
+    tool = app.viewers[0].toolbar.active_tool
+    tool.update_from_roi(subset_to_update.subset_state.roi)
     page_session.wait_for_timeout(100)
 
     assert_solara_snapshot(plot.screenshot())
@@ -131,6 +133,8 @@ def test_rectangular_selection_rotate(solara_test, page_session, assert_solara_s
     subset_to_update = app.session.data_collection.subset_groups[0]
     subset_to_update.subset_state.roi.theta = np.radians(45)
     app.session.edit_subset_mode._combine_data(subset_to_update.subset_state, override_mode=ReplaceMode)
+    tool = app.viewers[0].toolbar.active_tool
+    tool.update_from_roi(subset_to_update.subset_state.roi)
     page_session.wait_for_timeout(100)
 
     assert_solara_snapshot(plot.screenshot())
