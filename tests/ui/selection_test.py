@@ -108,7 +108,7 @@ def test_rectangular_selection_rotate(solara_test, page_session, assert_solara_s
     page_session.mouse.up()
     page_session.wait_for_timeout(100)
 
-    rotate(180, app, viewer)
+    rotate(45, app, viewer)
     page_session.wait_for_timeout(100)
 
     assert_solara_snapshot(plot.screenshot())
