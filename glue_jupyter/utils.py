@@ -1,7 +1,6 @@
 import os
 import functools
 import collections
-import time
 from io import BytesIO as StringIO
 
 import IPython
@@ -9,7 +8,7 @@ import ipyvue
 import numpy as np
 import PIL.Image
 
-from tornado.ioloop import IOLoop
+from asyncio import get_running_loop
 
 from glue.core import BaseCartesianData
 from glue.utils.matplotlib import MATPLOTLIB_GE_36
@@ -106,7 +105,7 @@ def grid_slice(xmin, xmax, shape, ymin, ymax):
 def get_ioloop():
     ipython = IPython.get_ipython()
     if ipython and hasattr(ipython, 'kernel'):
-        return IOLoop.instance()
+        return get_running_loop()
 
 
 def debounced(delay_seconds=0.5, method=False):
@@ -128,11 +127,11 @@ def debounced(delay_seconds=0.5, method=False):
             ioloop = get_ioloop()
 
             def thread_safe():
-                ioloop.add_timeout(time.time() + delay_seconds, debounced_execute)
+                ioloop.call_later(delay_seconds, debounced_execute)
             if ioloop is None:  # not IPython, maybe unittest
                 debounced_execute()
             else:
-                ioloop.add_callback(thread_safe)
+                ioloop.call_soon_threadsafe(thread_safe)
         return execute
     return wrapped
 
