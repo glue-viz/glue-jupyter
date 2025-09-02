@@ -10,7 +10,6 @@ on:
 
 jobs:
   initial_checks:
-    if: false
     # Mandatory checks before CI tests
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
@@ -20,7 +19,6 @@ jobs:
         - linux: codestyle
 
   tests:
-    if: false
     needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
@@ -45,7 +43,6 @@ jobs:
         - windows: py310-test
 
   no_coverage:
-    if: false
     needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
@@ -89,7 +86,6 @@ jobs:
 
 
   publish:
-    if: false
     needs: tests
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v1
     with:
