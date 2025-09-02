@@ -1,4 +1,5 @@
 import pytest
+from glue.core import Data
 import glue_jupyter as gj
 import numpy as np
 from glue.core.edit_subset_mode import ReplaceMode
@@ -113,10 +114,21 @@ def test_rectangular_selection_rotate(solara_test, page_session, assert_solara_s
 
     assert_solara_snapshot(plot.screenshot())
 
+def example_data_square():
+    n=100
+    xlim=(0.0, 1.0)
+    ylim=(0.0, 1.0)
+
+    x = np.linspace(xlim[0], xlim[1], n)
+    y = np.linspace(ylim[0], ylim[1], n)
+    X, Y = np.meshgrid(x, y)
+
+    data = Data(x=X.ravel(), y=Y.ravel(), label='square')
+    return data
 
 def create_viewer(page_session):
     page_session.set_viewport_size({ "width": 500, "height": 600 })
-    points = gj.example_data_xyz(loc=0, scale=1, N=10*1000)
+    points = example_data_square()
     app = gj.jglue(points=points)
     viewer = app.scatter2d(x='x', y='y', show=False)
     viewer.figure_widget.layout.width = '500px'
