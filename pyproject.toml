@@ -74,6 +74,7 @@ lint.ignore = [  # NOTE: non-permanent exclusions should be added to `.ruff.toml
 ".github/workflows/*.py" = ["INP001"]
 "setup.py" = ["INP001"]
 "docs/conf.py" = ["INP001"]
+"tests/ui/test_selection.py" = ["INP001"]
 # `import` should be at the top-level of a file. Most of the following are conditional imports.
 "glue_jupyter/__init__.py" = ["PLC0415"]
 "glue_jupyter/app.py" = ["PLC0415"]
