@@ -56,7 +56,7 @@ jobs:
 
         - linux: py311-docs
         - macos: py310-docs
-        - windows: py10-docs
+        - windows: py312-docs
 
   publish:
     needs: tests
