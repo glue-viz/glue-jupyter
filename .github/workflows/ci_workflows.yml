@@ -28,19 +28,19 @@ jobs:
           - libhdf5-dev
 
       envs: |
-        - linux: py38-test
-        - linux: py39-test
         - linux: py310-test
         - linux: py311-test
+        - linux: py312-test
+        - linux: py313-test
 
-        - macos: py38-test
-        - macos: py39-test
         # One of these to be switched to arm64 running natively once the PLAT var is supported.
+        - macos: py310-test
         - macos: py311-test
+        - macos: py312-test
 
-        - windows: py38-test
-        - windows: py39-test
         - windows: py310-test
+        - windows: py311-test
+        - windows: py312-test
 
   no_coverage:
     needs: initial_checks
@@ -50,13 +50,13 @@ jobs:
       pytest: false
 
       envs: |
-        - windows: py39-notebooks
-        - macos: py38-notebooks
-        - linux: py310-notebooks
+        - windows: py310-notebooks
+        - macos: py311-notebooks
+        - linux: py313-notebooks
 
         - linux: py311-docs
-        - macos: py39-docs
-        - windows: py38-docs
+        - macos: py310-docs
+        - windows: py312-docs
 
   ui-tests:
     runs-on: ubuntu-latest
