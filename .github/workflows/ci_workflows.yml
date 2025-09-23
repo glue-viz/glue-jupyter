@@ -44,8 +44,7 @@ jobs:
         - windows: py313-test
 
         # test against some dev versions of some packages
-        - linux: py311-test-all-dev
-        - linux: py311-test-all
+        - linux: py311-test-dev
         - macos: py312-test-dev
         - windows: py313-test-dev
 
