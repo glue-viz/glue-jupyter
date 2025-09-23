@@ -4,9 +4,9 @@ from contextlib import nullcontext
 import numpy as np
 from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
-from bqplot_image_gl.interacts import BrushEllipseSelector
+from bqplot_image_gl.interacts import BrushEllipseSelector, BrushRectangleSelector
 from glue import __version__ as glue_version
-from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
+from glue.core.roi import PointROI, RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
 from glue.viewers.common.tool import Tool, CheckableTool
@@ -134,9 +134,17 @@ class BqplotRectangleMode(BqplotSelectionTool):
 
         super().__init__(viewer, **kwargs)
 
-        self.interact = BrushSelector(x_scale=self.viewer.scale_x,
-                                      y_scale=self.viewer.scale_y,
-                                      color=INTERACT_COLOR)
+        self.interact = BrushRectangleSelector(x_scale=self.viewer.scale_x,
+                                               y_scale=self.viewer.scale_y)
+
+        # Workaround for bug that causes the `color` trait to not be recognized
+        style = self.interact.style.copy()
+        style['fill'] = INTERACT_COLOR
+        border_style = self.interact.border_style.copy()
+        border_style['fill'] = INTERACT_COLOR
+        border_style['stroke'] = INTERACT_COLOR
+        self.interact.style = style
+        self.interact.border_style = border_style
 
         self._roi = kwargs.get("roi", None)
         if roi is not None:
@@ -166,6 +174,7 @@ class BqplotRectangleMode(BqplotSelectionTool):
             if isinstance(roi, RectangularROI):
                 self.interact.selected_x = [roi.xmin, roi.xmax]
                 self.interact.selected_y = [roi.ymin, roi.ymax]
+                self.interact.rotate = -np.degrees(roi.theta)
             elif isinstance(roi, PolygonalROI):
                 self.interact.selected_x = [np.min(roi.vx), np.max(roi.vx)]
                 self.interact.selected_y = [np.min(roi.vy), np.max(roi.vy)]
@@ -422,6 +431,7 @@ class BqplotCircleMode(BqplotSelectionTool):
                 rx, ry = np.sqrt((roi.radius_x ** 2 + roi.radius_y ** 2) * 0.5)
             else:
                 rx, ry = roi.radius_x, roi.radius_y
+            self.interact.rotate = -np.degrees(roi.theta)
         else:
             raise TypeError(f'Cannot initialize a BqplotCircleMode from a {type(roi)}')
         self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
@@ -679,7 +689,8 @@ class ROIClickAndDrag(InteractCheckableTool):
             self.press(x, y)
 
     def press(self, x, y):
-        from glue_jupyter.bqplot.image.layer_artist import BqplotImageSubsetLayerArtist
+        # Avoid circular import in bqplot.common.viewer
+        from glue_jupyter.bqplot.image.layer_artist import BqplotImageSubsetLayerArtist  # noqa
         for layer in self.viewer.layers:
             if not isinstance(layer, BqplotImageSubsetLayerArtist):
                 continue
@@ -724,3 +735,48 @@ class HomeTool(Tool):
 
     def activate(self):
         self.viewer.state.reset_limits()
+
+
+@viewer_tool
+class PointSelectTool(InteractCheckableTool):
+    tool_id = 'bqplot:point'
+    icon = 'glue_point'
+    action_text = 'Point'
+    tool_tip = 'Select a single pixel based on the mouse location'
+
+    def __init__(self, viewer, finalize_callback=None, **kwargs):
+        super().__init__(viewer, **kwargs)
+
+        self.interact = BrushSelector(x_scale=self.viewer.scale_x,
+                                      y_scale=self.viewer.scale_y,
+                                      color=INTERACT_COLOR)
+
+        self.interact.observe(self.update_selection, "brushing")
+        self.interact.observe(self.on_selection_change, "selected")
+        self.finalize_callback = finalize_callback
+
+    def update_selection(self, *args):
+        if self.interact.brushing:
+            return
+        with self.viewer._output_widget or nullcontext():
+            if self.interact.selected_x is not None and self.interact.selected_y is not None:
+                x = self.interact.selected_x
+                y = self.interact.selected_y
+
+            if (x and y) is not None:
+                roi = PointROI(x, y)
+                self.viewer.apply_roi(roi)
+                if self.finalize_callback is not None:
+                    self.finalize_callback()
+
+
+    def on_selection_change(self, *args):
+        if self.interact.selected_x is None and self.interact.selected_y is None:
+            if self.finalize_callback is not None:
+                self.finalize_callback()
+
+    def activate(self):
+        with self.viewer._output_widget or nullcontext():
+            self.interact.selected_x = None
+            self.interact.selected_y = None
+        super().activate()

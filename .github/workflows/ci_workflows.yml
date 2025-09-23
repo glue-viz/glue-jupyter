@@ -34,6 +34,7 @@ jobs:
         - linux: py313-test
 
         # One of these to be switched to arm64 running natively once the PLAT var is supported.
+        - macos: py310-test
         - macos: py311-test
         - macos: py312-test
         - macos: py313-test
@@ -56,13 +57,37 @@ jobs:
       pytest: false
 
       envs: |
-        - windows: py39-notebooks
-        - macos: py38-notebooks
-        - linux: py310-notebooks
+        - windows: py310-notebooks
+        - macos: py311-notebooks
+        - linux: py313-notebooks
 
         - linux: py311-docs
-        - macos: py39-docs
-        - windows: py38-docs
+        - macos: py310-docs
+        - windows: py312-docs
+
+  ui-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install . "pytest-ipywidgets[all]" "pytest-playwright==0.5.2" "jupyterlab<4"
+      - name: Install playwright
+        run: |
+          playwright install chromium
+      - name: Run visual regression tests
+        run: |
+          pytest tests/ui
+      - name: Upload UI Test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: glue-jupyter-ui-test-output
+          path: |
+            test-results
 
   publish:
     needs: tests

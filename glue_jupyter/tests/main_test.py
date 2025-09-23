@@ -3,6 +3,7 @@ import os
 import pytest
 import nbformat
 import numpy as np
+from astropy.wcs import WCS
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from glue.core import Data
@@ -188,8 +189,6 @@ def test_plugins():
 
     # Make sure that glue plugins are correctly loaded, by checking that the
     # WCS autolinker works.
-
-    from astropy.wcs import WCS
 
     app = gj.jglue()
 
