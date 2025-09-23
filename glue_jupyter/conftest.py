@@ -54,18 +54,27 @@ def data_image():
 
 
 @pytest.fixture
-def app(dataxyz, datax, dataxz, data_volume, data_image):
+def data_flat():
+    return Data(x=np.arange(72).reshape((6, 4, 1, 3)), label='Flat 4D')
+
+
+@pytest.fixture
+def app(dataxyz, datax, dataxz, data_volume, data_image, data_flat):
     app = gj.jglue(dataxyz=dataxyz, dataxz=dataxz, datax=datax)
     app.add_link(dataxyz, 'x', dataxz, 'x')
     app.add_link(dataxyz, 'y', dataxz, 'z')
     app.add_link(dataxyz, 'x', datax, 'x')
     app.add_data(data_volume=data_volume)
     app.add_data(data_image=data_image)
+    app.add_data(data_flat=data_flat)
     app.add_link(data_image, 'Pixel Axis 0 [y]', dataxyz, 'y')
     app.add_link(data_image, 'Pixel Axis 1 [x]', dataxyz, 'x')
     app.add_link(data_volume, 'Pixel Axis 0 [z]', dataxyz, 'z')
     app.add_link(data_volume, 'Pixel Axis 1 [y]', dataxyz, 'y')
     app.add_link(data_volume, 'Pixel Axis 2 [x]', dataxyz, 'x')
+    app.add_link(data_flat, 'Pixel Axis 0', dataxyz, 'z')
+    app.add_link(data_flat, 'Pixel Axis 1', dataxyz, 'y')
+    app.add_link(data_flat, 'Pixel Axis 2', dataxyz, 'x')
     return app
 
 
