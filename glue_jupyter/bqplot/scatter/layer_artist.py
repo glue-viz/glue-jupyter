@@ -458,11 +458,12 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _update_zorder(self, *args):
         sorted_layers = sorted(self.view.layers, key=lambda layer: layer.state.zorder)
+        marks = ['density_mark', 'scatter_mark', 'line_mark_gl', 'line_mark',
+                 'vector_mark', 'vector_lines']
         self.view.figure.marks = [
             item
             for layer in sorted_layers
-            for item in (layer.density_mark, layer.scatter_mark, layer.line_mark_gl,
-                         layer.line_mark, layer.vector_mark, layer.vector_lines)
+            for item in [getattr(layer, mark, None) for mark in marks] if item is not None
         ]
 
     def _build_line_vector_points(self, x, y, vx, vy):
