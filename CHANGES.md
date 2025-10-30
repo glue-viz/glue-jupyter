@@ -1,5 +1,25 @@
 # Full changelog
 
+## v0.25.0 - 2025-10-30
+
+<!-- Release notes generated using configuration in .github/release.yml at v0.25.x -->
+### What's Changed
+
+#### Bug Fixes
+
+* Don't show a slider for a "flat" dimension by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/490
+* Debug changing zorder in viewers with mixed layer states by @rosteen in https://github.com/glue-viz/glue-jupyter/pull/493
+
+#### New Features
+
+* feat: support for rotated ellipse and rectangle selections by @mariobuikhuizen in https://github.com/glue-viz/glue-jupyter/pull/483
+
+#### Other Changes
+
+* Replace tornado IOLoop with asyncio by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/492
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.24.0...v0.25.0
+
 ## v0.24.0 - 2025-04-07
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
