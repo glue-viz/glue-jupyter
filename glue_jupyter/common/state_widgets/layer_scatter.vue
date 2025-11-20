@@ -7,7 +7,7 @@
         </div>
         <div>
           <v-subheader class="pl-0 slider-label">Axes definition</v-subheader>
-          <Glue-axes/>
+          <glue-axes/>
         </div>
         <template v-if="glue_state.cmap_mode === 'Linear'">
             <div>
