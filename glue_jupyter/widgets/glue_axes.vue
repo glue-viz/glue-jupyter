@@ -20,6 +20,10 @@
           </v-col>
         </v-row>
   </div>
+  <div>
+      <v-text-field :label="x-label" :value.sync="glue_state.x_axislabel"/>
+      <v-text-field :label="y-label" :value.sync="glue_state.y_axislabel"/>
+  </div>
 </template>
 
 <script>
