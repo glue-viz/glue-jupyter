@@ -1,28 +1,40 @@
 <template>
   <div>
         <v-row dense>
-          <v-col cols="5">
-            <glue-float-field label="xmin" :value.sync="value.x_min"/>
+          <v-col cols="6">
+            <v-text-field label="xmin" v-model="value.x_min"/>
           </v-col>
 
-          <v-col cols="5">
-            <glue-float-field label="xmax" :value.sync="value.x_max"/>
+          <v-col cols="6">
+            <v-text-field label="xmax" v-model="value.x_max"/>
           </v-col>
         </v-row>
 
         <v-row dense>
-          <v-col cols="5">
-            <glue-float-field label="ymin" :value.sync="value.y_min"/>
+          <v-col cols="6">
+            <v-text-field label="ymin" v-model="value.y_min"/>
           </v-col>
 
-          <v-col cols="5">
-            <glue-float-field label="ymax" :value.sync="value.y_max"/>
+          <v-col cols="6">
+            <v-text-field label="ymax" v-model="value.y_max"/>
           </v-col>
         </v-row>
-  </div>
-  <div>
-      <v-text-field :label="x-label" :value.sync="glue_state.x_axislabel"/>
-      <v-text-field :label="y-label" :value.sync="glue_state.y_axislabel"/>
+        <div>
+          <v-row dense>
+            <v-text-field label="x-label" v-model="value.x_axislabel"/>
+          </v-row>
+          <v-row dense>
+            <v-text-field label="y-label" v-model="value.y_axislabel"/>
+          </v-row>
+        </div>
+        <div>
+          <v-subheader class="pl-0 slider-label">x tick size</v-subheader>
+          <glue-throttled-slider wait="300" min="1" max="20" step="0.01" :value.sync="value.x_ticklabel_size" hide-details />
+        </div>
+        <div>
+          <v-subheader class="pl-0 slider-label">y tick size</v-subheader>
+          <glue-throttled-slider wait="300" min="1" max="20" step="0.01" :value.sync="value.y_ticklabel_size" hide-details />
+        </div>
   </div>
 </template>
 
@@ -32,6 +44,6 @@
        Only when `value` is changed externally, `glue_state` will be update according to the current `value`.
     */
     module.exports = {
-        props: { value: { type: Object, default: () => ({ x_min: 0, x_max: 1, y_min: 0, y_max: 1 }) } },
+        props: { value: { type: Object, default: () => ({ x_min: 0, x_max: 1, y_min: 0, y_max: 1}) } },
     }
 </script>
