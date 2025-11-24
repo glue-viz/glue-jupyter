@@ -2,7 +2,7 @@
     <div class="glue-viewer-scatter">
         <div>
           <v-subheader class="pl-0 slider-label">Axes Size</v-subheader>
-          <glue-axes :value.sync="glue_state"/>
+          <glue-axes :value="glue_state"/>
         </div>
         <div>
             <v-select label="x axis" :items="x_att_items" v-model="x_att_selected" hide-details />
