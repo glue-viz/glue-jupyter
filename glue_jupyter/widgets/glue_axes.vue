@@ -2,21 +2,21 @@
   <div>
         <v-row dense>
           <v-col cols="5">
-            <glue-float-field label="xmin" :value.sync="glue_state.x_min"/>
+            <glue-float-field label="xmin" :value.sync="value.x_min"/>
           </v-col>
 
           <v-col cols="5">
-            <glue-float-field label="xmax" :value.sync="glue_state.x_max"/>
+            <glue-float-field label="xmax" :value.sync="value.x_max"/>
           </v-col>
         </v-row>
 
         <v-row dense>
           <v-col cols="5">
-            <glue-float-field label="ymin" :value.sync="glue_state.y_min"/>
+            <glue-float-field label="ymin" :value.sync="value.y_min"/>
           </v-col>
 
           <v-col cols="5">
-            <glue-float-field label="ymax" :value.sync="glue_state.y_max"/>
+            <glue-float-field label="ymax" :value.sync="value.y_max"/>
           </v-col>
         </v-row>
   </div>
@@ -32,15 +32,6 @@
        Only when `value` is changed externally, `glue_state` will be update according to the current `value`.
     */
     module.exports = {
-        props: { glue_state: { type: Object, default: () => ({ x_min: 0, x_max: 1, y_min: 0, y_max: 1 }) } },
-        watch: {
-            glue_state: { handler(value) {
-                // when we change the input, we only update value when valid
-                // and we emit the change only when we have a valid number
-                this.$emit('update:value', value);
-            },
-              deep: true
-            }
-            },
+        props: { value: { type: Object, default: () => ({ x_min: 0, x_max: 1, y_min: 0, y_max: 1 }) } },
     }
 </script>
