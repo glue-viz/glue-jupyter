@@ -129,13 +129,15 @@ class BqplotRectangleMode(BqplotSelectionTool):
     tool_id = 'bqplot:rectangle'
     action_text = 'Rectangular ROI'
     tool_tip = 'Define a rectangular region of interest'
+    show_handles = False
 
     def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
         super().__init__(viewer, **kwargs)
 
         self.interact = BrushRectangleSelector(x_scale=self.viewer.scale_x,
-                                               y_scale=self.viewer.scale_y)
+                                               y_scale=self.viewer.scale_y,
+                                               show_handles=BqplotRectangleMode.show_handles)
 
         # Workaround for bug that causes the `color` trait to not be recognized
         style = self.interact.style.copy()
@@ -363,6 +365,7 @@ class BqplotCircleMode(BqplotSelectionTool):
     tool_id = 'bqplot:circle'
     action_text = 'Circular ROI'
     tool_tip = 'Define a circular region of interest'
+    show_handles = False
 
     def __init__(self, viewer, roi=None, finalize_callback=None, **kwargs):
 
@@ -370,7 +373,8 @@ class BqplotCircleMode(BqplotSelectionTool):
 
         self.interact = BrushEllipseSelector(x_scale=self.viewer.scale_x,
                                              y_scale=self.viewer.scale_y,
-                                             pixel_aspect=1)
+                                             pixel_aspect=1,
+                                             show_handles = BqplotCircleMode.show_handles)
 
         # Workaround for bug that causes the `color` trait to not be recognized
         style = self.interact.style.copy()
@@ -474,10 +478,12 @@ class BqplotEllipseMode(BqplotCircleMode):
         super().__init__(viewer, **kwargs)
 
         self.interact = BrushEllipseSelector(x_scale=self.viewer.scale_x,
-                                             y_scale=self.viewer.scale_y)
+                                             y_scale=self.viewer.scale_y,
+                                             show_handles = BqplotCircleMode.show_handles)
 
         # Workaround for bug that causes the `color` trait to not be recognized
         style = self.interact.style.copy()
+        print("init with color", INTERACT_COLOR)
         style['fill'] = INTERACT_COLOR
         border_style = self.interact.border_style.copy()
         border_style['fill'] = INTERACT_COLOR
