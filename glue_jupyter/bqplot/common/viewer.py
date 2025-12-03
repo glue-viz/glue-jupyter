@@ -97,10 +97,10 @@ class BqplotBaseView(IPyWidgetView):
         self.axis_y.label = self.state.y_axislabel
 
     def update_x_ticksize(self, *event):
-        self.axis_x.tick_style = {'font_size': self.state.x_ticklabel_size}
+        self.axis_x.tick_style = {'font-size': self.state.x_ticklabel_size}
 
     def update_y_ticksize(self, *event):
-        self.axis_y.tick_style = {'font_size': self.state.y_ticklabel_size}
+        self.axis_y.tick_style = {'font-size': self.state.y_ticklabel_size}
 
     def _update_bqplot_limits(self, *args):
 
