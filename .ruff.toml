@@ -14,6 +14,7 @@ lint.ignore = [
     "B007",  # UnusedLoopControlVariable
     "B028",  # No-explicit-stacklevel
     "B904",  # RaiseWithoutFromInsideExcept
+    "B905",  # ZipWithoutExplicitStrict (needs further investigation where default `strict=False` is intended)
 
     # flake8-blind-except (BLE)
     "BLE001",  # blind-except
