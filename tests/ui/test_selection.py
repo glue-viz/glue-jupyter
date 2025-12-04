@@ -11,7 +11,7 @@ selection_height = 40
 
 @pytest.mark.parametrize("compression", ["png"])
 def test_elliptical_selection(solara_test, page_session, assert_solara_snapshot, compression, request):
-    app, viewer, plot = create_viewer(page_session)
+    _app, _viewer, plot = create_viewer(page_session)
 
     # click elliptical selection tool
     page_session.mouse.move(240, 31)
@@ -64,7 +64,7 @@ def test_elliptical_selection_rotate(solara_test, page_session, assert_solara_sn
 
 @pytest.mark.parametrize("compression", ["png"])
 def test_rectangular_selection(solara_test, page_session, assert_solara_snapshot, compression, request):
-    app, viewer, plot = create_viewer(page_session)
+    _app, _viewer, plot = create_viewer(page_session)
 
     # click rectangular selection tool
     page_session.mouse.move(135, 31)
