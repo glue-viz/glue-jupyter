@@ -125,7 +125,7 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.line_mark = lines_cls(scales=self.view.scales, x=[0.], y=[0.])
         self.line_mark.colors = [color2hex(self.state.color)]
         self.line_mark.opacities = [self.state.alpha]
-        self.line_mark.visible = True
+        self.line_mark.visible = False
 
         # Vectors
 
@@ -165,7 +165,6 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.view.figure.marks = list(self.view.figure.marks) + [
             self.density_mark,
             self.scatter_mark,
-            self.line_mark_gl,
             self.vector_mark,
             self.vector_lines,
         ]
@@ -342,35 +341,33 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.line_mark.stroke_width = self.state.linewidth
 
             if force or "linestyle" in changed:
-                features_solid_line = False
-                features_non_continuous_line = False
+                use_line_gl = True
                 self.line_mark.colors = [color2hex(self.state.color)]
                 if self.state.linestyle == "solid":
-                    features_solid_line = True
-                    self.line_mark_gl.visible = True
-                    self.line_mark.visible = False
-                elif (self.state.linestyle == "dashed"
-                      or self.state.linestyle == "dotted"
-                      or self.state.linestyle == "dashdot"):
-                    features_non_continuous_line = True
-                    self.line_mark.visible = True
-                    self.line_mark_gl.visible = False
+                    pass
+                else:
+                    use_line_gl = False
                     if self.state.linestyle == "dashdot":
                         self.line_mark.line_style = 'dash_dotted'
                     else:
                         self.line_mark.line_style = self.state.linestyle
 
-                marks = [
-                    self.vector_mark,
-                    self.vector_lines,
-                    self.scatter_mark,
-                    self.density_mark
-                ]
-                if features_solid_line:
-                    marks.append(self.line_mark_gl)
-                if features_non_continuous_line:
-                    marks.append(self.line_mark)
-                self.view.figure.marks = list(self.view.figure.marks) + marks
+                new_marks = []
+                line_mark_added = False
+                for mark in self.view.figure.marks:
+                    if mark is self.line_mark_gl and not use_line_gl:
+                        new_marks.append(self.line_mark)
+                        line_mark_added = True
+                    elif mark is self.line_mark and use_line_gl:
+                        new_marks.append(self.line_mark_gl)
+                        line_mark_added = True
+                    else:
+                        new_marks.append(mark)
+                if not line_mark_added:
+                    new_marks.append(self.line_mark_gl if use_line_gl else self.line_mark)
+
+                self.view.figure.marks = new_marks
+
         if (
             self.state.vector_visible
             and self.state.vx_att is not None
@@ -444,9 +441,11 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.density_mark = None
         marks.remove(self.scatter_mark)
         self.scatter_mark = None
-        marks.remove(self.line_mark_gl)
+        if self.line_mark_gl in marks:
+            marks.remove(self.line_mark_gl)
         self.line_mark_gl = None
-        marks.remove(self.line_mark)
+        if self.line_mark in marks:
+            marks.remove(self.line_mark)
         self.line_mark = None
         marks.remove(self.vector_mark)
         self.vector_mark = None
@@ -476,12 +475,15 @@ class BqplotScatterLayerArtist(LayerArtist):
 
     def _update_zorder(self, *args):
         sorted_layers = sorted(self.view.layers, key=lambda layer: layer.state.zorder)
-        marks = ['density_mark', 'scatter_mark', 'line_mark_gl', 'line_mark',
-                 'vector_mark', 'vector_lines']
         self.view.figure.marks = [
             item
             for layer in sorted_layers
-            for item in [getattr(layer, mark, None) for mark in marks] if item is not None
+            for item in (layer.density_mark,
+                         layer.scatter_mark,
+                         layer.line_mark_gl
+                         if layer.state.linestyle == 'solid' else layer.line_mark,
+                         layer.vector_mark,
+                         layer.vector_lines)
         ]
 
     def _build_line_vector_points(self, x, y, vx, vy):
