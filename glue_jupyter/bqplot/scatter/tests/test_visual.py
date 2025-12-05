@@ -1,5 +1,3 @@
-import pytest
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -77,7 +75,6 @@ def test_visual_scatter2d_density(
     return figure
 
 
-@pytest.mark.xfail
 @visual_widget_test
 def test_visual_linestyle(
     tmp_path,
@@ -119,7 +116,6 @@ def test_visual_linestyle(
     return figure
 
 
-@pytest.mark.xfail
 @visual_widget_test
 def test_visual_vector(
     tmp_path,
