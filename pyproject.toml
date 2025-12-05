@@ -1,8 +1,132 @@
+[project]
+name = "glue-jupyter"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "License :: OSI Approved :: BSD License",
+]
+
+description = "Jupyter notebook/lab viewers for glue"
+readme = "README.rst"
+requires-python = ">=3.10"
+dynamic = [ "version",]
+
+authors = [
+    {name = "Maarten A. Breddels", email = "maartenbreddels@gmail.com"},
+    {name =  "Thomas Robitaille"},
+]
+
+dependencies = [
+    "glue-core>=1.23.0",
+    "glue-vispy-viewers[jupyter]>=1.2.1",
+    "notebook>=4.0",
+    "ipython_genutils>=0.2",
+    "ipympl>=0.3.0",
+    "ipyvolume>=0.6.0",
+    "ipython_genutils>=0.2",
+    "ipywidgets>=7.4.0",
+    "ipyvue>=1.2.0,<2",
+    "ipyvuetify>=1.2.0,<2",
+    "bqplot-image-gl>=1.6.0",
+    "bqplot>=0.12.17",
+    "bqplot-gl",
+    "scikit-image",
+]
+
+[project.urls]
+Homepage = "https://glueviz.org"
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "sphinx-automodapi",
+    "numpydoc",
+    "nbconvert>=6.4.5",
+    "nbsphinx",
+    "sphinx-book-theme",
+]
+
+test = [
+    "pytest",
+    "pytest-cov",
+    "nbconvert>=6.4.5",
+]
+
+visualtest = [
+    "playwright==1.41.2",
+    "pytest-playwright==0.5.2",
+    "pytest-mpl",
+    "solara[pytest]>=1.44.1",
+]
+
 [build-system]
-requires = ["setuptools",
-            "setuptools_scm",
-            "wheel"]
+requires = ["setuptools>=61.2",
+            "setuptools_scm"]
 build-backend = 'setuptools.build_meta'
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = false
+
+[tool.setuptools.package-data]
+"glue_jupyter.table" = [ "*.vue",]
+"glue_jupyter.widgets" = [ "*.vue",]
+"glue_jupyter.common.state_widgets" = [ "*.vue",]
+glue_jupyter = [ "*.vue",]
+"glue_jupyter.common" = [ "*.vue",]
+"glue_jupyter.bqplot.tests" = [ "data/*.ipynb",]
+"glue_jupyter.ipyvolume.tests" = [ "data/*.ipynb",]
+"glue_jupyter.matplotlib.tests" = [ "data/*.ipynb",]
+"glue_jupyter.tests" = [ "data/*.ipynb",]
+"glue_jupyter.icons" = [ "*.svg",]
+
+[tool.setuptools.packages.find]
+namespaces = false
+
+[tool.setuptools_scm]
+version_file = "glue_jupyter/_version.py"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:the imp module is deprecated:DeprecationWarning:glue.config.*:",
+    "ignore:`np.float` is a deprecated alias:DeprecationWarning:glue.*:",
+    "ignore:Numpy has detected .* writing to an array:DeprecationWarning:",
+    "ignore:The keymap.* rcparam was deprecated::glue.config.*:",
+    "ignore:metadata .* was set from the constructor:DeprecationWarning:bqplot.*:",
+    "ignore:default_opacities is deprecated:DeprecationWarning:bqplot.*:",
+    "ignore:Traits should be given as instances:DeprecationWarning:bqplot_image_gl.*:",
+    "ignore:Traits should be given as instances:DeprecationWarning:ipyvolume.*:",
+    "ignore:Using or importing the ABCs from 'collections':DeprecationWarning:ipyvolume.*:",
+    "ignore:Passing unrecogi?nized arguments to super:DeprecationWarning:ipywidgets.*:",
+    "ignore:the load_module.* method is deprecated and slated for removal in Python 3.12. use exec_module:DeprecationWarning:glue.*:",
+    "ignore:There is no current event loop:DeprecationWarning:nbclient.*:",
+    "ignore:defusedxml.cElementTree is deprecated:DeprecationWarning:nbconvert.filters.*:",
+    "ignore:Keyword `trait:DeprecationWarning:pythreejs.*:",
+    "ignore::DeprecationWarning:traittypes.*:",
+    "ignore::FutureWarning:traitlets.*:",
+    "ignore:Creating an ndarray from ragged nested sequences::numpy.core.*:",
+    "ignore:Creating an ndarray from ragged nested sequences::numpy.linalg.*:",
+    "ignore:'contextfilter' is renamed to 'pass_context':DeprecationWarning:",
+    "ignore:Passing a schema:DeprecationWarning",
+    "ignore:distutils Version:DeprecationWarning",
+    "ignore:There is no current event loop:DeprecationWarning",
+    "ignore:Jupyter is migrating its paths to use standard platformdirs:DeprecationWarning",
+    "ignore:Widget._active_widgets is deprecated:DeprecationWarning",
+    "ignore:Widget._widget_types is deprecated:DeprecationWarning",
+    "ignore:Widget.widget_types is deprecated:DeprecationWarning",
+    "ignore:Widget.widgets is deprecated:DeprecationWarning",
+    "ignore:`np.bool8` is a deprecated alias for `np.bool_`.:DeprecationWarning:skimage.util.dtype.*:",
+    "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
+    "ignore:Deprecated call to `pkg_resources.declare_namespace(.*)`:DeprecationWarning",
+]
 
 [tool.gilesbot]
 [tool.gilesbot.circleci_artifacts]
@@ -12,7 +136,6 @@ enabled = true
 url = "results/fig_comparison.html"
 message = "Click details to see the image test comparisons, for py311-test-visual"
 report_on_fail = true
-
 
 [tool.ruff]
 # ruff check: pycodestyle, Pyflakes, McCabe, flake8-bugbear, flake8-simplify
