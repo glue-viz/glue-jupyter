@@ -2,7 +2,7 @@
   <div>
         <v-row dense>
           <v-col cols="6">
-            <v-text-field label="xmin" : v-model="value.x_min" :rules="[minLimit]"/>
+            <v-text-field label="xmin" v-model="value.x_min" />
           </v-col>
 
           <v-col cols="6">
@@ -45,26 +45,26 @@
     */
     module.exports = {
         props: { value: { type: Object, default: () => ({ x_min: 0, x_max: 1, y_min: 0, y_max: 1}) } },
-        methods: {
-          validNumber(entered_number) {
-            //
-            const value = Number(entered_number);
-            if(entered_number === 0) {
-              return "Please enter a value"
-            }
-            if(isNaN(value)) {
-              return "Invalid Number"
-            }
-            return true;
-          },
-          minLimit(data_limit) {
-            // lets round to 2 significant figures lower than the min value
-            if(this.validNumber(data_limit) === true) {
-              const value = Number(data_limit)
-              value.x_min = Number(value.toPrecision(2));
-            }
-          }
-        }
+        // methods: {
+        //   validNumber(entered_number) {
+        //     //
+        //     const value = Number(entered_number);
+        //     if(entered_number === 0) {
+        //       return "Please enter a value"
+        //     }
+        //     if(isNaN(value)) {
+        //       return "Invalid Number"
+        //     }
+        //     return true;
+        //   },
+          // minLimit(data_limit) {
+          //   // lets round to 2 significant figures lower than the min value
+          //   if(this.validNumber(data_limit) === true) {
+          //     const value = Number(data_limit)
+          //     value.x_min = Number(value.toPrecision(2));
+          //   }
+          // }
+        // }
     }
 
 </script>
