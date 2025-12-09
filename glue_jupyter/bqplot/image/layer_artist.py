@@ -194,9 +194,10 @@ class BqplotImageSubsetLayerArtist(BaseImageLayerArtist):
         PIXEL_CACHE.pop(self.state.uuid, None)
         self.subset_array = None
         marks = self.view.figure.marks[:]
-        marks.remove(self.image_artist)
+        if self.image_artist in marks:
+            marks.remove(self.image_artist)
+            self.view.figure.marks = marks
         self.image_artist = None
-        self.view.figure.marks = marks
 
     def enable(self, redraw=True):
         if self.enabled:
