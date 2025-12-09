@@ -3,6 +3,6 @@
   "glue_jupyter.bqplot.image.tests.test_visual.test_contour_units[chromium]":	"9d7dfd5526006dd7fcd2aef6370c3b1f704568d79325a1ba6a20a297082ea5f1",
   "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d[chromium]":	"fbdd9fe2649a0d72813c03e77af6233909df64207cb834f28da479f50b9e7a1d",
   "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density[chromium]":	"d843a816a91e37cb0212c7caae913d7563f6c2eb42b49fa18345a5952e093b2f",
-  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_linestyle[chromium]":	"6be688fefbfc83e19d6b84659afd8591ede0388c64bde6c10dd484969a39af59",
-  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_vector[chromium]":	"95dbf670df6041d0a75f5f8c6d8588f51f7d33d5268e59ca9a5156d739babdc8"
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_linestyle[chromium]":	"a40792d0eda64923cff310987c729f69627ed583f01ed62bda96d7d6e80cdb66",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_vector[chromium]":	"be8e5ff91d4c7793928cda6896ddbf1b449ba120093e0f920850a53d9fcb0755"
 }
