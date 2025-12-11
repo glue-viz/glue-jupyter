@@ -1,8 +1,109 @@
+[project]
+name = "glue-jupyter"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "License :: OSI Approved :: BSD License",
+]
+
+description = "Jupyter notebook/lab viewers for glue"
+readme = "README.rst"
+requires-python = ">=3.10"
+dynamic = [ "version",]
+
+authors = [
+    {name = "Maarten A. Breddels", email = "maartenbreddels@gmail.com"},
+    {name =  "Thomas Robitaille"},
+]
+
+dependencies = [
+    "glue-core>=1.23.0",
+    "glue-vispy-viewers[jupyter]>=1.2.1",
+    "notebook>=6.5.1",
+    "nbclient>=0.7.0",
+    "ipython_genutils>=0.2",
+    "ipympl>=0.3.0",
+    "ipyvolume>=0.6.0",
+    "ipywidgets>=7.7.0",
+    "ipyvue>=1.2.0,<2",
+    "ipyvuetify>=1.2.0,<2",
+    "bqplot-image-gl>=1.7.0",
+    "bqplot>=0.12.17",
+    "bqplot-gl",
+    "scikit-image",
+]
+
+[project.urls]
+Homepage = "https://glueviz.org"
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "sphinx-automodapi",
+    "numpydoc",
+    "nbconvert>=7.0.0",
+    "nbsphinx",
+    "sphinx-book-theme",
+]
+
+test = [
+    "pytest",
+    "pytest-cov",
+    "nbconvert>=6.4.5",
+]
+
+visualtest = [
+    "playwright==1.41.2",
+    "pytest-playwright==0.5.2",
+    "pytest-mpl",
+    "solara[pytest]>=1.44.1",
+]
+
 [build-system]
-requires = ["setuptools",
-            "setuptools_scm",
-            "wheel"]
+requires = ["setuptools>=61.2",
+            "setuptools_scm"]
 build-backend = 'setuptools.build_meta'
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = false
+
+[tool.setuptools.package-data]
+"glue_jupyter.table" = [ "*.vue",]
+"glue_jupyter.widgets" = [ "*.vue",]
+"glue_jupyter.common.state_widgets" = [ "*.vue",]
+glue_jupyter = [ "*.vue",]
+"glue_jupyter.common" = [ "*.vue",]
+"glue_jupyter.bqplot.tests" = [ "data/*.ipynb",]
+"glue_jupyter.ipyvolume.tests" = [ "data/*.ipynb",]
+"glue_jupyter.matplotlib.tests" = [ "data/*.ipynb",]
+"glue_jupyter.tests" = [ "data/*.ipynb",]
+"glue_jupyter.icons" = [ "*.svg",]
+
+[tool.setuptools.packages.find]
+namespaces = false
+
+[tool.setuptools_scm]
+version_file = "glue_jupyter/_version.py"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error::DeprecationWarning",
+    "ignore:`BqplotScatterLayerState` is deprecated and will be removed in a future version.*:DeprecationWarning:glue_jupyter.bqplot.*:",
+    "ignore:metadata .* was set from the constructor:DeprecationWarning:bqscales.*:",
+    "ignore:Passing unrecognized arguments to super:DeprecationWarning:traitlets.*:",
+    "ignore:Passing unrecognized arguments to super:DeprecationWarning:ipywidgets.*:",
+    "ignore:websockets.server.WebSocketServerProtocol is deprecated:DeprecationWarning",
+    "ignore:remove second argument of ws_handler:DeprecationWarning",
+]
 
 [tool.gilesbot]
 [tool.gilesbot.circleci_artifacts]
@@ -12,7 +113,6 @@ enabled = true
 url = "results/fig_comparison.html"
 message = "Click details to see the image test comparisons, for py311-test-visual"
 report_on_fail = true
-
 
 [tool.ruff]
 # ruff check: pycodestyle, Pyflakes, McCabe, flake8-bugbear, flake8-simplify

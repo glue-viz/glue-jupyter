@@ -33,19 +33,18 @@ jobs:
         - linux: py312-test
         - linux: py313-test
 
-        # One of these to be switched to arm64 running natively once the PLAT var is supported.
         - macos: py310-test
         - macos: py311-test
-        - macos: py312-test
         - macos: py313-test
+        - macos: py314-test
 
         - windows: py310-test
         - windows: py311-test
         - windows: py312-test
-        - windows: py313-test
+        - windows: py314-test
 
         # test against some dev versions of some packages
-        - linux: py311-test-dev
+        - linux: py314-test-dev
         - macos: py312-test-dev
         - windows: py313-test-dev
 
@@ -58,10 +57,10 @@ jobs:
 
       envs: |
         - windows: py310-notebooks
-        - macos: py311-notebooks
+        - macos: py314-notebooks
         - linux: py313-notebooks
 
-        - linux: py311-docs
+        - linux: py314-docs
         - macos: py310-docs
         - windows: py312-docs
 
