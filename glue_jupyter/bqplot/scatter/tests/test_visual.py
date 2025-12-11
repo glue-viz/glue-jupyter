@@ -122,9 +122,6 @@ def test_visual_linestyle(
     scatter.state.layers[4].linestyle = 'dashed'
     scatter.state.layers[4].color = 'b'
 
-    scatter.remove_layer(data_d)
-    scatter.remove_layer(data_e)
-
     scatter.state.layers[2].zorder = 10
 
     assert scatter.layers[0].line_mark_gl.visible
@@ -136,6 +133,11 @@ def test_visual_linestyle(
     assert scatter.layers[2].line_mark.visible
     assert scatter.layers[2].line_mark in scatter.figure.marks
     assert scatter.layers[2].line_mark_gl not in scatter.figure.marks
+
+    scatter.remove_layer(data_d)
+    scatter.remove_layer(data_e)
+
+    assert len(scatter.layers) == 3
 
     figure = scatter.figure_widget
     figure.layout = {"width": "800px", "height": "500px"}
