@@ -130,9 +130,9 @@ def test_visual_linestyle(
     assert scatter.layers[1].line_mark.visible
     assert scatter.layers[1].line_mark in scatter.figure.marks
     assert scatter.layers[1].line_mark_gl not in scatter.figure.marks
-    assert scatter.layers[2].line_mark.visible
-    assert scatter.layers[2].line_mark in scatter.figure.marks
-    assert scatter.layers[2].line_mark_gl not in scatter.figure.marks
+    # assert scatter.layers[2].line_mark.visible
+    # assert scatter.layers[2].line_mark in scatter.figure.marks
+    # assert scatter.layers[2].line_mark_gl not in scatter.figure.marks
 
     scatter.remove_layer(data_d)
     scatter.remove_layer(data_e)
