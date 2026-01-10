@@ -81,38 +81,67 @@ def test_visual_linestyle(
     page_session,
     solara_test,
 ):
-
     x = np.array([1, 2, 4, 5])
     y = np.array([3, 2, 1, 8])
 
     app = jglue()
 
     data_a = app.add_data(a={"x": x, "y": y})[0]
-    data_b = app.add_data(b={"x": x, "y": y+1})[0]
-    data_c = app.add_data(c={"x": x, "y": y+2})[0]
+    data_b = app.add_data(b={"x": x, "y": y + 1})[0]
+    data_c = app.add_data(c={"x": x, "y": y + 2})[0]
+    data_d = app.add_data(d={"x": x, "y": y + 3})[0]
+    data_e = app.add_data(e={"x": x, "y": y + 4})[0]
 
     app.add_link(data_a, 'x', data_b, 'x')
     app.add_link(data_a, 'x', data_c, 'x')
+    app.add_link(data_a, 'x', data_d, 'x')
+    app.add_link(data_a, 'x', data_e, 'x')
     app.add_link(data_a, 'y', data_b, 'y')
     app.add_link(data_a, 'y', data_c, 'y')
+    app.add_link(data_a, 'y', data_d, 'y')
+    app.add_link(data_a, 'y', data_e, 'y')
 
-    scatter = app.scatter2d(show=False, data=data_a)
+    scatter = app.scatter2d(show=True, data=data_a)
     scatter.add_data(data_b)
     scatter.add_data(data_c)
+    scatter.add_data(data_d)
+    scatter.add_data(data_e)
 
     scatter.state.layers[0].line_visible = True
     scatter.state.layers[0].linestyle = 'solid'
     scatter.state.layers[1].line_visible = True
     scatter.state.layers[1].linestyle = 'dashed'
+    scatter.state.layers[1].color = 'r'
     scatter.state.layers[2].line_visible = True
     scatter.state.layers[2].linestyle = 'dashdot'
+    scatter.state.layers[2].color = 'b'
+    scatter.state.layers[3].line_visible = True
+    scatter.state.layers[3].linestyle = 'solid'
+    scatter.state.layers[3].color = 'b'
+    scatter.state.layers[4].line_visible = True
+    scatter.state.layers[4].linestyle = 'dashed'
+    scatter.state.layers[4].color = 'b'
+
+    scatter.state.layers[2].zorder = 10
 
     assert scatter.layers[0].line_mark_gl.visible
-    assert not scatter.layers[1].line_mark_gl.visible
-    assert not scatter.layers[2].line_mark_gl.visible
+    assert scatter.layers[0].line_mark_gl in scatter.figure.marks
+    assert scatter.layers[0].line_mark not in scatter.figure.marks
+    assert scatter.layers[1].line_mark.visible
+    assert scatter.layers[1].line_mark in scatter.figure.marks
+    assert scatter.layers[1].line_mark_gl not in scatter.figure.marks
+    assert scatter.layers[2].line_mark.visible
+    assert scatter.layers[2].line_mark in scatter.figure.marks
+    assert scatter.layers[2].line_mark_gl not in scatter.figure.marks
+
+    scatter.remove_layer(data_d)
+    scatter.remove_layer(data_e)
+
+    assert len(scatter.layers) == 3
 
     figure = scatter.figure_widget
     figure.layout = {"width": "800px", "height": "500px"}
+
     return figure
 
 
