@@ -33,6 +33,10 @@
                 }
                 return true;
             }
+            precisionNumber() {
+              // for situations where the display number needs making more human readable
+
+            }
         },
         watch: {
             displayValue() {
