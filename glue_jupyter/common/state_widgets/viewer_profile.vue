@@ -16,6 +16,10 @@
             <v-select :items="function_items" label="function" v-model="function_selected"/>
         </div>
 
+        <div>
+            <jupyter-widget :widget="axes_limits_widget"></jupyter-widget>
+        </div>
+
         <div class="d-inline-flex flex-wrap">
             <v-btn-toggle dense multiple :value="modeSet" @change="modeSetChange" style="margin-right: 8px">
 
