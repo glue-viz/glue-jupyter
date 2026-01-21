@@ -19,6 +19,12 @@ class ScatterViewerStateWidget(v.VuetifyTemplate):
     y_att_items = traitlets.List().tag(sync=True)
     y_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
 
+    x_display_unit_items = traitlets.List().tag(sync=True)
+    x_display_unit_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
+    y_display_unit_items = traitlets.List().tag(sync=True)
+    y_display_unit_selected = traitlets.Int(allow_none=True).tag(sync=True)
+
     def __init__(self, viewer_state):
 
         super().__init__()
@@ -28,3 +34,5 @@ class ScatterViewerStateWidget(v.VuetifyTemplate):
 
         link_glue_choices(self, viewer_state, "x_att")
         link_glue_choices(self, viewer_state, "y_att")
+        link_glue_choices(self, viewer_state, 'x_display_unit')
+        link_glue_choices(self, viewer_state, 'y_display_unit')
