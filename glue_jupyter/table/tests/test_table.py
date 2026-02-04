@@ -87,6 +87,39 @@ def test_table_sort_pagination(app):
     assert [item['__row__'] for item in items] == [0, 8, 6, 2, 4]
 
 
+def test_table_column_visibility_widget(app, dataxyz):
+    table = app.table(data=dataxyz)
+    options_widget = table._layout_viewer_options
+
+    # Check that all columns are listed and visible by default
+    column_names = [item['text'] for item in options_widget.column_items]
+    assert 'x' in column_names
+    assert 'y' in column_names
+    assert 'z' in column_names
+    assert set(options_widget.visible_columns) == set(column_names)
+
+    # Hide a column via the widget
+    options_widget.visible_columns = ['x', 'z']
+
+    # Check that hidden_components is updated
+    hidden_names = [str(c) for c in table.state.hidden_components]
+    assert 'y' in hidden_names
+    assert 'x' not in hidden_names
+    assert 'z' not in hidden_names
+
+    # Check the table headers are updated
+    header_names = [h['text'] for h in table.widget_table.headers]
+    assert 'x' in header_names
+    assert 'z' in header_names
+    assert 'y' not in header_names
+
+    # Hide a column via state and check widget updates
+    table.state.hidden_components = [dataxyz.id['x'], dataxyz.id['z']]
+    assert 'x' not in options_widget.visible_columns
+    assert 'z' not in options_widget.visible_columns
+    assert 'y' in options_widget.visible_columns
+
+
 def test_table_filter(app, dataxyz):
     table = app.table(data=dataxyz)
     assert len(table.layers) == 1

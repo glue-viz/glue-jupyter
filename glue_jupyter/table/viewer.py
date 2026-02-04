@@ -9,6 +9,7 @@ from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.common.state import ViewerState
 
+from glue_jupyter import get_layout_factory
 from glue_jupyter.registries import viewer_registry
 
 from ..view import IPyWidgetView
@@ -257,10 +258,61 @@ class TableLayerStateWidget(widgets.VBox):
         self.state = layer_state
 
 
-class TableViewerStateWidget(widgets.VBox):
-    def __init__(self, viewer_state):
-        super(TableViewerStateWidget, self).__init__()
-        self.state = viewer_state
+class TableViewerStateWidget(v.VuetifyTemplate):
+    template_file = (__file__, 'viewer_state.vue')
+
+    column_items = traitlets.List([]).tag(sync=True)
+    visible_columns = traitlets.List([]).tag(sync=True)
+
+    def __init__(self, viewer):
+        super().__init__()
+        self.viewer = viewer
+        self.state = viewer.state
+        self._updating = False
+
+        # Sync from state to widget
+        self.state.add_callback('hidden_components', self._on_hidden_changed)
+
+    def update_columns(self, data):
+        """Update available columns when data changes."""
+        if data is None:
+            self.column_items = []
+            self.visible_columns = []
+            return
+
+        all_components = data.main_components + data.derived_components
+        self.column_items = [{'text': str(c), 'value': str(c)} for c in all_components]
+
+        # Set visible columns (all minus hidden)
+        hidden_names = [str(c) for c in self.state.hidden_components]
+        self.visible_columns = [str(c) for c in all_components if str(c) not in hidden_names]
+
+    def _on_hidden_changed(self, *args):
+        """Sync from state.hidden_components to widget."""
+        if self._updating:
+            return
+        data = self.viewer.widget_table.data
+        if data is None:
+            return
+        all_components = data.main_components + data.derived_components
+        hidden_names = [str(c) for c in self.state.hidden_components]
+        self.visible_columns = [str(c) for c in all_components if str(c) not in hidden_names]
+
+    @traitlets.observe('visible_columns')
+    def _on_visible_changed(self, change):
+        """Sync from widget to state.hidden_components."""
+        data = self.viewer.widget_table.data
+        if data is None:
+            return
+
+        self._updating = True
+        try:
+            all_components = data.main_components + data.derived_components
+            visible_names = set(change['new'])
+            hidden = [c for c in all_components if str(c) not in visible_names]
+            self.state.hidden_components = hidden
+        finally:
+            self._updating = False
 
 
 @viewer_registry("table")
@@ -282,6 +334,16 @@ class TableViewer(IPyWidgetView):
         self.create_layout()
         self.state.add_callback('hidden_components', self._update_hidden)
 
+    def create_layout(self):
+        # Override to pass viewer instead of just state
+        self._layout_viewer_options = self._options_cls(self)
+
+        layout_factory = get_layout_factory()
+        if layout_factory is None:
+            raise ValueError('layout factory should be set with set_layout_factory')
+        else:
+            self._layout = layout_factory(self)
+
     def _update_hidden(self, *args):
         self.widget_table.hidden_components = self.state.hidden_components
         self.redraw()
@@ -292,6 +354,7 @@ class TableViewer(IPyWidgetView):
             self.widget_table.selections = [subset.label for subset in subsets]
             self.widget_table.selection_colors = [subset.style.color for subset in subsets]
         self.widget_table._update()
+        self._layout_viewer_options.update_columns(self.widget_table.data)
 
     def apply_filter(self):
         selected_rows = self.widget_table.checked
