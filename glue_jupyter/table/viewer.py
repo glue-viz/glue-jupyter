@@ -73,8 +73,8 @@ class TableBase(v.VuetifyTemplate):
 
     @traitlets.default('options')
     def _options(self):
-        return {'descending': False, 'page': 1, 'itemsPerPage': 10,
-                'sortBy': None, 'totalItems': len(self)}
+        return {'page': 1, 'itemsPerPage': 10,
+                'sortBy': [], 'sortDesc': [], 'totalItems': len(self)}
 
     def format(self, value):
         return value
@@ -104,6 +104,23 @@ class TableBase(v.VuetifyTemplate):
 
     def vue_on_row_clicked(self, index):
         self.highlighted = index
+
+    def vue_sort_column(self, column):
+        current_sort_by = self.options.get('sortBy', [])
+        current_sort_desc = self.options.get('sortDesc', [])
+
+        if current_sort_by and current_sort_by[0] == column:
+            if not (current_sort_desc and current_sort_desc[0]):
+                # Currently ascending, switch to descending
+                new_options = {**self.options, 'sortBy': [column], 'sortDesc': [True]}
+            else:
+                # Currently descending, clear sort
+                new_options = {**self.options, 'sortBy': [], 'sortDesc': []}
+        else:
+            # New column, sort ascending
+            new_options = {**self.options, 'sortBy': [column], 'sortDesc': [False]}
+
+        self.options = new_options
 
     def get_visible_components(self):
         components = []
@@ -135,7 +152,41 @@ class TableGlue(TableBase):
         if self.data is None:
             return []
         components = self.get_visible_components()
-        return [{'text': str(k), 'value': str(k), 'sortable': False} for k in components]
+        return [{'text': str(k), 'value': str(k), 'sortable': True} for k in components]
+
+    def _get_sorted_indices(self):
+        """Return indices that would sort the data by the current sort column."""
+        sort_by = self.options.get('sortBy')
+        if not sort_by:
+            return np.arange(len(self))
+
+        # sortBy can be a list (Vuetify 2.x) or a single value
+        sort_column = sort_by[0] if isinstance(sort_by, list) else sort_by
+        if not sort_column:
+            return np.arange(len(self))
+
+        # Find the component matching the sort column
+        components = self.get_visible_components()
+        component = None
+        for c in components:
+            if str(c) == sort_column:
+                component = c
+                break
+
+        if component is None:
+            return np.arange(len(self))
+
+        values = self.data[component]
+        indices = np.argsort(values)
+
+        # Check for descending order
+        sort_desc = self.options.get('sortDesc', self.options.get('descending', False))
+        if isinstance(sort_desc, list):
+            sort_desc = sort_desc[0] if sort_desc else False
+        if sort_desc:
+            indices = indices[::-1]
+
+        return indices
 
     def _get_items(self):
         if self.data is None:
@@ -145,23 +196,27 @@ class TableGlue(TableBase):
         i1 = page * page_size
         i2 = min(len(self), (page + 1) * page_size)
 
-        view = slice(i1, i2)
+        # Get sorted indices and slice for current page
+        sorted_indices = self._get_sorted_indices()
+        page_indices = sorted_indices[i1:i2]
+
         masks = {}
         for k in self.data.subsets:
             try:
-                masks[k.label] = k.to_mask(view)
+                full_mask = k.to_mask()
+                masks[k.label] = full_mask[page_indices]
             except IncompatibleAttribute:
-                masks[k.label] = np.zeros(i2 - i1, dtype=bool)
+                masks[k.label] = np.zeros(len(page_indices), dtype=bool)
 
         items = []
-        for i in range(i2 - i1):
-            item = {'__row__': i + i1}  # special key for the row number
+        components = self.get_visible_components()
+        for i, orig_idx in enumerate(page_indices):
+            item = {'__row__': int(orig_idx)}  # original index for selections
             for selection in self.selections:
                 selected = masks[selection][i]
                 item[selection] = bool(selected)
-            components = self.get_visible_components()
-            for j, component in enumerate(components):
-                item[str(component)] = self.format(self.data[component][i + i1])
+            for component in components:
+                item[str(component)] = self.format(self.data[component][orig_idx])
             items.append(item)
         return items
 
