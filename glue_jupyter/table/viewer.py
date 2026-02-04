@@ -193,6 +193,7 @@ class TableLayerArtist(LayerArtist):
             last_layer = self._table_viewer.layers[-1]
             data = last_layer.layer.data
         self._table_viewer.widget_table.data = data
+        self._refresh()
 
 
 class TableLayerStateWidget(widgets.VBox):

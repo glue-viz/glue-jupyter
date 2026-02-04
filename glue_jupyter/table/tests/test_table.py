@@ -18,6 +18,32 @@ def test_table_filter(app, dataxyz):
     assert len(table.widget_table.selections) == 2
 
 
+def test_table_remove_subset_group(app, dataxyz):
+    table = app.table(data=dataxyz)
+    assert len(table.layers) == 1
+    assert len(table.widget_table.selections) == 0
+
+    # Create two subset groups
+    app.subset('subset1', dataxyz.id['x'] > 1)
+    app.subset('subset2', dataxyz.id['y'] > 2)
+    assert len(table.layers) == 3
+    assert len(table.widget_table.selections) == 2
+    assert 'subset1' in table.widget_table.selections
+    assert 'subset2' in table.widget_table.selections
+
+    # Remove the second subset group
+    app.data_collection.remove_subset_group(app.data_collection.subset_groups[1])
+    assert len(table.layers) == 2
+    assert len(table.widget_table.selections) == 1
+    assert 'subset1' in table.widget_table.selections
+    assert 'subset2' not in table.widget_table.selections
+
+    # Remove the first subset group
+    app.data_collection.remove_subset_group(app.data_collection.subset_groups[0])
+    assert len(table.layers) == 1
+    assert len(table.widget_table.selections) == 0
+
+
 def test_table_add_remove_data(app, dataxyz, dataxz, data_empty):
     table = app.new_data_viewer(TableViewer, data=None, show=True)
     assert len(table.layers) == 0
