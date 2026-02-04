@@ -84,6 +84,9 @@
 .glue-data-table th,
 .glue-data-table td {
   white-space: nowrap;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .glue-data-table--scrollable .v-data-table__wrapper {
