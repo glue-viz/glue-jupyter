@@ -73,8 +73,20 @@
     background-color: #E3F2FD;
 }
 
+.glue-data-table .v-data-table__wrapper {
+  overflow-x: auto;
+}
+
 .glue-data-table table {
-  table-layout: fixed;
+  table-layout: auto;
+}
+
+.glue-data-table th,
+.glue-data-table td {
+  white-space: nowrap;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .glue-data-table--scrollable .v-data-table__wrapper {
