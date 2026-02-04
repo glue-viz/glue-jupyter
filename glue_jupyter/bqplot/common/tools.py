@@ -56,7 +56,8 @@ class BqplotSelectionTool(InteractCheckableTool):
 
     def activate(self):
         # Jumps back to "create new" if that setting is active
-        if self.viewer.session.application.get_setting('new_subset_on_selection_tool_change'):
+        application = self.viewer.session.application
+        if application is not None and application.get_setting('new_subset_on_selection_tool_change'):
             self.viewer.session.edit_subset_mode.edit_subset = None
         super().activate()
 
