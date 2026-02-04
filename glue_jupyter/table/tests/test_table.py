@@ -1,4 +1,90 @@
+import numpy as np
+from glue.core import Data
+
 from glue_jupyter.table import TableViewer
+
+
+def test_table_sort(app, dataxyz):
+    table = app.table(data=dataxyz)
+
+    # Initially unsorted - items should be in original order
+    items = table.widget_table.items
+    assert [item['x'] for item in items] == [1, 2, 3]
+    assert [item['__row__'] for item in items] == [0, 1, 2]
+
+    # Sort ascending by x
+    table.widget_table.vue_sort_column('x')
+    items = table.widget_table.items
+    assert [item['x'] for item in items] == [1, 2, 3]
+    assert [item['__row__'] for item in items] == [0, 1, 2]
+
+    # Sort descending by x
+    table.widget_table.vue_sort_column('x')
+    items = table.widget_table.items
+    assert [item['x'] for item in items] == [3, 2, 1]
+    assert [item['__row__'] for item in items] == [2, 1, 0]
+
+    # Clear sort
+    table.widget_table.vue_sort_column('x')
+    items = table.widget_table.items
+    assert [item['x'] for item in items] == [1, 2, 3]
+    assert [item['__row__'] for item in items] == [0, 1, 2]
+
+
+def test_table_sort_selection(app):
+    # Create data where sorting will reorder rows
+    data = Data(x=[3, 1, 2], y=[30, 10, 20], label="unsorted data")
+    app.add_data(data)
+    table = app.table(data=data)
+
+    # Sort ascending by x (will reorder to indices [1, 2, 0])
+    table.widget_table.vue_sort_column('x')
+    items = table.widget_table.items
+    assert [item['x'] for item in items] == [1, 2, 3]
+    assert [item['__row__'] for item in items] == [1, 2, 0]
+
+    # Select the first row in the sorted view (which is original index 1)
+    table.widget_table.checked = [1]
+    table.apply_filter()
+
+    # Verify subset was created with correct original index
+    assert len(table.layers) == 2
+    subset = table.layers[1].layer
+    mask = subset.to_mask()
+    assert list(mask) == [False, True, False]  # Only original index 1 selected
+
+    # Select multiple rows in sorted view
+    table.widget_table.checked = [1, 0]  # Original indices 1 and 0
+    table.apply_filter()
+
+    # The subset should contain original indices 0 and 1
+    mask = subset.to_mask()
+    assert list(mask) == [True, True, False]
+
+
+def test_table_sort_pagination(app):
+    # Create larger dataset to test pagination with sorting
+    data = Data(x=np.array([5, 2, 8, 1, 9, 3, 7, 4, 6, 0, 11, 10]),
+                label="pagination data")
+    app.add_data(data)
+    table = app.table(data=data)
+
+    # Set page size to 5
+    table.widget_table.options = {**table.widget_table.options, 'itemsPerPage': 5}
+
+    # Sort ascending
+    table.widget_table.vue_sort_column('x')
+    items = table.widget_table.items
+    # First page should have smallest 5 values
+    assert [item['x'] for item in items] == [0, 1, 2, 3, 4]
+    # __row__ should be original indices
+    assert [item['__row__'] for item in items] == [9, 3, 1, 5, 7]
+
+    # Go to page 2
+    table.widget_table.options = {**table.widget_table.options, 'page': 2}
+    items = table.widget_table.items
+    assert [item['x'] for item in items] == [5, 6, 7, 8, 9]
+    assert [item['__row__'] for item in items] == [0, 8, 6, 2, 4]
 
 
 def test_table_filter(app, dataxyz):

@@ -24,9 +24,16 @@
             <th style="padding: 0 1px" v-for="(header, index) in headers_selections" :key="header.text">
               <v-icon style="padding: 0 1px" :key="index" :color="selection_colors[index]">brightness_1</v-icon>
             </th>
-            <v-slide-x-transition :key="header.text" v-for="header in headers">
-              <th >{{ header.text }}</th>
-            </v-slide-x-transition>
+            <th v-for="header in headers"
+                :key="header.text"
+                @click="toggleSort(header.value)"
+                style="cursor: pointer; user-select: none;"
+            >
+              {{ header.text }}
+              <v-icon v-if="options.sortBy && options.sortBy[0] === header.value">
+                {{ options.sortDesc && options.sortDesc[0] ? 'arrow_drop_down' : 'arrow_drop_up' }}
+              </v-icon>
+            </th>
           </tr>
         </thead>
       </template>
@@ -67,6 +74,15 @@
   </v-slide-x-transition>
 </template>
 
+<script>
+module.exports = {
+  methods: {
+    toggleSort(column) {
+      this.sort_column(column);
+    }
+  }
+}
+</script>
 
 <style id="glue_table">
 .highlightedRow {
