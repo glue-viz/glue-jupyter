@@ -1,7 +1,7 @@
 import traitlets
 
 from glue_jupyter.state_traitlets_helpers import GlueState
-from glue_jupyter.common.state3d import ViewerState3D
+from glue.viewers.common3d.viewer_state import ViewerState3D
 
 
 class Widget(traitlets.HasTraits):

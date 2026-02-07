@@ -3,35 +3,13 @@ import ipyvolume
 
 from glue.core.data import Subset
 from glue.viewers.common.layer_artist import LayerArtist
-from glue.core.data_combo_helper import ComponentIDComboHelper
 from glue.core.exceptions import IncompatibleAttribute
-from glue.viewers.scatter.state import ScatterLayerState
-from echo import CallbackProperty, SelectionCallbackProperty
 from glue.utils import ensure_numerical, color2hex
 
+from .layer_state import Scatter3DLayerState
 from ...link import link, on_change
 
-__all__ = ['Scatter3DLayerState', 'IpyvolumeScatterLayerArtist']
-
-
-class Scatter3DLayerState(ScatterLayerState):
-
-    # FIXME: the following should be a SelectionCallbackProperty
-    geo = CallbackProperty('diamond', docstring="Type of marker")
-    vz_att = SelectionCallbackProperty(docstring="The attribute to use for the z vector arrow")
-
-    def __init__(self, viewer_state=None, layer=None, **kwargs):
-        self.vz_att_helper = ComponentIDComboHelper(self, 'vz_att',
-                                                    numeric=True, categorical=False)
-        super(Scatter3DLayerState, self).__init__(viewer_state=viewer_state, layer=layer)
-        # self.update_from_dict(kwargs)
-
-    def _on_layer_change(self, layer=None):
-        super(Scatter3DLayerState, self)._on_layer_change(layer=layer)
-        if self.layer is None:
-            self.vz_att_helper.set_multiple_data([])
-        else:
-            self.vz_att_helper.set_multiple_data([self.layer])
+__all__ = ['IpyvolumeScatterLayerArtist']
 
 
 class IpyvolumeScatterLayerArtist(LayerArtist):
@@ -54,7 +32,7 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
                                         geo='arrow', visible=False)
         self.view.figure.scatters = list(self.view.figure.scatters) + [self.scatter, self.quiver]
 
-        on_change([(self.state, 'cmap_mode', 'cmap_att',
+        on_change([(self.state, 'cmap_mode', 'cmap_attribute',
                     'cmap_vmin', 'cmap_vmax', 'cmap', 'color')])(self._update_color)
         on_change([(self.state, 'size', 'size_scaling',
                     'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
@@ -66,8 +44,8 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
         link((self.state, 'visible'), (self.scatter.material, 'visible'))
 
-        on_change([(self.state, 'vector_visible', 'vx_att',
-                    'vy_att', 'vz_att')])(self._update_quiver)
+        on_change([(self.state, 'vector_visible', 'vx_attribute',
+                    'vy_attribute', 'vz_attribute')])(self._update_quiver)
         link((self.state, 'vector_visible'), (self.quiver, 'visible'))
 
         link((self.state, 'geo'), (self.scatter, 'geo'))
@@ -75,7 +53,7 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
     def _update_color(self, ignore=None):
         cmap = self.state.cmap
         if self.state.cmap_mode == 'Linear':
-            values = self.layer.data[self.state.cmap_att].astype(np.float32).ravel()
+            values = self.layer.data[self.state.cmap_attribute].astype(np.float32).ravel()
             normalized_values = ((values - self.state.cmap_vmin)
                                  / (self.state.cmap_vmax - self.state.cmap_vmin))
             color_values = cmap(normalized_values).astype(np.float32)
@@ -134,15 +112,15 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
     def _update_quiver(self):
         with self.quiver.hold_sync():
-            self.quiver.vz = self.layer.data[self.state.vx_att].ravel()
-            self.quiver.vy = self.layer.data[self.state.vz_att].ravel()
-            self.quiver.vx = self.layer.data[self.state.vy_att].ravel()
+            self.quiver.vz = self.layer.data[self.state.vx_attribute].ravel()
+            self.quiver.vy = self.layer.data[self.state.vz_attribute].ravel()
+            self.quiver.vx = self.layer.data[self.state.vy_attribute].ravel()
 
     def _update_size(self):
         size = self.state.size
         scale = self.state.size_scaling / 5  # /5 seems to give similar sizes as the Qt Glue
         if self.state.size_mode == 'Linear':
-            size = self.layer.data[self.state.size_att].ravel()
+            size = self.layer.data[self.state.size_attribute].ravel()
             size = (size - self.state.size_vmin) / (self.state.size_vmax - self.state.size_vmin)
             size *= 5
         value = size * scale
