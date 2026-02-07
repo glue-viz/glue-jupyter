@@ -26,7 +26,6 @@ authors = [
 
 dependencies = [
     "glue-core>=1.23.0",
-    "glue-vispy-viewers[jupyter]>=1.2.1",
     "notebook>=6.5.1",
     "nbclient>=0.7.0",
     "ipython_genutils>=0.2",
@@ -45,6 +44,9 @@ dependencies = [
 Homepage = "https://glueviz.org"
 
 [project.optional-dependencies]
+recommended = [
+        "glue-vispy-viewers[jupyter]>=1.2.1",
+]
 docs = [
     "sphinx",
     "sphinx-automodapi",
