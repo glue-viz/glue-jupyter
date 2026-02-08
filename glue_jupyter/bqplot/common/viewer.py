@@ -31,8 +31,7 @@ class BqplotBaseView(IPyWidgetView):
         self.scale_y = bqplot.LinearScale(min=0, max=1)
 
         self.scales = {'x': self.scale_x, 'y': self.scale_y}
-        self.axis_x = bqplot.Axis(
-            scale=self.scale_x, grid_lines='none', label='x')
+        self.axis_x = bqplot.Axis(scale=self.scale_x, grid_lines='none', label='x')
         self.axis_y = bqplot.Axis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
                                   grid_lines='none', label='y')
 
@@ -68,11 +67,11 @@ class BqplotBaseView(IPyWidgetView):
 
         self.state.add_callback('x_axislabel', self.update_x_axislabel)
         # self.state.add_callback('x_axislabel_weight', self.update_x_axislabel)
-        # self.state.add_callback('x_axislabel_size', self.update_x_axislabel)
+        self.state.add_callback('x_axislabel_size', self.update_x_ticksize)
 
         self.state.add_callback('y_axislabel', self.update_y_axislabel)
         # self.state.add_callback('y_axislabel_weight', self.update_y_axislabel)
-        # self.state.add_callback('y_axislabel_size', self.update_y_axislabel)
+        self.state.add_callback('y_axislabel_size', self.update_y_ticksize)
 
         self.scale_x.observe(self.update_glue_scales, names=['min', 'max'])
         self.scale_y.observe(self.update_glue_scales, names=['min', 'max'])
@@ -94,6 +93,12 @@ class BqplotBaseView(IPyWidgetView):
 
     def update_y_axislabel(self, *event):
         self.axis_y.label = self.state.y_axislabel
+
+    def update_x_ticksize(self, *event):
+        self.axis_x.tick_style = {'font-size': str(self.state.x_ticklabel_size) + "px"}
+
+    def update_y_ticksize(self, *event):
+        self.axis_y.tick_style = {'font-size': str(self.state.y_ticklabel_size) + "px"}
 
     def _update_bqplot_limits(self, *args):
 

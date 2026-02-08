@@ -1,8 +1,13 @@
 <template>
     <div class="glue-layer-scatter">
+        <div class="text-subtitle-2 font-weight-bold"></divclass>
         <div class="text-subtitle-2 font-weight-bold">Color</div>
         <div>
             <v-select label="color" :items="cmap_mode_items" v-model="cmap_mode_selected" hide-details />
+        </div>
+        <div>
+          <v-subheader class="pl-0 slider-label">Axes definition</v-subheader>
+          <glue-axes/>
         </div>
         <template v-if="glue_state.cmap_mode === 'Linear'">
             <div>
@@ -106,6 +111,12 @@
     </div>
 </template>
 <script>
+<!--import {defineComponent} from "vue";-->
+<!--import Glue_axes from "../../widgets/glue_axes.vue";-->
+
+<!--export default defineComponent({-->
+<!--  components: {Glue_axes}-->
+<!--})-->
 </script>
 <style id="layer_scatter">
 .glue-layer-scatter .v-subheader.slider-label {
