@@ -44,8 +44,8 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
         link((self.state, 'visible'), (self.scatter.material, 'visible'))
 
-        on_change([(self.state, 'vector_visible', 'vx_attribute',
-                    'vy_attribute', 'vz_attribute')])(self._update_quiver)
+        on_change([(self.state, 'vector_visible', 'vx_att',
+                    'vy_att', 'vz_att')])(self._update_quiver)
         link((self.state, 'vector_visible'), (self.quiver, 'visible'))
 
         link((self.state, 'geo'), (self.scatter, 'geo'))
@@ -112,15 +112,15 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
     def _update_quiver(self):
         with self.quiver.hold_sync():
-            self.quiver.vz = self.layer.data[self.state.vx_attribute].ravel()
-            self.quiver.vy = self.layer.data[self.state.vz_attribute].ravel()
-            self.quiver.vx = self.layer.data[self.state.vy_attribute].ravel()
+            self.quiver.vz = self.layer.data[self.state.vx_att].ravel()
+            self.quiver.vy = self.layer.data[self.state.vz_att].ravel()
+            self.quiver.vx = self.layer.data[self.state.vy_att].ravel()
 
     def _update_size(self):
         size = self.state.size
         scale = self.state.size_scaling / 5  # /5 seems to give similar sizes as the Qt Glue
         if self.state.size_mode == 'Linear':
-            size = self.layer.data[self.state.size_attribute].ravel()
+            size = self.layer.data[self.state.size_att].ravel()
             size = (size - self.state.size_vmin) / (self.state.size_vmax - self.state.size_vmin)
             size *= 5
         value = size * scale
