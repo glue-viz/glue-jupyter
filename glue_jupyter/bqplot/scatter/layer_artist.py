@@ -68,9 +68,10 @@ DATA_PROPERTIES = {
 
 # Kept for backward compatibility with <= 0.17
 class BqplotScatterLayerState(ScatterLayerState):
-    warnings.warn("`BqplotScatterLayerState` is deprecated and will be removed in a "
-                  "future version. Use `ScatterLayerState` instead", DeprecationWarning)
-
+    def __init__(self, *args, **kwargs):
+        warnings.warn("`BqplotScatterLayerState` is deprecated and will be removed in a "
+                    "future version. Use `ScatterLayerState` instead", DeprecationWarning)
+        super().__init__(*args, **kwargs)
 
 class BqplotScatterLayerArtist(LayerArtist):
 
