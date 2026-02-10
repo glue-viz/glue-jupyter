@@ -25,11 +25,11 @@ authors = [
 ]
 
 dependencies = [
-    "glue-core>=1.23.0",
-    "nbclient>=0.7.0",
-    "ipython_genutils>=0.2",
+    "glue-core>=1.25.0",
     "ipympl>=0.3.0",
     "ipyvolume>=0.6.0",
+    "ipython_genutils>=0.2",  # missing ipyvolume dependency
+    "tornado",  # missing ipyvolume dependency
     "ipywidgets>=7.7.0",
     "ipyvue>=1.2.0,<2",
     "ipyvuetify>=1.2.0,<2",
@@ -58,7 +58,14 @@ docs = [
 test = [
     "pytest",
     "pytest-cov",
+]
+
+nbtest = [
+    "astroquery",
     "nbconvert>=6.4.5",
+    "nbformat",
+    "notebook",
+    "pyyaml",
 ]
 
 visualtest = [
@@ -96,6 +103,10 @@ namespaces = false
 version_file = "glue_jupyter/_version.py"
 
 [tool.pytest.ini_options]
+addopts = "-m 'not notebook'"
+markers = [
+    "notebook: marks tests as notebook tests (deselected by default, run with '-m notebook')",
+]
 filterwarnings = [
     "ignore:`BqplotScatterLayerState` is deprecated and will be removed in a future version.*:DeprecationWarning:glue_jupyter.bqplot.*:",
     "ignore:metadata .* was set from the constructor:DeprecationWarning:bqscales.*:",

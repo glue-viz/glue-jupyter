@@ -1,9 +1,8 @@
 import os
 
-import nbformat
 import numpy as np
+import pytest
 from glue.core.roi import PolygonalROI, Projected3dROI
-from nbconvert.preprocessors import ExecutePreprocessor
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -177,9 +176,13 @@ def test_volshow_multiple_subsets(app, data_unlinked, data_volume):
     assert not viewer.layers[2].enabled
 
 
+@pytest.mark.notebook
 def test_notebook():
 
     # Run an actual notebook
+
+    import nbformat
+    from nbconvert.preprocessors import ExecutePreprocessor
 
     with open(os.path.join(DATA, 'ipyvolume.ipynb')) as f:
         nb = nbformat.read(f, as_version=4)

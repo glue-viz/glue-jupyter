@@ -1,8 +1,8 @@
 import os
-import nbformat
+
 import numpy as np
+import pytest
 from numpy.testing import assert_allclose
-from nbconvert.preprocessors import ExecutePreprocessor
 from glue.config import viewer_tool
 from glue.core import Data
 from glue.core.roi import CircularAnnulusROI, EllipticalROI
@@ -386,9 +386,13 @@ def test_show_axes(app, dataxyz):
     assert s.figure.fig_margin == margin_initial
 
 
+@pytest.mark.notebook
 def test_notebook():
 
     # Run an actual notebook
+
+    import nbformat
+    from nbconvert.preprocessors import ExecutePreprocessor
 
     with open(os.path.join(DATA, 'bqplot.ipynb')) as f:
         nb = nbformat.read(f, as_version=4)
