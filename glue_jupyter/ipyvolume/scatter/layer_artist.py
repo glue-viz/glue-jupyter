@@ -32,7 +32,7 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
                                         geo='arrow', visible=False)
         self.view.figure.scatters = list(self.view.figure.scatters) + [self.scatter, self.quiver]
 
-        on_change([(self.state, 'cmap_mode', 'cmap_attribute',
+        on_change([(self.state, 'color_mode', 'cmap_attribute',
                     'cmap_vmin', 'cmap_vmax', 'cmap', 'color')])(self._update_color)
         on_change([(self.state, 'size', 'size_scaling',
                     'size_mode', 'size_vmin', 'size_vmax')])(self._update_size)
@@ -52,7 +52,7 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
     def _update_color(self, ignore=None):
         cmap = self.state.cmap
-        if self.state.cmap_mode == 'Linear':
+        if self.state.color_mode == 'Linear':
             values = self.layer.data[self.state.cmap_attribute].astype(np.float32).ravel()
             normalized_values = ((values - self.state.cmap_vmin)
                                  / (self.state.cmap_vmax - self.state.cmap_vmin))
@@ -81,6 +81,8 @@ class IpyvolumeScatterLayerArtist(LayerArtist):
 
     def update(self):
         # we don't use layer, but layer.data to get everything
+        if self._viewer_state.x_att is None or self._viewer_state.y_att is None or self._viewer_state.z_att is None:
+            return
         self.scatter.z = self._cast_to_float(
                 ensure_numerical(self.layer.data[self._viewer_state.x_att]).ravel())
         self.scatter.y = self._cast_to_float(
