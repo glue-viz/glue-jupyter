@@ -1,4 +1,4 @@
-from glue.viewers.volume3d.layer_state import VolumeLayerState as VolumeLayerStateBase
+from glue.viewers.volume3d.layer_state import VolumeLayerState3D as VolumeLayerStateBase
 from echo import CallbackProperty
 
 __all__ = ['VolumeLayerState']
