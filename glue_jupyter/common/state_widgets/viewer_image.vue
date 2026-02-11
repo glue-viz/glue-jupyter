@@ -9,7 +9,7 @@
         <div class="glue-viewer-image-switches">
             <div>
                 <v-subheader class="pl-0 slider-label">equal aspect ratio</v-subheader>
-                <v-switch input-value="glue_state.aspect === EQUAL" @change="setEqualAspect" hide-details style="margin-top: 0" />
+                <v-switch :model-value="glue_state.aspect === EQUAL" @update:modelValue="setEqualAspect" hide-details style="margin-top: 0" />
             </div>
             <div>
                 <v-subheader class="pl-0 slider-label">show axes</v-subheader>
@@ -26,7 +26,7 @@
             <v-subheader class="pl-0 slider-label">{{ slider.label }}: {{ glue_state.slices[slider.index] }} ({{  slider.world_value  }} {{ slider.unit }})</v-subheader>
             <glue-throttled-slider
                 v-if="glue_state.slices && glue_state.slices.length > 0"
-                wait="300" :max="slider.max" :value.sync="glue_state.slices[slider.index]" hide-details />
+                wait="300" :max="slider.max" v-model:value="glue_state.slices[slider.index]" hide-details />
         </div>
     </div>
 </template>
