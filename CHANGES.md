@@ -1,5 +1,35 @@
 # Full changelog
 
+## v0.26.0 - 2026-02-11
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+* Fix subset deletion after reordering layers by @rosteen in https://github.com/glue-viz/glue-jupyter/pull/494
+* Fix horizontal display of tables, don't squash columns, instead add a scrollbar if needed by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/502
+* Add missing refresh when subset is removed by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/505
+
+#### New Features
+
+* feat: add option to show handles on selection by @mariobuikhuizen in https://github.com/glue-viz/glue-jupyter/pull/498
+* Add ability to sort table viewer by columns by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/503
+* Add dropdown to select which columns are shown by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/504
+* Add colormaps and stretches to ipyvolume viewer by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/484
+
+#### Other Changes
+
+* Update figure hashes by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/495
+* Migrate configuration to pyproject.toml by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/491
+* Guard tool against case where application is not set by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/506
+* Fix deprecation warnings in tests by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/510
+* Use 3D state classes from glue-core by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/509
+* fix: remove leftover debug statement by @mariobuikhuizen in https://github.com/glue-viz/glue-jupyter/pull/511
+* ci: fix error in ui-tests by @mariobuikhuizen in https://github.com/glue-viz/glue-jupyter/pull/513
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.25.0...v0.26.0
+
 ## v0.25.0 - 2025-10-30
 
 <!-- Release notes generated using configuration in .github/release.yml at v0.25.x -->
