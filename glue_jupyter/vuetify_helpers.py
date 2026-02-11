@@ -27,7 +27,7 @@ def link_glue_choices(widget, state, prop):
 
     def update_choices(*args):
         labels = get_choices(state, prop)[1]
-        items = [dict(text=label, value=index) for index, label in enumerate(labels)]
+        items = [dict(title=label, value=index) for index, label in enumerate(labels)]
         setattr(widget, f'{prop}_items', items)
 
     state.add_callback(prop, update_choices)

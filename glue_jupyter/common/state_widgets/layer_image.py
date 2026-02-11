@@ -50,7 +50,7 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
         link_glue_choices(self, layer_state, 'percentile')
 
         self.colormap_items = [dict(
-            text=cmap[0],
+            title=cmap[0],
             value=cmap[1].name
         ) for cmap in colormaps.members]
 
