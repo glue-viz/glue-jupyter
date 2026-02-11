@@ -9,18 +9,18 @@
                 <v-select label="attribute" :items="cmap_att_items" v-model="cmap_att_selected" hide-details />
             </div>
             <div>
-                <glue-float-field label="min" :value.sync="glue_state.cmap_vmin" />
+                <glue-float-field label="min" v-model:value="glue_state.cmap_vmin" />
             </div>
             <div>
-                <glue-float-field label="max" :value.sync="glue_state.cmap_vmax" />
+                <glue-float-field label="max" v-model:value="glue_state.cmap_vmax" />
             </div>
             <div>
-                <v-select label="colormap" :items="cmap_items" :value="glue_state.cmap" @change="set_colormap" hide-details/>
+                <v-select label="colormap" :items="cmap_items" :model-value="glue_state.cmap" @update:modelValue="set_colormap" hide-details/>
             </div>
         </template>
         <div>
             <v-subheader class="pl-0 slider-label">opacity</v-subheader>
-            <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="glue_state.alpha" hide-details />
+            <glue-throttled-slider wait="300" min="0" max="1" step="0.01" v-model:value="glue_state.alpha" hide-details />
         </div>
         <div class="text-subtitle-2 font-weight-bold">Points</div>
         <div>
@@ -39,20 +39,20 @@
                     <v-select label="attribute" :items="size_att_items" v-model="size_att_selected" hide-details />
                 </div>
                 <div>
-                    <glue-float-field label="min" :value.sync="glue_state.size_vmin" />
+                    <glue-float-field label="min" v-model:value="glue_state.size_vmin" />
                 </div>
                 <div>
-                    <glue-float-field label="max" :value.sync="glue_state.size_vmax" />
+                    <glue-float-field label="max" v-model:value="glue_state.size_vmax" />
                 </div>
             </template>
             <template v-if="glue_state.density_map">
                 <div>
                     <v-subheader class="pl-0 slider-label">dpi</v-subheader>
-                    <glue-throttled-slider wait="300" min="12" max="144" step="1" :value.sync="dpi" hide-details />
+                    <glue-throttled-slider wait="300" min="12" max="144" step="1" v-model:value="dpi" hide-details />
                 </div>
                 <div>
                     <v-subheader class="pl-0 slider-label">contrast</v-subheader>
-                    <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="glue_state.density_contrast"
+                    <glue-throttled-slider wait="300" min="0" max="1" step="0.01" v-model:value="glue_state.density_contrast"
                                          hide-details />
                 </div>
             </template>
@@ -63,7 +63,7 @@
                 </div>
                 <div>
                     <v-subheader class="pl-0 slider-label">size scaling</v-subheader>
-                    <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" :value.sync="glue_state.size_scaling"
+                    <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" v-model:value="glue_state.size_scaling"
                         hide-details />
                 </div>
             </template>
@@ -76,7 +76,7 @@
         <template v-if="glue_state.line_visible">
             <div>
                 <v-subheader class="pl-0 slider-label">width</v-subheader>
-                <glue-throttled-slider wait="300" min="1" max="20" step="1" :value.sync="glue_state.linewidth" hide-details />
+                <glue-throttled-slider wait="300" min="1" max="20" step="1" v-model:value="glue_state.linewidth" hide-details />
             </div>
             <div>
                 <v-select label="linestyle" :items="linestyle_items" v-model="linestyle_selected" hide-details />
@@ -99,7 +99,7 @@
             </div>
             <div>
                 <v-subheader class="pl-0 slider-label">vector size</v-subheader>
-                <glue-throttled-slider wait="300" min="0.01" max="1" step="0.01" :value.sync="glue_state.vector_scaling"
+                <glue-throttled-slider wait="300" min="0.01" max="1" step="0.01" v-model:value="glue_state.vector_scaling"
                     hide-details />
             </div>
         </template>
