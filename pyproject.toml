@@ -108,6 +108,7 @@ markers = [
     "notebook: marks tests as notebook tests (deselected by default, run with '-m notebook')",
 ]
 filterwarnings = [
+    "error::DeprecationWarning",
     "ignore:`BqplotScatterLayerState` is deprecated and will be removed in a future version.*:DeprecationWarning:glue_jupyter.bqplot.*:",
     "ignore:metadata .* was set from the constructor:DeprecationWarning:bqscales.*:",
     "ignore:Passing unrecognized arguments to super:DeprecationWarning:traitlets.*:",
@@ -118,7 +119,6 @@ filterwarnings = [
     "ignore:.*Sentinel is not a public part of the traitlets API.*:DeprecationWarning:",
     "ignore:.*metadata.*was set from the constructor.*:DeprecationWarning:",
     "ignore:Jupyter is migrating its paths to use standard platformdirs:DeprecationWarning:",
-    "error::DeprecationWarning",
 ]
 
 [tool.gilesbot]
