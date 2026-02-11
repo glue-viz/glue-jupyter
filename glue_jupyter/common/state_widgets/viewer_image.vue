@@ -9,7 +9,7 @@
         <div class="glue-viewer-image-switches">
             <div>
                 <v-subheader class="pl-0 slider-label">equal aspect ratio</v-subheader>
-                <v-switch :input-value="aspect === 'equal'" @change="setEqualAspect" hide-details style="margin-top: 0" />
+                <v-switch :model-value="aspect === 'equal'" @update:modelValue="setEqualAspect" hide-details style="margin-top: 0" />
             </div>
             <div>
                 <v-subheader class="pl-0 slider-label">show axes</v-subheader>
