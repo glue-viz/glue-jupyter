@@ -1,15 +1,10 @@
 import os
 
 import numpy as np
-<<<<<<< HEAD
 import pytest
-from glue.core.roi import PolygonalROI, Projected3dROI
-=======
 from glue.config import stretches
 from glue.core.roi import PolygonalROI, Projected3dROI
 from matplotlib import colormaps
-from nbconvert.preprocessors import ExecutePreprocessor
->>>>>>> 3f0ddc7 (Add tests of volume colormap mode and stretch widgets.)
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 

@@ -47,12 +47,12 @@ class Color(widgets.VBox):
              lambda cmap: colormaps.name_from_cmap(cmap), lambda name: colormaps[name])
 
         dlink((self.widget_color_mode, 'value'), (self.widget_color.layout, 'display'),
-              lambda value: None if value == cmap_mode_options[0] else 'none')
+              lambda value: None if value == color_mode_options[0] else 'none')
         dlink((self.widget_color_mode, 'value'), (self.widget_cmap.layout, 'display'),
-              lambda value: None if value == cmap_mode_options[1] else 'none')
+              lambda value: None if value == color_mode_options[1] else 'none')
         if self.cmap_att is not None:
             dlink((self.widget_color_mode, 'value'), (self.widget_cmap_att.layout, 'display'),
-                  lambda value: None if value == cmap_mode_options[1] else 'none')
+                  lambda value: None if value == color_mode_options[1] else 'none')
             dlink((self.widget_color_mode, 'value'), (self.widget_cmap_v.layout, 'display'),
-                  lambda value: None if value == cmap_mode_options[1] else 'none')
+                  lambda value: None if value == color_mode_options[1] else 'none')
         self.children = tuple(children)
