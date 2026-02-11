@@ -66,7 +66,7 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
         link_glue_choices(self, layer_state, "cmap_att")
 
         self.cmap_items = [
-            {"text": cmap[0], "value": cmap[1].name} for cmap in colormaps.members
+            {"title": cmap[0], "value": cmap[1].name} for cmap in colormaps.members
         ]
 
         # Points
