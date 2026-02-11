@@ -16,10 +16,10 @@ class Color(widgets.VBox):
         self.widget_color = widgets.ColorPicker(description='color')
         link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
 
-        cmap_mode_options = type(self.state).cmap_mode.get_choice_labels(self.state)
-        self.widget_cmap_mode = widgets.RadioButtons(options=cmap_mode_options,
+        color_mode_options = type(self.state).color_mode.get_choice_labels(self.state)
+        self.widget_color_mode = widgets.RadioButtons(options=color_mode_options,
                                                      description='cmap mode')
-        link((self.state, 'cmap_mode'), (self.widget_cmap_mode, 'value'))
+        link((self.state, 'color_mode'), (self.widget_color_mode, 'value'))
 
         self.widget_cmap_att = LinkedDropdown(self.state, 'cmap_att',
                                               ui_name='color attribute',
@@ -35,14 +35,14 @@ class Color(widgets.VBox):
         link((self.state, 'cmap'), (self.widget_cmap, 'label'),
              lambda cmap: colormaps.name_from_cmap(cmap), lambda name: colormaps[name])
 
-        dlink((self.widget_cmap_mode, 'value'), (self.widget_color.layout, 'display'),
-              lambda value: None if value == cmap_mode_options[0] else 'none')
-        dlink((self.widget_cmap_mode, 'value'), (self.widget_cmap.layout, 'display'),
-              lambda value: None if value == cmap_mode_options[1] else 'none')
-        dlink((self.widget_cmap_mode, 'value'), (self.widget_cmap_att.layout, 'display'),
-              lambda value: None if value == cmap_mode_options[1] else 'none')
-        dlink((self.widget_cmap_mode, 'value'), (self.widget_cmap_v.layout, 'display'),
-              lambda value: None if value == cmap_mode_options[1] else 'none')
-        self.children = (self.widget_cmap_mode, self.widget_color,
+        dlink((self.widget_color_mode, 'value'), (self.widget_color.layout, 'display'),
+              lambda value: None if value == color_mode_options[0] else 'none')
+        dlink((self.widget_color_mode, 'value'), (self.widget_cmap.layout, 'display'),
+              lambda value: None if value == color_mode_options[1] else 'none')
+        dlink((self.widget_color_mode, 'value'), (self.widget_cmap_att.layout, 'display'),
+              lambda value: None if value == color_mode_options[1] else 'none')
+        dlink((self.widget_color_mode, 'value'), (self.widget_cmap_v.layout, 'display'),
+              lambda value: None if value == color_mode_options[1] else 'none')
+        self.children = (self.widget_color_mode, self.widget_color,
                          self.widget_cmap_att, self.widget_cmap_v,
                          self.widget_cmap)

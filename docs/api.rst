@@ -10,8 +10,6 @@ General
 
 .. automodapi:: glue_jupyter.view
 
-.. automodapi:: glue_jupyter.common.state3d
-
 .. automodapi:: glue_jupyter.common.state_widgets
 
 bqplot viewers

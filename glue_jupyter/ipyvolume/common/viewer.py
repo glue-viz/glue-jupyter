@@ -65,7 +65,9 @@ class IpyvolumeBaseView(IPyWidgetView):
                 ipv.style.box_off()
 
     def _update_aspect(self, *args):
-        self.figure.box_size = self.state.aspect.tolist()
+        # Reorder aspect from glue's [x, y, z] to ipyvolume's [y, z, x] axis order
+        aspect = self.state.aspect
+        self.figure.box_size = [aspect[1], aspect[2], aspect[0]]
 
     @property
     def figure_widget(self):

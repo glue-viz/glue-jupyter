@@ -94,6 +94,6 @@ jobs:
     with:
       libraries: libhdf5-dev
       test_extras: test
-      test_command: pytest --pyargs glue_jupyter
+      test_command: pytest --pyargs glue_jupyter -m 'not notebook'
     secrets:
       pypi_token: ${{ secrets.pypi_token }}

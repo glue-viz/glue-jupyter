@@ -1,9 +1,8 @@
 import os
 
-import nbformat
 import numpy as np
+import pytest
 from glue.core.roi import PolygonalROI, Projected3dROI
-from nbconvert.preprocessors import ExecutePreprocessor
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -70,20 +69,20 @@ def test_scatter3d(app, dataxyz, dataxz):
     assert layer.quiver.visible
 
 
-def test_scatter3d_cmap_mode(app, dataxyz):
+def test_scatter3d_color_mode(app, dataxyz):
 
     s = app.scatter3d(x='x', y='y', data=dataxyz)
     l1 = s.layers[0]
 
     layer_widget = s.layer_options.layers[-1]['layer_panel']
 
-    assert l1.state.cmap_mode == 'Fixed', 'expected default value'
+    assert l1.state.color_mode == 'Fixed', 'expected default value'
     assert l1.state.cmap_name == 'Gray'
 
     assert l1.scatter.color.shape == (), 'numpy scalar'
     l1.state.cmap_att = 'x'
-    l1.state.cmap_mode = 'Linear'
-    assert layer_widget.widget_color.widget_cmap_mode.label == 'Linear'
+    l1.state.color_mode = 'Linear'
+    assert layer_widget.widget_color.widget_color_mode.label == 'Linear'
     assert l1.state.cmap_name == 'Gray'
     l1.state.cmap_vmin = 0
     l1.state.cmap_vmax = 10
@@ -177,9 +176,13 @@ def test_volshow_multiple_subsets(app, data_unlinked, data_volume):
     assert not viewer.layers[2].enabled
 
 
+@pytest.mark.notebook
 def test_notebook():
 
     # Run an actual notebook
+
+    import nbformat
+    from nbconvert.preprocessors import ExecutePreprocessor
 
     with open(os.path.join(DATA, 'ipyvolume.ipynb')) as f:
         nb = nbformat.read(f, as_version=4)

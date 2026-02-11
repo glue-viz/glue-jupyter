@@ -39,8 +39,9 @@ class InteractCheckableTool(CheckableTool):
     def activate(self):
 
         # Disable any active tool in other viewers
-        if self.viewer.session.application.get_setting('single_global_active_tool'):
-            for viewer in self.viewer.session.application.viewers:
+        application = self.viewer.session.application
+        if application is not None and application.get_setting('single_global_active_tool'):
+            for viewer in application.viewers:
                 if viewer is not self.viewer:
                     viewer.toolbar.active_tool = None
 

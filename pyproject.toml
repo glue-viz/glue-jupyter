@@ -25,13 +25,11 @@ authors = [
 ]
 
 dependencies = [
-    "glue-core>=1.23.0",
-    "glue-vispy-viewers[jupyter]>=1.2.1",
-    "notebook>=6.5.1",
-    "nbclient>=0.7.0",
-    "ipython_genutils>=0.2",
+    "glue-core>=1.25.0",
     "ipympl>=0.3.0",
     "ipyvolume>=0.6.0",
+    "ipython_genutils>=0.2",  # missing ipyvolume dependency
+    "tornado",  # missing ipyvolume dependency
     "ipywidgets>=7.7.0",
     "ipyvue>=1.2.0,<2",
     "ipyvuetify>=1.2.0,<2",
@@ -45,6 +43,9 @@ dependencies = [
 Homepage = "https://glueviz.org"
 
 [project.optional-dependencies]
+recommended = [
+        "glue-vispy-viewers[jupyter]>=1.2.1",
+]
 docs = [
     "sphinx",
     "sphinx-automodapi",
@@ -57,7 +58,14 @@ docs = [
 test = [
     "pytest",
     "pytest-cov",
+]
+
+nbtest = [
+    "astroquery",
     "nbconvert>=6.4.5",
+    "nbformat",
+    "notebook",
+    "pyyaml",
 ]
 
 visualtest = [
@@ -95,6 +103,10 @@ namespaces = false
 version_file = "glue_jupyter/_version.py"
 
 [tool.pytest.ini_options]
+addopts = "-m 'not notebook'"
+markers = [
+    "notebook: marks tests as notebook tests (deselected by default, run with '-m notebook')",
+]
 filterwarnings = [
     "ignore:`BqplotScatterLayerState` is deprecated and will be removed in a future version.*:DeprecationWarning:glue_jupyter.bqplot.*:",
     "ignore:metadata .* was set from the constructor:DeprecationWarning:bqscales.*:",
@@ -182,6 +194,11 @@ lint.ignore = [  # NOTE: non-permanent exclusions should be added to `.ruff.toml
 # `import` should be at the top-level of a file. Most of the following are conditional imports.
 "glue_jupyter/__init__.py" = ["PLC0415"]
 "glue_jupyter/app.py" = ["PLC0415"]
+# Notebook test imports are inside functions to avoid requiring nbconvert for regular tests.
+"glue_jupyter/bqplot/tests/test_bqplot.py" = ["PLC0415"]
+"glue_jupyter/ipyvolume/tests/test_ipyvolume.py" = ["PLC0415"]
+"glue_jupyter/matplotlib/tests/test_matplotlib.py" = ["PLC0415"]
+"glue_jupyter/tests/main_test.py" = ["PLC0415"]
 
 [tool.ruff.lint.flake8-annotations]
 ignore-fully-untyped = true
