@@ -190,7 +190,7 @@ def test_volshow_cmap_mode(app, data_volume):
     assert layer.state.cmap.name == 'gray'
 
     layer.state.color_mode = 'Linear'
-    assert layer_widget.widget_color.widget_cmap_mode.label == 'Linear'
+    assert layer_widget.widget_color.widget_color_mode.label == 'Linear'
     assert layer_widget.widget_color.widget_cmap.label == 'Gray'
     assert layer.state.cmap.name == 'gray'
 
