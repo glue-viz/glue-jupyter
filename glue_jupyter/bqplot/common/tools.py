@@ -485,7 +485,6 @@ class BqplotEllipseMode(BqplotCircleMode):
 
         # Workaround for bug that causes the `color` trait to not be recognized
         style = self.interact.style.copy()
-        print("init with color", INTERACT_COLOR)
         style['fill'] = INTERACT_COLOR
         border_style = self.interact.border_style.copy()
         border_style['fill'] = INTERACT_COLOR
