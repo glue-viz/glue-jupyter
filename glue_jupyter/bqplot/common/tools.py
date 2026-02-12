@@ -772,8 +772,8 @@ class PointSelectTool(InteractCheckableTool):
 
     def on_click(self, event):
         with self.viewer._output_widget or nullcontext():
-            x = int(round(event['domain']['x']))
-            y = int(round(event['domain']['y']))
+            x = round(event['domain']['x'])
+            y = round(event['domain']['y'])
 
             slices = [slice(None)] * self.viewer.state.reference_data.ndim
             slices[self.viewer.state.x_att.axis] = slice(x, x + 1)
