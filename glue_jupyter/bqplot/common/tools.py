@@ -6,9 +6,11 @@ from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector
 from bqplot_image_gl.interacts import BrushEllipseSelector, BrushRectangleSelector
 from glue import __version__ as glue_version
-from glue.core.roi import PointROI, RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
+from glue.core.command import ApplySubsetState
+from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
+from glue.viewers.image.pixel_selection_subset_state import PixelSubsetState
 from glue.viewers.common.tool import Tool, CheckableTool
 from packaging.version import Version
 
@@ -754,37 +756,35 @@ class PointSelectTool(InteractCheckableTool):
 
     def __init__(self, viewer, finalize_callback=None, **kwargs):
         super().__init__(viewer, **kwargs)
-
-        self.interact = BrushSelector(x_scale=self.viewer.scale_x,
-                                      y_scale=self.viewer.scale_y,
-                                      color=INTERACT_COLOR)
-
-        self.interact.observe(self.update_selection, "brushing")
-        self.interact.observe(self.on_selection_change, "selected")
+        self.interact = None
         self.finalize_callback = finalize_callback
 
-    def update_selection(self, *args):
-        if self.interact.brushing:
-            return
+    def activate(self):
+        self.viewer.add_event_callback(self.on_click, events=['click'])
+        super().activate()
+
+    def deactivate(self):
+        try:
+            self.viewer.remove_event_callback(self.on_click)
+        except KeyError:
+            pass
+        super().deactivate()
+
+    def on_click(self, event):
         with self.viewer._output_widget or nullcontext():
-            if self.interact.selected_x is not None and self.interact.selected_y is not None:
-                x = self.interact.selected_x
-                y = self.interact.selected_y
+            x = int(round(event['domain']['x']))
+            y = int(round(event['domain']['y']))
 
-            if (x and y) is not None:
-                roi = PointROI(x, y)
-                self.viewer.apply_roi(roi)
-                if self.finalize_callback is not None:
-                    self.finalize_callback()
+            slices = [slice(None)] * self.viewer.state.reference_data.ndim
+            slices[self.viewer.state.x_att.axis] = slice(x, x + 1)
+            slices[self.viewer.state.y_att.axis] = slice(y, y + 1)
 
+            subset_state = PixelSubsetState(self.viewer.state.reference_data, slices)
 
-    def on_selection_change(self, *args):
-        if self.interact.selected_x is None and self.interact.selected_y is None:
+            cmd = ApplySubsetState(data_collection=self.viewer._data,
+                                   subset_state=subset_state,
+                                   override_mode=None)
+            self.viewer._session.command_stack.do(cmd)
+
             if self.finalize_callback is not None:
                 self.finalize_callback()
-
-    def activate(self):
-        with self.viewer._output_widget or nullcontext():
-            self.interact.selected_x = None
-            self.interact.selected_y = None
-        super().activate()
