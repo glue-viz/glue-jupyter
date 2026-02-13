@@ -6,8 +6,7 @@ from bqplot import PanZoom, Lines
 from bqplot.interacts import BrushSelector, BrushIntervalSelector, TwoDSelector
 from bqplot_image_gl.interacts import BrushEllipseSelector, BrushRectangleSelector
 from glue import __version__ as glue_version
-from glue.core.roi import (PointROI, RectangularROI, RangeROI,
-                           CircularROI, EllipticalROI, PolygonalROI)
+from glue.core.roi import RectangularROI, RangeROI, CircularROI, EllipticalROI, PolygonalROI
 from glue.core.subset import RoiSubsetState
 from glue.config import viewer_tool
 from glue.viewers.common.tool import Tool, CheckableTool
@@ -665,38 +664,19 @@ class BqplotYRangeMode(BqplotSelectionTool):
 class BqplotPointMode(BqplotSelectionTool):
     tool_id = 'bqplot:point'
     icon = 'glue_point'
-    action_text = 'Point ROI'
+    action_text = 'Point-like ROI'
     tool_tip = 'Select a single pixel region of interest'
 
     def __init__(self, viewer, finalize_callback=None, **kwargs):
         super().__init__(viewer, **kwargs)
-
         self.interact = TwoDSelector(x_scale=self.viewer.scale_x,
-                                      y_scale=self.viewer.scale_y,
-                                      color=INTERACT_COLOR)
-
+                                     y_scale=self.viewer.scale_y,
+                                     color=INTERACT_COLOR)
         self.finalize_callback = finalize_callback
 
     def activate(self):
-        """
-        We do not call super().activate() because we don't have a separate interact,
-        instead we just add a callback to the default viewer MouseInteraction.
-        """
-
-        # We need to make sure any existing callbacks associated with this
-        # viewer are cleared. This can happen if the user switches between
-        # different viewers without deactivating the tool.
-        try:
-            self.viewer.remove_event_callback(self.on_msg)
-        except KeyError:
-            pass
-
-        # Disable any active tool in other viewers
-        if self.viewer.session.application.get_setting('single_global_active_tool'):
-            for viewer in self.viewer.session.application.viewers:
-                if viewer is not self.viewer:
-                    viewer.toolbar.active_tool = None
         self.viewer.add_event_callback(self.on_msg, events=['click', 'keydown'])
+        super().activate()
 
     def deactivate(self):
         try:
@@ -709,7 +689,7 @@ class BqplotPointMode(BqplotSelectionTool):
         x = event['domain']['x']
         y = event['domain']['y']
 
-        roi = PointROI(x, y)
+        roi = RectangularROI(xmin=x-0.5, xmax=x+0.5, ymin=y-0.5, ymax=y+0.5)
         self._roi = roi
         self.viewer.apply_roi(roi)
         if self.finalize_callback is not None:
