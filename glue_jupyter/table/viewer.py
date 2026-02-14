@@ -17,6 +17,14 @@ from ..view import IPyWidgetView
 
 class TableState(ViewerState):
     hidden_components = ListCallbackProperty(docstring='Attributes to hide in the table display')
+    editable_components = ListCallbackProperty(docstring='Attributes that can be edited in the table')
+
+    def is_editable(self, component_id):
+        """Check if a component is editable using identity comparison."""
+        for editable_cid in self.editable_components:
+            if component_id is editable_cid:
+                return True
+        return False
 
 
 class TableBase(v.VuetifyTemplate):
@@ -39,7 +47,6 @@ class TableBase(v.VuetifyTemplate):
     height = traitlets.Unicode(None, allow_none=True).tag(sync=True)
 
     hidden_components = traitlets.List([]).tag(sync=False)
-    editable_column = traitlets.Unicode(None, allow_none=True).tag(sync=True)
 
     def _update(self):
         self._update_columns()
@@ -140,6 +147,7 @@ class TableBase(v.VuetifyTemplate):
 class TableGlue(TableBase):
     data = traitlets.Any()  # Glue data object
     apply_filter = traitlets.Any()  # callback
+    state = traitlets.Any()  # TableState reference
 
     @traitlets.observe('data')
     def _on_data_change(self, change):
@@ -159,7 +167,7 @@ class TableGlue(TableBase):
                 'text': str(k),
                 'value': str(k),
                 'sortable': True,
-                'editable': self.editable_column is not None and str(k) == self.editable_column
+                'editable': self.state is not None and self.state.is_editable(k)
             }
             for k in components
         ]
@@ -391,9 +399,10 @@ class TableViewer(IPyWidgetView):
 
     def __init__(self, session, state=None):
         super(TableViewer, self).__init__(session, state=state)
-        self.widget_table = TableGlue(data=None, apply_filter=self.apply_filter)
+        self.widget_table = TableGlue(data=None, apply_filter=self.apply_filter, state=self.state)
         self.create_layout()
         self.state.add_callback('hidden_components', self._update_hidden)
+        self.state.add_callback('editable_components', self._update_editable)
 
     def create_layout(self):
         # Override to pass viewer instead of just state
@@ -408,6 +417,9 @@ class TableViewer(IPyWidgetView):
     def _update_hidden(self, *args):
         self.widget_table.hidden_components = self.state.hidden_components
         self.redraw()
+
+    def _update_editable(self, *args):
+        self.widget_table._update_columns()
 
     def redraw(self):
         subsets = [k.layer for k in self.layers if isinstance(k.layer, Subset)]
@@ -426,13 +438,3 @@ class TableViewer(IPyWidgetView):
     @property
     def figure_widget(self):
         return self.widget_table
-
-    @property
-    def editable_column(self):
-        """The name of the column that is editable, or None if no column is editable."""
-        return self.widget_table.editable_column
-
-    @editable_column.setter
-    def editable_column(self, value):
-        self.widget_table.editable_column = value
-        self.widget_table._update_columns()

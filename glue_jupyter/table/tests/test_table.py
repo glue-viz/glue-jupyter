@@ -200,19 +200,18 @@ def test_table_add_remove_data(app, dataxyz, dataxz, data_empty):
     assert len(table.layers) == 0
 
 
-def test_table_editable_column(app, dataxyz):
-    """Test that setting editable_column marks the header as editable."""
+def test_table_editable_components(app, dataxyz):
+    """Test that setting editable_components marks headers as editable."""
     table = app.table(data=dataxyz)
 
-    # Initially no column is editable
-    assert table.editable_column is None
+    # Initially no columns are editable
+    assert table.state.editable_components == []
     headers = table.widget_table.headers
     for header in headers:
         assert header['editable'] is False
 
-    # Set editable column
-    table.editable_column = 'x'
-    assert table.widget_table.editable_column == 'x'
+    # Set editable components using ComponentID
+    table.state.editable_components = [dataxyz.id['x']]
 
     # Check header has editable flag
     headers = table.widget_table.headers
@@ -223,13 +222,23 @@ def test_table_editable_column(app, dataxyz):
     y_header = next(h for h in headers if h['value'] == 'y')
     assert y_header['editable'] is False
 
+    # Test multiple editable components
+    table.state.editable_components = [dataxyz.id['x'], dataxyz.id['y']]
+    headers = table.widget_table.headers
+    x_header = next(h for h in headers if h['value'] == 'x')
+    y_header = next(h for h in headers if h['value'] == 'y')
+    z_header = next(h for h in headers if h['value'] == 'z')
+    assert x_header['editable'] is True
+    assert y_header['editable'] is True
+    assert z_header['editable'] is False
+
 
 def test_table_cell_edit(app, dataxyz):
     """Test that cell editing updates the underlying data."""
     table = app.table(data=dataxyz)
 
     # Enable editing for column 'x'
-    table.editable_column = 'x'
+    table.state.editable_components = [dataxyz.id['x']]
 
     # Get original value
     original_value = dataxyz['x'][0]
@@ -250,7 +259,7 @@ def test_table_cell_edit(app, dataxyz):
 def test_table_cell_edit_type_conversion(app, dataxyz):
     """Test that type conversion works correctly for cell edits."""
     table = app.table(data=dataxyz)
-    table.editable_column = 'x'
+    table.state.editable_components = [dataxyz.id['x']]
 
     # Original dtype should be preserved
     original_dtype = dataxyz.get_component('x').data.dtype
@@ -270,7 +279,7 @@ def test_table_cell_edit_type_conversion(app, dataxyz):
 def test_table_cell_edit_invalid_value(app, dataxyz):
     """Test that invalid values don't crash and don't modify data."""
     table = app.table(data=dataxyz)
-    table.editable_column = 'x'
+    table.state.editable_components = [dataxyz.id['x']]
 
     original_value = dataxyz['x'][0]
 
