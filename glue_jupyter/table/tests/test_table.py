@@ -198,3 +198,88 @@ def test_table_add_remove_data(app, dataxyz, dataxz, data_empty):
     assert table.widget_table.data is None
     assert table.widget_table.items == []
     assert len(table.layers) == 0
+
+
+def test_table_editable_column(app, dataxyz):
+    """Test that setting editable_column marks the header as editable."""
+    table = app.table(data=dataxyz)
+
+    # Initially no column is editable
+    assert table.editable_column is None
+    headers = table.widget_table.headers
+    for header in headers:
+        assert header['editable'] is False
+
+    # Set editable column
+    table.editable_column = 'x'
+    assert table.widget_table.editable_column == 'x'
+
+    # Check header has editable flag
+    headers = table.widget_table.headers
+    x_header = next(h for h in headers if h['value'] == 'x')
+    assert x_header['editable'] is True
+
+    # Other columns should not be editable
+    y_header = next(h for h in headers if h['value'] == 'y')
+    assert y_header['editable'] is False
+
+
+def test_table_cell_edit(app, dataxyz):
+    """Test that cell editing updates the underlying data."""
+    table = app.table(data=dataxyz)
+
+    # Enable editing for column 'x'
+    table.editable_column = 'x'
+
+    # Get original value
+    original_value = dataxyz['x'][0]
+
+    # Simulate cell edit
+    new_value = 999
+    table.widget_table.vue_cell_edited({
+        'row': 0,
+        'column': 'x',
+        'value': str(new_value)
+    })
+
+    # Verify data was updated
+    assert dataxyz['x'][0] == new_value
+    assert dataxyz['x'][0] != original_value
+
+
+def test_table_cell_edit_type_conversion(app, dataxyz):
+    """Test that type conversion works correctly for cell edits."""
+    table = app.table(data=dataxyz)
+    table.editable_column = 'x'
+
+    # Original dtype should be preserved
+    original_dtype = dataxyz.get_component('x').data.dtype
+
+    # Edit with string value (should convert to correct type)
+    table.widget_table.vue_cell_edited({
+        'row': 0,
+        'column': 'x',
+        'value': '42'
+    })
+
+    assert dataxyz['x'][0] == 42
+    # Type should be preserved (int or float depending on original)
+    assert np.issubdtype(type(dataxyz['x'][0]), original_dtype)
+
+
+def test_table_cell_edit_invalid_value(app, dataxyz):
+    """Test that invalid values don't crash and don't modify data."""
+    table = app.table(data=dataxyz)
+    table.editable_column = 'x'
+
+    original_value = dataxyz['x'][0]
+
+    # Try to edit with invalid value
+    table.widget_table.vue_cell_edited({
+        'row': 0,
+        'column': 'x',
+        'value': 'not_a_number'
+    })
+
+    # Data should remain unchanged
+    assert dataxyz['x'][0] == original_value

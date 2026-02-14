@@ -39,6 +39,7 @@ class TableBase(v.VuetifyTemplate):
     height = traitlets.Unicode(None, allow_none=True).tag(sync=True)
 
     hidden_components = traitlets.List([]).tag(sync=False)
+    editable_column = traitlets.Unicode(None, allow_none=True).tag(sync=True)
 
     def _update(self):
         self._update_columns()
@@ -153,7 +154,15 @@ class TableGlue(TableBase):
         if self.data is None:
             return []
         components = self.get_visible_components()
-        return [{'text': str(k), 'value': str(k), 'sortable': True} for k in components]
+        return [
+            {
+                'text': str(k),
+                'value': str(k),
+                'sortable': True,
+                'editable': self.editable_column is not None and str(k) == self.editable_column
+            }
+            for k in components
+        ]
 
     def _get_sorted_indices(self):
         """Return indices that would sort the data by the current sort column."""
@@ -223,6 +232,58 @@ class TableGlue(TableBase):
 
     def vue_apply_filter(self, data):
         self.apply_filter()
+
+    def vue_cell_edited(self, data):
+        """Handle cell edit from Vue frontend.
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary with keys:
+            - 'row': int, the row index (absolute, not page-relative)
+            - 'column': str, the column/component name
+            - 'value': any, the new value
+        """
+        row = data['row']
+        column = data['column']
+        new_value = data['value']
+
+        # Find component ID
+        component_id = None
+        for cid in self.data.main_components + self.data.derived_components:
+            if str(cid) == column:
+                component_id = cid
+                break
+
+        if component_id is None:
+            return
+
+        # Update the data
+        self._update_data_value(component_id, row, new_value)
+
+    def _update_data_value(self, component_id, row_index, new_value):
+        """Update value in glue Data object and notify linked viewers."""
+        component = self.data.get_component(component_id)
+        current_dtype = component.data.dtype
+
+        # Type conversion
+        try:
+            if np.issubdtype(current_dtype, np.integer):
+                converted_value = int(new_value)
+            elif np.issubdtype(current_dtype, np.floating):
+                converted_value = float(new_value)
+            else:
+                converted_value = new_value
+        except (ValueError, TypeError):
+            return  # Invalid input
+
+        # Create updated array and use update_components
+        new_data = component.data.copy()
+        new_data[row_index] = converted_value
+        self.data.update_components({component_id: new_data})
+
+        # Refresh table
+        self._update_items()
 
 
 class TableLayerArtist(LayerArtist):
@@ -365,3 +426,13 @@ class TableViewer(IPyWidgetView):
     @property
     def figure_widget(self):
         return self.widget_table
+
+    @property
+    def editable_column(self):
+        """The name of the column that is editable, or None if no column is editable."""
+        return self.widget_table.editable_column
+
+    @editable_column.setter
+    def editable_column(self, value):
+        self.widget_table.editable_column = value
+        self.widget_table._update_columns()
