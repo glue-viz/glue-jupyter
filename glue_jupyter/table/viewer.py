@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import ipyvuetify as v
 import ipywidgets as widgets
@@ -15,6 +16,8 @@ from glue_jupyter import get_layout_factory
 from glue_jupyter.registries import viewer_registry
 
 from ..view import IPyWidgetView
+
+ICONS_DIR = os.path.join(os.path.dirname(__file__), '..', 'icons')
 
 
 class TableState(ViewerState):
@@ -334,8 +337,7 @@ class TableViewerStateWidget(v.VuetifyTemplate):
 @viewer_tool
 class TableApplySubset(Tool):
 
-    icon = 'glue_square'
-    # icon = 'glue_row_select'
+    icon = os.path.join(ICONS_DIR, 'row_select.svg')
     tool_id = 'table:apply_subset'
     action_text = 'Apply subset from selection'
     tool_tip = 'Create a subset from the selected rows'
