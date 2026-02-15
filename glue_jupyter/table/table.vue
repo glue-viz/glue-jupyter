@@ -17,8 +17,8 @@
           <tr>
             <th :style="'padding: 0 10px; width: '+Math.max(1, Math.ceil(Math.log10(total_length)))*20+'px'">#</th>
             <th style="padding: 0 1px; width: 30px" v-if="selection_enabled">
-              <v-btn icon color="primary" text small @click="apply_filter">
-                <v-icon>filter_list</v-icon>
+              <v-btn icon color="primary" text small @click="toggle_select_all">
+                <v-icon>{{ all_selected ? 'check_box' : (checked.length > 0 ? 'indeterminate_check_box' : 'check_box_outline_blank') }}</v-icon>
               </v-btn>
             </th>
             <th style="padding: 0 1px" v-for="(header, index) in headers_selections" :key="header.text">
