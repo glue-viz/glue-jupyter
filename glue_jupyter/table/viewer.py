@@ -8,6 +8,8 @@ from glue.core.subset import ElementSubsetState
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.common.state import ViewerState
+from glue.viewers.common.tool import Tool
+from glue.config import viewer_tool
 
 from glue_jupyter import get_layout_factory
 from glue_jupyter.registries import viewer_registry
@@ -24,6 +26,7 @@ class TableBase(v.VuetifyTemplate):
 
     total_length = traitlets.CInt().tag(sync=True)
     checked = traitlets.List([]).tag(sync=True)  # indices of which rows are selected
+    all_selected = traitlets.Bool(False).tag(sync=True)
     items = traitlets.Any().tag(sync=True)  # the data, a list of dict
     headers = traitlets.Any().tag(sync=True)
     headers_selections = traitlets.Any().tag(sync=True)
@@ -105,6 +108,13 @@ class TableBase(v.VuetifyTemplate):
 
     def vue_on_row_clicked(self, index):
         self.highlighted = index
+
+    def vue_toggle_select_all(self, data):
+        pass
+
+    @traitlets.observe('checked')
+    def _on_checked_change(self, change):
+        self.all_selected = len(self) > 0 and len(change['new']) == len(self)
 
     def vue_sort_column(self, column):
         current_sort_by = self.options.get('sortBy', [])
@@ -224,6 +234,12 @@ class TableGlue(TableBase):
     def vue_apply_filter(self, data):
         self.apply_filter()
 
+    def vue_toggle_select_all(self, data):
+        if self.all_selected:
+            self.checked = []
+        else:
+            self.checked = list(range(len(self)))
+
 
 class TableLayerArtist(LayerArtist):
     def __init__(self, table_viewer, viewer_state, layer_state=None, layer=None):
@@ -315,6 +331,22 @@ class TableViewerStateWidget(v.VuetifyTemplate):
             self._updating = False
 
 
+@viewer_tool
+class TableApplySubset(Tool):
+
+    icon = 'glue_square'
+    # icon = 'glue_row_select'
+    tool_id = 'table:apply_subset'
+    action_text = 'Apply subset from selection'
+    tool_tip = 'Create a subset from the selected rows'
+
+    def __init__(self, viewer):
+        self.viewer = viewer
+
+    def activate(self):
+        self.viewer.apply_filter()
+
+
 @viewer_registry("table")
 class TableViewer(IPyWidgetView):
     allow_duplicate_data = False
@@ -326,7 +358,7 @@ class TableViewer(IPyWidgetView):
     _subset_artist_cls = TableLayerArtist
     _layer_style_widget_cls = TableLayerStateWidget
 
-    tools = []
+    tools = ['table:apply_subset']
 
     def __init__(self, session, state=None):
         super(TableViewer, self).__init__(session, state=state)
