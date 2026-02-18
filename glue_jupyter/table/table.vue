@@ -59,14 +59,51 @@
               >brightness_1</v-icon>
             </v-fade-transition>
           </td>
-          <td v-for="header in headers" class="text-xs-right"
+          <td v-for="header in headers"
               :key="header.text"
-              class="text-truncate text-no-wrap"
+              class="text-truncate text-no-wrap glue-editable-cell"
               :title="props.item[header.value]"
+              @dblclick="header.editable && startEdit(props.item.__row__, header.value, props.item[header.value])"
           >
-            <v-slide-x-transition appear>
-              <span>{{ props.item[header.value] }}</span>
-            </v-slide-x-transition>
+              <div v-if="isEditing(props.item.__row__, header.value)" class="cell-edit-container">
+                <v-text-field
+                  v-model="editValue"
+                  class="cell-edit-input"
+                  dense
+                  hide-details
+                  single-line
+                  autofocus
+                  @focus="onEditFocus"
+                  @keyup.enter="commitEdit"
+                  @keyup.escape="cancelEdit"
+                  @click.stop
+                ></v-text-field>
+                <div class="cell-edit-icons">
+                  <v-icon
+                    small
+                    class="cell-edit-confirm"
+                    color="success"
+                    @click.native.stop="commitEdit"
+                    title="Confirm (Enter)"
+                  >mdi-check</v-icon>
+                  <v-icon
+                    small
+                    class="cell-edit-cancel"
+                    color="error"
+                    @click.native.stop="cancelEdit"
+                    title="Cancel (Escape)"
+                  >mdi-close</v-icon>
+                </div>
+              </div>
+              <span v-else class="cell-content">
+                {{ props.item[header.value] }}
+                <v-icon
+                  v-if="header.editable"
+                  x-small
+                  class="edit-icon"
+                  @click.stop="startEdit(props.item.__row__, header.value, props.item[header.value])"
+                >mdi-pencil</v-icon>
+              </span>
           </td>
         </tr>
       </template>
@@ -76,9 +113,48 @@
 
 <script>
 module.exports = {
+  data: function() {
+    return {
+      editingCell: null,  // { row: number, column: string }
+      editValue: ''
+    };
+  },
   methods: {
     toggleSort(column) {
       this.sort_column(column);
+    },
+    startEdit(row, column, currentValue) {
+      this.editingCell = { row: row, column: column };
+      this.editValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : '';
+    },
+    cancelEdit() {
+      this.editingCell = null;
+      this.editValue = '';
+    },
+    commitEdit() {
+      if (this.editingCell) {
+        this.cell_edited({
+          row: this.editingCell.row,
+          column: this.editingCell.column,
+          value: this.editValue
+        });
+        this.editingCell = null;
+        this.editValue = '';
+      }
+    },
+    isEditing(row, column) {
+      return this.editingCell !== null &&
+             this.editingCell.row === row &&
+             this.editingCell.column === column;
+    },
+    onEditFocus(event) {
+      // Move cursor to start so text isn't truncated at the beginning
+      this.$nextTick(() => {
+        const input = event.target;
+        if (input && input.setSelectionRange) {
+          input.setSelectionRange(0, 0);
+        }
+      });
     }
   }
 }
@@ -127,5 +203,65 @@ module.exports = {
 .glue-data-table--scrollable .v-data-table__wrapper > table thead {
   position: relative;
   z-index: 1;
+}
+
+/* Editable cell styles */
+.glue-editable-cell .cell-content {
+  display: inline-flex;
+  align-items: center;
+}
+
+.glue-editable-cell .edit-icon {
+  opacity: 0;
+  transition: opacity 0.2s;
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+.glue-editable-cell:hover .edit-icon {
+  opacity: 0.5;
+}
+
+.glue-editable-cell .edit-icon:hover {
+  opacity: 1;
+}
+
+.cell-edit-container {
+  display: inline-flex;
+  align-items: center;
+}
+
+.cell-edit-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.cell-edit-input {
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  font-size: inherit;
+}
+
+.cell-edit-input input {
+  font-size: inherit;
+}
+
+.cell-edit-input .v-input__slot {
+  min-height: unset !important;
+}
+
+.cell-edit-confirm,
+.cell-edit-cancel {
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.cell-edit-confirm:hover,
+.cell-edit-cancel:hover {
+  opacity: 1;
 }
 </style>
