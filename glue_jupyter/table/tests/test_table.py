@@ -2,6 +2,7 @@ import numpy as np
 from glue.core import Data
 
 from glue_jupyter.table import TableViewer
+from glue_jupyter.table.viewer import TableApplySubset
 
 
 def test_table_sort(app, dataxyz):
@@ -242,8 +243,6 @@ def test_all_selected_trait(app, dataxyz):
 
 
 def test_table_apply_subset_tool(app, dataxyz):
-    from glue_jupyter.table.viewer import TableApplySubset
-
     table = app.table(data=dataxyz)
     assert len(table.layers) == 1
 
