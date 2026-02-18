@@ -238,7 +238,7 @@ class TableGlue(TableBase):
         self.apply_filter()
 
     def vue_toggle_select_all(self, data):
-        if self.all_selected:
+        if self.checked:
             self.checked = []
         else:
             self.checked = list(range(len(self)))
