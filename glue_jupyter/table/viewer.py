@@ -22,6 +22,14 @@ ICONS_DIR = os.path.join(os.path.dirname(__file__), '..', 'icons')
 
 class TableState(ViewerState):
     hidden_components = ListCallbackProperty(docstring='Attributes to hide in the table display')
+    editable_components = ListCallbackProperty(docstring='Attributes that can be edited in the table')
+
+    def is_editable(self, component_id):
+        """Check if a component is editable using identity comparison."""
+        for editable_cid in self.editable_components:
+            if component_id is editable_cid:
+                return True
+        return False
 
 
 class TableBase(v.VuetifyTemplate):
@@ -152,6 +160,7 @@ class TableBase(v.VuetifyTemplate):
 class TableGlue(TableBase):
     data = traitlets.Any()  # Glue data object
     apply_filter = traitlets.Any()  # callback
+    state = traitlets.Any()  # TableState reference
 
     @traitlets.observe('data')
     def _on_data_change(self, change):
@@ -166,7 +175,15 @@ class TableGlue(TableBase):
         if self.data is None:
             return []
         components = self.get_visible_components()
-        return [{'text': str(k), 'value': str(k), 'sortable': True} for k in components]
+        return [
+            {
+                'text': str(k),
+                'value': str(k),
+                'sortable': True,
+                'editable': self.state is not None and self.state.is_editable(k)
+            }
+            for k in components
+        ]
 
     def _get_sorted_indices(self):
         """Return indices that would sort the data by the current sort column."""
@@ -242,6 +259,58 @@ class TableGlue(TableBase):
             self.checked = []
         else:
             self.checked = list(range(len(self)))
+
+    def vue_cell_edited(self, data):
+        """Handle cell edit from Vue frontend.
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary with keys:
+            - 'row': int, the row index (absolute, not page-relative)
+            - 'column': str, the column/component name
+            - 'value': any, the new value
+        """
+        row = data['row']
+        column = data['column']
+        new_value = data['value']
+
+        # Find component ID
+        component_id = None
+        for cid in self.data.main_components + self.data.derived_components:
+            if str(cid) == column:
+                component_id = cid
+                break
+
+        if component_id is None:
+            return
+
+        # Update the data
+        self._update_data_value(component_id, row, new_value)
+
+    def _update_data_value(self, component_id, row_index, new_value):
+        """Update value in glue Data object and notify linked viewers."""
+        component = self.data.get_component(component_id)
+        current_dtype = component.data.dtype
+
+        # Type conversion
+        try:
+            if np.issubdtype(current_dtype, np.integer):
+                converted_value = int(new_value)
+            elif np.issubdtype(current_dtype, np.floating):
+                converted_value = float(new_value)
+            else:
+                converted_value = new_value
+        except (ValueError, TypeError):
+            return  # Invalid input
+
+        # Create updated array and use update_components
+        new_data = component.data.copy()
+        new_data[row_index] = converted_value
+        self.data.update_components({component_id: new_data})
+
+        # Refresh table
+        self._update_items()
 
 
 class TableLayerArtist(LayerArtist):
@@ -364,9 +433,10 @@ class TableViewer(IPyWidgetView):
 
     def __init__(self, session, state=None):
         super(TableViewer, self).__init__(session, state=state)
-        self.widget_table = TableGlue(data=None, apply_filter=self.apply_filter)
+        self.widget_table = TableGlue(data=None, apply_filter=self.apply_filter, state=self.state)
         self.create_layout()
         self.state.add_callback('hidden_components', self._update_hidden)
+        self.state.add_callback('editable_components', self._update_editable)
 
     def create_layout(self):
         # Override to pass viewer instead of just state
@@ -381,6 +451,9 @@ class TableViewer(IPyWidgetView):
     def _update_hidden(self, *args):
         self.widget_table.hidden_components = self.state.hidden_components
         self.redraw()
+
+    def _update_editable(self, *args):
+        self.widget_table._update_columns()
 
     def redraw(self):
         subsets = [k.layer for k in self.layers if isinstance(k.layer, Subset)]
