@@ -7,17 +7,29 @@
                     <v-icon start>add</v-icon>
                     {{ no_selection_text }}
                 </v-chip>
-                <v-tooltip v-else v-for="subset in toSubsets(selected)" :key=subset.label bottom>
-                    <template #activator="{ props: tooltip }">
-                        <v-chip v-bind="(selected.length > nr_of_full_names) ? tooltip : {}" style="cursor: pointer">
-                            <v-icon start :color="subset.color">
-                                signal_cellular_4_bar
-                            </v-icon>
-                            {{ (selected.length <= nr_of_full_names) ? subset.label : '' }}
-                        </v-chip>
-                    </template>
-                    {{ subset.label }}
-                </v-tooltip>
+                <template v-else>
+                    <v-tooltip
+                        v-for="(subset_idx, subset_index) in selected"
+                        :key="(available[subset_idx] && available[subset_idx].label) || subset_index"
+                        location="bottom"
+                    >
+                        <template #activator="{ props: tooltip }">
+                            <v-chip
+                                v-if="available[subset_idx]"
+                                v-bind="(selected.length > nr_of_full_names) ? tooltip : {}"
+                                style="cursor: pointer"
+                            >
+                                <v-icon start :color="available[subset_idx].color">
+                                    signal_cellular_4_bar
+                                </v-icon>
+                                {{ (selected.length <= nr_of_full_names) ? available[subset_idx].label : '' }}
+                            </v-chip>
+                        </template>
+                        <template v-if="available[subset_idx]">
+                            {{ available[subset_idx].label }}
+                        </template>
+                    </v-tooltip>
+                </template>
             </div>
         </template>
 
