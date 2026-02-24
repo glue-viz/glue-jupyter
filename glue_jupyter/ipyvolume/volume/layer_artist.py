@@ -63,8 +63,6 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
         self.last_shape = None
         self._data_proxy = None
 
-        self.transpose = (2, 0, 1)
-
         dlink((self.state, 'lighting'), (self.volume, 'lighting'))
         dlink((self.state, 'render_method'), (self.volume, 'rendering_method'))
         dlink((self.state, 'max_resolution'), (self.volume, 'data_max_shape'))
@@ -101,17 +99,26 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
 
         data = self._data_proxy.compute_fixed_resolution_buffer(bounds)
         
-        data = np.transpose(data, self.transpose)
+        data = np.transpose(data, (2, 0, 1))
         data_min, data_max = np.nanmin(data), np.nanmax(data)
 
-        self.last_shape = shape = data.shape
+        x = self.layer[self._viewer_state.x_att]
+        y = self.layer[self._viewer_state.y_att]
+        z = self.layer[self._viewer_state.z_att]
+        extent = [
+            [np.nanmin(y), np.nanmax(y)],
+            [np.nanmin(z), np.nanmax(z)],
+            [np.nanmin(x), np.nanmax(x)],
+        ]
+
+        self.last_shape = data.shape
         if self.volume is None:
             with self.figure:
                 self.volume = ipv.volshow(data, data_min=data_min, data_max=data_max,
-                                          extent=[[0, shape[0]], [0, shape[1]], [0, shape[2]]],
+                                          extent=extent,
                                           controls=False, tf=self.transfer_function)
         else:
-            self.volume.extent_original = [[0, shape[0]], [0, shape[1]], [0, shape[2]]]
+            self.volume.extent_original = extent
             self.volume.data_original = data
             self.volume.data_min = data_min
             self.volume.data_max = data_max
