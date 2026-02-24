@@ -63,6 +63,8 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
         self.last_shape = None
         self._data_proxy = None
 
+        self.transpose = (2, 0, 1)
+
         dlink((self.state, 'lighting'), (self.volume, 'lighting'))
         dlink((self.state, 'render_method'), (self.volume, 'rendering_method'))
         dlink((self.state, 'max_resolution'), (self.volume, 'data_max_shape'))
@@ -90,19 +92,16 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
 
     def update(self):
 
-        self._data_proxy = DataProxy(self._viewer_state, self.state)
+        if self._data_proxy is None:
+            self._data_proxy = DataProxy(self._viewer_state, self)
 
-        bounds = [(self._viewer_state.z_min, self._viewer_state.z_max, 256),
-                  (self._viewer_state.y_min, self._viewer_state.y_max, 256),
-                  (self._viewer_state.x_min, self._viewer_state.x_max, 256)]
+        bounds = [(self._viewer_state.z_min, self._viewer_state.z_max, self._viewer_state.resolution),
+                  (self._viewer_state.y_min, self._viewer_state.y_max, self._viewer_state.resolution),
+                  (self._viewer_state.x_min, self._viewer_state.x_max, self._viewer_state.resolution)]
 
         data = self._data_proxy.compute_fixed_resolution_buffer(bounds)
-        data = data.transpose((2, 0, 1))
-        finite_mask = np.isfinite(data)
-        finite_data = data[finite_mask]
-        finite_mask_normalized = finite_data - finite_data.min()
-        finite_mask_normalized = finite_mask_normalized / finite_mask_normalized.max()
-
+        
+        data = np.transpose(data, self.transpose)
         data_min, data_max = np.nanmin(data), np.nanmax(data)
 
         self.last_shape = shape = data.shape
