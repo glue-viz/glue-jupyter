@@ -1,6 +1,7 @@
 import ipyvolume as ipv
 import numpy as np
 import matplotlib.colors
+import uuid
 
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.core.data import Subset
@@ -58,6 +59,9 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
                                  tf=self.transfer_function, data_max_shape=128)
         self.figure.volumes = self.figure.volumes + [self.volume]
 
+        self.id = str(uuid.uuid4())
+
+        # ipv.figure(self.ipyvolume_viewer.figure)
         self.last_shape = None
 
         dlink((self.state, 'lighting'), (self.volume, 'lighting'))
@@ -86,21 +90,38 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
         pass
 
     def update(self):
+
+        bounds = [(self._viewer_state.z_min, self._viewer_state.z_max, 256),
+                  (self._viewer_state.y_min, self._viewer_state.y_max, 256),
+                  (self._viewer_state.x_min, self._viewer_state.x_max, 256)]
+
+        shape = [bound[2] for bound in bounds]
+
         if isinstance(self.layer, Subset):
             try:
-                mask = self.layer.to_mask()
+                subset_state = self.layer.subset_state
+                data = self.layer.data.compute_fixed_resolution_buffer(
+                    target_data=self._viewer_state.reference_data,
+                    bounds=bounds, subset_state=subset_state,
+                    cache_id=self.id)
             except IncompatibleAttribute:
-                # The following includes a call to self.clear()
-                self.disable("Subset cannot be applied to this data")
-                return
+                self.disable_incompatible_subset()
+                return np.broadcast_to(0, shape)
             else:
                 self.enable()
-            data = self.layer.data[self.state.attribute].astype(np.float32)
-            data *= mask
         else:
-            data = self.layer[self.state.attribute]
+            try:
+                data = self.layer.compute_fixed_resolution_buffer(
+                    target_data=self._viewer_state.reference_data,
+                    bounds=bounds, target_cid=self.state.attribute,
+                    cache_id=self.id)
+            except IncompatibleAttribute:
+                self.disable('Layer data is not fully linked to reference data')
+                return np.broadcast_to(0, shape)
+            else:
+                self.enable()
 
-        data = np.transpose(data, (2, 0, 1))
+        data = data.transpose((2, 0, 1))
         finite_mask = np.isfinite(data)
         finite_data = data[finite_mask]
         finite_mask_normalized = finite_data - finite_data.min()
