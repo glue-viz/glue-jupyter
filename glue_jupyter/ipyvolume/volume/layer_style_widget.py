@@ -27,12 +27,6 @@ class Volume3DLayerStateWidget(VBox):
                                              description='method')
         link((self.state, 'render_method'), (self.widget_render_method, 'value'))
 
-        self.size_options = [32, 64, 128, 128+64, 256, 256+128, 512]
-        options = [(str(k), k) for k in self.size_options]
-        self.widget_max_resolution = Dropdown(options=options, value=128,
-                                              description='max resolution')
-        link((self.state, 'max_resolution'), (self.widget_max_resolution, 'value'))
-
         if self.state.vmin is None:
             self.state.vmin = 0
 
@@ -84,8 +78,7 @@ class Volume3DLayerStateWidget(VBox):
         # self.widget_reset_zoom.on_click(self.state.viewer_state.reset_limits)
 
         super().__init__([self.widget_render_method, self.widget_lighting,
-                          self.widget_data_min, self.widget_data_max,
+                          # self.widget_data_min, self.widget_data_max,
                           self.widget_clamp_min, self.widget_clamp_max,
-                          self.widget_max_resolution,  # self.widget_reset_zoom,
                           self.widget_color, self.widget_opacity,
                           self.widget_opacity_scale, self.widget_stretch])

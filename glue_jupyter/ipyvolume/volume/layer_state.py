@@ -18,7 +18,7 @@ class VolumeLayerState(VolumeLayerStateBase):
 
     def __init__(self, layer=None, **kwargs):
         super(VolumeLayerState, self).__init__(layer=layer, **kwargs)
-        self.opacity_scale = 0.1
+        self.opacity_scale = 0.5
         self.render_method = 'NORMAL'
         self.lighting = True
         self.max_resolution = 256
