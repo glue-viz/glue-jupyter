@@ -4,6 +4,9 @@ def test_non_hex_colors(app, data_volume):
     # matplotlib colors, work as expected.
 
     viewer = app.volshow(data=data_volume)
+    viewer.state.x_att = data_volume.pixel_components[0]
+    viewer.state.y_att = data_volume.pixel_components[1]
+    viewer.state.z_att = data_volume.pixel_components[2]
     data_volume.style.color = '0.3'
     data_volume.style.color = 'indigo'
 
