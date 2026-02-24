@@ -4,8 +4,7 @@ import matplotlib.colors
 import uuid
 
 from glue.viewers.common.layer_artist import LayerArtist
-from glue.core.data import Subset
-from glue.core.exceptions import IncompatibleAttribute
+from glue.viewers.volume3d.data_proxy import DataProxy
 
 from .layer_state import VolumeLayerState
 from ...link import link, dlink, on_change
@@ -61,8 +60,8 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
 
         self.id = str(uuid.uuid4())
 
-        # ipv.figure(self.ipyvolume_viewer.figure)
         self.last_shape = None
+        self._data_proxy = None
 
         dlink((self.state, 'lighting'), (self.volume, 'lighting'))
         dlink((self.state, 'render_method'), (self.volume, 'rendering_method'))
@@ -91,36 +90,13 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
 
     def update(self):
 
+        self._data_proxy = DataProxy(self._viewer_state, self.state)
+
         bounds = [(self._viewer_state.z_min, self._viewer_state.z_max, 256),
                   (self._viewer_state.y_min, self._viewer_state.y_max, 256),
                   (self._viewer_state.x_min, self._viewer_state.x_max, 256)]
 
-        shape = [bound[2] for bound in bounds]
-
-        if isinstance(self.layer, Subset):
-            try:
-                subset_state = self.layer.subset_state
-                data = self.layer.data.compute_fixed_resolution_buffer(
-                    target_data=self._viewer_state.reference_data,
-                    bounds=bounds, subset_state=subset_state,
-                    cache_id=self.id)
-            except IncompatibleAttribute:
-                self.disable_incompatible_subset()
-                return np.broadcast_to(0, shape)
-            else:
-                self.enable()
-        else:
-            try:
-                data = self.layer.compute_fixed_resolution_buffer(
-                    target_data=self._viewer_state.reference_data,
-                    bounds=bounds, target_cid=self.state.attribute,
-                    cache_id=self.id)
-            except IncompatibleAttribute:
-                self.disable('Layer data is not fully linked to reference data')
-                return np.broadcast_to(0, shape)
-            else:
-                self.enable()
-
+        data = self._data_proxy.compute_fixed_resolution_buffer(bounds)
         data = data.transpose((2, 0, 1))
         finite_mask = np.isfinite(data)
         finite_data = data[finite_mask]
