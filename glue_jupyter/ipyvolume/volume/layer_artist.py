@@ -82,13 +82,16 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
                     'cmap', 'stretch', 'stretch_parameters'
                     )])(self._update_transfer_function)
 
+        self._viewer_state.add_global_callback(self.update)
+        self.state.add_global_callback(self.update)
+
     def clear(self):
         pass
 
     def redraw(self):
         pass
 
-    def update(self):
+    def update(self, **kwargs):
 
         if self._data_proxy is None:
             self._data_proxy = DataProxy(self._viewer_state, self)
