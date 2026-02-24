@@ -9,7 +9,6 @@ class VolumeLayerState(VolumeLayerStateBase):
     opacity_scale = CallbackProperty()
     render_method = CallbackProperty()
     lighting = CallbackProperty()
-    max_resolution = CallbackProperty()
     clamp_min = CallbackProperty()
     clamp_max = CallbackProperty()
 
@@ -21,6 +20,5 @@ class VolumeLayerState(VolumeLayerStateBase):
         self.opacity_scale = 0.5
         self.render_method = 'NORMAL'
         self.lighting = True
-        self.max_resolution = 256
         self.clamp_min = False
         self.clamp_max = False
