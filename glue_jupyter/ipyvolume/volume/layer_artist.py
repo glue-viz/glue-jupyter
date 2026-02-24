@@ -65,7 +65,7 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
 
         dlink((self.state, 'lighting'), (self.volume, 'lighting'))
         dlink((self.state, 'render_method'), (self.volume, 'rendering_method'))
-        dlink((self.state, 'max_resolution'), (self.volume, 'data_max_shape'))
+        dlink((self._viewer_state, 'resolution'), (self.volume, 'data_max_shape'))
 
         dlink((self.state, 'vmin'), (self.volume, 'show_min'))
         dlink((self.state, 'vmax'), (self.volume, 'show_max'))
@@ -101,7 +101,7 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
                   (self._viewer_state.x_min, self._viewer_state.x_max, self._viewer_state.resolution)]
 
         data = self._data_proxy.compute_fixed_resolution_buffer(bounds)
-        
+
         data = np.transpose(data, (2, 0, 1))
         data_min, data_max = np.nanmin(data), np.nanmax(data)
 
