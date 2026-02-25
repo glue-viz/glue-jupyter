@@ -36,6 +36,20 @@ def _transfer_func_cmap(cmap, N=256, max_opacity=1, stretch=None):
     data[..., 3] = ramp*max_opacity
     return data
 
+def operation(op, x, empty_value=0):
+    try:
+        return op(x)
+    except ValueError:
+        return empty_value
+
+
+def nanmin(x, empty_value=0):
+    return operation(np.nanmin, x, empty_value=empty_value)
+
+
+def nanmax(x, empty_value=1):
+    return operation(np.nanmax, x, empty_value=empty_value)
+
 
 data0 = [[[1, 2]] * 2] * 2
 
@@ -103,15 +117,15 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
         data = self._data_proxy.compute_fixed_resolution_buffer(bounds)
 
         data = np.transpose(data, (2, 0, 1))
-        data_min, data_max = np.nanmin(data), np.nanmax(data)
+        data_min, data_max = nanmin(data), nanmax(data)
 
         x = self.layer[self._viewer_state.x_att]
         y = self.layer[self._viewer_state.y_att]
         z = self.layer[self._viewer_state.z_att]
         extent = [
-            [np.nanmin(y), np.nanmax(y)],
-            [np.nanmin(z), np.nanmax(z)],
-            [np.nanmin(x), np.nanmax(x)],
+            [nanmin(y), nanmax(y)],
+            [nanmin(z), nanmax(z)],
+            [nanmin(x), nanmax(x)],
         ]
 
         self.last_shape = data.shape
