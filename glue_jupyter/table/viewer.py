@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import ipyvuetify as v
 import ipywidgets as widgets
@@ -8,10 +9,15 @@ from glue.core.subset import ElementSubsetState
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.common.state import ViewerState
+from glue.viewers.common.tool import Tool
+from glue.config import viewer_tool
 
+from glue_jupyter import get_layout_factory
 from glue_jupyter.registries import viewer_registry
 
 from ..view import IPyWidgetView
+
+ICONS_DIR = os.path.join(os.path.dirname(__file__), '..', 'icons')
 
 
 class TableState(ViewerState):
@@ -23,6 +29,7 @@ class TableBase(v.VuetifyTemplate):
 
     total_length = traitlets.CInt().tag(sync=True)
     checked = traitlets.List([]).tag(sync=True)  # indices of which rows are selected
+    all_selected = traitlets.Bool(False).tag(sync=True)
     items = traitlets.Any().tag(sync=True)  # the data, a list of dict
     headers = traitlets.Any().tag(sync=True)
     headers_selections = traitlets.Any().tag(sync=True)
@@ -73,8 +80,8 @@ class TableBase(v.VuetifyTemplate):
 
     @traitlets.default('options')
     def _options(self):
-        return {'descending': False, 'page': 1, 'itemsPerPage': 10,
-                'sortBy': None, 'totalItems': len(self)}
+        return {'page': 1, 'itemsPerPage': 10,
+                'sortBy': [], 'sortDesc': [], 'totalItems': len(self)}
 
     def format(self, value):
         return value
@@ -104,6 +111,30 @@ class TableBase(v.VuetifyTemplate):
 
     def vue_on_row_clicked(self, index):
         self.highlighted = index
+
+    def vue_toggle_select_all(self, data):
+        pass
+
+    @traitlets.observe('checked')
+    def _on_checked_change(self, change):
+        self.all_selected = len(self) > 0 and len(change['new']) == len(self)
+
+    def vue_sort_column(self, column):
+        current_sort_by = self.options.get('sortBy', [])
+        current_sort_desc = self.options.get('sortDesc', [])
+
+        if current_sort_by and current_sort_by[0] == column:
+            if not (current_sort_desc and current_sort_desc[0]):
+                # Currently ascending, switch to descending
+                new_options = {**self.options, 'sortBy': [column], 'sortDesc': [True]}
+            else:
+                # Currently descending, clear sort
+                new_options = {**self.options, 'sortBy': [], 'sortDesc': []}
+        else:
+            # New column, sort ascending
+            new_options = {**self.options, 'sortBy': [column], 'sortDesc': [False]}
+
+        self.options = new_options
 
     def get_visible_components(self):
         components = []
@@ -135,7 +166,41 @@ class TableGlue(TableBase):
         if self.data is None:
             return []
         components = self.get_visible_components()
-        return [{'text': str(k), 'value': str(k), 'sortable': False} for k in components]
+        return [{'text': str(k), 'value': str(k), 'sortable': True} for k in components]
+
+    def _get_sorted_indices(self):
+        """Return indices that would sort the data by the current sort column."""
+        sort_by = self.options.get('sortBy')
+        if not sort_by:
+            return np.arange(len(self))
+
+        # sortBy can be a list (Vuetify 2.x) or a single value
+        sort_column = sort_by[0] if isinstance(sort_by, list) else sort_by
+        if not sort_column:
+            return np.arange(len(self))
+
+        # Find the component matching the sort column
+        components = self.get_visible_components()
+        component = None
+        for c in components:
+            if str(c) == sort_column:
+                component = c
+                break
+
+        if component is None:
+            return np.arange(len(self))
+
+        values = self.data[component]
+        indices = np.argsort(values)
+
+        # Check for descending order
+        sort_desc = self.options.get('sortDesc', self.options.get('descending', False))
+        if isinstance(sort_desc, list):
+            sort_desc = sort_desc[0] if sort_desc else False
+        if sort_desc:
+            indices = indices[::-1]
+
+        return indices
 
     def _get_items(self):
         if self.data is None:
@@ -145,28 +210,38 @@ class TableGlue(TableBase):
         i1 = page * page_size
         i2 = min(len(self), (page + 1) * page_size)
 
-        view = slice(i1, i2)
+        # Get sorted indices and slice for current page
+        sorted_indices = self._get_sorted_indices()
+        page_indices = sorted_indices[i1:i2]
+
         masks = {}
         for k in self.data.subsets:
             try:
-                masks[k.label] = k.to_mask(view)
+                full_mask = k.to_mask()
+                masks[k.label] = full_mask[page_indices]
             except IncompatibleAttribute:
-                masks[k.label] = np.zeros(i2 - i1, dtype=bool)
+                masks[k.label] = np.zeros(len(page_indices), dtype=bool)
 
         items = []
-        for i in range(i2 - i1):
-            item = {'__row__': i + i1}  # special key for the row number
+        components = self.get_visible_components()
+        for i, orig_idx in enumerate(page_indices):
+            item = {'__row__': int(orig_idx)}  # original index for selections
             for selection in self.selections:
                 selected = masks[selection][i]
                 item[selection] = bool(selected)
-            components = self.get_visible_components()
-            for j, component in enumerate(components):
-                item[str(component)] = self.format(self.data[component][i + i1])
+            for component in components:
+                item[str(component)] = self.format(self.data[component][orig_idx])
             items.append(item)
         return items
 
     def vue_apply_filter(self, data):
         self.apply_filter()
+
+    def vue_toggle_select_all(self, data):
+        if self.checked:
+            self.checked = []
+        else:
+            self.checked = list(range(len(self)))
 
 
 class TableLayerArtist(LayerArtist):
@@ -193,6 +268,7 @@ class TableLayerArtist(LayerArtist):
             last_layer = self._table_viewer.layers[-1]
             data = last_layer.layer.data
         self._table_viewer.widget_table.data = data
+        self._refresh()
 
 
 class TableLayerStateWidget(widgets.VBox):
@@ -201,10 +277,76 @@ class TableLayerStateWidget(widgets.VBox):
         self.state = layer_state
 
 
-class TableViewerStateWidget(widgets.VBox):
-    def __init__(self, viewer_state):
-        super(TableViewerStateWidget, self).__init__()
-        self.state = viewer_state
+class TableViewerStateWidget(v.VuetifyTemplate):
+    template_file = (__file__, 'viewer_state.vue')
+
+    column_items = traitlets.List([]).tag(sync=True)
+    visible_columns = traitlets.List([]).tag(sync=True)
+
+    def __init__(self, viewer):
+        super().__init__()
+        self.viewer = viewer
+        self.state = viewer.state
+        self._updating = False
+
+        # Sync from state to widget
+        self.state.add_callback('hidden_components', self._on_hidden_changed)
+
+    def update_columns(self, data):
+        """Update available columns when data changes."""
+        if data is None:
+            self.column_items = []
+            self.visible_columns = []
+            return
+
+        all_components = data.main_components + data.derived_components
+        self.column_items = [{'text': str(c), 'value': str(c)} for c in all_components]
+
+        # Set visible columns (all minus hidden)
+        hidden_names = [str(c) for c in self.state.hidden_components]
+        self.visible_columns = [str(c) for c in all_components if str(c) not in hidden_names]
+
+    def _on_hidden_changed(self, *args):
+        """Sync from state.hidden_components to widget."""
+        if self._updating:
+            return
+        data = self.viewer.widget_table.data
+        if data is None:
+            return
+        all_components = data.main_components + data.derived_components
+        hidden_names = [str(c) for c in self.state.hidden_components]
+        self.visible_columns = [str(c) for c in all_components if str(c) not in hidden_names]
+
+    @traitlets.observe('visible_columns')
+    def _on_visible_changed(self, change):
+        """Sync from widget to state.hidden_components."""
+        data = self.viewer.widget_table.data
+        if data is None:
+            return
+
+        self._updating = True
+        try:
+            all_components = data.main_components + data.derived_components
+            visible_names = set(change['new'])
+            hidden = [c for c in all_components if str(c) not in visible_names]
+            self.state.hidden_components = hidden
+        finally:
+            self._updating = False
+
+
+@viewer_tool
+class TableApplySubset(Tool):
+
+    icon = os.path.join(ICONS_DIR, 'row_select.svg')
+    tool_id = 'table:apply_subset'
+    action_text = 'Apply subset from selection'
+    tool_tip = 'Create a subset from the selected rows'
+
+    def __init__(self, viewer):
+        self.viewer = viewer
+
+    def activate(self):
+        self.viewer.apply_filter()
 
 
 @viewer_registry("table")
@@ -218,13 +360,23 @@ class TableViewer(IPyWidgetView):
     _subset_artist_cls = TableLayerArtist
     _layer_style_widget_cls = TableLayerStateWidget
 
-    tools = []
+    tools = ['table:apply_subset']
 
     def __init__(self, session, state=None):
         super(TableViewer, self).__init__(session, state=state)
         self.widget_table = TableGlue(data=None, apply_filter=self.apply_filter)
         self.create_layout()
         self.state.add_callback('hidden_components', self._update_hidden)
+
+    def create_layout(self):
+        # Override to pass viewer instead of just state
+        self._layout_viewer_options = self._options_cls(self)
+
+        layout_factory = get_layout_factory()
+        if layout_factory is None:
+            raise ValueError('layout factory should be set with set_layout_factory')
+        else:
+            self._layout = layout_factory(self)
 
     def _update_hidden(self, *args):
         self.widget_table.hidden_components = self.state.hidden_components
@@ -236,6 +388,7 @@ class TableViewer(IPyWidgetView):
             self.widget_table.selections = [subset.label for subset in subsets]
             self.widget_table.selection_colors = [subset.style.color for subset in subsets]
         self.widget_table._update()
+        self._layout_viewer_options.update_columns(self.widget_table.data)
 
     def apply_filter(self):
         selected_rows = self.widget_table.checked

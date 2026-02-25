@@ -5,18 +5,20 @@ def test_scatter3d_nd(app, data_4d):
     scatter = app.scatter3d(x='x', y='x', z='x', data=data_4d)
     scatter.state.layers[0].vector_visible = True
     scatter.state.layers[0].size_mode = 'Linear'
-    scatter.state.layers[0].cmap_mode = 'Linear'
+    scatter.state.layers[0].color_mode = 'Linear'
 
 
 def test_scatter3d_categorical(app, datacat):
-    # Make sure that things work correctly with arrays that have categorical
-    # components - for now these are skipped, until we figure out how to
-    # show the correct categorical labels on the axes.
+    # Make sure that things work correctly (don't crash) with data that has
+    # only categorical components. Since the 3D scatter viewer only supports
+    # numerical attributes, the x/y/z_att will be None with categorical-only
+    # data.
     app.add_data(datacat)
     scatter = app.scatter3d(data=datacat)
-    assert str(scatter.state.x_att) == 'a'
-    assert str(scatter.state.y_att) == 'b'
-    assert str(scatter.state.z_att) == 'b'
+    # Categorical-only data has no valid numerical attributes for plotting
+    assert scatter.state.x_att is None
+    assert scatter.state.y_att is None
+    assert scatter.state.z_att is None
 
 
 def test_non_hex_colors(app, dataxyz):

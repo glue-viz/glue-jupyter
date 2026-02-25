@@ -10,4 +10,4 @@ git config --global user.name "Binder"
 # Install glue-jupyter and all requirements as well as Jupyter Lab. Also
 # install astroquery for the GAIA notebook.
 
-pip install . jupyterlab astroquery --user
+pip install . jupyterlab astroquery --user --break-system-packages

@@ -85,9 +85,13 @@ except ImportError:
 else:
     SOLARA_INSTALLED = True
 
-
-import vispy  # noqa
-vispy.use('jupyter_rfb')
+try:
+    import vispy  # noqa
+except ImportError:
+    VISPY_INSTALLED = False
+else:
+    VISPY_INSTALLED = True
+    vispy.use('jupyter_rfb')
 
 # Tweak IPython's display to not print out lots of __repr__s for widgets to
 # standard output. However, if we are using solara, we shouldn't do this as

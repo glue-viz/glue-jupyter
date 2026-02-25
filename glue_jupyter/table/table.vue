@@ -17,16 +17,23 @@
           <tr>
             <th :style="'padding: 0 10px; width: '+Math.max(1, Math.ceil(Math.log10(total_length)))*20+'px'">#</th>
             <th style="padding: 0 1px; width: 30px" v-if="selection_enabled">
-              <v-btn icon color="primary" text small @click="apply_filter">
-                <v-icon>filter_list</v-icon>
+              <v-btn icon color="primary" text small @click="toggle_select_all">
+                <v-icon>{{ all_selected ? 'check_box' : (checked.length > 0 ? 'indeterminate_check_box' : 'check_box_outline_blank') }}</v-icon>
               </v-btn>
             </th>
             <th style="padding: 0 1px" v-for="(header, index) in headers_selections" :key="header.text">
               <v-icon style="padding: 0 1px" :key="index" :color="selection_colors[index]">brightness_1</v-icon>
             </th>
-            <v-slide-x-transition :key="header.text" v-for="header in headers">
-              <th >{{ header.text }}</th>
-            </v-slide-x-transition>
+            <th v-for="header in headers"
+                :key="header.text"
+                @click="toggleSort(header.value)"
+                style="cursor: pointer; user-select: none;"
+            >
+              {{ header.text }}
+              <v-icon v-if="options.sortBy && options.sortBy[0] === header.value">
+                {{ options.sortDesc && options.sortDesc[0] ? 'arrow_drop_down' : 'arrow_drop_up' }}
+              </v-icon>
+            </th>
           </tr>
         </thead>
       </template>
@@ -67,14 +74,35 @@
   </v-slide-x-transition>
 </template>
 
+<script>
+module.exports = {
+  methods: {
+    toggleSort(column) {
+      this.sort_column(column);
+    }
+  }
+}
+</script>
 
 <style id="glue_table">
 .highlightedRow {
     background-color: #E3F2FD;
 }
 
+.glue-data-table .v-data-table__wrapper {
+  overflow-x: auto;
+}
+
 .glue-data-table table {
-  table-layout: fixed;
+  table-layout: auto;
+}
+
+.glue-data-table th,
+.glue-data-table td {
+  white-space: nowrap;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .glue-data-table--scrollable .v-data-table__wrapper {

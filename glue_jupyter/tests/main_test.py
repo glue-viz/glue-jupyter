@@ -1,10 +1,8 @@
 import os
 
 import pytest
-import nbformat
 import numpy as np
 from astropy.wcs import WCS
-from nbconvert.preprocessors import ExecutePreprocessor
 
 from glue.core import Data
 from glue.core.autolinking import find_possible_links
@@ -97,7 +95,11 @@ def test_double_load_data(tmpdir):
     app.load_data(filename)
 
 
+@pytest.mark.notebook
 def test_state_widget_notebook():
+
+    import nbformat
+    from nbconvert.preprocessors import ExecutePreprocessor
 
     with open(os.path.join(DATA, 'state_widgets.ipynb')) as f:
         nb = nbformat.read(f, as_version=4)

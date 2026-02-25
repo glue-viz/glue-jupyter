@@ -390,7 +390,10 @@ class JupyterApplication(Application):
             from .ipyvolume import IpyvolumeScatterView
             viewer_cls = IpyvolumeScatterView
         elif widget == 'vispy':
-            from glue_vispy_viewers.scatter.jupyter import JupyterVispyScatterViewer
+            try:
+                from glue_vispy_viewers.scatter.jupyter import JupyterVispyScatterViewer
+            except ImportError:
+                raise ImportError("The glue-vispy-viewers package is required for widget='vispy'")
             viewer_cls = JupyterVispyScatterViewer
         else:
             raise ValueError("widget= should be 'ipyvolume' or 'vispy'")
@@ -531,7 +534,10 @@ class JupyterApplication(Application):
             from .ipyvolume import IpyvolumeVolumeView
             viewer_cls = IpyvolumeVolumeView
         elif widget == 'vispy':
-            from glue_vispy_viewers.volume.jupyter import JupyterVispyVolumeViewer
+            try:
+                from glue_vispy_viewers.volume.jupyter import JupyterVispyVolumeViewer
+            except ImportError:
+                raise ImportError("The glue-vispy-viewers package is required for widget='vispy'")
             viewer_cls = JupyterVispyVolumeViewer
         else:
             raise ValueError("widget= should be 'ipyvolume' or 'vispy'")

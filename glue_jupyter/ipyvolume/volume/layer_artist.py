@@ -2,44 +2,22 @@ import ipyvolume as ipv
 import numpy as np
 import matplotlib.colors
 
-from glue_vispy_viewers.volume.layer_state import VolumeLayerState
-from echo import CallbackProperty
+from glue.viewers.common.layer_artist import LayerArtist
 from glue.core.data import Subset
 from glue.core.exceptions import IncompatibleAttribute
-from glue_vispy_viewers.common.layer_artist import VispyLayerArtist
 
+from .layer_state import VolumeLayerState
 from ...link import link, dlink, on_change
 
-__all__ = ['VolumeLayerState']
+__all__ = ['IpyvolumeVolumeLayerArtist']
 
 
-class VolumeLayerState(VolumeLayerState):
-
-    opacity_scale = CallbackProperty()
-    render_method = CallbackProperty()
-    lighting = CallbackProperty()
-    max_resolution = CallbackProperty()
-    clamp_min = CallbackProperty()
-    clamp_max = CallbackProperty()
-    # attribute = SelectionCallbackProperty()
-
-    data_min = CallbackProperty(0)
-    data_max = CallbackProperty(1)
-
-    def __init__(self, layer=None, **kwargs):
-        super(VolumeLayerState, self).__init__(layer=layer, **kwargs)
-        self.opacity_scale = 0.1
-        self.render_method = 'NORMAL'
-        self.lighting = True
-        self.max_resolution = 256
-        self.clamp_min = False
-        self.clamp_max = False
-
-
-def _transfer_func_rgba(color, N=256, max_opacity=1):
+def _transfer_func_rgba(color, N=256, max_opacity=1, stretch=None):
     r, g, b = matplotlib.colors.to_rgb(color)
     data = np.zeros((N, 4), dtype=np.float32)
     ramp = np.linspace(0, 1, N)
+    if stretch is not None:
+        ramp = stretch(ramp)
     data[..., 0] = r
     data[..., 1] = g
     data[..., 2] = b
@@ -47,26 +25,39 @@ def _transfer_func_rgba(color, N=256, max_opacity=1):
     return data
 
 
+def _transfer_func_cmap(cmap, N=256, max_opacity=1, stretch=None):
+    data = np.zeros((N, 4), dtype=np.float32)
+    ramp = np.linspace(0, 1, N)
+    if stretch is not None:
+        ramp = stretch(ramp)
+    colors = cmap(ramp)
+    for i in range(3):
+        data[..., i] = [c[i] for c in colors]
+    data[..., 3] = ramp*max_opacity
+    return data
+
+
 data0 = [[[1, 2]] * 2] * 2
 
 
-class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
-    def __init__(self, ipyvolume_viewer=None, state=None, layer=None, layer_state=None):
-        super(IpyvolumeVolumeLayerArtist, self).__init__(layer)
-        self.layer = layer or layer_state.layer
-        self.ipyvolume_viewer = ipyvolume_viewer
-        self.figure = self.ipyvolume_viewer.figure
-        self.state = layer_state or VolumeLayerState(layer=self.layer)
+class IpyvolumeVolumeLayerArtist(LayerArtist):
+
+    _layer_state_cls = VolumeLayerState
+
+    def __init__(self, view, viewer_state, layer=None, layer_state=None):
+
+        super(IpyvolumeVolumeLayerArtist, self).__init__(viewer_state,
+                                                         layer_state=layer_state,
+                                                         layer=layer)
+
+        self.view = view
+        self.figure = view.figure
+
         self.transfer_function = ipv.TransferFunction(rgba=_transfer_func_rgba(self.state.color))
         self.volume = ipv.Volume(extent_original=[[0, 1]] * 3, data_original=data0,
                                  tf=self.transfer_function, data_max_shape=128)
         self.figure.volumes = self.figure.volumes + [self.volume]
-        self._viewer_state = ipyvolume_viewer.state
-        assert ipyvolume_viewer.state == state
-        if self.state not in self._viewer_state.layers:
-            self._viewer_state.layers.append(self.state)
 
-        # ipv.figure(self.ipyvolume_viewer.figure)
         self.last_shape = None
 
         dlink((self.state, 'lighting'), (self.volume, 'lighting'))
@@ -84,7 +75,9 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
 
         link((self.state, 'opacity_scale'), (self.volume, 'opacity_scale'))
 
-        on_change([(self.state, 'color', 'alpha')])(self._update_transfer_function)
+        on_change([(self.state, 'color', 'alpha', 'color_mode',
+                    'cmap', 'stretch', 'stretch_parameters'
+                    )])(self._update_transfer_function)
 
     def clear(self):
         pass
@@ -136,5 +129,13 @@ class IpyvolumeVolumeLayerArtist(VispyLayerArtist):
             self.state.percentile = 100
 
     def _update_transfer_function(self):
-        self.transfer_function.rgba = _transfer_func_rgba(self.state.color,
-                                                          max_opacity=self.state.alpha)
+        def stretch(x):
+            return self.state.stretch_object(x, **self.state.stretch_parameters)
+        if self.state.color_mode == "Fixed":
+            self.transfer_function.rgba = _transfer_func_rgba(self.state.color,
+                                                              max_opacity=self.state.alpha,
+                                                              stretch=stretch)
+        else:
+            self.transfer_function.rgba = _transfer_func_cmap(self.state.cmap,
+                                                              max_opacity=self.state.alpha,
+                                                              stretch=stretch)

@@ -34,7 +34,7 @@ Notebooks with real data:
    area <https://mybinder.org/v2/gh/glue-viz/glue-jupyter/main?urlpath=lab/tree/notebooks%2FPlanes%2FBoston%20Planes.ipynb>`__
    (example with a single tabular dataset)
 -  `Distance to the Pleiades with GAIA
-   data <https://mybinder.org/v2/gh/glue-viz/glue-jupyter/main?urlpath=lab/tree/notebooks%2FAstronomy%2FGAIA%2FDistance%20to%20The%20Pleiades%20with%20Glupyter%20and%20Gaia%20DR2.ipynb>`__
+   data <https://mybinder.org/v2/gh/glue-viz/glue-jupyter/main?urlpath=lab/tree/notebooks%2FAstronomy%2FGAIA%2FDistance%20to%20The%20Pleiades%20with%20Glupyter%20and%20Gaia%20DR3.ipynb>`__
 
 Installing
 ~~~~~~~~~~

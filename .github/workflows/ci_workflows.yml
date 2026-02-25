@@ -64,6 +64,21 @@ jobs:
         - macos: py310-docs
         - windows: py312-docs
 
+  binder-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build binder Docker image
+        run: docker build -t glue-jupyter-binder -f binder/Dockerfile .
+
+      - name: Test notebook execution
+        run: |
+          docker run --rm glue-jupyter-binder \
+            jupyter nbconvert --to notebook --execute \
+              notebooks/Generic/demo_gaussian.ipynb \
+              --output /tmp/output.ipynb
+
   ui-tests:
     runs-on: ubuntu-latest
     steps:
@@ -94,6 +109,6 @@ jobs:
     with:
       libraries: libhdf5-dev
       test_extras: test
-      test_command: pytest --pyargs glue_jupyter
+      test_command: pytest --pyargs glue_jupyter -m 'not notebook'
     secrets:
       pypi_token: ${{ secrets.pypi_token }}

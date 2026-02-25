@@ -4,19 +4,18 @@
 
 # https://mybinder.readthedocs.io/en/latest/tutorials/dockerfile.html#preparing-your-dockerfile
 
-FROM ubuntu:20.04
+FROM ubuntu:latest
 
-# Set up Python 3.6
+# Set up Python (>= 3.10)
 
 RUN apt update
 RUN apt install -y python3 python3-pip git
-RUN pip3 install --upgrade pip
 
 # Set up user as required by mybinder docs:
 
-ENV NB_USER jovyan
-ENV NB_UID 1000
-ENV HOME /home/${NB_USER}
+ENV NB_USER=jovyan
+ENV NB_UID=1001
+ENV HOME=/home/${NB_USER}
 
 RUN adduser --disabled-password \
     --gecos "Default user" \
