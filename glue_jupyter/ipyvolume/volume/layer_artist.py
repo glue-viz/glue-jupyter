@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.colors
 import uuid
 
-from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.volume3d.data_proxy import DataProxy
 
