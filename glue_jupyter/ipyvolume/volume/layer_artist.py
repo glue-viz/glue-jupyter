@@ -120,23 +120,7 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
         data = np.transpose(data, (2, 0, 1))
         data_min, data_max = nanmin(data), nanmax(data)
 
-        invalid_attrs = []
-        coordinates = []
-        # The attribute order here matches what we need for the volume extent
-        for att in (self._viewer_state.y_att,
-                    self._viewer_state.z_att,
-                    self._viewer_state.x_att):
-            try:
-                c = self.layer[att]
-                coordinates.append(c)
-            except IncompatibleAttribute:
-                invalid_attrs.append(att)
-
-        if invalid_attrs:
-            self.disable_invalid_attributes(*invalid_attrs)
-            return
-
-        extent = [[nanmin(c), nanmax(c)] for c in coordinates]
+        extent = [[bounds[i][0], bounds[i][1]] for i in (1, 0, 2)]
 
         self.last_shape = data.shape
         if self.volume is None:
