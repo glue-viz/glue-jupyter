@@ -122,8 +122,6 @@ def test_visual_linestyle(
     scatter.state.layers[4].linestyle = 'dashed'
     scatter.state.layers[4].color = 'b'
 
-    scatter.state.layers[2].zorder = 10
-
     assert scatter.layers[0].line_mark_gl.visible
     assert scatter.layers[0].line_mark_gl in scatter.figure.marks
     assert scatter.layers[0].line_mark not in scatter.figure.marks
