@@ -1,16 +1,17 @@
-import pytest
-from glue.core import Data
-import glue_jupyter as gj
 import numpy as np
+from glue.core import Data
 from glue.core.edit_subset_mode import ReplaceMode
+
+import glue_jupyter as gj
+from glue_jupyter.tests.helpers import visual_ui_test
 
 
 selection_width = 200
 selection_height = 40
 
 
-@pytest.mark.parametrize("compression", ["png"])
-def test_elliptical_selection(solara_test, page_session, assert_solara_snapshot, compression, request):
+@visual_ui_test
+def test_elliptical_selection(solara_test, page_session):
     _app, _viewer, plot = create_viewer(page_session)
 
     # click elliptical selection tool
@@ -31,11 +32,11 @@ def test_elliptical_selection(solara_test, page_session, assert_solara_snapshot,
     page_session.mouse.up()
     page_session.wait_for_timeout(100)
     page_session.pause()
-    assert_solara_snapshot(plot.screenshot())
+    return plot.screenshot()
 
 
-@pytest.mark.parametrize("compression", ["png"])
-def test_elliptical_selection_rotate(solara_test, page_session, assert_solara_snapshot, compression, request):
+@visual_ui_test
+def test_elliptical_selection_rotate(solara_test, page_session):
     app, viewer, plot = create_viewer(page_session)
 
     # click elliptical selection tool
@@ -59,11 +60,11 @@ def test_elliptical_selection_rotate(solara_test, page_session, assert_solara_sn
     rotate(45, app, viewer)
     page_session.wait_for_timeout(100)
 
-    assert_solara_snapshot(plot.screenshot())
+    return plot.screenshot()
 
 
-@pytest.mark.parametrize("compression", ["png"])
-def test_rectangular_selection(solara_test, page_session, assert_solara_snapshot, compression, request):
+@visual_ui_test
+def test_rectangular_selection(solara_test, page_session):
     _app, _viewer, plot = create_viewer(page_session)
 
     # click rectangular selection tool
@@ -84,11 +85,11 @@ def test_rectangular_selection(solara_test, page_session, assert_solara_snapshot
     page_session.mouse.up()
     page_session.wait_for_timeout(100)
 
-    assert_solara_snapshot(plot.screenshot())
+    return plot.screenshot()
 
 
-@pytest.mark.parametrize("compression", ["png"])
-def test_rectangular_selection_rotate(solara_test, page_session, assert_solara_snapshot, compression, request):
+@visual_ui_test
+def test_rectangular_selection_rotate(solara_test, page_session):
     app, viewer, plot = create_viewer(page_session)
 
     # click rectangular selection tool
@@ -112,12 +113,13 @@ def test_rectangular_selection_rotate(solara_test, page_session, assert_solara_s
     rotate(45, app, viewer)
     page_session.wait_for_timeout(100)
 
-    assert_solara_snapshot(plot.screenshot())
+    return plot.screenshot()
+
 
 def example_data_square():
-    n=100
-    xlim=(0.0, 1.0)
-    ylim=(0.0, 1.0)
+    n = 100
+    xlim = (0.0, 1.0)
+    ylim = (0.0, 1.0)
 
     x = np.linspace(xlim[0], xlim[1], n)
     y = np.linspace(ylim[0], ylim[1], n)
@@ -126,8 +128,9 @@ def example_data_square():
     data = Data(x=X.ravel(), y=Y.ravel(), label='square')
     return data
 
+
 def create_viewer(page_session):
-    page_session.set_viewport_size({ "width": 500, "height": 600 })
+    page_session.set_viewport_size({"width": 500, "height": 600})
     points = example_data_square()
     app = gj.jglue(points=points)
     viewer = app.scatter2d(x='x', y='y', show=False)
@@ -142,10 +145,9 @@ def create_viewer(page_session):
     page_session.wait_for_timeout(100)
     return app, viewer, plot
 
+
 def center_of_element(page_session, selector):
-    """
-    Returns the center coordinates of a given element on the page.
-    """
+    """Return the center coordinates of a given element on the page."""
     bounding_box = page_session.query_selector(selector).bounding_box()
     center_x = bounding_box["x"] + bounding_box["width"] / 2
     center_y = bounding_box["y"] + bounding_box["height"] / 2
@@ -155,6 +157,8 @@ def center_of_element(page_session, selector):
 def rotate(angle, app, viewer):
     subset_to_update = app.session.data_collection.subset_groups[0]
     subset_to_update.subset_state.roi.theta = np.radians(angle)
-    app.session.edit_subset_mode._combine_data(subset_to_update.subset_state, override_mode=ReplaceMode)
+    app.session.edit_subset_mode._combine_data(
+        subset_to_update.subset_state, override_mode=ReplaceMode
+    )
     tool = viewer.toolbar.active_tool
     tool.update_from_roi(subset_to_update.subset_state.roi)
