@@ -6,11 +6,10 @@
       :headers="[...headers]"
       :items="items"
       :footer-props="{'items-per-page-options': [10,20,50,100]}"
-      :options="options"
-      @update:options="setOptions"
-      :items-per-page="items_per_page"
-      @update:items-per-page="setItemsPerPage"
-      :server-items-length="total_length"
+      v-model:page="options.page"
+      v-model:items-per-page="options.itemsPerPage"
+      v-model:sort-by="tableSortBy"
+      :items-length="options.total_length"
       :class="['elevation-1', 'glue-data-table', scrollable && 'glue-data-table--scrollable']"
       :style="scrollable && height != null && `height: ${height}`"
     >
@@ -81,36 +80,22 @@ module.exports = {
     toggleSort(column) {
       this.sort_column(column);
     },
-    setOptions(nextOptions) {
-      const next = nextOptions || {};
-      const page = Number(next.page);
-      const itemsPerPage = Number(next.itemsPerPage);
-      const normalized = {
-        page: Number.isFinite(page) ? page : this.options.page,
-        itemsPerPage: Number.isFinite(itemsPerPage) ? itemsPerPage : this.options.itemsPerPage,
-        sortBy: Array.isArray(next.sortBy)
-          ? next.sortBy.map((entry) => (typeof entry === 'object' && entry !== null ? entry.key : entry)).filter((v) => v != null)
-          : [],
-        sortDesc: Array.isArray(next.sortBy) && next.sortBy.length > 0 && typeof next.sortBy[0] === 'object'
-          ? next.sortBy.map((entry) => entry && entry.order === 'desc')
-          : (Array.isArray(next.sortDesc) ? next.sortDesc.slice() : []),
-        totalItems: this.total_length,
-      };
-      if (JSON.stringify(normalized) !== JSON.stringify(this.options)) {
-        this.options = normalized;
+    computed: {
+      tableSortBy: {
+        get() {
+          return this.options.sortBy.map((key, index) => ({
+            key,
+            order: this.options.sortDesc[index] ? 'desc' : 'asc'
+          }))
+        },
+        set(sortByItems) {
+          this.options = {
+            ...this.options,
+            sortBy: sortByItems.map(({key}) => key),
+            sortDesc: sortByItems.map(({order}) => order === 'desc')
+          }
+        }
       }
-    },
-    setItemsPerPage(value) {
-      const pageSize = Number(value);
-      if (!Number.isFinite(pageSize) || this.items_per_page === pageSize) {
-        return;
-      }
-      this.items_per_page = pageSize;
-      this.options = {
-        ...this.options,
-        itemsPerPage: pageSize,
-        totalItems: this.total_length,
-      };
     }
   }
 }
