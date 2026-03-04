@@ -13,7 +13,7 @@ except ImportError:
 else:
     HAS_VISUAL_TEST_DEPS = True
 
-__all__ = ['visual_widget_test']
+__all__ = ['visual_widget_test', 'visual_ui_test']
 
 
 class DummyFigure:
@@ -51,6 +51,36 @@ def visual_widget_test(*args, **kwargs):
 
             screenshot = viewer.screenshot()
 
+            return DummyFigure(screenshot)
+
+        return test_wrapper
+
+    # If the decorator was used without any arguments, the only positional
+    # argument will be the test to decorate so we do the following:
+    if len(args) == 1:
+        return decorator(*args)
+
+    return decorator
+
+
+def visual_ui_test(*args, **kwargs):
+    """
+    Decorator for UI visual regression tests using pytest-mpl.
+
+    The decorated test function should return the screenshot bytes from
+    a Playwright element (e.g., `plot.screenshot()`).
+
+    This is similar to visual_widget_test but for tests that handle
+    their own screenshot capture.
+    """
+    tolerance = kwargs.pop("tolerance", 0)
+
+    def decorator(test_function):
+        @pytest.mark.skipif("not HAS_VISUAL_TEST_DEPS")
+        @pytest.mark.mpl_image_compare(tolerance=tolerance, **kwargs)
+        @wraps(test_function)
+        def test_wrapper(*args, **kwargs):
+            screenshot = test_function(*args, **kwargs)
             return DummyFigure(screenshot)
 
         return test_wrapper
