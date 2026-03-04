@@ -19,7 +19,7 @@
         </v-row>
         <v-navigation-drawer v-model="drawer_open" absolute location="right" width="min-content">
             <v-app-bar-nav-icon @click="drawer_open = !drawer_open"></v-app-bar-nav-icon>
-            <v-expansion-panels v-model="open_panels" multiple accordion style="padding-left: 1px; min-width: 200px">
+            <v-expansion-panels v-model="open_panels" multiple variant="accordion" style="padding-left: 1px; min-width: 200px">
                 <v-expansion-panel>
                     <v-expansion-panel-title class="font-weight-bold">Viewer Options</v-expansion-panel-title>
                     <v-expansion-panel-text>

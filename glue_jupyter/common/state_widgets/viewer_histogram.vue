@@ -22,7 +22,7 @@
                      </template>
                     <span>normalize</span>
                   </v-tooltip>
-                  <v-tooltip bottom>
+                  <v-tooltip location="bottom">
                     <template v-slot:activator="{ props }">
                         <v-btn v-bind="props" size="x-small" value="cumulative">
                             <v-icon>trending_up</v-icon>
