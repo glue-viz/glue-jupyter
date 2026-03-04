@@ -1,14 +1,15 @@
 <template>
   <v-slide-x-transition appear>
     <v-data-table
-      dense
+      density="compact"
       hide-default-header
       :headers="[...headers]"
       :items="items"
       :footer-props="{'items-per-page-options': [10,20,50,100]}"
-      :options.sync="options"
-      :items_per_page.sync="items_per_page"
-      :server-items-length="total_length"
+      v-model:page="options.page"
+      v-model:items-per-page="options.itemsPerPage"
+      v-model:sort-by="tableSortBy"
+      :items-length="options.total_length"
       :class="['elevation-1', 'glue-data-table', scrollable && 'glue-data-table--scrollable']"
       :style="scrollable && height != null && `height: ${height}`"
     >
@@ -17,7 +18,7 @@
           <tr>
             <th :style="'padding: 0 10px; width: '+Math.max(1, Math.ceil(Math.log10(total_length)))*20+'px'">#</th>
             <th style="padding: 0 1px; width: 30px" v-if="selection_enabled">
-              <v-btn icon color="primary" text small @click="toggle_select_all">
+              <v-btn icon color="primary" variant="text" size="small" @click="apply_filter">
                 <v-icon>{{ all_selected ? 'check_box' : (checked.length > 0 ? 'indeterminate_check_box' : 'check_box_outline_blank') }}</v-icon>
               </v-btn>
             </th>
@@ -39,29 +40,28 @@
       </template>
       <template v-slot:item="props">
         <tr @click="on_row_clicked(props.item.__row__)" :class="{'highlightedRow': props.item.__row__ === highlighted}">
-          <td style="padding: 0 10px" class="text-xs-left">
+          <td style="padding: 0 10px" class="text-left">
             <i>{{ props.item.__row__ }}</i>
           </td>
-          <td style="padding: 0 1px" class="text-xs-left" v-if="selection_enabled">
+          <td style="padding: 0 1px" class="text-left" v-if="selection_enabled">
             <v-checkbox
               hide-details style="margin-top: 0; padding-top: 0"
-              :input-value="checked.indexOf(props.item.__row__) != -1"
+              :model-value="checked.indexOf(props.item.__row__) != -1"
               :key="props.item.__row__"
-              @change="(value) => select({checked: value, row: props.item.__row__})"
+              @update:modelValue="(value) => select({checked: value, row: props.item.__row__})"
             />
           </td>
           <td style="padding: 0 1px" :key="header.text" v-for="(header, index) in headers_selections">
             <v-fade-transition leave-absolute>
               <v-icon
                 v-if="props.item[header.value]"
-                v-model="props.item[header.value]"
                 :color="selection_colors[index]"
               >brightness_1</v-icon>
             </v-fade-transition>
           </td>
-          <td v-for="header in headers" class="text-xs-right"
+          <td v-for="header in headers"
               :key="header.text"
-              class="text-truncate text-no-wrap"
+              class="text-right text-truncate text-no-wrap"
               :title="props.item[header.value]"
           >
             <v-slide-x-transition appear>
@@ -79,6 +79,23 @@ module.exports = {
   methods: {
     toggleSort(column) {
       this.sort_column(column);
+    },
+    computed: {
+      tableSortBy: {
+        get() {
+          return this.options.sortBy.map((key, index) => ({
+            key,
+            order: this.options.sortDesc[index] ? 'desc' : 'asc'
+          }))
+        },
+        set(sortByItems) {
+          this.options = {
+            ...this.options,
+            sortBy: sortByItems.map(({key}) => key),
+            sortDesc: sortByItems.map(({order}) => order === 'desc')
+          }
+        }
+      }
     }
   }
 }

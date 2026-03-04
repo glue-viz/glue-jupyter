@@ -93,7 +93,7 @@ def test_table_column_visibility_widget(app, dataxyz):
     options_widget = table._layout_viewer_options
 
     # Check that all columns are listed and visible by default
-    column_names = [item['text'] for item in options_widget.column_items]
+    column_names = [item['title'] for item in options_widget.column_items]
     assert 'x' in column_names
     assert 'y' in column_names
     assert 'z' in column_names
