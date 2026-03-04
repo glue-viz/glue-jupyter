@@ -86,8 +86,6 @@ workflows:
             parameters:
               jobname:
                 - "py311-test-visual"
-          requires:
-            - << matrix.jobname >>
           filters:
             branches:
               only:
