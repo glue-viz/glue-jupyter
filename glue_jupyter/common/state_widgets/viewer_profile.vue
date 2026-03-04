@@ -19,7 +19,7 @@
         <div class="d-inline-flex flex-wrap">
             <v-btn-toggle density="compact" multiple :model-value="modeSet" @update:modelValue="modeSetChange" style="margin-right: 8px">
 
-                <v-tooltip bottom>
+                <v-tooltip location="bottom">
                     <template v-slot:activator="{ props }">
                         <v-btn v-bind="props" size="small" value="normalize">
                             <v-icon>unfold_more</v-icon>

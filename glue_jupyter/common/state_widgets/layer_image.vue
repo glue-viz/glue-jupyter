@@ -15,7 +15,7 @@
                 <div v-if="contour_visible">
                     <v-btn-toggle density="compact" v-model="level_mode" style="margin-right: 8px; margin-top: 8px">
 
-                        <v-tooltip bottom>
+                        <v-tooltip location="bottom">
                             <template v-slot:activator="{ props }">
                                 <v-btn v-bind="props" size="small" value="Linear">
                                     <v-icon>mdi-call-made</v-icon>
@@ -24,7 +24,7 @@
                             <span>linear</span>
                         </v-tooltip>
 
-                        <v-tooltip bottom>
+                        <v-tooltip location="bottom">
                             <template v-slot:activator="{ props }">
                                 <v-btn v-bind="props" size="small" value="Custom">
                                     <v-icon>mdi-wrench</v-icon>
