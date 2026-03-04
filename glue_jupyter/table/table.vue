@@ -1,47 +1,47 @@
 <template>
   <div class="glue-table-container">
-    <!-- Edit bar (Excel-style formula bar) -->
-    <v-slide-y-transition>
-      <div v-if="editingCell" class="glue-edit-bar elevation-1">
-        <div class="edit-bar-cell-ref">
-          <v-icon small class="mr-1">mdi-table-edit</v-icon>
-          <span class="edit-bar-label">{{ editingCell.column }} [{{ editingCell.row }}]</span>
-        </div>
-        <div class="edit-bar-input-container">
-          <v-text-field
-            ref="editInput"
-            v-model="editValue"
-            class="edit-bar-input"
-            dense
-            hide-details
-            single-line
-            outlined
-            @keyup.enter="commitEdit"
-            @keyup.escape="cancelEdit"
-          ></v-text-field>
-        </div>
-        <div class="edit-bar-actions">
-          <v-btn
-            icon
-            small
-            color="success"
-            @click="commitEdit"
-            title="Confirm and move to next row (Enter)"
-          >
-            <v-icon small>mdi-check</v-icon>
-          </v-btn>
-          <v-btn
-            icon
-            small
-            color="error"
-            @click="cancelEdit"
-            title="Cancel (Escape)"
-          >
-            <v-icon small>mdi-close</v-icon>
-          </v-btn>
-        </div>
+    <!-- Cell display/edit bar (always visible) -->
+    <div class="glue-edit-bar elevation-1">
+      <div class="edit-bar-cell-ref">
+        <v-icon small class="mr-1">{{ selectedCell ? (selectedCell.editable ? 'mdi-table-edit' : 'mdi-table-eye') : 'mdi-table' }}</v-icon>
+        <span class="edit-bar-label">{{ selectedCell ? selectedCell.column + ' [' + selectedCell.row + ']' : 'Click a cell to view' }}</span>
       </div>
-    </v-slide-y-transition>
+      <div class="edit-bar-input-container">
+        <v-text-field
+          ref="editInput"
+          v-model="editValue"
+          class="edit-bar-input"
+          dense
+          hide-details
+          single-line
+          outlined
+          :readonly="!selectedCell || !selectedCell.editable"
+          :placeholder="selectedCell ? '' : 'Select a cell...'"
+          @keyup.enter="commitEdit"
+          @keyup.escape="cancelEdit"
+        ></v-text-field>
+      </div>
+      <div class="edit-bar-actions" v-if="selectedCell && selectedCell.editable">
+        <v-btn
+          icon
+          small
+          color="success"
+          @click="commitEdit"
+          title="Confirm and move to next row (Enter)"
+        >
+          <v-icon small>mdi-check</v-icon>
+        </v-btn>
+        <v-btn
+          icon
+          small
+          color="error"
+          @click="cancelEdit"
+          title="Cancel (Escape)"
+        >
+          <v-icon small>mdi-close</v-icon>
+        </v-btn>
+      </div>
+    </div>
 
     <v-slide-x-transition appear>
       <v-data-table
@@ -105,19 +105,12 @@
           </td>
           <td v-for="header in headers"
               :key="header.text"
-              class="text-truncate text-no-wrap glue-editable-cell"
-              :class="{'glue-cell-editing': isEditing(props.item.__row__, header.value)}"
+              class="text-truncate text-no-wrap glue-selectable-cell"
+              :class="{'glue-cell-selected': isSelected(props.item.__row__, header.value)}"
               :title="props.item[header.value]"
+              @click.stop="selectCell(props.item.__row__, header.value, props.item[header.value], header.editable)"
           >
-              <span class="cell-content">
-                {{ props.item[header.value] }}
-                <v-icon
-                  v-if="header.editable"
-                  x-small
-                  class="edit-icon"
-                  @click.stop="startEdit(props.item.__row__, header.value, props.item[header.value])"
-                >mdi-pencil</v-icon>
-              </span>
+              <span class="cell-content">{{ props.item[header.value] }}</span>
           </td>
         </tr>
       </template>
@@ -130,7 +123,7 @@
 module.exports = {
   data: function() {
     return {
-      editingCell: null,  // { row: number, column: string }
+      selectedCell: null,  // { row: number, column: string, editable: boolean }
       editValue: ''
     };
   },
@@ -138,24 +131,27 @@ module.exports = {
     toggleSort(column) {
       this.sort_column(column);
     },
-    startEdit(row, column, currentValue) {
-      this.editingCell = { row: row, column: column };
+    selectCell(row, column, currentValue, editable) {
+      this.selectedCell = { row: row, column: column, editable: editable };
       this.editValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : '';
-      // Focus the edit input after Vue updates the DOM
-      this.$nextTick(() => {
-        if (this.$refs.editInput) {
-          this.$refs.editInput.focus();
-        }
-      });
+      // Focus the edit input after Vue updates the DOM (only if editable)
+      if (editable) {
+        this.$nextTick(() => {
+          if (this.$refs.editInput) {
+            this.$refs.editInput.focus();
+          }
+        });
+      }
     },
     cancelEdit() {
-      this.editingCell = null;
+      this.selectedCell = null;
       this.editValue = '';
     },
     commitEdit() {
-      if (this.editingCell) {
-        const currentColumn = this.editingCell.column;
-        const currentRow = this.editingCell.row;
+      if (this.selectedCell && this.selectedCell.editable) {
+        const currentColumn = this.selectedCell.column;
+        const currentRow = this.selectedCell.row;
+        const isEditable = this.selectedCell.editable;
         // Commit the edit
         this.cell_edited({
           row: currentRow,
@@ -168,23 +164,23 @@ module.exports = {
           // Find the current value for the next cell
           const nextItem = this.items.find(item => item.__row__ === nextRow);
           if (nextItem) {
-            this.startEdit(nextRow, currentColumn, nextItem[currentColumn]);
+            this.selectCell(nextRow, currentColumn, nextItem[currentColumn], isEditable);
           } else {
-            // Next row might not be in current page, just close editing
-            this.editingCell = null;
+            // Next row might not be in current page, just clear selection
+            this.selectedCell = null;
             this.editValue = '';
           }
         } else {
-          // No more rows, close editing
-          this.editingCell = null;
+          // No more rows, clear selection
+          this.selectedCell = null;
           this.editValue = '';
         }
       }
     },
-    isEditing(row, column) {
-      return this.editingCell !== null &&
-             this.editingCell.row === row &&
-             this.editingCell.column === column;
+    isSelected(row, column) {
+      return this.selectedCell !== null &&
+             this.selectedCell.row === row &&
+             this.selectedCell.column === column;
     }
   }
 }
@@ -289,29 +285,17 @@ module.exports = {
   z-index: 1;
 }
 
-/* Editable cell styles */
-.glue-editable-cell .cell-content {
-  display: inline-flex;
-  align-items: center;
-}
-
-.glue-editable-cell .edit-icon {
-  opacity: 0;
-  transition: opacity 0.2s;
-  margin-left: 4px;
+/* Selectable cell styles */
+.glue-selectable-cell {
   cursor: pointer;
 }
 
-.glue-editable-cell:hover .edit-icon {
-  opacity: 0.5;
+.glue-selectable-cell:hover {
+  background-color: #f5f5f5;
 }
 
-.glue-editable-cell .edit-icon:hover {
-  opacity: 1;
-}
-
-/* Visual cue for cell being edited */
-.glue-cell-editing {
+/* Visual cue for selected cell */
+.glue-cell-selected {
   background-color: #E3F2FD !important;
   box-shadow: inset 0 0 0 2px #1976D2;
 }
