@@ -109,9 +109,7 @@
               :class="{'glue-cell-selected': isSelected(props.item.__row__, header.value)}"
               :title="props.item[header.value]"
               @click.stop="selectCell(props.item.__row__, header.value, props.item[header.value], header.editable)"
-          >
-              <span class="cell-content">{{ props.item[header.value] }}</span>
-          </td>
+          >{{ props.item[header.value] }}</td>
         </tr>
       </template>
       </v-data-table>
