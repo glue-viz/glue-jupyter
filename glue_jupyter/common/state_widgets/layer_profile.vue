@@ -7,7 +7,7 @@
             <v-select label="attribute" :items="attribute_items" v-model="attribute_selected" hide-details />
         </div>
         <div>
-            <v-subheader class="pl-0 slider-label">opacity</v-subheader>
+            <div class="slider-label">opacity</div>
             <glue-throttled-slider wait="300" min="0" max="1" step="0.01" v-model:value="glue_state.alpha" hide-details />
         </div>
         <div>
@@ -15,3 +15,10 @@
         </div>
     </div>
 </template>
+<style>
+    .slider-label {
+        font-size: 12px;
+        height: 16px;
+        margin-top: 6px;
+    }
+</style>

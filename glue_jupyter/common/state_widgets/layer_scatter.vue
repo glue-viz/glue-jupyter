@@ -19,12 +19,12 @@
             </div>
         </template>
         <div>
-            <v-subheader class="pl-0 slider-label">opacity</v-subheader>
+            <div class="slider-label">opacity</div>
             <glue-throttled-slider wait="300" min="0" max="1" step="0.01" v-model:value="glue_state.alpha" hide-details />
         </div>
         <div class="text-subtitle-2 font-weight-bold">Points</div>
         <div>
-            <v-subheader class="pl-0 slider-label">show points</v-subheader>
+            <div class="slider-label">show points</div>
             <v-switch v-model="glue_state.markers_visible" hide-details style="margin-top: 0" />
         </div>
         <template v-if="glue_state.markers_visible">
@@ -47,22 +47,22 @@
             </template>
             <template v-if="glue_state.density_map">
                 <div>
-                    <v-subheader class="pl-0 slider-label">dpi</v-subheader>
+                    <div class="slider-label">dpi</div>
                     <glue-throttled-slider wait="300" min="12" max="144" step="1" v-model:value="dpi" hide-details />
                 </div>
                 <div>
-                    <v-subheader class="pl-0 slider-label">contrast</v-subheader>
+                    <div class="slider-label">contrast</div>
                     <glue-throttled-slider wait="300" min="0" max="1" step="0.01" v-model:value="glue_state.density_contrast"
                                          hide-details />
                 </div>
             </template>
             <template v-else>
                 <div>
-                    <v-subheader class="pl-0 slider-label">fill markers</v-subheader>
+                    <div class="slider-label">fill markers</div>
                     <v-switch v-model="glue_state.fill" hide-details style="margin-top: 0" />
                 </div>
                 <div>
-                    <v-subheader class="pl-0 slider-label">size scaling</v-subheader>
+                    <div class="slider-label">size scaling</div>
                     <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" v-model:value="glue_state.size_scaling"
                         hide-details />
                 </div>
@@ -70,12 +70,12 @@
         </template>
         <div class="text-subtitle-2 font-weight-bold" :style="glue_state.markers_visible ? {} : {marginTop: '6px'}">Line</div>
         <div>
-            <v-subheader class="pl-0 slider-label">show line</v-subheader>
+            <div class="slider-label">show line</div>
             <v-switch v-model="glue_state.line_visible" hide-details style="margin-top: 0"/>
         </div>
         <template v-if="glue_state.line_visible">
             <div>
-                <v-subheader class="pl-0 slider-label">width</v-subheader>
+                <div class="slider-label">width</div>
                 <glue-throttled-slider wait="300" min="1" max="20" step="1" v-model:value="glue_state.linewidth" hide-details />
             </div>
             <div>
@@ -84,7 +84,7 @@
         </template>
         <div class="text-subtitle-2 font-weight-bold" :style="glue_state.markers_visible ? {} : {marginTop: '6px'}">Vectors</div>
         <div>
-            <v-subheader class="pl-0 slider-label">show vectors</v-subheader>
+            <div class="slider-label">show vectors</div>
             <v-switch v-model="glue_state.vector_visible" hide-details style="margin-top: 0"/>
         </div>
         <template v-if="glue_state.vector_visible">
@@ -98,7 +98,7 @@
                 <v-select label="vector origin" :items="vector_origin_items" v-model="vector_origin_selected" hide-details/>
             </div>
             <div>
-                <v-subheader class="pl-0 slider-label">vector size</v-subheader>
+                <div class="slider-label">vector size</div>
                 <glue-throttled-slider wait="300" min="0.01" max="1" step="0.01" v-model:value="glue_state.vector_scaling"
                     hide-details />
             </div>
@@ -108,7 +108,7 @@
 <script>
 </script>
 <style id="layer_scatter">
-.glue-layer-scatter .v-subheader.slider-label {
+.glue-layer-scatter .slider-label {
     font-size: 12px;
     height: 16px;
     margin-top: 6px;
