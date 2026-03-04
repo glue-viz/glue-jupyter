@@ -54,15 +54,15 @@
         <v-expand-transition>
             <div v-if="!has_contour || bitmap_visible">
                 <div>
-                    <v-subheader class="pl-0 slider-label">opacity</v-subheader>
+                    <div class="slider-label">opacity</div>
                     <glue-throttled-slider wait="300" max="1" step="0.01" v-model:value="alpha" hide-details />
                 </div>
                 <div>
-                    <v-subheader class="pl-0 slider-label">contrast</v-subheader>
+                    <div class="slider-label">contrast</div>
                     <glue-throttled-slider wait="300" max="4" step="0.01" v-model:value="contrast" hide-details />
                 </div>
                 <div>
-                    <v-subheader class="pl-0 slider-label">bias</v-subheader>
+                    <div class="slider-label">bias</div>
                     <glue-throttled-slider wait="300" max="1" step="0.01" v-model:value="bias" hide-details />
                 </div>
                 <div>
@@ -87,7 +87,7 @@
 <script>
 </script>
 <style id="layer_image">
-    .v-subheader.slider-label {
+    .slider-label {
         font-size: 12px;
         height: 16px;
     }
