@@ -1,17 +1,61 @@
 <template>
-  <v-slide-x-transition appear>
-    <v-data-table
-      dense
-      hide-default-header
-      :headers="[...headers]"
-      :items="items"
-      :footer-props="{'items-per-page-options': [10,20,50,100]}"
-      :options.sync="options"
-      :items_per_page.sync="items_per_page"
-      :server-items-length="total_length"
-      :class="['elevation-1', 'glue-data-table', scrollable && 'glue-data-table--scrollable']"
-      :style="scrollable && height != null && `height: ${height}`"
-    >
+  <div class="glue-table-container">
+    <!-- Cell display/edit bar (always visible) -->
+    <div class="glue-edit-bar elevation-1">
+      <div class="edit-bar-cell-ref">
+        <v-icon small class="mr-1">{{ selectedCell ? (selectedCell.editable ? 'mdi-table-edit' : 'mdi-table-eye') : 'mdi-table' }}</v-icon>
+        <span class="edit-bar-label">{{ selectedCell ? selectedCell.column + ' [' + selectedCell.row + ']' : 'Click a cell to view' }}</span>
+      </div>
+      <div class="edit-bar-input-container">
+        <v-text-field
+          ref="editInput"
+          v-model="editValue"
+          class="edit-bar-input"
+          dense
+          hide-details
+          single-line
+          outlined
+          :readonly="!selectedCell || !selectedCell.editable"
+          :placeholder="selectedCell ? '' : 'Select a cell...'"
+          @keyup.enter="commitEdit"
+          @keyup.escape="cancelEdit"
+        ></v-text-field>
+      </div>
+      <div class="edit-bar-actions" v-if="selectedCell && selectedCell.editable">
+        <v-btn
+          icon
+          small
+          color="success"
+          @click="commitEdit"
+          title="Confirm and move to next row (Enter)"
+        >
+          <v-icon small>mdi-check</v-icon>
+        </v-btn>
+        <v-btn
+          icon
+          small
+          color="error"
+          @click="cancelEdit"
+          title="Cancel (Escape)"
+        >
+          <v-icon small>mdi-close</v-icon>
+        </v-btn>
+      </div>
+    </div>
+
+    <v-slide-x-transition appear>
+      <v-data-table
+        dense
+        hide-default-header
+        :headers="[...headers]"
+        :items="items"
+        :footer-props="{'items-per-page-options': [10,20,50,100]}"
+        :options.sync="options"
+        :items_per_page.sync="items_per_page"
+        :server-items-length="total_length"
+        :class="['elevation-1', 'glue-data-table', scrollable && 'glue-data-table--scrollable']"
+        :style="scrollable && height != null && `height: ${height}`"
+      >
       <template v-slot:header="props">
         <thead>
           <tr>
@@ -59,32 +103,142 @@
               >brightness_1</v-icon>
             </v-fade-transition>
           </td>
-          <td v-for="header in headers" class="text-xs-right"
+          <td v-for="header in headers"
               :key="header.text"
-              class="text-truncate text-no-wrap"
+              class="text-truncate text-no-wrap glue-selectable-cell"
+              :class="{'glue-cell-selected': isSelected(props.item.__row__, header.value)}"
               :title="props.item[header.value]"
-          >
-            <v-slide-x-transition appear>
-              <span>{{ props.item[header.value] }}</span>
-            </v-slide-x-transition>
-          </td>
+              @click.stop="selectCell(props.item.__row__, header.value, props.item[header.value], header.editable)"
+          >{{ props.item[header.value] }}</td>
         </tr>
       </template>
-    </v-data-table>
-  </v-slide-x-transition>
+      </v-data-table>
+    </v-slide-x-transition>
+  </div>
 </template>
 
 <script>
 module.exports = {
+  data: function() {
+    return {
+      selectedCell: null,  // { row: number, column: string, editable: boolean }
+      editValue: ''
+    };
+  },
   methods: {
     toggleSort(column) {
       this.sort_column(column);
+    },
+    selectCell(row, column, currentValue, editable) {
+      this.selectedCell = { row: row, column: column, editable: editable };
+      this.editValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : '';
+      // Focus the edit input after Vue updates the DOM (only if editable)
+      if (editable) {
+        this.$nextTick(() => {
+          if (this.$refs.editInput) {
+            this.$refs.editInput.focus();
+          }
+        });
+      }
+    },
+    cancelEdit() {
+      this.selectedCell = null;
+      this.editValue = '';
+    },
+    commitEdit() {
+      if (this.selectedCell && this.selectedCell.editable) {
+        const currentColumn = this.selectedCell.column;
+        const currentRow = this.selectedCell.row;
+        const isEditable = this.selectedCell.editable;
+        // Commit the edit
+        this.cell_edited({
+          row: currentRow,
+          column: currentColumn,
+          value: this.editValue
+        });
+        // Move to the next row in the same column
+        const nextRow = currentRow + 1;
+        if (nextRow < this.total_length) {
+          // Find the current value for the next cell
+          const nextItem = this.items.find(item => item.__row__ === nextRow);
+          if (nextItem) {
+            this.selectCell(nextRow, currentColumn, nextItem[currentColumn], isEditable);
+          } else {
+            // Next row might not be in current page, just clear selection
+            this.selectedCell = null;
+            this.editValue = '';
+          }
+        } else {
+          // No more rows, clear selection
+          this.selectedCell = null;
+          this.editValue = '';
+        }
+      }
+    },
+    isSelected(row, column) {
+      return this.selectedCell !== null &&
+             this.selectedCell.row === row &&
+             this.selectedCell.column === column;
     }
   }
 }
 </script>
 
 <style id="glue_table">
+/* Table container */
+.glue-table-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Edit bar (Excel-style formula bar) */
+.glue-edit-bar {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  gap: 8px;
+}
+
+.edit-bar-cell-ref {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  min-width: 120px;
+  font-size: 12px;
+  color: #666;
+}
+
+.edit-bar-label {
+  font-family: monospace;
+  font-weight: 500;
+}
+
+.edit-bar-input-container {
+  flex: 1;
+}
+
+.edit-bar-input {
+  margin: 0;
+  padding: 0;
+}
+
+.edit-bar-input .v-input__slot {
+  min-height: 32px !important;
+  background-color: #fff !important;
+}
+
+.edit-bar-actions {
+  display: flex;
+  gap: 4px;
+}
+
 .highlightedRow {
     background-color: #E3F2FD;
 }
@@ -127,5 +281,20 @@ module.exports = {
 .glue-data-table--scrollable .v-data-table__wrapper > table thead {
   position: relative;
   z-index: 1;
+}
+
+/* Selectable cell styles */
+.glue-selectable-cell {
+  cursor: pointer;
+}
+
+.glue-selectable-cell:hover {
+  background-color: #f5f5f5;
+}
+
+/* Visual cue for selected cell */
+.glue-cell-selected {
+  background-color: #E3F2FD !important;
+  box-shadow: inset 0 0 0 2px #1976D2;
 }
 </style>
