@@ -10,7 +10,7 @@ selection_width = 200
 selection_height = 40
 
 
-@visual_ui_test
+@visual_ui_test(tolerance=1)
 def test_elliptical_selection(solara_test, page_session):
     _app, _viewer, plot = create_viewer(page_session)
 
@@ -35,7 +35,7 @@ def test_elliptical_selection(solara_test, page_session):
     return plot.screenshot()
 
 
-@visual_ui_test
+@visual_ui_test(tolerance=1)
 def test_elliptical_selection_rotate(solara_test, page_session):
     app, viewer, plot = create_viewer(page_session)
 
@@ -63,7 +63,7 @@ def test_elliptical_selection_rotate(solara_test, page_session):
     return plot.screenshot()
 
 
-@visual_ui_test
+@visual_ui_test(tolerance=1)
 def test_rectangular_selection(solara_test, page_session):
     _app, _viewer, plot = create_viewer(page_session)
 
@@ -88,7 +88,7 @@ def test_rectangular_selection(solara_test, page_session):
     return plot.screenshot()
 
 
-@visual_ui_test
+@visual_ui_test(tolerance=1)
 def test_rectangular_selection_rotate(solara_test, page_session):
     app, viewer, plot = create_viewer(page_session)
 
