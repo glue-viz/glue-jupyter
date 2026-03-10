@@ -103,7 +103,7 @@ jobs:
           playwright install chromium
       - name: Run visual regression tests
         run: |
-          pytest tests/ui
+          pytest glue_jupyter/tests/ui
       - name: Upload UI Test artifacts
         if: always()
         uses: actions/upload-artifact@v4
