@@ -1,7 +1,7 @@
 <template>
     <v-slider
-            :value="value"
-            @input="throttledSetValue"
+            :model-value="value"
+            @update:modelValue="throttledSetValue"
             :max="max"
             :step="step"
             :hide-details="hideDetails" />

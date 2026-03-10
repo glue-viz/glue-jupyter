@@ -8,11 +8,11 @@
         </div>
         <div class="glue-viewer-image-switches">
             <div>
-                <v-subheader class="pl-0 slider-label">equal aspect ratio</v-subheader>
-                <v-switch input-value="glue_state.aspect === EQUAL" @change="setEqualAspect" hide-details style="margin-top: 0" />
+                <div class="slider-label">equal aspect ratio</div>
+                <v-switch :model-value="glue_state.aspect === EQUAL" @update:modelValue="setEqualAspect" hide-details style="margin-top: 0" />
             </div>
             <div>
-                <v-subheader class="pl-0 slider-label">show axes</v-subheader>
+                <div class="slider-label">show axes</div>
                 <v-switch v-model="glue_state.show_axes" hide-details style="margin-top: 0"/>
             </div>
         </div>
@@ -23,10 +23,10 @@
             <v-select label="y axis" :items="y_att_world_items" v-model="y_att_world_selected" hide-details style="margin-bottom: 16px" />
         </div>
         <div v-for="slider of sliders">
-            <v-subheader class="pl-0 slider-label">{{ slider.label }}: {{ glue_state.slices[slider.index] }} ({{  slider.world_value  }} {{ slider.unit }})</v-subheader>
+            <div class="slider-label">{{ slider.label }}: {{ glue_state.slices[slider.index] }} ({{  slider.world_value  }} {{ slider.unit }})</div>
             <glue-throttled-slider
                 v-if="glue_state.slices && glue_state.slices.length > 0"
-                wait="300" :max="slider.max" :value.sync="glue_state.slices[slider.index]" hide-details />
+                wait="300" :max="slider.max" v-model:value="glue_state.slices[slider.index]" hide-details />
         </div>
     </div>
 </template>
@@ -53,7 +53,7 @@
         flex-direction: row;
     }
 
-    .v-subheader.slider-label {
+    .slider-label {
         font-size: 12px;
         height: 16px;
     }

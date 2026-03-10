@@ -7,24 +7,24 @@
             <v-text-field type="number" step="1" label="number of bins" v-model="glue_state.hist_n_bin" />
         </div>
         <div>
-            <glue-float-field label="x-min" :value.sync="glue_state.hist_x_min" />
+            <glue-float-field label="x-min" v-model:value="glue_state.hist_x_min" />
         </div>
         <div>
-            <glue-float-field label="x-max" :value.sync="glue_state.hist_x_max" />
+            <glue-float-field label="x-max" v-model:value="glue_state.hist_x_max" />
         </div>
         <div>
             <v-toolbar density="compact" >
                   <v-tooltip>
-                    <template v-slot:activator="{ on }">
-                         <v-btn v-on="on" size="x-small" value="normalize">
+                    <template v-slot:activator="{ props }">
+                         <v-btn v-bind="props" size="x-small" value="normalize">
                              <v-icon>unfold_more</v-icon>
                          </v-btn>
                      </template>
                     <span>normalize</span>
                   </v-tooltip>
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" size="x-small" value="cumulative">
+                  <v-tooltip location="bottom">
+                    <template v-slot:activator="{ props }">
+                        <v-btn v-bind="props" size="x-small" value="cumulative">
                             <v-icon>trending_up</v-icon>
                         </v-btn>
                     </template>

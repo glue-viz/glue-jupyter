@@ -300,7 +300,7 @@ class TableViewerStateWidget(v.VuetifyTemplate):
             return
 
         all_components = data.main_components + data.derived_components
-        self.column_items = [{'text': str(c), 'value': str(c)} for c in all_components]
+        self.column_items = [{'title': str(c), 'value': str(c)} for c in all_components]
 
         # Set visible columns (all minus hidden)
         hidden_names = [str(c) for c in self.state.hidden_components]

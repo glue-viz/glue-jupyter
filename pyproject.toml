@@ -31,8 +31,7 @@ dependencies = [
     "ipython_genutils>=0.2",  # missing ipyvolume dependency
     "tornado",  # missing ipyvolume dependency
     "ipywidgets>=7.7.0",
-    "ipyvue>=1.2.0,<2",
-    "ipyvuetify>=1.2.0,<2",
+    "ipyvuetify @ https://nbg1.your-objectstorage.com/ipyvue3-packages/packages/ipyvuetify/ipyvuetify-3.0.0a3-py2.py3-none-any.whl",
     "bqplot-image-gl>=1.8.0",
     "bqplot>=0.12.17",
     "bqplot-gl",
