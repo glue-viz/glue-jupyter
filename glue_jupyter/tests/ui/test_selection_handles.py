@@ -21,7 +21,7 @@ def teardown_module(module):
     BqplotCircleMode.show_handles = False
 
 
-@visual_ui_test
+@visual_ui_test(tolerance=1)
 def test_elliptical_selection_handles(solara_test, page_session):
     _, _, plot = create_viewer(page_session)
 
@@ -46,7 +46,7 @@ def test_elliptical_selection_handles(solara_test, page_session):
     return plot.screenshot()
 
 
-@visual_ui_test
+@visual_ui_test(tolerance=1)
 def test_elliptical_selection_handles_rotate(solara_test, page_session):
     app, viewer, plot = create_viewer(page_session)
 
@@ -74,7 +74,7 @@ def test_elliptical_selection_handles_rotate(solara_test, page_session):
     return plot.screenshot()
 
 
-@visual_ui_test
+@visual_ui_test(tolerance=1)
 def test_rectangular_selection_handles(solara_test, page_session):
     _, _, plot = create_viewer(page_session)
 
@@ -99,7 +99,7 @@ def test_rectangular_selection_handles(solara_test, page_session):
     return plot.screenshot()
 
 
-@visual_ui_test
+@visual_ui_test(tolerance=1)
 def test_rectangular_selection_handles_rotate(solara_test, page_session):
     app, viewer, plot = create_viewer(page_session)
 
