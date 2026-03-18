@@ -485,6 +485,7 @@ class BqplotScatterLayerArtist(LayerArtist):
                          if layer.state.linestyle == 'solid' else layer.line_mark,
                          layer.vector_mark,
                          layer.vector_lines)
+            if item is not None
         ]
 
     def _build_line_vector_points(self, x, y, vx, vy):
