@@ -391,7 +391,8 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.scale_color_vector.min = float_or_none(self.state.cmap_vmin)
                 self.scale_color_vector.max = float_or_none(self.state.cmap_vmax)
 
-        for mark in self.view.figure.marks:
+        for mark in [self.scatter_mark, self.line_mark_gl, self.line_mark,
+                     self.vector_mark, self.vector_lines, self.density_mark]:
 
             if mark is None:
                 continue
