@@ -149,7 +149,7 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         vector_lines_cls = bqplot.Lines
         self.vector_lines = vector_lines_cls(scales=self.view.scales, x=[0.], y=[0.])
-        self.vector_lines.color = [color2hex(self.state.color)]
+        self.vector_lines.colors = [color2hex(self.state.color)]
         self.vector_lines.visible = False
 
         # Density map
@@ -335,7 +335,7 @@ class BqplotScatterLayerArtist(LayerArtist):
 
         if self.state.line_visible:
             if force or "color" in changed:
-                self.line_mark_gl.color = [color2hex(self.state.color)]
+                self.line_mark_gl.colors = [color2hex(self.state.color)]
                 self.line_mark.colors = [color2hex(self.state.color)]
             if force or "linewidth" in changed:
                 self.line_mark_gl.stroke_width = self.state.linewidth
@@ -381,7 +381,6 @@ class BqplotScatterLayerArtist(LayerArtist):
                 if force or "color" in changed or "cmap_mode" in changed:
                     self.vector_mark.color = None
                     self.vector_mark.colors = [color2hex(self.state.color)]
-                    self.vector_lines.color = None
                     self.vector_lines.colors = [color2hex(self.state.color)]
             elif force or any(prop in changed for prop in CMAP_PROPERTIES):
                 self.vector_mark.color = ensure_numerical(
