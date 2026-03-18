@@ -1,5 +1,42 @@
 from itertools import permutations
 
+import bqplot
+
+
+def test_scatter2d_log(app, dataxyz):
+
+    s = app.scatter2d(data=dataxyz)
+
+    # Initially linear scales
+    assert isinstance(s.scale_x, bqplot.LinearScale)
+    assert isinstance(s.scale_y, bqplot.LinearScale)
+
+    # Switch x to log
+    s.state.x_log = True
+    assert isinstance(s.scale_x, bqplot.LogScale)
+    assert isinstance(s.scale_y, bqplot.LinearScale)
+
+    # Check all marks reference the new scale
+    for mark in s.figure.marks:
+        if 'x' in mark.scales:
+            assert isinstance(mark.scales['x'], bqplot.LogScale)
+
+    # Check axis, figure, and interaction are updated
+    assert s.axis_x.scale is s.scale_x
+    assert s.figure.scale_x is s.scale_x
+    assert s._mouse_interact.x_scale is s.scale_x
+
+    # Switch y to log
+    s.state.y_log = True
+    assert isinstance(s.scale_y, bqplot.LogScale)
+    assert s.axis_y.scale is s.scale_y
+
+    # Switch back to linear
+    s.state.x_log = False
+    s.state.y_log = False
+    assert isinstance(s.scale_x, bqplot.LinearScale)
+    assert isinstance(s.scale_y, bqplot.LinearScale)
+
 
 def test_scatter2d_nd(app, data_4d):
     # Regression test for a bug that meant that arrays with more than one
