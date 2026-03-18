@@ -248,5 +248,57 @@ class BqplotBaseView(IPyWidgetView):
             self.scale_y.min = float(self.state.y_min)
             self.scale_y.max = float(self.state.y_max)
 
+    def _replace_scale(self, axis):
+        """Replace the bqplot scale for the given axis ('x' or 'y') based on log state."""
+
+        is_log = getattr(self.state, f'{axis}_log', False)
+        scale_cls = bqplot.LogScale if is_log else bqplot.LinearScale
+
+        old_scale = getattr(self, f'scale_{axis}')
+        if isinstance(old_scale, scale_cls):
+            return
+
+        # Create new scale
+        kwargs = {}
+        if axis == 'x':
+            kwargs['allow_padding'] = False
+        new_scale = scale_cls(**kwargs)
+
+        # Set limits if available and valid for the new scale type
+        lo = getattr(self.state, f'{axis}_min')
+        hi = getattr(self.state, f'{axis}_max')
+        if lo is not None and hi is not None:
+            if not is_log or (lo > 0 and hi > 0):
+                new_scale.min = float(lo)
+                new_scale.max = float(hi)
+
+        new_scale.observe(self.update_glue_scales, names=['min', 'max'])
+
+        # Update viewer references
+        setattr(self, f'scale_{axis}', new_scale)
+        self.scales[axis] = new_scale
+
+        # Update axis and figure
+        ax = getattr(self, f'axis_{axis}')
+        ax.scale = new_scale
+        setattr(self.figure, f'scale_{axis}', new_scale)
+
+        # Update mouse interaction
+        setattr(self._mouse_interact, f'{axis}_scale', new_scale)
+
+        # Update all marks
+        for mark in self.figure.marks:
+            if axis in mark.scales and mark.scales[axis] is old_scale:
+                mark.scales = {**mark.scales, axis: new_scale}
+            # Transfer density mark observers from old to new scale
+            if hasattr(mark, '_debounced_update_counts'):
+                old_scale.unobserve(mark._debounced_update_counts, 'min')
+                old_scale.unobserve(mark._debounced_update_counts, 'max')
+                new_scale.observe(mark._debounced_update_counts, 'min')
+                new_scale.observe(mark._debounced_update_counts, 'max')
+
+        # Reset cached limits to force sync on next update
+        self._last_limits = None
+
     def redraw(self):
         pass
