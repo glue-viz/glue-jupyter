@@ -31,6 +31,8 @@ class BqplotScatterView(BqplotBaseView):
         super().__init__(*args, **kwargs)
         self.state.add_callback('x_att', self._update_axes)
         self.state.add_callback('y_att', self._update_axes)
+        self.state.add_callback('x_log', self._update_x_log)
+        self.state.add_callback('y_log', self._update_y_log)
         self._update_axes()
 
     def _update_axes(self, *args):
@@ -40,3 +42,9 @@ class BqplotScatterView(BqplotBaseView):
 
         if self.state.y_att is not None:
             self.state.y_axislabel = str(self.state.y_att)
+
+    def _update_x_log(self, *args):
+        self._replace_scale('x')
+
+    def _update_y_log(self, *args):
+        self._replace_scale('y')
