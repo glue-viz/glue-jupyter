@@ -261,13 +261,9 @@ class BqplotBaseView(IPyWidgetView):
         if isinstance(old_scale, scale_cls):
             return
 
-        # Create new scale
-        kwargs = {}
-        if axis == 'x':
-            kwargs['allow_padding'] = False
-        new_scale = scale_cls(**kwargs)
+        new_scale = scale_cls(**({'allow_padding': False} if axis == 'x' else {}))
 
-        # Set limits if available and valid for the new scale type
+        # Set limits if valid for the new scale type
         lo = getattr(self.state, f'{axis}_min')
         hi = getattr(self.state, f'{axis}_max')
         if lo is not None and hi is not None:
@@ -277,28 +273,22 @@ class BqplotBaseView(IPyWidgetView):
 
         new_scale.observe(self.update_glue_scales, names=['min', 'max'])
 
-        # Update viewer references
+        # Update all references to the scale
         setattr(self, f'scale_{axis}', new_scale)
         self.scales[axis] = new_scale
-
-        # Update axis and figure
-        ax = getattr(self, f'axis_{axis}')
-        ax.scale = new_scale
+        getattr(self, f'axis_{axis}').scale = new_scale
         setattr(self.figure, f'scale_{axis}', new_scale)
-
-        # Update mouse interaction
         setattr(self._mouse_interact, f'{axis}_scale', new_scale)
 
-        # Update all marks
+        # Update all marks and transfer any scale observers (e.g. density marks)
         for mark in self.figure.marks:
             if axis in mark.scales and mark.scales[axis] is old_scale:
                 mark.scales = {**mark.scales, axis: new_scale}
-            # Transfer density mark observers from old to new scale
-            if hasattr(mark, '_debounced_update_counts'):
-                old_scale.unobserve(mark._debounced_update_counts, 'min')
-                old_scale.unobserve(mark._debounced_update_counts, 'max')
-                new_scale.observe(mark._debounced_update_counts, 'min')
-                new_scale.observe(mark._debounced_update_counts, 'max')
+                if hasattr(mark, '_debounced_update_counts'):
+                    old_scale.unobserve(mark._debounced_update_counts, 'min')
+                    old_scale.unobserve(mark._debounced_update_counts, 'max')
+                    new_scale.observe(mark._debounced_update_counts, 'min')
+                    new_scale.observe(mark._debounced_update_counts, 'max')
 
         # Reset cached limits to force sync on next update
         self._last_limits = None
