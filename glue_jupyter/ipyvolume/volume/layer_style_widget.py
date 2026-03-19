@@ -5,9 +5,10 @@ from glue.core.subset import Subset
 from glue.utils import color2hex
 
 from glue_jupyter.widgets import Color
+from glue_jupyter.widgets.glue_float_field import GlueFloatField
 from glue_jupyter.widgets.linked_dropdown import LinkedDropdown
 
-from ...link import link, dlink
+from ...link import link
 
 __all__ = ['Volume3DLayerStateWidget']
 
@@ -27,29 +28,17 @@ class Volume3DLayerStateWidget(VBox):
                                              description='method')
         link((self.state, 'render_method'), (self.widget_render_method, 'value'))
 
-        self.size_options = [32, 64, 128, 128+64, 256, 256+128, 512]
-        options = [(str(k), k) for k in self.size_options]
-        self.widget_max_resolution = Dropdown(options=options, value=128,
-                                              description='max resolution')
-        link((self.state, 'max_resolution'), (self.widget_max_resolution, 'value'))
-
         if self.state.vmin is None:
             self.state.vmin = 0
 
-        self.widget_data_min = FloatSlider(description='min', min=0, max=1,
-                                           value=self.state.vmin, step=0.001)
+        self.widget_data_min = GlueFloatField(label="vmin", initial_value=self.state.vmin)
         link((self.state, 'vmin'), (self.widget_data_min, 'value'))
-        dlink((self.state, 'data_min'), (self.widget_data_min, 'min'))
-        dlink((self.state, 'data_max'), (self.widget_data_min, 'max'))
 
         if self.state.vmax is None:
             self.state.vmax = 1
 
-        self.widget_data_max = FloatSlider(description='max', min=0, max=1,
-                                           value=self.state.vmax, step=0.001)
+        self.widget_data_max = GlueFloatField(label="vmax", initial_value=self.state.vmax)
         link((self.state, 'vmax'), (self.widget_data_max, 'value'))
-        dlink((self.state, 'data_min'), (self.widget_data_max, 'min'))
-        dlink((self.state, 'data_max'), (self.widget_data_max, 'max'))
 
         self.widget_clamp_min = Checkbox(description='clamp minimum', value=self.state.clamp_min)
         link((self.state, 'clamp_min'), (self.widget_clamp_min, 'value'))
@@ -86,6 +75,5 @@ class Volume3DLayerStateWidget(VBox):
         super().__init__([self.widget_render_method, self.widget_lighting,
                           self.widget_data_min, self.widget_data_max,
                           self.widget_clamp_min, self.widget_clamp_max,
-                          self.widget_max_resolution,  # self.widget_reset_zoom,
                           self.widget_color, self.widget_opacity,
                           self.widget_opacity_scale, self.widget_stretch])
