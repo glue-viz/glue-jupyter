@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pytest
 
 from glue_jupyter import jglue
 from glue_jupyter.tests.helpers import visual_widget_test
@@ -188,4 +189,58 @@ def test_visual_vector(
 
     figure = scatter.figure_widget
     figure.layout = {"width": "800px", "height": "500px"}
+    return figure
+
+
+@pytest.mark.parametrize(("x_log", "y_log"), [
+    (True, False),
+    (False, True),
+    (True, True),
+], ids=["xlog", "ylog", "xylog"])
+@visual_widget_test
+def test_visual_scatter2d_log(
+    tmp_path,
+    page_session,
+    solara_test,
+    x_log,
+    y_log,
+):
+
+    np.random.seed(12345)
+
+    app = jglue()
+
+    # Small dataset shown as scatter points
+    x_pts = np.random.lognormal(2, 0.5, 50)
+    y_pts = np.random.lognormal(1, 0.8, 50)
+    data_pts = app.add_data(points={"x": x_pts, "y": y_pts})[0]
+
+    # Large dataset shown as density map
+    x_dense = np.random.lognormal(2, 0.5, 500_000)
+    y_dense = np.random.lognormal(1, 0.8, 500_000)
+    data_dense = app.add_data(dense={"x": x_dense, "y": y_dense})[0]
+
+    app.add_link(data_pts, 'x', data_dense, 'x')
+    app.add_link(data_pts, 'y', data_dense, 'y')
+
+    scatter = app.scatter2d(show=False, data=data_pts)
+    scatter.add_data(data_dense)
+
+    # Density map layer behind, scatter points in front
+    scatter.state.layers[1].zorder = 0.5
+
+    # Create a subset that covers part of the data
+    app.data_collection.new_subset_group(
+        subset_state=data_pts.id['x'] > np.median(x_pts),
+        label='right half',
+    )
+
+    scatter.state.layers[0].color = 'orange'
+
+    # Set log scales
+    scatter.state.x_log = x_log
+    scatter.state.y_log = y_log
+
+    figure = scatter.figure_widget
+    figure.layout = {"width": "400px", "height": "250px"}
     return figure

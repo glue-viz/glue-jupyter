@@ -1,5 +1,104 @@
 from itertools import permutations
 
+import bqplot
+
+from glue_jupyter.state_traitlets_helpers import update_state_from_dict
+
+
+def test_scatter2d_log(app, dataxyz):
+
+    s = app.scatter2d(data=dataxyz)
+
+    # Initially linear scales
+    assert isinstance(s.scale_x, bqplot.LinearScale)
+    assert isinstance(s.scale_y, bqplot.LinearScale)
+
+    # Switch x to log
+    s.state.x_log = True
+    assert isinstance(s.scale_x, bqplot.LogScale)
+    assert isinstance(s.scale_y, bqplot.LinearScale)
+
+    # Check all marks reference the new scale
+    for mark in s.figure.marks:
+        if 'x' in mark.scales:
+            assert isinstance(mark.scales['x'], bqplot.LogScale)
+
+    # Check axis, figure, and interaction are updated
+    assert s.axis_x.scale is s.scale_x
+    assert s.figure.scale_x is s.scale_x
+    assert s._mouse_interact.x_scale is s.scale_x
+
+    # Switch y to log
+    s.state.y_log = True
+    assert isinstance(s.scale_y, bqplot.LogScale)
+    assert s.axis_y.scale is s.scale_y
+
+    # Switch back to linear
+    s.state.x_log = False
+    s.state.y_log = False
+    assert isinstance(s.scale_x, bqplot.LinearScale)
+    assert isinstance(s.scale_y, bqplot.LinearScale)
+
+
+def test_scatter2d_log_limits(app):
+
+    # Regression test: when toggling log scale with limits that include
+    # negative values, the limits should be automatically reset to
+    # positive values by the state's limit helper.
+
+    d = app.add_data(data={'x': [-10, -5, 0, 5, 15, 30],
+                           'y': [-5, 10, 20, 35, 40, 50]})[0]
+    s = app.scatter2d(data=d)
+
+    assert s.state.x_min < 0
+
+    s.state.x_log = True
+    assert s.state.x_min > 0
+    assert s.state.x_max > 0
+    assert s.scale_x.min == s.state.x_min
+    assert s.scale_x.max == s.state.x_max
+
+    # Also test the case where the user pans to negative limits
+    # with all-positive data, then enables log
+    s.state.x_log = False
+    s.state.x_min = -10
+    s.state.x_max = 30
+
+    s.state.x_log = True
+    assert s.state.x_min > 0
+    assert s.scale_x.min == s.state.x_min
+    assert s.scale_x.max == s.state.x_max
+
+
+def test_scatter2d_log_limits_browser_sync(app):
+
+    # Regression test: when the browser syncs state via GlueState,
+    # it sends the full state dict including stale x_min/x_max
+    # alongside the new x_log value. update_state_from_dict should
+    # pre-filter unchanged properties so that setting x_log doesn't
+    # cause the stale limits to be re-applied after the log callback
+    # has reset them to positive values.
+
+    d = app.add_data(data={'x': [-10, -5, 0, 5, 15, 30],
+                           'y': [-5, 10, 20, 35, 40, 50]})[0]
+    s = app.scatter2d(data=d)
+
+    stale_x_min = s.state.x_min
+    stale_x_max = s.state.x_max
+    assert stale_x_min < 0
+
+    # Simulate what the browser sends: x_log + stale limits together
+    update_state_from_dict(s.state, {
+        'x_log': True,
+        'x_min': stale_x_min,
+        'x_max': stale_x_max,
+    })
+
+    assert s.state.x_min > 0
+    assert s.state.x_max > 0
+    assert s.scale_x.min == s.state.x_min
+    assert s.scale_x.max == s.state.x_max
+
 
 def test_scatter2d_nd(app, data_4d):
     # Regression test for a bug that meant that arrays with more than one
