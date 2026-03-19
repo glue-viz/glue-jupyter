@@ -38,6 +38,66 @@ def test_scatter2d_log(app, dataxyz):
     assert isinstance(s.scale_y, bqplot.LinearScale)
 
 
+def test_scatter2d_log_limits(app):
+
+    # Regression test: when toggling log scale with limits that include
+    # negative values, the limits should be automatically reset to
+    # positive values by the state's limit helper.
+
+    d = app.add_data(data={'x': [-10, -5, 0, 5, 15, 30],
+                           'y': [-5, 10, 20, 35, 40, 50]})[0]
+    s = app.scatter2d(data=d)
+
+    assert s.state.x_min < 0
+
+    s.state.x_log = True
+    assert s.state.x_min > 0
+    assert s.state.x_max > 0
+    assert s.scale_x.min == s.state.x_min
+    assert s.scale_x.max == s.state.x_max
+
+    # Also test the case where the user pans to negative limits
+    # with all-positive data, then enables log
+    s.state.x_log = False
+    s.state.x_min = -10
+    s.state.x_max = 30
+
+    s.state.x_log = True
+    assert s.state.x_min > 0
+    assert s.scale_x.min == s.state.x_min
+    assert s.scale_x.max == s.state.x_max
+
+
+def test_scatter2d_log_limits_browser_sync(app):
+
+    # Regression test: when the browser syncs state via GlueState,
+    # it sends the full state dict including stale x_min/x_max
+    # alongside the new x_log value. Since update_from_dict processes
+    # x_log first (higher priority), the log callback fires, but then
+    # the stale negative limits overwrite the reset values. The viewer
+    # must detect and correct this.
+
+    d = app.add_data(data={'x': [-10, -5, 0, 5, 15, 30],
+                           'y': [-5, 10, 20, 35, 40, 50]})[0]
+    s = app.scatter2d(data=d)
+
+    stale_x_min = s.state.x_min
+    stale_x_max = s.state.x_max
+    assert stale_x_min < 0
+
+    # Simulate what the browser sends: x_log + stale limits together
+    s.state.update_from_dict({
+        'x_log': True,
+        'x_min': stale_x_min,
+        'x_max': stale_x_max,
+    })
+
+    assert s.state.x_min > 0
+    assert s.state.x_max > 0
+    assert s.scale_x.min == s.state.x_min
+    assert s.scale_x.max == s.state.x_max
+
+
 def test_scatter2d_nd(app, data_4d):
     # Regression test for a bug that meant that arrays with more than one
     # dimension did not work correctly.
