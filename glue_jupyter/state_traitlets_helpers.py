@@ -39,10 +39,31 @@ def update_state_from_dict(state, changes):
     if len(changes) == 0:
         return
 
-    groups = defaultdict(list)
+    # Determine which scalar properties actually differ from the current
+    # state BEFORE making any changes. This prevents callbacks triggered
+    # by high-priority properties from making lower-priority properties
+    # appear changed. For example, toggling x_log resets x_min/x_max via
+    # a callback, and without pre-filtering, stale x_min/x_max values
+    # from the browser would then be applied because they differ from the
+    # reset values.
+    actual_changes = {}
     for name in changes:
-        if state.is_callback_property(name):
-            groups[state._update_priority(name)].append(name)
+        if not state.is_callback_property(name):
+            continue
+        current = getattr(state, name)
+        if isinstance(current, (CallbackList, CallbackDict)):
+            actual_changes[name] = changes[name]
+        elif changes[name] == MAGIC_IGNORE:
+            continue
+        elif name == 'cmap':
+            if changes[name] != current.name:
+                actual_changes[name] = changes[name]
+        elif current != changes[name]:
+            actual_changes[name] = changes[name]
+
+    groups = defaultdict(list)
+    for name in actual_changes:
+        groups[state._update_priority(name)].append(name)
 
     for priority in sorted(groups, reverse=True):
         for name in groups[priority]:
@@ -55,32 +76,30 @@ def update_state_from_dict(state, changes):
                     # specified, only indices referring to existing list items
                     # will be updated, and if a list, extra elements will be
                     # ignored.
-                    if (isinstance(changes[name], dict) and i in changes[name]
-                            or isinstance(changes[name], list) and i < len(changes[name])):
+                    if (isinstance(actual_changes[name], dict) and i in actual_changes[name]
+                            or isinstance(actual_changes[name], list) and i < len(actual_changes[name])):
                         if isinstance(callback_list[i], State):
-                            update_state_from_dict(callback_list[i], changes[name][i])
+                            update_state_from_dict(callback_list[i], actual_changes[name][i])
                         else:
-                            if (changes[name][i] != MAGIC_IGNORE and
-                                    callback_list[i] != changes[name][i]):
-                                callback_list[i] = changes[name][i]
+                            if (actual_changes[name][i] != MAGIC_IGNORE and
+                                    callback_list[i] != actual_changes[name][i]):
+                                callback_list[i] = actual_changes[name][i]
             elif isinstance(getattr(state, name), CallbackDict):
                 callback_dict = getattr(state, name)
 
                 for k in callback_dict:
-                    if k in changes[name]:
+                    if k in actual_changes[name]:
                         if isinstance(callback_dict[k], State):
-                            update_state_from_dict(callback_dict[k], changes[name][k])
+                            update_state_from_dict(callback_dict[k], actual_changes[name][k])
                         else:
-                            if (changes[name][k] != MAGIC_IGNORE and
-                                    callback_dict[k] != changes[name][k]):
-                                callback_dict[k] = changes[name][k]
+                            if (actual_changes[name][k] != MAGIC_IGNORE and
+                                    callback_dict[k] != actual_changes[name][k]):
+                                callback_dict[k] = actual_changes[name][k]
             else:
-                if changes[name] != MAGIC_IGNORE and getattr(state, name) != changes[name]:
-                    if name == 'cmap':
-                        if changes[name] != state.cmap.name:
-                            setattr(state, name, colormaps.get_cmap(changes[name]))
-                    else:
-                        setattr(state, name, changes[name])
+                if name == 'cmap':
+                    setattr(state, name, colormaps.get_cmap(actual_changes[name]))
+                else:
+                    setattr(state, name, actual_changes[name])
 
 
 class GlueStateJSONEncoder(json.JSONEncoder):

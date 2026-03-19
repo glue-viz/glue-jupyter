@@ -2,6 +2,8 @@ from itertools import permutations
 
 import bqplot
 
+from glue_jupyter.state_traitlets_helpers import update_state_from_dict
+
 
 def test_scatter2d_log(app, dataxyz):
 
@@ -72,10 +74,10 @@ def test_scatter2d_log_limits_browser_sync(app):
 
     # Regression test: when the browser syncs state via GlueState,
     # it sends the full state dict including stale x_min/x_max
-    # alongside the new x_log value. Since update_from_dict processes
-    # x_log first (higher priority), the log callback fires, but then
-    # the stale negative limits overwrite the reset values. The viewer
-    # must detect and correct this.
+    # alongside the new x_log value. update_state_from_dict should
+    # pre-filter unchanged properties so that setting x_log doesn't
+    # cause the stale limits to be re-applied after the log callback
+    # has reset them to positive values.
 
     d = app.add_data(data={'x': [-10, -5, 0, 5, 15, 30],
                            'y': [-5, 10, 20, 35, 40, 50]})[0]
@@ -86,7 +88,7 @@ def test_scatter2d_log_limits_browser_sync(app):
     assert stale_x_min < 0
 
     # Simulate what the browser sends: x_log + stale limits together
-    s.state.update_from_dict({
+    update_state_from_dict(s.state, {
         'x_log': True,
         'x_min': stale_x_min,
         'x_max': stale_x_max,

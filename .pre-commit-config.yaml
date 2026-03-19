@@ -49,6 +49,11 @@ repos:
       - id: text-unicode-replacement-char
         # Forbid files which have a UTF-8 Unicode replacement character.
 
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.14.14"
     hooks:
