@@ -258,6 +258,11 @@ class BqplotBaseView(IPyWidgetView):
         if isinstance(old_scale, scale_cls):
             return
 
+        # Disconnect the old scale so that any pending browser syncs
+        # don't overwrite the state's limits via update_glue_scales
+        old_scale.unobserve(self.update_glue_scales, 'min')
+        old_scale.unobserve(self.update_glue_scales, 'max')
+
         new_scale = scale_cls(**({'allow_padding': False} if axis == 'x' else {}))
 
         # Set limits if valid for the new scale type
