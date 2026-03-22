@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from glue.core import Data
 
 from glue_jupyter.table import TableViewer
@@ -292,28 +293,32 @@ def test_table_editable_components(app, dataxyz):
     assert y_header['editable'] is True
     assert z_header['editable'] is False
 
-
-def test_table_cell_edit(app, dataxyz):
+@pytest.mark.parametrize('new_value', [999, 1.4e-12, np.inf, np.nan])
+def test_table_cell_edit(app, datamix, new_value):
     """Test that cell editing updates the underlying data."""
-    table = app.table(data=dataxyz)
+    app.add_data(datamix)
+    table = app.table(data=datamix)
 
-    # Enable editing for column 'x'
-    table.state.editable_components = [dataxyz.id['x']]
+    # Enable editing for float column
+    column = 'y'
+    table.state.editable_components = [datamix.id[column]]
 
     # Get original value
-    original_value = dataxyz['x'][0]
+    original_value = datamix[column][0]
 
     # Simulate cell edit
-    new_value = 999
     table.widget_table.vue_cell_edited({
         'row': 0,
-        'column': 'x',
+        'column': column,
         'value': str(new_value)
     })
 
     # Verify data was updated
-    assert dataxyz['x'][0] == new_value
-    assert dataxyz['x'][0] != original_value
+    if np.isnan(new_value):
+        assert np.isnan(datamix[column][0])
+    else:
+        assert datamix[column][0] == new_value
+    assert datamix[column][0] != original_value
 
 
 def test_table_cell_edit_type_conversion(app, dataxyz):
