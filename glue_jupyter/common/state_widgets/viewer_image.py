@@ -12,13 +12,19 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
     template_file = (__file__, 'viewer_image.vue')
 
     sliders = traitlets.List().tag(sync=True)
+
+    # The slices property on the viewer state is a tuple with one entry per
+    # data dimension (e.g. (0, 0, 50, 100)).  The template binds each extra-
+    # dimension slider to a single element of this list.  Because autoconnect
+    # maps one property to one traitlet, it cannot handle this element-level
+    # binding, so we sync the full list manually.  Equality checks in both
+    # directions prevent infinite update cycles.
     slices = traitlets.List().tag(sync=True)
 
     def __init__(self, viewer_state):
         super().__init__()
 
         self.viewer_state = viewer_state
-        self._updating_slices = False
 
         autoconnect_callbacks_to_vue(viewer_state, self,
                                      extras={'aspect': 'text'})
@@ -48,11 +54,8 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
                 new_slices.append(self.viewer_state.slices[i])
         self.viewer_state.slices = tuple(new_slices)
 
-        self._updating_slices = True
-        try:
+        if list(self.viewer_state.slices) != self.slices:
             self.slices = list(self.viewer_state.slices)
-        finally:
-            self._updating_slices = False
 
         self.sliders = [{
             'index': i,
@@ -71,10 +74,6 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
 
     @traitlets.observe('slices')
     def _on_slices_change(self, change):
-        if self._updating_slices:
-            return
-        self._updating_slices = True
-        try:
-            self.viewer_state.slices = tuple(change['new'])
-        finally:
-            self._updating_slices = False
+        new_slices = tuple(change['new'])
+        if new_slices != self.viewer_state.slices:
+            self.viewer_state.slices = new_slices
