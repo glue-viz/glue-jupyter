@@ -13,9 +13,7 @@ class HistogramViewerStateWidget(v.VuetifyTemplate):
 
         self.viewer_state = viewer_state
 
-        autoconnect_callbacks_to_vue(viewer_state, self,
-                                     extras={'normalize': 'bool',
-                                             'cumulative': 'bool'})
+        autoconnect_callbacks_to_vue(viewer_state, self)
 
     def vue_bins_to_axis(self, *args):
         self.viewer_state.update_bins_to_view()

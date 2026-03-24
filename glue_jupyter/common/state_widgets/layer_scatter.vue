@@ -9,10 +9,10 @@
                 <v-select label="attribute" :items="cmap_att_items" v-model="cmap_att_selected" hide-details />
             </div>
             <div>
-                <glue-float-field label="min" :value.sync="cmap_vmin" echo-type="number" />
+                <glue-float-field label="min" :value.sync="cmap_vmin" echo-type="float" />
             </div>
             <div>
-                <glue-float-field label="max" :value.sync="cmap_vmax" echo-type="number" />
+                <glue-float-field label="max" :value.sync="cmap_vmax" echo-type="float" />
             </div>
             <div>
                 <v-select label="colormap" :items="cmap_items" v-model="cmap" hide-details/>
@@ -20,7 +20,7 @@
         </template>
         <div>
             <v-subheader class="pl-0 slider-label">opacity</v-subheader>
-            <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="alpha" echo-type="number" hide-details />
+            <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="alpha" echo-type="float" hide-details />
         </div>
         <div class="text-subtitle-2 font-weight-bold">Points</div>
         <div>
@@ -39,20 +39,20 @@
                     <v-select label="attribute" :items="size_att_items" v-model="size_att_selected" hide-details />
                 </div>
                 <div>
-                    <glue-float-field label="min" :value.sync="size_vmin" echo-type="number" />
+                    <glue-float-field label="min" :value.sync="size_vmin" echo-type="float" />
                 </div>
                 <div>
-                    <glue-float-field label="max" :value.sync="size_vmax" echo-type="number" />
+                    <glue-float-field label="max" :value.sync="size_vmax" echo-type="float" />
                 </div>
             </template>
             <template v-if="density_map">
                 <div>
                     <v-subheader class="pl-0 slider-label">dpi</v-subheader>
-                    <glue-throttled-slider wait="300" min="12" max="144" step="1" :value.sync="dpi" echo-type="number" hide-details />
+                    <glue-throttled-slider wait="300" min="12" max="144" step="1" :value.sync="dpi" echo-type="float" hide-details />
                 </div>
                 <div>
                     <v-subheader class="pl-0 slider-label">contrast</v-subheader>
-                    <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="density_contrast" echo-type="number"
+                    <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="density_contrast" echo-type="float"
                                          hide-details />
                 </div>
             </template>
@@ -63,7 +63,7 @@
                 </div>
                 <div>
                     <v-subheader class="pl-0 slider-label">size scaling</v-subheader>
-                    <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" :value.sync="size_scaling" echo-type="number"
+                    <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" :value.sync="size_scaling" echo-type="float"
                         hide-details />
                 </div>
             </template>
@@ -76,7 +76,7 @@
         <template v-if="line_visible">
             <div>
                 <v-subheader class="pl-0 slider-label">width</v-subheader>
-                <glue-throttled-slider wait="300" min="1" max="20" step="1" :value.sync="linewidth" echo-type="number" hide-details />
+                <glue-throttled-slider wait="300" min="1" max="20" step="1" :value.sync="linewidth" echo-type="float" hide-details />
             </div>
             <div>
                 <v-select label="linestyle" :items="linestyle_items" v-model="linestyle_selected" hide-details />
@@ -99,7 +99,7 @@
             </div>
             <div>
                 <v-subheader class="pl-0 slider-label">vector size</v-subheader>
-                <glue-throttled-slider wait="300" min="0.01" max="1" step="0.01" :value.sync="vector_scaling" echo-type="number"
+                <glue-throttled-slider wait="300" min="0.01" max="1" step="0.01" :value.sync="vector_scaling" echo-type="float"
                     hide-details />
             </div>
         </template>
