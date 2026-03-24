@@ -48,7 +48,7 @@
             <template v-if="density_map">
                 <div>
                     <v-subheader class="pl-0 slider-label">dpi</v-subheader>
-                    <glue-throttled-slider wait="300" min="12" max="144" step="1" :value.sync="dpi" hide-details />
+                    <glue-throttled-slider wait="300" min="12" max="144" step="1" :value.sync="dpi" echo-type="number" hide-details />
                 </div>
                 <div>
                     <v-subheader class="pl-0 slider-label">contrast</v-subheader>

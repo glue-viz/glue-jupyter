@@ -18,7 +18,8 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
 
         autoconnect_callbacks_to_vue(layer_state, self,
                                      extras={'density_map': 'bool',
-                                             'cmap': cmap_extras(self)})
+                                             'cmap': cmap_extras(self)},
+                                     skip={'dpi'})
 
         autoconnect_callbacks_to_vue(layer_state.viewer_state, self,
                                      only={'dpi': 'number'})
