@@ -8,15 +8,13 @@ import traitlets
 
 from echo.vue import autoconnect_callbacks_to_vue
 
-from ...vuetify_helpers import cmap_extras, link_glue
+from ...vuetify_helpers import cmap_extras
 
 __all__ = ['ImageLayerStateWidget', 'ImageSubsetLayerStateWidget']
 
 
 class ImageLayerStateWidget(v.VuetifyTemplate):
     template_file = (__file__, 'layer_image.vue')
-
-    color_mode = traitlets.Unicode().tag(sync=True)
 
     c_levels_txt = traitlets.Unicode().tag(sync=True)
     c_levels_txt_editing = False
@@ -39,8 +37,8 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
 
         autoconnect_callbacks_to_vue(layer_state, self, extras=extras)
 
-        # color_mode comes from the viewer state, not the layer state
-        link_glue(self, 'color_mode', layer_state.viewer_state)
+        autoconnect_callbacks_to_vue(layer_state.viewer_state, self,
+                                     only={'color_mode': 'text'})
 
         if self.has_contour:
             # Sync contour levels to editable text
