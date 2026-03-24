@@ -4,7 +4,6 @@ import traitlets
 from glue.config import colormaps
 
 from echo.vue import autoconnect_callbacks_to_vue
-from echo.vue._connect import connect_bool
 
 from ...vuetify_helpers import link_glue
 
@@ -25,14 +24,12 @@ class ScatterLayerStateWidget(v.VuetifyTemplate):
 
         self.layer_state = layer_state
 
-        autoconnect_callbacks_to_vue(layer_state, self)
+        autoconnect_callbacks_to_vue(layer_state, self,
+                                     extras={'density_map': 'bool'})
 
         self.cmap_items = [
             {"text": cmap[0], "value": cmap[1].name} for cmap in colormaps.members
         ]
-
-        # density_map is only used in v-if, not bound to a component
-        connect_bool(layer_state, 'density_map', self)
 
         # Sync colormap name (Colormap objects can't be serialized directly)
         def _sync_cmap_name(*args):

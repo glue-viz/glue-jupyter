@@ -8,7 +8,6 @@ import ipyvuetify as v
 import traitlets
 
 from echo.vue import autoconnect_callbacks_to_vue
-from echo.vue._connect import connect_bool, connect_text
 
 from ...vuetify_helpers import link_glue
 
@@ -35,7 +34,13 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
 
         self.has_contour = hasattr(layer_state, "contour_visible")
 
-        autoconnect_callbacks_to_vue(layer_state, self)
+        extras = {}
+        if self.has_contour:
+            extras.update({'contour_visible': 'bool',
+                           'bitmap_visible': 'bool',
+                           'level_mode': 'text'})
+
+        autoconnect_callbacks_to_vue(layer_state, self, extras=extras)
 
         self.colormap_items = [dict(
             text=cmap[0],
@@ -52,11 +57,6 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
         link_glue(self, 'color_mode', layer_state.viewer_state)
 
         if self.has_contour:
-            # Properties only used in v-if/click handlers, not bound to components
-            connect_bool(layer_state, 'contour_visible', self)
-            connect_bool(layer_state, 'bitmap_visible', self)
-            connect_text(layer_state, 'level_mode', self)
-
             # Sync contour levels to editable text
             def levels_to_text(*_ignore):
                 if not self.c_levels_txt_editing:

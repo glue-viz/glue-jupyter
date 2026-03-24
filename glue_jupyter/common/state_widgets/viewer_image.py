@@ -4,7 +4,6 @@ import ipyvuetify as v
 import traitlets
 
 from echo.vue import autoconnect_callbacks_to_vue
-from echo.vue._connect import connect_text
 
 __all__ = ['ImageViewerStateWidget']
 
@@ -21,10 +20,8 @@ class ImageViewerStateWidget(v.VuetifyTemplate):
         self.viewer_state = viewer_state
         self._updating_slices = False
 
-        autoconnect_callbacks_to_vue(viewer_state, self)
-
-        # aspect is only used in JS expressions, not bound to a known component
-        connect_text(viewer_state, 'aspect', self)
+        autoconnect_callbacks_to_vue(viewer_state, self,
+                                     extras={'aspect': 'text'})
 
         # Set up sliders for remaining dimensions
 
