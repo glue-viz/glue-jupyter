@@ -376,12 +376,12 @@ def test_imshow_nonfloat(app):
 def test_show_axes(app, dataxyz):
     s = app.scatter2d(x='x', y='y', data=dataxyz)
     assert s.state.show_axes
-    assert s.viewer_options.glue_state.show_axes
+    assert s.viewer_options.show_axes
     margin_initial = s.figure.fig_margin
     s.state.show_axes = False
-    assert not s.viewer_options.glue_state.show_axes
+    assert not s.viewer_options.show_axes
     assert s.figure.fig_margin != margin_initial
-    s.viewer_options.glue_state.show_axes = True
+    s.viewer_options.show_axes = True
     assert s.state.show_axes
     assert s.figure.fig_margin == margin_initial
 

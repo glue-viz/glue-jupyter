@@ -7,10 +7,10 @@
             <v-text-field type="number" step="1" label="number of bins" v-model="hist_n_bin" />
         </div>
         <div>
-            <glue-float-field label="x-min" :value.sync="hist_x_min" echo-type="value" />
+            <glue-float-field label="x-min" :value.sync="hist_x_min" echo-type="number" />
         </div>
         <div>
-            <glue-float-field label="x-max" :value.sync="hist_x_max" echo-type="value" />
+            <glue-float-field label="x-max" :value.sync="hist_x_max" echo-type="number" />
         </div>
         <div>
             <v-toolbar density="compact" >
