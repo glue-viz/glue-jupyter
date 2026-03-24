@@ -4,13 +4,13 @@
             <v-select :items="x_att_items" label="x axis" v-model="x_att_selected"/>
         </div>
         <div>
-            <v-text-field type="number" step="1" label="number of bins" v-model="glue_state.hist_n_bin" />
+            <v-text-field type="number" step="1" label="number of bins" v-model="hist_n_bin" />
         </div>
         <div>
-            <glue-float-field label="x-min" :value.sync="glue_state.hist_x_min" />
+            <glue-float-field label="x-min" :value.sync="hist_x_min" echo-type="value" />
         </div>
         <div>
-            <glue-float-field label="x-max" :value.sync="glue_state.hist_x_max" />
+            <glue-float-field label="x-max" :value.sync="hist_x_max" echo-type="value" />
         </div>
         <div>
             <v-toolbar density="compact" >
@@ -36,20 +36,20 @@
                   </v-btn>
             </v-toolbar>
         </div>
-        <v-switch v-model="glue_state.show_axes" label="Show axes" hide-details/>
+        <v-switch v-model="show_axes" label="Show axes" hide-details/>
     </div>
 </template>
 <script>
     module.exports = {
         computed: {
             modeSet() {
-                return [this.glue_state.normalize && 'normalize', this.glue_state.cumulative && 'cumulative']
+                return [this.normalize && 'normalize', this.cumulative && 'cumulative']
             }
         },
         methods: {
             modeSetChange(v) {
-                this.glue_state.normalize = v.includes('normalize');
-                this.glue_state.cumulative = v.includes('cumulative');
+                this.normalize = v.includes('normalize');
+                this.cumulative = v.includes('cumulative');
             }
         }
     }

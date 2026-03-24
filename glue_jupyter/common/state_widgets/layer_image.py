@@ -6,8 +6,11 @@ from ...link import link
 
 import ipyvuetify as v
 import traitlets
-from ...state_traitlets_helpers import GlueState
-from ...vuetify_helpers import link_glue_choices, link_glue
+
+from echo.vue import autoconnect_callbacks_to_vue
+from echo.vue._connect import connect_bool, connect_text
+
+from ...vuetify_helpers import link_glue
 
 __all__ = ['ImageLayerStateWidget', 'ImageSubsetLayerStateWidget']
 
@@ -15,20 +18,8 @@ __all__ = ['ImageLayerStateWidget', 'ImageSubsetLayerStateWidget']
 class ImageLayerStateWidget(v.VuetifyTemplate):
     template_file = (__file__, 'layer_image.vue')
 
-    glue_state = GlueState().tag(sync=True)
-
-    # TODO: expose toggle to turn on image and/or contour
-
-    attribute_items = traitlets.List().tag(sync=True)
-    attribute_selected = traitlets.Int(allow_none=True).tag(sync=True)
-
-    stretch_items = traitlets.List().tag(sync=True)
-    stretch_selected = traitlets.Int(allow_none=True).tag(sync=True)
-
-    percentile_items = traitlets.List().tag(sync=True)
-    percentile_selected = traitlets.Int(allow_none=True).tag(sync=True)
-
     colormap_items = traitlets.List().tag(sync=True)
+    cmap_name = traitlets.Unicode().tag(sync=True)
     color_mode = traitlets.Unicode().tag(sync=True)
 
     c_levels_txt = traitlets.Unicode().tag(sync=True)
@@ -41,30 +32,38 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
         super().__init__()
 
         self.layer_state = layer_state
-        self.glue_state = layer_state
 
         self.has_contour = hasattr(layer_state, "contour_visible")
 
-        link_glue_choices(self, layer_state, 'attribute')
-        link_glue_choices(self, layer_state, 'stretch')
-        link_glue_choices(self, layer_state, 'percentile')
+        autoconnect_callbacks_to_vue(layer_state, self)
 
         self.colormap_items = [dict(
             text=cmap[0],
             value=cmap[1].name
         ) for cmap in colormaps.members]
 
+        # Sync colormap name (Colormap objects can't be serialized directly)
+        def _sync_cmap_name(*args):
+            self.cmap_name = layer_state.cmap.name if layer_state.cmap is not None else ''
+        layer_state.add_callback('cmap', _sync_cmap_name)
+        _sync_cmap_name()
+
+        # color_mode comes from the viewer state, not the layer state
         link_glue(self, 'color_mode', layer_state.viewer_state)
 
-        # we only go from glue state to the text version of the level list
-        # the other way around is handled in _on_change_c_levels_txt
         if self.has_contour:
+            # Properties only used in v-if/click handlers, not bound to components
+            connect_bool(layer_state, 'contour_visible', self)
+            connect_bool(layer_state, 'bitmap_visible', self)
+            connect_text(layer_state, 'level_mode', self)
+
+            # Sync contour levels to editable text
             def levels_to_text(*_ignore):
                 if not self.c_levels_txt_editing:
-                    text = ", ".join('%g' % v for v in self.glue_state.levels)
+                    text = ", ".join('%g' % v for v in layer_state.levels)
                     self.c_levels_txt = text
 
-            self.glue_state.add_callback('levels', levels_to_text)
+            layer_state.add_callback('levels', levels_to_text)
 
     @traitlets.observe('c_levels_txt')
     def _on_change_c_levels_txt(self, change):
@@ -77,8 +76,8 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
                 self.c_levels_error = str(e)
                 return
 
-            if self.glue_state.level_mode == "Custom":
-                self.glue_state.levels = float_list_str
+            if self.layer_state.level_mode == "Custom":
+                self.layer_state.levels = float_list_str
             self.c_levels_error = ''
         finally:
             self.c_levels_txt_editing = False

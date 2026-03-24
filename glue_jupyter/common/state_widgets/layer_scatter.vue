@@ -4,90 +4,90 @@
         <div>
             <v-select label="color" :items="cmap_mode_items" v-model="cmap_mode_selected" hide-details />
         </div>
-        <template v-if="glue_state.cmap_mode === 'Linear'">
+        <template v-if="cmap_mode_text === 'Linear'">
             <div>
                 <v-select label="attribute" :items="cmap_att_items" v-model="cmap_att_selected" hide-details />
             </div>
             <div>
-                <glue-float-field label="min" :value.sync="glue_state.cmap_vmin" />
+                <glue-float-field label="min" :value.sync="cmap_vmin" echo-type="value" />
             </div>
             <div>
-                <glue-float-field label="max" :value.sync="glue_state.cmap_vmax" />
+                <glue-float-field label="max" :value.sync="cmap_vmax" echo-type="value" />
             </div>
             <div>
-                <v-select label="colormap" :items="cmap_items" :value="glue_state.cmap" @change="set_colormap" hide-details/>
+                <v-select label="colormap" :items="cmap_items" :value="cmap_name" @change="set_colormap" hide-details/>
             </div>
         </template>
         <div>
             <v-subheader class="pl-0 slider-label">opacity</v-subheader>
-            <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="glue_state.alpha" hide-details />
+            <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="alpha" echo-type="value" hide-details />
         </div>
         <div class="text-subtitle-2 font-weight-bold">Points</div>
         <div>
             <v-subheader class="pl-0 slider-label">show points</v-subheader>
-            <v-switch v-model="glue_state.markers_visible" hide-details style="margin-top: 0" />
+            <v-switch v-model="markers_visible" hide-details style="margin-top: 0" />
         </div>
-        <template v-if="glue_state.markers_visible">
+        <template v-if="markers_visible">
             <div>
                 <v-select label="type" :items="points_mode_items" v-model="points_mode_selected" hide-details />
             </div>
-            <div v-if="glue_state.density_map === false">
+            <div v-if="density_map === false">
                 <v-select label="size" :items="size_mode_items" v-model="size_mode_selected" hide-details />
             </div>
-            <template v-if="glue_state.size_mode === 'Linear'">
+            <template v-if="size_mode_text === 'Linear'">
                 <div>
                     <v-select label="attribute" :items="size_att_items" v-model="size_att_selected" hide-details />
                 </div>
                 <div>
-                    <glue-float-field label="min" :value.sync="glue_state.size_vmin" />
+                    <glue-float-field label="min" :value.sync="size_vmin" echo-type="value" />
                 </div>
                 <div>
-                    <glue-float-field label="max" :value.sync="glue_state.size_vmax" />
+                    <glue-float-field label="max" :value.sync="size_vmax" echo-type="value" />
                 </div>
             </template>
-            <template v-if="glue_state.density_map">
+            <template v-if="density_map">
                 <div>
                     <v-subheader class="pl-0 slider-label">dpi</v-subheader>
-                    <glue-throttled-slider wait="300" min="12" max="144" step="1" :value.sync="dpi" hide-details />
+                    <glue-throttled-slider wait="300" min="12" max="144" step="1" :value.sync="dpi" echo-type="value" hide-details />
                 </div>
                 <div>
                     <v-subheader class="pl-0 slider-label">contrast</v-subheader>
-                    <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="glue_state.density_contrast"
+                    <glue-throttled-slider wait="300" min="0" max="1" step="0.01" :value.sync="density_contrast" echo-type="value"
                                          hide-details />
                 </div>
             </template>
             <template v-else>
                 <div>
                     <v-subheader class="pl-0 slider-label">fill markers</v-subheader>
-                    <v-switch v-model="glue_state.fill" hide-details style="margin-top: 0" />
+                    <v-switch v-model="fill" hide-details style="margin-top: 0" />
                 </div>
                 <div>
                     <v-subheader class="pl-0 slider-label">size scaling</v-subheader>
-                    <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" :value.sync="glue_state.size_scaling"
+                    <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" :value.sync="size_scaling" echo-type="value"
                         hide-details />
                 </div>
             </template>
         </template>
-        <div class="text-subtitle-2 font-weight-bold" :style="glue_state.markers_visible ? {} : {marginTop: '6px'}">Line</div>
+        <div class="text-subtitle-2 font-weight-bold" :style="markers_visible ? {} : {marginTop: '6px'}">Line</div>
         <div>
             <v-subheader class="pl-0 slider-label">show line</v-subheader>
-            <v-switch v-model="glue_state.line_visible" hide-details style="margin-top: 0"/>
+            <v-switch v-model="line_visible" hide-details style="margin-top: 0"/>
         </div>
-        <template v-if="glue_state.line_visible">
+        <template v-if="line_visible">
             <div>
                 <v-subheader class="pl-0 slider-label">width</v-subheader>
-                <glue-throttled-slider wait="300" min="1" max="20" step="1" :value.sync="glue_state.linewidth" hide-details />
+                <glue-throttled-slider wait="300" min="1" max="20" step="1" :value.sync="linewidth" echo-type="value" hide-details />
             </div>
             <div>
                 <v-select label="linestyle" :items="linestyle_items" v-model="linestyle_selected" hide-details />
             </div>
         </template>
-        <div class="text-subtitle-2 font-weight-bold" :style="glue_state.markers_visible ? {} : {marginTop: '6px'}">Vectors</div>
+        <div class="text-subtitle-2 font-weight-bold" :style="markers_visible ? {} : {marginTop: '6px'}">Vectors</div>
         <div>
             <v-subheader class="pl-0 slider-label">show vectors</v-subheader>
-            <v-switch v-model="glue_state.vector_visible" hide-details style="margin-top: 0"/>
+            <v-switch v-model="vector_visible" hide-details style="margin-top: 0"/>
         </div>
-        <template v-if="glue_state.vector_visible">
+        <template v-if="vector_visible">
             <div>
                 <v-select label="vx" :items="vx_att_items" v-model="vx_att_selected" hide-details />
             </div>
@@ -99,13 +99,25 @@
             </div>
             <div>
                 <v-subheader class="pl-0 slider-label">vector size</v-subheader>
-                <glue-throttled-slider wait="300" min="0.01" max="1" step="0.01" :value.sync="glue_state.vector_scaling"
+                <glue-throttled-slider wait="300" min="0.01" max="1" step="0.01" :value.sync="vector_scaling" echo-type="value"
                     hide-details />
             </div>
         </template>
     </div>
 </template>
 <script>
+    module.exports = {
+        computed: {
+            cmap_mode_text() {
+                var item = this.cmap_mode_items && this.cmap_mode_items[this.cmap_mode_selected];
+                return item ? item.text : '';
+            },
+            size_mode_text() {
+                var item = this.size_mode_items && this.size_mode_items[this.size_mode_selected];
+                return item ? item.text : '';
+            }
+        }
+    }
 </script>
 <style id="layer_scatter">
 .glue-layer-scatter .v-subheader.slider-label {
