@@ -15,7 +15,7 @@
                 <glue-float-field label="max" :value.sync="cmap_vmax" echo-type="value" />
             </div>
             <div>
-                <v-select label="colormap" :items="cmap_items" :value="cmap_name" @change="set_colormap" hide-details/>
+                <v-select label="colormap" :items="cmap_items" v-model="cmap" hide-details/>
             </div>
         </template>
         <div>

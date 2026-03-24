@@ -1,5 +1,4 @@
 from ipywidgets import Checkbox, FloatSlider, ColorPicker, VBox
-from glue.config import colormaps
 from glue.utils import color2hex
 
 from ...link import link
@@ -9,7 +8,7 @@ import traitlets
 
 from echo.vue import autoconnect_callbacks_to_vue
 
-from ...vuetify_helpers import link_glue
+from ...vuetify_helpers import cmap_extras, link_glue
 
 __all__ = ['ImageLayerStateWidget', 'ImageSubsetLayerStateWidget']
 
@@ -17,8 +16,6 @@ __all__ = ['ImageLayerStateWidget', 'ImageSubsetLayerStateWidget']
 class ImageLayerStateWidget(v.VuetifyTemplate):
     template_file = (__file__, 'layer_image.vue')
 
-    colormap_items = traitlets.List().tag(sync=True)
-    cmap_name = traitlets.Unicode().tag(sync=True)
     color_mode = traitlets.Unicode().tag(sync=True)
 
     c_levels_txt = traitlets.Unicode().tag(sync=True)
@@ -34,24 +31,13 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
 
         self.has_contour = hasattr(layer_state, "contour_visible")
 
-        extras = {}
+        extras = {'cmap': cmap_extras(self)}
         if self.has_contour:
             extras.update({'contour_visible': 'bool',
                            'bitmap_visible': 'bool',
                            'level_mode': 'text'})
 
         autoconnect_callbacks_to_vue(layer_state, self, extras=extras)
-
-        self.colormap_items = [dict(
-            text=cmap[0],
-            value=cmap[1].name
-        ) for cmap in colormaps.members]
-
-        # Sync colormap name (Colormap objects can't be serialized directly)
-        def _sync_cmap_name(*args):
-            self.cmap_name = layer_state.cmap.name if layer_state.cmap is not None else ''
-        layer_state.add_callback('cmap', _sync_cmap_name)
-        _sync_cmap_name()
 
         # color_mode comes from the viewer state, not the layer state
         link_glue(self, 'color_mode', layer_state.viewer_state)
@@ -81,15 +67,6 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
             self.c_levels_error = ''
         finally:
             self.c_levels_txt_editing = False
-
-    def vue_set_colormap(self, data):
-        cmap = None
-        for member in colormaps.members:
-            if member[1].name == data:
-                cmap = member[1]
-                break
-
-        self.layer_state.cmap = cmap
 
 
 class ImageSubsetLayerStateWidget(VBox):

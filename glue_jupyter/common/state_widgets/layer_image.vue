@@ -78,27 +78,13 @@
                     <glue-float-field label="max" :value.sync="v_max" echo-type="value" />
                 </div>
                 <div v-if="color_mode === 'Colormaps'">
-                    <v-select label="colormap" :items="colormap_items" :value="cmap_name" @change="set_colormap" />
+                    <v-select label="colormap" :items="cmap_items" v-model="cmap" />
                 </div>
             </div>
         </v-expand-transition>
     </div>
 </template>
 <script>
-    modules.export = {
-        methods: {
-            /* TODO: use @change with debounce instead of @end */
-            setAlpha(value) {
-                this.alpha = value;
-            },
-            setContrast(value) {
-                this.contrast = value;
-            },
-            setBias(value) {
-                this.bias = value;
-            },
-        },
-    }
 </script>
 <style id="layer_image">
     .v-subheader.slider-label {
