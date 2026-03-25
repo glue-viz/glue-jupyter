@@ -71,8 +71,9 @@ nbtest = [
 visualtest = [
     "playwright==1.41.2",
     "pytest-playwright==0.5.2",
-    "pytest-mpl",
+    "pytest-mpl>=0.19.0",
     "solara[pytest]>=1.44.1",
+    "starlette<1.0"
 ]
 
 [build-system]
