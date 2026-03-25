@@ -44,7 +44,7 @@ class Color(widgets.VBox):
         self.widget_cmap = widgets.Dropdown(options=colormaps, description='colormap')
         children.append(self.widget_cmap)
         link((self.state, 'cmap'), (self.widget_cmap, 'label'),
-             lambda cmap: colormaps.name_from_cmap(cmap), lambda name: colormaps[name])
+             colormaps.name_from_cmap, lambda name: colormaps[name])
 
         dlink((self.widget_color_mode, 'value'), (self.widget_color.layout, 'display'),
               lambda value: None if value == color_mode_options[0] else 'none')
