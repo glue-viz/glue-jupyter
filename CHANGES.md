@@ -1,5 +1,29 @@
 # Full changelog
 
+## v0.27.0 - 2026-03-25
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+* Update binder setup and Gaia notebook by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/517
+* Correct error propagation for distances from Gaia parallaxes by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/518
+* Corrects linestyle change behaviour in scatter by @CyclingNinja in https://github.com/glue-viz/glue-jupyter/pull/524
+* Replace nonfunctional PointSelectTool by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/508
+
+#### New Features
+
+* Improve UI for selecting rows by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/516
+* Provide a way to edit cells in table viewer by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/515
+
+#### Other Changes
+
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci[bot] in https://github.com/glue-viz/glue-jupyter/pull/521
+* Update ui test decorators with tolerance by @CyclingNinja in https://github.com/glue-viz/glue-jupyter/pull/523
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.26.0...v0.27.0
+
 ## v0.26.0 - 2026-02-11
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
