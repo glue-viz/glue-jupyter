@@ -73,6 +73,7 @@ visualtest = [
     "pytest-playwright==0.5.2",
     "pytest-mpl>=0.19.0",
     "solara[pytest]>=1.44.1",
+    "starlette<1.0"
 ]
 
 [build-system]
