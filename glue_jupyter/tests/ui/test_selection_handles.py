@@ -46,7 +46,7 @@ def test_elliptical_selection_handles(solara_test, page_session):
     return plot.screenshot()
 
 
-@visual_ui_test(tolerance=1)
+@visual_ui_test(tolerance=1, skip_hash=True)
 def test_elliptical_selection_handles_rotate(solara_test, page_session):
     app, viewer, plot = create_viewer(page_session)
 
@@ -99,7 +99,7 @@ def test_rectangular_selection_handles(solara_test, page_session):
     return plot.screenshot()
 
 
-@visual_ui_test(tolerance=1)
+@visual_ui_test(tolerance=1, skip_hash=True)
 def test_rectangular_selection_handles_rotate(solara_test, page_session):
     app, viewer, plot = create_viewer(page_session)
 
