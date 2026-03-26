@@ -29,19 +29,19 @@ def test_elliptical_selection_handles(solara_test, page_session):
     page_session.mouse.move(240, 31)
     page_session.mouse.down()
     page_session.mouse.up()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     center_x, center_y = center_of_element(page_session, ".bqplot")
 
     # mouse down on center of plot
     page_session.mouse.move(center_x, center_y)
     page_session.mouse.down()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     # move right and down and release mouse
     page_session.mouse.move(center_x + selection_width / 2, center_y + selection_height / 2)
     page_session.mouse.up()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
     page_session.pause()
     return plot.screenshot()
 
@@ -54,22 +54,22 @@ def test_elliptical_selection_handles_rotate(solara_test, page_session):
     page_session.mouse.move(240, 31)
     page_session.mouse.down()
     page_session.mouse.up()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     center_x, center_y = center_of_element(page_session, ".bqplot")
 
     # mouse down on center of plot
     page_session.mouse.move(center_x, center_y)
     page_session.mouse.down()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     # move right and down and release mouse
     page_session.mouse.move(center_x + selection_width / 2, center_y + selection_height / 2)
     page_session.mouse.up()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     rotate(45, app, viewer)
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     return plot.screenshot()
 
@@ -82,19 +82,19 @@ def test_rectangular_selection_handles(solara_test, page_session):
     page_session.mouse.move(135, 31)
     page_session.mouse.down()
     page_session.mouse.up()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     center_x, center_y = center_of_element(page_session, ".bqplot")
 
     # mouse down on center of plot
     page_session.mouse.move(center_x - selection_width / 2, center_y - selection_height / 2)
     page_session.mouse.down()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     # move right and down and release mouse
     page_session.mouse.move(center_x + selection_width / 2, center_y + selection_height / 2)
     page_session.mouse.up()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     return plot.screenshot()
 
@@ -107,22 +107,22 @@ def test_rectangular_selection_handles_rotate(solara_test, page_session):
     page_session.mouse.move(135, 31)
     page_session.mouse.down()
     page_session.mouse.up()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     center_x, center_y = center_of_element(page_session, ".bqplot")
 
     # mouse down on center of plot
     page_session.mouse.move(center_x - selection_width / 2, center_y - selection_height / 2)
     page_session.mouse.down()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     # move right and down and release mouse
     page_session.mouse.move(center_x + selection_width / 2, center_y + selection_height / 2)
     page_session.mouse.up()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     rotate(45, app, viewer)
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
 
     return plot.screenshot()
 
@@ -153,7 +153,7 @@ def create_viewer(page_session):
 
     plot = page_session.locator(".jp-OutputArea-output")
     plot.wait_for()
-    page_session.wait_for_timeout(100)
+    page_session.wait_for_timeout(500)
     return app, viewer, plot
 
 
