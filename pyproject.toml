@@ -117,7 +117,7 @@ filterwarnings = [
     "ignore:Image.Image.getdata is deprecated and will be removed in Pillow 14 .2027-10.*:DeprecationWarning:pixelmatch.*:",
     "ignore:websockets.server.WebSocketServerProtocol is deprecated:DeprecationWarning",
     "ignore:remove second argument of ws_handler:DeprecationWarning",
-    "ignore:.*Sentinel is not a public part of the traitlets API.*:DeprecationWarning:",
+    "ignore:((.|\n)*)Sentinel is not a public part of the traitlets API((.|\n)*)",
     "ignore:.*metadata.*was set from the constructor.*:DeprecationWarning:",
     "ignore:Jupyter is migrating its paths to use standard platformdirs:DeprecationWarning:",
 ]
