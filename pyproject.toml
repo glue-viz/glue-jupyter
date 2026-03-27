@@ -107,6 +107,7 @@ version_file = "glue_jupyter/_version.py"
 addopts = "-m 'not notebook'"
 markers = [
     "notebook: marks tests as notebook tests (deselected by default, run with '-m notebook')",
+    "mpl_image_compare",
 ]
 filterwarnings = [
     "error:::echo.*:",
