@@ -39,8 +39,7 @@
                         <glue-float-field label="contour max" :value.sync="c_max" echo-type="float" />
                         <glue-float-field label="number of contour levels" :value.sync="n_levels" echo-type="float" />
                     </template>
-                    <v-text-field v-else label="contour levels" v-model="c_levels_txt" :rules="() => c_levels_error !== ''"
-                                  :error-messages="c_levels_error !== '' && [c_levels_error]"/>
+                    <v-text-field v-else label="contour levels" v-model="levels"/>
                 </div>
             </v-expand-transition>
             <v-divider class="mt-6"/>

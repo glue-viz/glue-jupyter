@@ -13,12 +13,16 @@ from ...vuetify_helpers import cmap_extras
 __all__ = ['ImageLayerStateWidget', 'ImageSubsetLayerStateWidget']
 
 
+def _levels_to_text(levels):
+    return ", ".join('%g' % level for level in levels)
+
+
+def _text_to_levels(text):
+    return [float(level.strip()) for level in text.split(',')]
+
+
 class ImageLayerStateWidget(v.VuetifyTemplate):
     template_file = (__file__, 'layer_image.vue')
-
-    c_levels_txt = traitlets.Unicode().tag(sync=True)
-    c_levels_txt_editing = False
-    c_levels_error = traitlets.Unicode().tag(sync=True)
 
     has_contour = traitlets.Bool().tag(sync=True)
 
@@ -33,38 +37,13 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
         if self.has_contour:
             extras.update({'contour_visible': 'bool',
                            'bitmap_visible': 'bool',
-                           'level_mode': 'text'})
+                           'level_mode': 'text',
+                           'levels': ('text', _levels_to_text, _text_to_levels)})
 
         autoconnect_callbacks_to_vue(layer_state, self, extras=extras)
 
         autoconnect_callbacks_to_vue(layer_state.viewer_state, self,
                                      only={'color_mode': 'text'})
-
-        if self.has_contour:
-            # Sync contour levels to editable text
-            def levels_to_text(*_ignore):
-                if not self.c_levels_txt_editing:
-                    text = ", ".join('%g' % v for v in layer_state.levels)
-                    self.c_levels_txt = text
-
-            layer_state.add_callback('levels', levels_to_text)
-
-    @traitlets.observe('c_levels_txt')
-    def _on_change_c_levels_txt(self, change):
-        try:
-            self.c_levels_txt_editing = True
-            try:
-                parts = change['new'].split(',')
-                float_list_str = [float(v.strip()) for v in parts]
-            except Exception as e:
-                self.c_levels_error = str(e)
-                return
-
-            if self.layer_state.level_mode == "Custom":
-                self.layer_state.levels = float_list_str
-            self.c_levels_error = ''
-        finally:
-            self.c_levels_txt_editing = False
 
 
 class ImageSubsetLayerStateWidget(VBox):
