@@ -104,6 +104,12 @@ namespaces = false
 [tool.setuptools_scm]
 version_file = "glue_jupyter/_version.py"
 
+[tool.coverage.run]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+]
+
 [tool.pytest.ini_options]
 addopts = "-m 'not notebook'"
 markers = [
