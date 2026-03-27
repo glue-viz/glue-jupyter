@@ -25,6 +25,7 @@ authors = [
 ]
 
 dependencies = [
+    "echo>=0.14.0",
     "glue-core>=1.25.0",
     "ipympl>=0.3.0",
     "ipyvolume>=0.6.0",
