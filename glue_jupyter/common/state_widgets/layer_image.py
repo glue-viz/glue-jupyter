@@ -13,16 +13,10 @@ from ...vuetify_helpers import cmap_extras
 __all__ = ['ImageLayerStateWidget', 'ImageSubsetLayerStateWidget']
 
 
-def _levels_to_text(levels):
-    return ", ".join('%g' % level for level in levels)
-
-
-def _text_to_levels(text):
-    return [float(level.strip()) for level in text.split(',')]
-
-
 class ImageLayerStateWidget(v.VuetifyTemplate):
     template_file = (__file__, 'layer_image.vue')
+
+    c_levels_error = traitlets.Unicode().tag(sync=True)
 
     has_contour = traitlets.Bool().tag(sync=True)
 
@@ -38,12 +32,24 @@ class ImageLayerStateWidget(v.VuetifyTemplate):
             extras.update({'contour_visible': 'bool',
                            'bitmap_visible': 'bool',
                            'level_mode': 'text',
-                           'levels': ('text', _levels_to_text, _text_to_levels)})
+                           'levels': ('text', self._levels_to_text, self._text_to_levels)})
 
         autoconnect_callbacks_to_vue(layer_state, self, extras=extras)
 
         autoconnect_callbacks_to_vue(layer_state.viewer_state, self,
                                      only={'color_mode': 'text'})
+
+    def _levels_to_text(self, levels):
+        return ", ".join('%g' % level for level in levels)
+
+
+    def _text_to_levels(self, text):
+        self.c_levels_error = ''
+        try:
+            return [float(level.strip()) for level in text.split(',')]
+        except Exception as e:
+            self.c_levels_error = str(e)
+            return []
 
 
 class ImageSubsetLayerStateWidget(VBox):
