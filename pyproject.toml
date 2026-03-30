@@ -110,6 +110,12 @@ omit = [
     "*/test_*",
 ]
 
+[tool.coverage.report]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+]
+
 [tool.pytest.ini_options]
 addopts = "-m 'not notebook'"
 markers = [
