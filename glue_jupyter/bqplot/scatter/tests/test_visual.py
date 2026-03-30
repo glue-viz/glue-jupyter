@@ -193,6 +193,51 @@ def test_visual_vector(
 
 
 @pytest.mark.parametrize("x_log, y_log", [
+    (False, False),
+    (True, False),
+    (False, True),
+    (True, True),
+], ids=["linear", "xlog", "ylog", "xylog"])
+@visual_widget_test
+def test_visual_scatter2d_density_alignment(
+    tmp_path,
+    page_session,
+    solara_test,
+    x_log,
+    y_log,
+):
+    # Check that density map and scatter markers line up by adding the
+    # same data twice: once as markers, once as a density map.
+
+    np.random.seed(12345)
+
+    app = jglue()
+
+    x = np.random.lognormal(2, 0.5, 100_000)
+    y = np.random.lognormal(1, 0.8, 100_000)
+    data = app.add_data(cloud={"x": x, "y": y})[0]
+
+    scatter = app.scatter2d(show=False, data=data)
+    scatter.add_data(data)
+
+    # First layer: markers (semi-transparent so density map shows through)
+    scatter.state.layers[0].color = 'blue'
+    scatter.state.layers[0].alpha = 0.1
+    scatter.state.layers[0].size = 1
+
+    # Second layer: density map
+    scatter.state.layers[1].density_map = True
+    scatter.state.layers[1].alpha = 0.8
+
+    scatter.state.x_log = x_log
+    scatter.state.y_log = y_log
+
+    figure = scatter.figure_widget
+    figure.layout = {"width": "400px", "height": "250px"}
+    return figure
+
+
+@pytest.mark.parametrize("x_log, y_log", [
     (True, False),
     (False, True),
     (True, True),
