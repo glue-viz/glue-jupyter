@@ -224,9 +224,9 @@ def test_visual_scatter2d_density_alignment(
     scatter = app.scatter2d(show=False, data=data_markers)
     scatter.add_data(data_density)
 
-    # First layer: markers (semi-transparent so density map shows through)
+    # First layer: markers
     scatter.state.layers[0].color = 'blue'
-    scatter.state.layers[0].alpha = 0.1
+    scatter.state.layers[0].alpha = 0.5
     scatter.state.layers[0].size = 1
 
     # Second layer: density map
