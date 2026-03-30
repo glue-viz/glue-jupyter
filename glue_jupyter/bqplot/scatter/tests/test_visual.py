@@ -192,7 +192,7 @@ def test_visual_vector(
     return figure
 
 
-@pytest.mark.parametrize("x_log, y_log", [
+@pytest.mark.parametrize(("x_log", "y_log"), [
     (False, False),
     (True, False),
     (False, True),
@@ -241,7 +241,7 @@ def test_visual_scatter2d_density_alignment(
     return figure
 
 
-@pytest.mark.parametrize("x_log, y_log", [
+@pytest.mark.parametrize(("x_log", "y_log"), [
     (True, False),
     (False, True),
     (True, True),
