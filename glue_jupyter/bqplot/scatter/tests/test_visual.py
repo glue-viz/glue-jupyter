@@ -213,8 +213,8 @@ def test_visual_scatter2d_density_alignment(
 
     app = jglue()
 
-    x = np.random.lognormal(2, 0.5, 1000)
-    y = np.random.lognormal(1, 0.8, 1000)
+    x = np.random.lognormal(2, 0.5, 5000)
+    y = np.random.lognormal(1, 0.8, 5000)
     data_markers = app.add_data(cloud_markers={"x": x, "y": y})[0]
     data_density = app.add_data(cloud_density={"x": x, "y": y})[0]
 
@@ -232,7 +232,7 @@ def test_visual_scatter2d_density_alignment(
     # Second layer: density map
     scatter.state.layers[1].density_map = True
     scatter.state.layers[1].alpha = 0.8
-    scatter.layers[1].density_mark.dpi = 25
+    scatter.layers[1].density_mark.dpi = 5
 
     scatter.state.x_log = x_log
     scatter.state.y_log = y_log
@@ -266,8 +266,8 @@ def test_visual_scatter2d_log(
     data_pts = app.add_data(points={"x": x_pts, "y": y_pts})[0]
 
     # Larger dataset shown as density map
-    x_dense = np.random.lognormal(2, 0.5, 1000)
-    y_dense = np.random.lognormal(1, 0.8, 1000)
+    x_dense = np.random.lognormal(2, 0.5, 5000)
+    y_dense = np.random.lognormal(1, 0.8, 5000)
     data_dense = app.add_data(dense={"x": x_dense, "y": y_dense})[0]
 
     app.add_link(data_pts, 'x', data_dense, 'x')
@@ -278,7 +278,7 @@ def test_visual_scatter2d_log(
 
     # Density map layer behind, scatter points in front
     scatter.state.layers[1].zorder = 0.5
-    scatter.layers[1].density_mark.dpi = 25
+    scatter.layers[1].density_mark.dpi = 5
 
     # Create a subset that covers part of the data
     app.data_collection.new_subset_group(
