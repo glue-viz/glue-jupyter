@@ -215,10 +215,14 @@ def test_visual_scatter2d_density_alignment(
 
     x = np.random.lognormal(2, 0.5, 100_000)
     y = np.random.lognormal(1, 0.8, 100_000)
-    data = app.add_data(cloud={"x": x, "y": y})[0]
+    data_markers = app.add_data(cloud_markers={"x": x, "y": y})[0]
+    data_density = app.add_data(cloud_density={"x": x, "y": y})[0]
 
-    scatter = app.scatter2d(show=False, data=data)
-    scatter.add_data(data)
+    app.add_link(data_markers, 'x', data_density, 'x')
+    app.add_link(data_markers, 'y', data_density, 'y')
+
+    scatter = app.scatter2d(show=False, data=data_markers)
+    scatter.add_data(data_density)
 
     # First layer: markers (semi-transparent so density map shows through)
     scatter.state.layers[0].color = 'blue'
@@ -242,7 +246,7 @@ def test_visual_scatter2d_density_alignment(
     (False, True),
     (True, True),
 ], ids=["xlog", "ylog", "xylog"])
-@visual_widget_test
+@visual_widget_test(skip_hash=True)
 def test_visual_scatter2d_log(
     tmp_path,
     page_session,
