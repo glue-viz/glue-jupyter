@@ -8,11 +8,11 @@
         </div>
         <div>
             <v-subheader class="pl-0 slider-label">log x axis</v-subheader>
-            <v-switch v-model="glue_state.x_log" hide-details style="margin-top: 0"/>
+            <v-switch v-model="x_log" hide-details style="margin-top: 0"/>
         </div>
         <div>
             <v-subheader class="pl-0 slider-label">log y axis</v-subheader>
-            <v-switch v-model="glue_state.y_log" hide-details style="margin-top: 0"/>
+            <v-switch v-model="y_log" hide-details style="margin-top: 0"/>
         </div>
         <div>
             <v-subheader class="pl-0 slider-label">show axes</v-subheader>

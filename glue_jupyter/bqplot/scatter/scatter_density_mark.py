@@ -1,5 +1,6 @@
 import math
 
+import bqplot
 import numpy as np
 from bqplot import ColorScale
 from bqplot_image_gl import ImageGL
@@ -163,16 +164,22 @@ class GenericDensityMark(ImageGL):
 
         # Expand beyond the boundary
         if self.external_padding != 0:
-            dx = xmax - xmin
-            dy = ymax - ymin
-            xmin, xmax = (
-                xmin - dx * self.external_padding,
-                xmax + dx * self.external_padding,
-            )
-            ymin, ymax = (
-                ymin - dy * self.external_padding,
-                ymax + dy * self.external_padding,
-            )
+            x_log = isinstance(self._figure.axes[0].scale, bqplot.LogScale)
+            y_log = isinstance(self._figure.axes[1].scale, bqplot.LogScale)
+            if x_log:
+                log_dx = np.log10(xmax / xmin)
+                factor = 10 ** (log_dx * self.external_padding)
+                xmin, xmax = xmin / factor, xmax * factor
+            else:
+                dx = xmax - xmin
+                xmin, xmax = xmin - dx * self.external_padding, xmax + dx * self.external_padding
+            if y_log:
+                log_dy = np.log10(ymax / ymin)
+                factor = 10 ** (log_dy * self.external_padding)
+                ymin, ymax = ymin / factor, ymax * factor
+            else:
+                dy = ymax - ymin
+                ymin, ymax = ymin - dy * self.external_padding, ymax + dy * self.external_padding
             nx *= math.ceil(1 + 2 * self.external_padding)
             ny *= math.ceil(1 + 2 * self.external_padding)
 

@@ -3,6 +3,7 @@ import numpy as np
 import warnings
 from astropy.visualization import AsinhStretch, LinearStretch, LogStretch, SqrtStretch
 
+from glue.core import Subset
 from glue.core.exceptions import IncompatibleAttribute
 from glue.utils import color2hex, datetime64_to_mpl, ensure_numerical
 from glue.viewers.common.layer_artist import LayerArtist
@@ -170,18 +171,47 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.vector_lines,
         ]
 
-    def compute_density_map(self, *args, **kwargs):
+    def compute_density_map(self, bins=None, range=None):
+        # ImageGL maps pixels linearly across the data range, so we must
+        # use linear bins even when log axes are active (the LogScale on
+        # the axes handles the visual transformation).
         try:
-            density_map = self.state.compute_density_map(*args, **kwargs)
-        except IncompatibleAttribute:
-            self.disable_invalid_attributes(
-                self._viewer_state.x_att,
-                self._viewer_state.y_att,
+            state = self.state
+            vs = self._viewer_state
+
+            if not state.markers_visible or not state.density_map:
+                return np.zeros(bins)
+
+            if isinstance(state.layer, Subset):
+                data = state.layer.data
+                subset_state = state.layer.subset_state
+            else:
+                data = state.layer
+                subset_state = None
+
+            count = data.compute_histogram(
+                [vs.y_att, vs.x_att],
+                subset_state=subset_state, bins=bins,
+                log=(False, False), range=range,
             )
+
+            if state.cmap_mode == 'Fixed':
+                result = count
+            else:
+                total = data.compute_histogram(
+                    [vs.y_att, vs.x_att],
+                    subset_state=subset_state, bins=bins,
+                    weights=state.cmap_att,
+                    log=(False, False), range=range,
+                )
+                result = total / count
+
+        except IncompatibleAttribute:
+            self.disable_invalid_attributes(vs.x_att, vs.y_att)
             return np.array([[np.nan]])
         else:
             self.enable()
-        return density_map
+        return result
 
     def _update_data(self):
         try:
