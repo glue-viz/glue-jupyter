@@ -1,3 +1,7 @@
+import traitlets
+
+from glue.config import colormaps
+
 from .widgets.linked_dropdown import get_choices
 
 
@@ -46,6 +50,30 @@ def link_glue_choices(widget, state, prop):
     link_glue(widget, f'{prop}_selected', state, prop,
               from_glue_fn=choice_to_index,
               to_glue_fn=index_to_choice)
+
+
+def _cmap_to_name(cmap):
+    return cmap.name if cmap is not None else ''
+
+
+def _name_to_cmap(name):
+    for _, member_cmap in colormaps.members:
+        if member_cmap.name == name:
+            return member_cmap
+    return None
+
+
+def cmap_extras(widget):
+    """
+    Set up colormap items on ``widget`` and return an extras tuple
+    suitable for ``autoconnect_callbacks_to_vue``.
+    """
+    if not widget.has_trait('cmap_items'):
+        widget.add_traits(cmap_items=traitlets.List().tag(sync=True))
+    widget.cmap_items = [
+        {'text': name, 'value': cmap.name} for name, cmap in colormaps.members
+    ]
+    return ('text', _cmap_to_name, _name_to_cmap)
 
 
 class WidgetCache():

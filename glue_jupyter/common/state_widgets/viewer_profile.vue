@@ -30,7 +30,7 @@
 
             </v-btn-toggle>
 
-            <v-switch v-model="glue_state.show_axes" label="Show axes" hide-details style="margin-top: 0"/>
+            <v-switch v-model="show_axes" label="Show axes" hide-details style="margin-top: 0"/>
         </div>
     </div>
 </template>
@@ -39,12 +39,12 @@
     module.exports = {
         computed: {
             modeSet() {
-                return [this.glue_state.normalize && 'normalize']
+                return [this.normalize && 'normalize']
             }
         },
         methods: {
             modeSetChange(v) {
-                this.glue_state.normalize = v.includes('normalize');
+                this.normalize = v.includes('normalize');
             }
         }
     }

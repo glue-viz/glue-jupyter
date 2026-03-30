@@ -1,4 +1,3 @@
-import glue_jupyter.state_traitlets_helpers
 
 
 def test_non_hex_colors(app, data_image):
@@ -71,15 +70,10 @@ def test_contour_state(app, data_image):
     layer.state.c_min = 0
     layer.state.c_max = 10
     layer.state.n_levels = 3
-    glue_jupyter.state_traitlets_helpers.update_state_from_dict(
-        layer.state,
-        {'level_mode': 'Custom', 'levels': [1, 2]}
-    )
+    layer.state.level_mode = 'Custom'
+    layer.state.levels = [1, 2]
     assert layer.state.levels == [1, 2]
-    glue_jupyter.state_traitlets_helpers.update_state_from_dict(
-        layer.state,
-        {'level_mode': 'Linear', 'levels': [2, 3]}
-    )
+    layer.state.level_mode = 'Linear'
     # Without priority of levels, this gets set to [2, 3]
     assert layer.state.levels == [0, 5, 10]
 

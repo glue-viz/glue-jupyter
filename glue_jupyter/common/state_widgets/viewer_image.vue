@@ -9,11 +9,11 @@
         <div class="glue-viewer-image-switches">
             <div>
                 <v-subheader class="pl-0 slider-label">equal aspect ratio</v-subheader>
-                <v-switch input-value="glue_state.aspect === EQUAL" @change="setEqualAspect" hide-details style="margin-top: 0" />
+                <v-switch :input-value="aspect === 'equal'" @change="setEqualAspect" hide-details style="margin-top: 0" />
             </div>
             <div>
                 <v-subheader class="pl-0 slider-label">show axes</v-subheader>
-                <v-switch v-model="glue_state.show_axes" hide-details style="margin-top: 0"/>
+                <v-switch v-model="show_axes" hide-details style="margin-top: 0"/>
             </div>
         </div>
         <div>
@@ -23,22 +23,23 @@
             <v-select label="y axis" :items="y_att_world_items" v-model="y_att_world_selected" hide-details style="margin-bottom: 16px" />
         </div>
         <div v-for="slider of sliders">
-            <v-subheader class="pl-0 slider-label">{{ slider.label }}: {{ glue_state.slices[slider.index] }} ({{  slider.world_value  }} {{ slider.unit }})</v-subheader>
+            <v-subheader class="pl-0 slider-label">{{ slider.label }}: {{ slices[slider.index] }} ({{  slider.world_value  }} {{ slider.unit }})</v-subheader>
             <glue-throttled-slider
-                v-if="glue_state.slices && glue_state.slices.length > 0"
-                wait="300" :max="slider.max" :value.sync="glue_state.slices[slider.index]" hide-details />
+                v-if="slices && slices.length > 0"
+                wait="300" :max="slider.max" :value="slices[slider.index]" @update:value="updateSlice(slider.index, $event)" hide-details />
         </div>
     </div>
 </template>
 <script>
     modules.export = {
-        created() {
-            this.EQUAL = 'equal';
-            this.AUTO = 'auto';
-        },
         methods: {
             setEqualAspect(value) {
-                this.glue_state.aspect = value ? this.EQUAL : this.AUTO;
+                this.aspect = value ? 'equal' : 'auto';
+            },
+            updateSlice(index, value) {
+                var newSlices = this.slices.slice();
+                newSlices[index] = value;
+                this.slices = newSlices;
             },
         }
     }

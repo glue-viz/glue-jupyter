@@ -1,24 +1,19 @@
 import ipyvuetify as v
-import traitlets
-from ...state_traitlets_helpers import GlueState
-from ...vuetify_helpers import link_glue_choices
 
+from echo.vue import autoconnect_callbacks_to_vue
 
 __all__ = ['HistogramViewerStateWidget']
 
 
 class HistogramViewerStateWidget(v.VuetifyTemplate):
     template_file = (__file__, 'viewer_histogram.vue')
-    x_att_items = traitlets.List().tag(sync=True)
-    x_att_selected = traitlets.Int(allow_none=True).tag(sync=True)
-    glue_state = GlueState().tag(sync=True)
 
     def __init__(self, viewer_state):
         super().__init__()
 
-        self.glue_state = viewer_state
+        self.viewer_state = viewer_state
 
-        link_glue_choices(self, viewer_state, 'x_att')
+        autoconnect_callbacks_to_vue(viewer_state, self)
 
     def vue_bins_to_axis(self, *args):
-        self.glue_state.update_bins_to_view()
+        self.viewer_state.update_bins_to_view()

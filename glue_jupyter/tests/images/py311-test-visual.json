@@ -7,7 +7,5 @@
   "glue_jupyter.tests.ui.test_selection.test_elliptical_selection[chromium]": "de3e144d9c57a972fc0ab29075ae1d39fb49326955b2c3af803c10c50847036d",
   "glue_jupyter.tests.ui.test_selection.test_elliptical_selection_rotate[chromium]": "7c47211f5150ef19db0171a72f9af8ec25a66ded53cf86320776c0dbe9471bed",
   "glue_jupyter.tests.ui.test_selection.test_rectangular_selection[chromium]": "14a2acd27fb61e0ae1f40ac285d9020858d63727848d39269b96aa46635cf7a5",
-  "glue_jupyter.tests.ui.test_selection.test_rectangular_selection_rotate[chromium]": "a7c5bfda37992da1b8ecc5cf40bd836793a212b95d7bbca67871eeb495048c05",
-  "glue_jupyter.tests.ui.test_selection_handles.test_elliptical_selection_handles_rotate[chromium]": "51baba2a6134b8fda922a473cb61b768031f2bb5097e5bac558d3671309beb6d",
-  "glue_jupyter.tests.ui.test_selection_handles.test_rectangular_selection_handles_rotate[chromium]": "0f95d0c9e32937449fbe769fb97e85fda1a670fa868282d608a10169639cb248"
+  "glue_jupyter.tests.ui.test_selection.test_rectangular_selection_rotate[chromium]": "a7c5bfda37992da1b8ecc5cf40bd836793a212b95d7bbca67871eeb495048c05"
 }
