@@ -17,7 +17,8 @@ class VolumeLayerState(VolumeLayerStateBase):
 
     def __init__(self, layer=None, **kwargs):
         super(VolumeLayerState, self).__init__(layer=layer, **kwargs)
-        VolumeLayerState.render_method.set_choices(self, ["NORMAL", "MAX INTENSITY"])
+        VolumeLayerState.render_method.set_choices(self, ["NORMAL", "MAX_INTENSITY"])
+        VolumeLayerState.render_method.set_display_func(self, lambda method: method.replace("_", " "))
         self.opacity_scale = 0.5
         self.render_method = 'NORMAL'
         self.lighting = True

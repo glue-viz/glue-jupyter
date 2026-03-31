@@ -3,23 +3,20 @@ import traitlets
 
 from math import log
 from echo.vue import autoconnect_callbacks_to_vue
-from ipywidgets import ColorPicker, DOMWidget, widget_serialization
 
 from glue.core.subset import Subset
-from glue.utils import color2hex
 
-from glue_jupyter.widgets import Color
+from ...vuetify_helpers import cmap_extras
 
-from ...link import link
 
 __all__ = ['Volume3DLayerStateWidget']
 
 
 class Volume3DLayerStateWidget(v.VuetifyTemplate):
 
-    template_file = (__file__, 'layer_style_widget.vue')
+    is_subset = traitlets.Bool().tag(sync=True)
 
-    widget_color = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
+    template_file = (__file__, 'layer_style_widget.vue')
 
     def __init__(self, layer_state):
         super().__init__()
@@ -32,13 +29,12 @@ class Volume3DLayerStateWidget(v.VuetifyTemplate):
         if self.state.vmax is None:
             self.state.vmax = 1
 
-        if isinstance(layer_state.layer, Subset):
-            self.widget_color = ColorPicker(value=color2hex(self.state.color), description='color')
-            link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
-        else:
-            self.widget_color = Color(state=self.state, cmap_mode_attr='color_mode', cmap_att=None)
+        self.is_subset = isinstance(self.state.layer, Subset)
 
-        extras = {"opacity_scale": ("float", self._value_to_exponent, self._exponent_to_value)}
+        extras = {
+            "opacity_scale": ("float", self._value_to_exponent, self._exponent_to_value),
+            "cmap": cmap_extras(self),
+        }
         autoconnect_callbacks_to_vue(layer_state, self, extras=extras)
 
     def _exponent_to_value(self, exponent, base=10):

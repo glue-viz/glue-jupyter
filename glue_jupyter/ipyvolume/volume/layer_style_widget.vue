@@ -19,9 +19,23 @@
       <v-subheader class="pl-0">clamp maximum</v-subheader>
       <v-switch v-model="clamp_max" hide-details style="margin-top: 0" />
     </div>
-    <div>
-      <jupyter-widget :widget="widget_color" />
-    </div>
+    <template v-if="!is_subset">
+      <div class="text-subtitle-2 font-weight-bold">Color</div>
+      <div>
+          <v-select label="color" :items="color_mode_items" v-model="color_mode_selected" hide-details />
+      </div>
+      <template v-if="(color_mode_items[color_mode_selected] || {}).text === 'Linear'">
+        <div>
+            <glue-float-field label="min" :value.sync="vmin" echo-type="float" />
+        </div>
+        <div>
+            <glue-float-field label="max" :value.sync="vmax" echo-type="float" />
+        </div>
+        <div>
+            <v-select label="colormap" :items="cmap_items" v-model="cmap" hide-details />
+        </div>
+      </template>
+    </template>
     <div>
       <v-slider label="Opacity" v-model="alpha" :min="0" :max="1" :step="0.001" hide-details />
     </div>
