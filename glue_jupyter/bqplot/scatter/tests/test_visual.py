@@ -289,6 +289,8 @@ def test_visual_scatter2d_log(
 
     scatter.state.layers[0].color = 'orange'
 
+    scatter.state.layers[3].density_map = True
+
     # Set log scales
     scatter.state.x_log = x_log
     scatter.state.y_log = y_log
