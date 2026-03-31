@@ -31,6 +31,10 @@ class BqplotScatterView(BqplotBaseView):
         super().__init__(*args, **kwargs)
         self.state.add_callback('x_att', self._update_axes)
         self.state.add_callback('y_att', self._update_axes)
+        self.state.add_callback('x_log', self._update_x_log)
+        self.state.add_callback('y_log', self._update_y_log)
+        self.state.add_callback('x_min', self._validate_log_limits)
+        self.state.add_callback('y_min', self._validate_log_limits)
         self._update_axes()
 
     def _update_axes(self, *args):
@@ -40,3 +44,17 @@ class BqplotScatterView(BqplotBaseView):
 
         if self.state.y_att is not None:
             self.state.y_axislabel = str(self.state.y_att)
+
+    def _update_x_log(self, *args):
+        self._replace_scale('x')
+
+    def _update_y_log(self, *args):
+        self._replace_scale('y')
+
+    def _validate_log_limits(self, *args):
+        # Force a limit recalculation when log is active but the limits
+        # are non-positive.
+        if self.state.x_log and self.state.x_min is not None and self.state.x_min <= 0:
+            self.state._reset_x_limits()
+        if self.state.y_log and self.state.y_min is not None and self.state.y_min <= 0:
+            self.state._reset_y_limits()
