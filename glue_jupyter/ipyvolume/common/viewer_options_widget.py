@@ -5,8 +5,6 @@ import ipyvolume as ipv
 import ipyvuetify as v
 import traitlets
 
-from ...link import link, dlink
-from ...widgets import LinkedDropdown
 
 
 __all__ = ['Viewer3DStateWidget']
@@ -17,22 +15,27 @@ class Viewer3DStateWidget(v.VuetifyTemplate):
 
     has_resolution = traitlets.Bool().tag(sync=True)
     has_figure = traitlets.Bool().tag(sync=True)
-    movie_maker_layout = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
+    movie_maker_widget = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
 
     def __init__(self, viewer_state):
         super().__init__()
 
         self.state = viewer_state
 
+        extras = {}
         self.has_resolution = hasattr(viewer_state, "resolution")
+        if self.has_resolution:
+            extras.update({ "resolution": "selection" })
 
         self.has_figure = hasattr(self.state, "figure")
         if self.has_figure:
             self.movie_maker = ipv.moviemaker.MovieMaker(self.state.figure,
                                                     self.state.figure.camera)
-            self.movie_maker_layout = self.movie_maker.widget_main.layout
+            self.movie_maker_widget = self.movie_maker.widget_main
 
-        autoconnect_callbacks_to_vue(viewer_state, self)
+            self.vue_set_movie_maker_visible(False)
+
+        autoconnect_callbacks_to_vue(viewer_state, self, extras=extras)
 
     def vue_set_movie_maker_visible(self, visible):
-        self.movie_maker_layout.display = visible
+        self.movie_maker_widget.layout.display = None if visible else "none"
