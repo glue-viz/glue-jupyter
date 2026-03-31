@@ -1,4 +1,3 @@
-import traitlets
 import ipyvuetify as v
 from echo.vue import autoconnect_callbacks_to_vue
 
