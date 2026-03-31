@@ -232,7 +232,7 @@ def test_visual_scatter2d_density_alignment(
     # Second layer: density map
     scatter.state.layers[1].density_map = True
     scatter.state.layers[1].alpha = 0.8
-    scatter.layers[1].density_mark.dpi = 5
+    scatter.state.dpi = 5
 
     scatter.state.x_log = x_log
     scatter.state.y_log = y_log
@@ -277,8 +277,9 @@ def test_visual_scatter2d_log(
     scatter.add_data(data_dense)
 
     # Density map layer behind, scatter points in front
-    scatter.state.layers[1].zorder = 0.5
-    scatter.layers[1].density_mark.dpi = 5
+    scatter.state.layers[1].density_map = True
+    scatter.state.layers[1].zorder = 0.8
+    scatter.state.dpi = 5
 
     # Create a subset that covers part of the data
     app.data_collection.new_subset_group(
