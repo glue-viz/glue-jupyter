@@ -19,7 +19,7 @@ class Volume3DLayerStateWidget(v.VuetifyTemplate):
 
     template_file = (__file__, 'layer_style_widget.vue')
 
-    color_widget = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
+    widget_color = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
 
     def __init__(self, layer_state):
         super().__init__()
@@ -33,10 +33,10 @@ class Volume3DLayerStateWidget(v.VuetifyTemplate):
             self.state.vmax = 1
 
         if isinstance(layer_state.layer, Subset):
-            self.color_widget = ColorPicker(value=color2hex(self.state.color), description='color')
+            self.widget_color = ColorPicker(value=color2hex(self.state.color), description='color')
             link((self.state, 'color'), (self.widget_color, 'value'), color2hex)
         else:
-            self.color_widget = Color(state=self.state, cmap_mode_attr='color_mode', cmap_att=None)
+            self.widget_color = Color(state=self.state, cmap_mode_attr='color_mode', cmap_att=None)
 
         extras = {"opacity_scale": ("float", self._value_to_exponent, self._exponent_to_value)}
         autoconnect_callbacks_to_vue(layer_state, self, extras=extras)

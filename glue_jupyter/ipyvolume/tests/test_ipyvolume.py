@@ -210,14 +210,15 @@ def test_volshow_stretch(app, data_volume):
     layer_widget = v.layer_options.layers[-1]['layer_panel']
 
     assert layer.state.stretch == 'linear'
-    assert [item[1] for item in layer_widget.widget_stretch.options] == \
-           [item for item in stretches.members]
-    assert layer_widget.widget_stretch.value == 'linear'
+    assert [item["text"] for item in layer_widget.stretch_items] == \
+           [stretches.display_func(key) for key in stretches.members.keys()]
+    assert layer_widget.stretch_selected == 0
 
+    stretch_members = list(stretches.members)
     layer.state.stretch = 'log'
-    assert layer_widget.widget_stretch.value == 'log'
+    assert layer_widget.stretch_selected == stretch_members.index("log")
 
-    layer_widget.widget_stretch.value = 'sqrt'
+    layer_widget.stretch_selected = stretch_members.index("sqrt")
     assert layer.state.stretch == 'sqrt'
 
 

@@ -8,8 +8,10 @@
       <v-select label="Marker" :items="geo_items" v-model="geo_selected" hide-details />
     </div>
     <div>
-      <jupyter-widget :widget="size_widget" />
-      <jupyter-widget :widget="color_widget" />
+      <jupyter-widget :widget="widget_size" />
+    </div>
+    <div>
+      <jupyter-widget :widget="widget_color" />
     </div>
     <div>
       <v-subheader class="pl-0">show vectors</v-subheader>

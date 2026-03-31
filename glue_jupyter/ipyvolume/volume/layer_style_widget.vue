@@ -20,7 +20,7 @@
       <v-switch v-model="clamp_max" hide-details style="margin-top: 0" />
     </div>
     <div>
-      <jupyter-widget :widget="color_widget" />
+      <jupyter-widget :widget="widget_color" />
     </div>
     <div>
       <v-slider label="Opacity" v-model="alpha" :min="0" :max="1" :step="0.001" hide-details />

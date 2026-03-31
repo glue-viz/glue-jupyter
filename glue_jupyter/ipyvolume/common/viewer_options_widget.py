@@ -15,7 +15,7 @@ class Viewer3DStateWidget(v.VuetifyTemplate):
 
     has_resolution = traitlets.Bool().tag(sync=True)
     has_figure = traitlets.Bool().tag(sync=True)
-    movie_maker_widget = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
+    widget_movie_maker = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
 
     def __init__(self, viewer_state):
         super().__init__()
@@ -31,11 +31,11 @@ class Viewer3DStateWidget(v.VuetifyTemplate):
         if self.has_figure:
             self.movie_maker = ipv.moviemaker.MovieMaker(self.state.figure,
                                                     self.state.figure.camera)
-            self.movie_maker_widget = self.movie_maker.widget_main
+            self.widget_movie_maker = self.movie_maker.widget_main
 
             self.vue_set_movie_maker_visible(False)
 
         autoconnect_callbacks_to_vue(viewer_state, self, extras=extras)
 
     def vue_set_movie_maker_visible(self, visible):
-        self.movie_maker_widget.layout.display = None if visible else "none"
+        self.widget_movie_maker.layout.display = None if visible else "none"

@@ -23,7 +23,7 @@
     <div v-if="has_figure">
       <v-subheader class="pl-0">show movie maker</v-subheader>
       <v-switch @change="set_movie_maker_visible" hide-details style="margin-top: 0" />
-      <jupyter-widget :widget="movie_maker_widget" />
+      <jupyter-widget :widget="widget_movie_maker" />
     </div>
   </div>
 </template>
