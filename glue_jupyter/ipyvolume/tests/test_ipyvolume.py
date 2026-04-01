@@ -81,24 +81,22 @@ def test_scatter3d_color_mode(app, dataxyz):
     assert l1.state.color_mode == 'Fixed', 'expected default value'
     assert l1.state.cmap_name == 'Gray'
 
+    color_modes = type(l1.state).color_mode.get_choices(l1.state)
     assert l1.scatter.color.shape == (), 'numpy scalar'
     l1.state.cmap_att = 'x'
     l1.state.color_mode = 'Linear'
-    assert layer_widget.widget_color.widget_color_mode.label == 'Linear'
+    assert color_modes[layer_widget.color_mode_selected] == 'Linear'
     assert l1.state.cmap_name == 'Gray'
     l1.state.cmap_vmin = 0
     l1.state.cmap_vmax = 10
     assert l1.scatter.color.shape == (3, 4)
     assert l1.scatter.color is not None
 
-    layer_widget.widget_color.widget_cmap.label = 'Viridis'
-    assert l1.state.cmap_name == 'Viridis'
-    assert layer_widget.widget_color.widget_cmap.label == 'Viridis'
+    layer_widget.cmap = "viridis"
+    assert l1.state.cmap_name == "Viridis"
 
-    layer_widget.widget_color.widget_cmap.label = 'Gray'
-    assert layer_widget.widget_color.widget_cmap.label == 'Gray'
-    assert l1.state.cmap_name == 'Gray'
-
+    l1.state.cmap = colormaps["plasma"]
+    assert layer_widget.cmap == "plasma"
 
 def test_roi3d(dataxyz):
 
@@ -189,15 +187,15 @@ def test_volshow_cmap_mode(app, data_volume):
     assert layer.state.color_mode == 'Fixed'
     assert layer.state.cmap.name == 'gray'
 
+    cmap_modes = type(layer.state).color_mode.get_choices(layer.state)
     layer.state.color_mode = 'Linear'
-    assert layer_widget.widget_color.widget_color_mode.label == 'Linear'
-    assert layer_widget.widget_color.widget_cmap.label == 'Gray'
-    assert layer.state.cmap.name == 'gray'
+    assert layer_widget.color_mode_selected == cmap_modes.index("Linear")
+    assert layer_widget.cmap == "gray"
 
     layer.state.cmap = colormaps['viridis']
-    assert layer_widget.widget_color.widget_cmap.label == 'Viridis'
+    assert layer_widget.cmap == "viridis"
 
-    layer_widget.widget_color.widget_cmap.label = 'Hot'
+    layer_widget.cmap = "hot"
     assert layer.state.cmap == colormaps['hot']
 
 
