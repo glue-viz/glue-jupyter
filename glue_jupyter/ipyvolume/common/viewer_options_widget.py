@@ -1,39 +1,41 @@
-from ipywidgets import Checkbox, VBox, ToggleButton
+from echo.vue import autoconnect_callbacks_to_vue
+from ipywidgets import DOMWidget, widget_serialization
 
 import ipyvolume as ipv
+import ipyvuetify as v
+import traitlets
 
-from ...link import link, dlink
-from ...widgets import LinkedDropdown
 
 
 __all__ = ['Viewer3DStateWidget']
 
 
-class Viewer3DStateWidget(VBox):
+class Viewer3DStateWidget(v.VuetifyTemplate):
+    template_file = (__file__, 'viewer_options_widget.vue')
+
+    has_resolution = traitlets.Bool().tag(sync=True)
+    has_figure = traitlets.Bool().tag(sync=True)
+    widget_movie_maker = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
 
     def __init__(self, viewer_state):
+        super().__init__()
 
         self.state = viewer_state
 
-        self.widget_show_axes = Checkbox(value=False, description="Show axes")
-        link((self.state, 'visible_axes'), (self.widget_show_axes, 'value'))
+        extras = {}
+        self.has_resolution = hasattr(viewer_state, "resolution")
+        if self.has_resolution:
+            extras.update({ "resolution": "selection" })
 
-        self.widget_native_aspect = Checkbox(value=False, description="Native aspect ratio")
-        link((self.state, 'native_aspect'), (self.widget_native_aspect, 'value'))
-
-        self.widgets_axis = []
-        for i, axis_name in enumerate('xyz'):
-            widget_axis = LinkedDropdown(self.state, axis_name + '_att',
-                                         label=axis_name + ' axis')
-            self.widgets_axis.append(widget_axis)
-
-        super().__init__([self.widget_show_axes, self.widget_native_aspect] + self.widgets_axis)
-
-        if hasattr(self.state, 'figure'):
-            self.widget_show_movie_maker = ToggleButton(value=False, description="Show movie maker")
+        self.has_figure = hasattr(self.state, "figure")
+        if self.has_figure:
             self.movie_maker = ipv.moviemaker.MovieMaker(self.state.figure,
-                                                         self.state.figure.camera)
-            dlink((self.widget_show_movie_maker, 'value'),
-                  (self.movie_maker.widget_main.layout, 'display'),
-                  lambda value: None if value else 'none')
-            self.children += (self.widget_show_movie_maker, self.movie_maker.widget_main)
+                                                    self.state.figure.camera)
+            self.widget_movie_maker = self.movie_maker.widget_main
+
+            self.vue_set_movie_maker_visible(False)
+
+        autoconnect_callbacks_to_vue(viewer_state, self, extras=extras)
+
+    def vue_set_movie_maker_visible(self, visible):
+        self.widget_movie_maker.layout.display = None if visible else "none"

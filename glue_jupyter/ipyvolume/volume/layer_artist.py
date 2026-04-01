@@ -1,10 +1,10 @@
 import ipyvolume as ipv
 import numpy as np
 import matplotlib.colors
+import uuid
 
 from glue.viewers.common.layer_artist import LayerArtist
-from glue.core.data import Subset
-from glue.core.exceptions import IncompatibleAttribute
+from glue.viewers.volume3d.data_proxy import DataProxy
 
 from .layer_state import VolumeLayerState
 from ...link import link, dlink, on_change
@@ -36,6 +36,20 @@ def _transfer_func_cmap(cmap, N=256, max_opacity=1, stretch=None):
     data[..., 3] = ramp*max_opacity
     return data
 
+def operation(op, x, empty_value=0):
+    try:
+        return op(x)
+    except ValueError:
+        return empty_value
+
+
+def nanmin(x, empty_value=0):
+    return operation(np.nanmin, x, empty_value=empty_value)
+
+
+def nanmax(x, empty_value=1):
+    return operation(np.nanmax, x, empty_value=empty_value)
+
 
 data0 = [[[1, 2]] * 2] * 2
 
@@ -58,11 +72,14 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
                                  tf=self.transfer_function, data_max_shape=128)
         self.figure.volumes = self.figure.volumes + [self.volume]
 
+        self.id = str(uuid.uuid4())
+
         self.last_shape = None
+        self._data_proxy = None
 
         dlink((self.state, 'lighting'), (self.volume, 'lighting'))
         dlink((self.state, 'render_method'), (self.volume, 'rendering_method'))
-        dlink((self.state, 'max_resolution'), (self.volume, 'data_max_shape'))
+        dlink((self._viewer_state, 'resolution'), (self.volume, 'data_max_shape'))
 
         dlink((self.state, 'vmin'), (self.volume, 'show_min'))
         dlink((self.state, 'vmax'), (self.volume, 'show_max'))
@@ -79,43 +96,39 @@ class IpyvolumeVolumeLayerArtist(LayerArtist):
                     'cmap', 'stretch', 'stretch_parameters'
                     )])(self._update_transfer_function)
 
+        self._viewer_state.add_global_callback(self.update)
+        self.state.add_global_callback(self.update)
+
     def clear(self):
         pass
 
     def redraw(self):
         pass
 
-    def update(self):
-        if isinstance(self.layer, Subset):
-            try:
-                mask = self.layer.to_mask()
-            except IncompatibleAttribute:
-                # The following includes a call to self.clear()
-                self.disable("Subset cannot be applied to this data")
-                return
-            else:
-                self.enable()
-            data = self.layer.data[self.state.attribute].astype(np.float32)
-            data *= mask
-        else:
-            data = self.layer[self.state.attribute]
+    def update(self, **kwargs):
+
+        if self._data_proxy is None:
+            self._data_proxy = DataProxy(self._viewer_state, self)
+
+        bounds = [(self._viewer_state.z_min, self._viewer_state.z_max, self._viewer_state.resolution),
+                  (self._viewer_state.y_min, self._viewer_state.y_max, self._viewer_state.resolution),
+                  (self._viewer_state.x_min, self._viewer_state.x_max, self._viewer_state.resolution)]
+
+        data = self._data_proxy.compute_fixed_resolution_buffer(bounds)
 
         data = np.transpose(data, (2, 0, 1))
-        finite_mask = np.isfinite(data)
-        finite_data = data[finite_mask]
-        finite_mask_normalized = finite_data - finite_data.min()
-        finite_mask_normalized = finite_mask_normalized / finite_mask_normalized.max()
+        data_min, data_max = nanmin(data), nanmax(data)
 
-        data_min, data_max = np.nanmin(data), np.nanmax(data)
+        extent = [[bounds[i][0], bounds[i][1]] for i in (1, 0, 2)]
 
-        self.last_shape = shape = data.shape
+        self.last_shape = data.shape
         if self.volume is None:
             with self.figure:
                 self.volume = ipv.volshow(data, data_min=data_min, data_max=data_max,
-                                          extent=[[0, shape[0]], [0, shape[1]], [0, shape[2]]],
+                                          extent=extent,
                                           controls=False, tf=self.transfer_function)
         else:
-            self.volume.extent_original = [[0, shape[0]], [0, shape[1]], [0, shape[2]]]
+            self.volume.extent_original = extent
             self.volume.data_original = data
             self.volume.data_min = data_min
             self.volume.data_max = data_max
