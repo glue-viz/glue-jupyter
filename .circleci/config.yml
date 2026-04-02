@@ -79,6 +79,7 @@ workflows:
             parameters:
               jobname:
                 - "py311-test-visual"
+                - "py311-test-visual-devdeps"
 
       - deploy-reference-images:
           name: baseline-<< matrix.jobname >>
