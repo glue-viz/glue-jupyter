@@ -24,7 +24,7 @@ class Viewer3DStateWidget(v.VuetifyTemplate):
 
         extras = None
         skip = None
-        self.has_resolution = hasattr(viewer_state, "resolution")
+        self.has_resolution = viewer_state.is_callback_property("resolution")
         if self.has_resolution:
             extras = { "resolution": "selection" }
         else:
