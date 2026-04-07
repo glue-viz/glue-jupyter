@@ -57,6 +57,11 @@
                 </div>
             </template>
             <template v-else>
+                <template v-if="(size_mode_items[size_mode_selected] || {}).text === 'Fixed'">
+                    <div>
+                        <glue-float-field label="size" :value.sync="size" echo-type="int" />
+                    </div>
+                </template>
                 <div>
                     <v-subheader class="pl-0 slider-label">fill markers</v-subheader>
                     <v-switch v-model="fill" hide-details style="margin-top: 0" />
