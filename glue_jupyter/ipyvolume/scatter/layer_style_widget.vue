@@ -21,6 +21,16 @@
       <div>
           <glue-float-field label="max" :value.sync="size_vmax" echo-type="float" />
       </div>
+      <div>
+          <v-subheader class="pl-0 slider-label">size scaling</v-subheader>
+          <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" :value.sync="size_scaling" echo-type="float"
+              hide-details />
+      </div>
+    </template>
+    <template v-else>
+      <div>
+          <glue-float-field label="size" :value.sync="size" echo-type="int" />
+      </div>
     </template>
     <div class="text-subtitle-2 font-weight-bold">Color</div>
     <div>
