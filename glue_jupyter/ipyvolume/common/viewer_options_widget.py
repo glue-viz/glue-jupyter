@@ -22,10 +22,13 @@ class Viewer3DStateWidget(v.VuetifyTemplate):
 
         self.state = viewer_state
 
-        extras = {}
+        extras = None
+        skip = None
         self.has_resolution = hasattr(viewer_state, "resolution")
         if self.has_resolution:
-            extras.update({ "resolution": "selection" })
+            extras = { "resolution": "selection" }
+        else:
+            skip = {"resolution"}
 
         self.has_figure = hasattr(self.state, "figure")
         if self.has_figure:
@@ -35,7 +38,7 @@ class Viewer3DStateWidget(v.VuetifyTemplate):
 
             self.vue_set_movie_maker_visible(False)
 
-        autoconnect_callbacks_to_vue(viewer_state, self, extras=extras)
+        autoconnect_callbacks_to_vue(viewer_state, self, extras=extras, skip=skip)
 
     def vue_set_movie_maker_visible(self, visible):
         self.widget_movie_maker.layout.display = None if visible else "none"
