@@ -628,7 +628,7 @@ class JupyterApplication(Application):
         pass
 
     @staticmethod
-    def restore_session(path):
+    def restore_session(path, widget_2d='bqplot', widget_3d='vispy'):
         """
         Reload a previously-saved session
 
@@ -636,13 +636,19 @@ class JupyterApplication(Application):
         ----------
         path : `str`
             Path to the file to load.
+        widget_2d : {'bqplot', 'matplotlib'}, optional
+            The widget backend to use for 2D viewers. Defaults to 'bqplot'.
+        widget_3d : {'vispy', 'ipyvolume'}, optional
+            The widget backend to use for 3D viewers. Defaults to 'vispy'.
 
         Returns
         -------
-        app : :class:`Application`
+        app : :class:`JupyterApplication`
             The loaded application.
         """
+        import json
         from glue.core.state import GlueUnSerializer
+        from glue_jupyter.session import translate_qt_to_jupyter_session
 
         # In case relative paths are needed in the session file, we do the
         # loading while setting the current directory to the directory
@@ -655,7 +661,10 @@ class JupyterApplication(Application):
         try:
             os.chdir(session_dir)
             with open(session_file) as infile:
-                state = GlueUnSerializer.load(infile)
+                rec = json.load(infile)
+            translate_qt_to_jupyter_session(rec, widget_2d=widget_2d,
+                                            widget_3d=widget_3d)
+            state = GlueUnSerializer(string=json.dumps(rec))
             return state.object('__main__')
         finally:
             os.chdir(start_dir)
