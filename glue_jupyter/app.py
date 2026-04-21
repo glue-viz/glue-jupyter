@@ -628,7 +628,8 @@ class JupyterApplication(Application):
         pass
 
     @staticmethod
-    def restore_session(path, widget_2d='bqplot', widget_3d='vispy'):
+    def restore_session(path, widget_2d='bqplot', widget_3d='vispy',
+                        exclude_viewer_types=None):
         """
         Reload a previously-saved session
 
@@ -640,6 +641,11 @@ class JupyterApplication(Application):
             The widget backend to use for 2D viewers. Defaults to 'bqplot'.
         widget_3d : {'vispy', 'ipyvolume'}, optional
             The widget backend to use for 3D viewers. Defaults to 'vispy'.
+        exclude_viewer_types : set of str, optional
+            A set of fully-qualified viewer class names to exclude from
+            the restored session. This is useful for excluding viewers
+            that cannot run in the current environment (e.g. vispy viewers
+            in a headless server context).
 
         Returns
         -------
@@ -664,8 +670,24 @@ class JupyterApplication(Application):
                 rec = json.load(infile)
             translate_qt_to_jupyter_session(rec, widget_2d=widget_2d,
                                             widget_3d=widget_3d)
-            state = GlueUnSerializer(string=json.dumps(rec))
-            return state.object('__main__')
+            if exclude_viewer_types:
+                rec["__main__"]["viewers"] = [
+                    v for v in rec["__main__"]["viewers"]
+                    if rec[v]["_type"] not in exclude_viewer_types
+                ]
+
+            # Temporarily clear PATH_PATCHES during deserialization.
+            # Our translation has already remapped all class paths, and
+            # PATH_PATCHES would otherwise undo some of our translations
+            # (e.g. mapping HistogramLayerArtist back to the Qt version).
+            from glue.core.state import PATH_PATCHES
+            saved_patches = PATH_PATCHES.copy()
+            PATH_PATCHES.clear()
+            try:
+                state = GlueUnSerializer(string=json.dumps(rec))
+                return state.object('__main__')
+            finally:
+                PATH_PATCHES.update(saved_patches)
         finally:
             os.chdir(start_dir)
 

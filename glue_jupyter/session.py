@@ -107,6 +107,13 @@ def translate_qt_to_jupyter_session(session, widget_2d='bqplot', widget_3d='visp
     session["__main__"]["_type"] = "glue_jupyter.app.JupyterApplication"
     session["__main__"]["viewers"] = list(chain(*session["__main__"]["viewers"]))
 
+    # Remove Qt-specific plugins that aren't available in the Jupyter environment
+    if "plugins" in session["__main__"]:
+        session["__main__"]["plugins"] = [
+            p for p in session["__main__"]["plugins"]
+            if not p.startswith(("glue_qt.", "glue_vispy_viewers."))
+        ]
+
     for key in session:
 
         while session[key]["_type"] in translation:

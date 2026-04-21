@@ -87,7 +87,7 @@ class BqplotImageView(BqplotBaseView):
                     axes_ratio = None
                 else:
                     height, width = self._composite_image.shape
-                    axes_ratio = height / width
+                    axes_ratio = height / width if width else None
             else:
                 axes_ratio = None
             self.state._set_axes_aspect_ratio(axes_ratio)
