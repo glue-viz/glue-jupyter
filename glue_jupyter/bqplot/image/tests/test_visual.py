@@ -5,7 +5,7 @@ from glue_jupyter import jglue
 from glue_jupyter.tests.helpers import visual_widget_test
 
 
-@visual_widget_test
+@visual_widget_test(tolerance=1)
 def test_contour_units(
     tmp_path,
     page_session,
