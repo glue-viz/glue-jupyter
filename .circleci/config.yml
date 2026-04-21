@@ -10,8 +10,11 @@ jobs:
     parameters:
       jobname:
         type: string
+      image:
+        type: string
+        default: "cimg/python:3.11"
     docker:
-      - image: cimg/python:3.11
+      - image: << parameters.image >>
     environment:
       TOXENV: << parameters.jobname >>
     steps:
@@ -79,6 +82,11 @@ workflows:
             parameters:
               jobname:
                 - "py311-test-visual"
+
+      - visual:
+          name: "py311-test-visual-dev"
+          jobname: "py311-test-visual-dev"
+          image: "cimg/python:3.11-node"
 
       - deploy-reference-images:
           name: baseline-<< matrix.jobname >>
