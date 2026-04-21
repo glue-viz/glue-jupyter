@@ -287,13 +287,22 @@ class BqplotBaseView(IPyWidgetView):
 
         # Update all marks and transfer any scale observers (e.g. density marks)
         for mark in self.figure.marks:
-            if axis in mark.scales and mark.scales[axis] is old_scale:
-                mark.scales = {**mark.scales, axis: new_scale}
+            if axis in mark.scales:
                 if hasattr(mark, '_debounced_update_counts'):
-                    old_scale.unobserve(mark._debounced_update_counts, 'min')
-                    old_scale.unobserve(mark._debounced_update_counts, 'max')
+                    # Density marks may replace their own scales internally
+                    # (e.g. with a log10-transformed LinearScale), so we
+                    # can't rely on an identity check against old_scale.
+                    # Always unobserve old, observe new, and update the scale.
+                    try:
+                        old_scale.unobserve(mark._debounced_update_counts, 'min')
+                        old_scale.unobserve(mark._debounced_update_counts, 'max')
+                    except ValueError:
+                        pass
                     new_scale.observe(mark._debounced_update_counts, 'min')
                     new_scale.observe(mark._debounced_update_counts, 'max')
+                    mark.scales = {**mark.scales, axis: new_scale}
+                elif mark.scales[axis] is old_scale:
+                    mark.scales = {**mark.scales, axis: new_scale}
 
         # Reset cached limits to force sync on next update
         self._last_limits = None
