@@ -161,15 +161,41 @@ class TableGlue(TableBase):
     data = traitlets.Any()  # Glue data object
     apply_filter = traitlets.Any()  # callback
     state = traitlets.Any()  # TableState reference
+    data_visible = traitlets.Bool(True)  # whether the data layer is visible
+
+    _visible_indices = None
 
     @traitlets.observe('data')
     def _on_data_change(self, change):
+        self._visible_indices = None
         self._update()
+
+    def _compute_visible_indices(self):
+        if self.data is None or len(self.data.shape) == 0:
+            self._visible_indices = np.array([], dtype=int)
+            return
+        if self.data_visible:
+            self._visible_indices = np.arange(self.data.shape[0])
+        else:
+            mask = np.zeros(self.data.shape[0], dtype=bool)
+            for k in self.data.subsets:
+                if k.label in self.selections:
+                    try:
+                        mask |= k.to_mask()
+                    except IncompatibleAttribute:
+                        pass
+            self._visible_indices = np.where(mask)[0]
+
+    def _update(self):
+        self._visible_indices = None
+        super()._update()
 
     def __len__(self):
         if self.data is None or len(self.data.shape) == 0:
             return 0
-        return self.data.shape[0]
+        if self._visible_indices is None:
+            self._compute_visible_indices()
+        return len(self._visible_indices)
 
     def _get_headers(self):
         if self.data is None:
@@ -187,14 +213,17 @@ class TableGlue(TableBase):
 
     def _get_sorted_indices(self):
         """Return indices that would sort the data by the current sort column."""
+        if len(self.data.shape) == 0:
+            return np.array([], dtype=int)
+        n_total = self.data.shape[0]
         sort_by = self.options.get('sortBy')
         if not sort_by:
-            return np.arange(len(self))
+            return np.arange(n_total)
 
         # sortBy can be a list (Vuetify 2.x) or a single value
         sort_column = sort_by[0] if isinstance(sort_by, list) else sort_by
         if not sort_column:
-            return np.arange(len(self))
+            return np.arange(n_total)
 
         # Find the component matching the sort column
         components = self.get_visible_components()
@@ -205,7 +234,7 @@ class TableGlue(TableBase):
                 break
 
         if component is None:
-            return np.arange(len(self))
+            return np.arange(n_total)
 
         values = self.data[component]
         indices = np.argsort(values)
@@ -222,30 +251,36 @@ class TableGlue(TableBase):
     def _get_items(self):
         if self.data is None:
             return []
+        if self._visible_indices is None:
+            self._compute_visible_indices()
+
         page = self.options['page'] - 1
         page_size = self.options['itemsPerPage']
         i1 = page * page_size
-        i2 = min(len(self), (page + 1) * page_size)
+        i2 = min(len(self._visible_indices), (page + 1) * page_size)
 
-        # Get sorted indices and slice for current page
+        # Get sorted indices, filtered to visible rows, then paginate
         sorted_indices = self._get_sorted_indices()
+        if not self.data_visible:
+            visible_set = set(self._visible_indices.tolist())
+            sorted_indices = np.array([i for i in sorted_indices if i in visible_set])
         page_indices = sorted_indices[i1:i2]
 
         masks = {}
         for k in self.data.subsets:
-            try:
-                full_mask = k.to_mask()
-                masks[k.label] = full_mask[page_indices]
-            except IncompatibleAttribute:
-                masks[k.label] = np.zeros(len(page_indices), dtype=bool)
+            if k.label in self.selections:
+                try:
+                    full_mask = k.to_mask()
+                    masks[k.label] = full_mask[page_indices]
+                except IncompatibleAttribute:
+                    masks[k.label] = np.zeros(len(page_indices), dtype=bool)
 
         items = []
         components = self.get_visible_components()
         for i, orig_idx in enumerate(page_indices):
-            item = {'__row__': int(orig_idx)}  # original index for selections
+            item = {'__row__': int(orig_idx)}
             for selection in self.selections:
-                selected = masks[selection][i]
-                item[selection] = bool(selected)
+                item[selection] = bool(masks[selection][i])
             for component in components:
                 item[str(component)] = self.format(self.data[component][orig_idx])
             items.append(item)
@@ -318,6 +353,10 @@ class TableLayerArtist(LayerArtist):
         self._table_viewer = table_viewer
         super(TableLayerArtist, self).__init__(viewer_state, layer_state=layer_state, layer=layer)
         self._table_viewer.widget_table.data = layer.data
+        self.state.add_callback('visible', self._on_visible_change)
+
+    def _on_visible_change(self, *args):
+        self._table_viewer.redraw()
 
     def _refresh(self):
         self._table_viewer.redraw()
@@ -456,10 +495,18 @@ class TableViewer(IPyWidgetView):
         self.widget_table._update_columns()
 
     def redraw(self):
-        subsets = [k.layer for k in self.layers if isinstance(k.layer, Subset)]
+        data_visible = True
+        for layer_artist in self.layers:
+            if isinstance(layer_artist.layer, Subset):
+                continue
+            data_visible = layer_artist.state.visible
+            break
+        visible_subsets = [k.layer for k in self.layers
+                          if isinstance(k.layer, Subset) and k.state.visible]
         with self.widget_table.hold_sync():
-            self.widget_table.selections = [subset.label for subset in subsets]
-            self.widget_table.selection_colors = [subset.style.color for subset in subsets]
+            self.widget_table.data_visible = data_visible
+            self.widget_table.selections = [subset.label for subset in visible_subsets]
+            self.widget_table.selection_colors = [subset.style.color for subset in visible_subsets]
         self.widget_table._update()
         self._layout_viewer_options.update_columns(self.widget_table.data)
 

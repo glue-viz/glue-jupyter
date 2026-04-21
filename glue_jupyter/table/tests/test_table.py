@@ -352,3 +352,45 @@ def test_table_cell_edit_invalid_value(app, dataxyz):
 
     # Data should remain unchanged
     assert dataxyz['x'][0] == original_value
+
+
+def test_table_visibility_subset(app, dataxyz):
+    table = app.table(data=dataxyz)
+    app.subset('test', dataxyz.id['x'] > 1)
+    assert len(table.layers) == 2
+
+    # Subset visible: its label appears in selections
+    assert table.widget_table.selections == ['test']
+
+    # Hide subset: its label should disappear
+    table.layers[1].state.visible = False
+    assert table.widget_table.selections == []
+    assert table.widget_table.selection_colors == []
+
+    # Show it again
+    table.layers[1].state.visible = True
+    assert table.widget_table.selections == ['test']
+
+
+def test_table_visibility_data_layer(app, dataxyz):
+    table = app.table(data=dataxyz)
+    app.subset('test', dataxyz.id['x'] > 1)
+
+    # All rows visible when data layer is visible
+    assert table.widget_table.total_length == 3
+
+    # Hide data layer: only rows in visible subsets should show
+    table.layers[0].state.visible = False
+    assert table.widget_table.total_length == 2
+
+    # The visible rows should be the ones matching x > 1 (indices 1 and 2)
+    items = table.widget_table.items
+    assert [item['__row__'] for item in items] == [1, 2]
+
+    # Hide the subset too: no rows should show
+    table.layers[1].state.visible = False
+    assert table.widget_table.total_length == 0
+
+    # Show the data layer again: all rows return
+    table.layers[0].state.visible = True
+    assert table.widget_table.total_length == 3
