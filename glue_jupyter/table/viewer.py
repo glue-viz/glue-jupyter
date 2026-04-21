@@ -3,12 +3,12 @@ import numpy as np
 import ipyvuetify as v
 import ipywidgets as widgets
 import traitlets
-from echo import ListCallbackProperty
+from echo import CallbackProperty, ListCallbackProperty, keep_in_sync
 from glue.core.data import Subset
 from glue.core.subset import ElementSubsetState
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.common.layer_artist import LayerArtist
-from glue.viewers.common.state import ViewerState
+from glue.viewers.common.state import LayerState, ViewerState
 from glue.viewers.common.tool import Tool
 from glue.config import viewer_tool
 
@@ -348,7 +348,22 @@ class TableGlue(TableBase):
         self._update_items()
 
 
+class TableLayerState(LayerState):
+    color = CallbackProperty(docstring='The color used to display the layer')
+    alpha = CallbackProperty(docstring='The transparency used to display the layer')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.color = self.layer.style.color
+        self.alpha = self.layer.style.alpha
+        self._sync_color = keep_in_sync(self, 'color', self.layer.style, 'color')
+        self._sync_alpha = keep_in_sync(self, 'alpha', self.layer.style, 'alpha')
+
+
 class TableLayerArtist(LayerArtist):
+
+    _layer_state_cls = TableLayerState
+
     def __init__(self, table_viewer, viewer_state, layer_state=None, layer=None):
         self._table_viewer = table_viewer
         super(TableLayerArtist, self).__init__(viewer_state, layer_state=layer_state, layer=layer)

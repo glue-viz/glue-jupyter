@@ -243,6 +243,10 @@ module.exports = {
     background-color: #E3F2FD;
 }
 
+.glue-data-table {
+  min-height: 250px;
+}
+
 .glue-data-table .v-data-table__wrapper {
   overflow-x: auto;
 }
