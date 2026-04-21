@@ -8,10 +8,6 @@
       <v-select label="Render method" :items="render_method_items" v-model="render_method_selected" hide-details />
     </div>
     <div>
-      <glue-float-field label="vmin" :value.sync="vmin" echo-type="float" />
-      <glue-float-field label="vmax" :value.sync="vmax" echo-type="float" />
-    </div>
-    <div>
       <v-subheader class="pl-0">clamp minimum</v-subheader>
       <v-switch v-model="clamp_min" hide-details style="margin-top: 0" />
     </div>
@@ -22,15 +18,15 @@
     <template v-if="!is_subset">
       <div class="text-subtitle-2 font-weight-bold">Color</div>
       <div>
+          <glue-float-field label="min" :value.sync="vmin" echo-type="float" />
+      </div>
+      <div>
+          <glue-float-field label="max" :value.sync="vmax" echo-type="float" />
+      </div>
+      <div>
           <v-select label="color" :items="color_mode_items" v-model="color_mode_selected" hide-details />
       </div>
       <template v-if="(color_mode_items[color_mode_selected] || {}).text === 'Linear'">
-        <div>
-            <glue-float-field label="min" :value.sync="vmin" echo-type="float" />
-        </div>
-        <div>
-            <glue-float-field label="max" :value.sync="vmax" echo-type="float" />
-        </div>
         <div>
             <v-select label="colormap" :items="cmap_items" v-model="cmap" hide-details />
         </div>
@@ -49,7 +45,7 @@
   </div>
 </template>
 
-<style id="layer_volume">
+<style id="layer_volume_3d" class="layer_3d">
     .v-subheader {
         font-size: 12px;
         height: 16px;

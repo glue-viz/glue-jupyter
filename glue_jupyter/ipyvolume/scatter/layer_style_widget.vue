@@ -62,7 +62,7 @@
   </div>
 </template>
 
-<style id="viewer_3d">
+<style id="layer_scatter_3d" class="layer_3d">
     .v-subheader.slider-label {
         font-size: 12px;
         height: 16px;
