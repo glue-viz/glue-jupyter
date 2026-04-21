@@ -1,6 +1,7 @@
 from itertools import permutations
 
 import bqplot
+import pytest
 
 
 def test_scatter2d_log(app, dataxyz):
@@ -67,6 +68,92 @@ def test_scatter2d_log_limits(app):
     assert s.scale_x.min == s.state.x_min
     assert s.scale_x.max == s.state.x_max
 
+
+
+@pytest.mark.parametrize('n_toggles', [3, 5, 7])
+def test_scatter2d_log_repeated_toggle(app, dataxyz, n_toggles):
+    # Regression test: toggling log scale back and forth multiple times
+    # should always leave the viewer in a consistent state.
+
+    s = app.scatter2d(data=dataxyz)
+
+    for i in range(n_toggles):
+        s.state.x_log = not s.state.x_log
+        s.state.y_log = not s.state.y_log
+
+        expected_x = bqplot.LogScale if s.state.x_log else bqplot.LinearScale
+        expected_y = bqplot.LogScale if s.state.y_log else bqplot.LinearScale
+
+        # Scale type matches the state
+        assert isinstance(s.scale_x, expected_x), f"x scale wrong after toggle {i+1}"
+        assert isinstance(s.scale_y, expected_y), f"y scale wrong after toggle {i+1}"
+
+        # Axis, figure, and interaction reference the current scale
+        assert s.axis_x.scale is s.scale_x, f"axis_x.scale stale after toggle {i+1}"
+        assert s.axis_y.scale is s.scale_y, f"axis_y.scale stale after toggle {i+1}"
+        assert s.figure.scale_x is s.scale_x, f"figure.scale_x stale after toggle {i+1}"
+        assert s.figure.scale_y is s.scale_y, f"figure.scale_y stale after toggle {i+1}"
+        assert s._mouse_interact.x_scale is s.scale_x, f"interact x stale after toggle {i+1}"
+        assert s._mouse_interact.y_scale is s.scale_y, f"interact y stale after toggle {i+1}"
+
+        # All marks use the current scales (excluding density marks which
+        # use their own internal scale management)
+        from glue_jupyter.bqplot.scatter.scatter_density_mark import GenericDensityMark
+        for j, mark in enumerate(s.figure.marks):
+            if isinstance(mark, GenericDensityMark):
+                continue
+            if 'x' in mark.scales:
+                assert isinstance(mark.scales['x'], expected_x), \
+                    f"mark {j} x scale wrong after toggle {i+1}"
+            if 'y' in mark.scales:
+                assert isinstance(mark.scales['y'], expected_y), \
+                    f"mark {j} y scale wrong after toggle {i+1}"
+
+        # Limits are synced between state and scale
+        if s.state.x_min is not None and s.state.x_max is not None:
+            assert s.scale_x.min == float(s.state.x_min), \
+                f"x_min out of sync after toggle {i+1}"
+            assert s.scale_x.max == float(s.state.x_max), \
+                f"x_max out of sync after toggle {i+1}"
+        if s.state.y_min is not None and s.state.y_max is not None:
+            assert s.scale_y.min == float(s.state.y_min), \
+                f"y_min out of sync after toggle {i+1}"
+            assert s.scale_y.max == float(s.state.y_max), \
+                f"y_max out of sync after toggle {i+1}"
+
+
+def test_scatter2d_log_density_mark_scale_updated(app, dataxyz):
+    # Regression test: the density mark internally replaces its own
+    # scales with private LinearScales when in log mode (as a rendering
+    # workaround). This means _replace_scale's identity check
+    # `mark.scales[axis] is old_scale` can fail, leaving the density
+    # mark with stale scales and observers after toggling.
+
+    s = app.scatter2d(data=dataxyz)
+    s.state.layers[0].density_map = True
+    density_mark = s.layers[0].density_mark
+
+    # Toggle to log
+    s.state.x_log = True
+    log_scale = s.scale_x
+    assert isinstance(log_scale, bqplot.LogScale)
+
+    # Simulate what _update_counts does in a real notebook: it replaces
+    # the density mark's x scale with a private LinearScale
+    private_scale = bqplot.LinearScale(min=0.0, max=1.0)
+    density_mark.scales = {**density_mark.scales, 'x': private_scale}
+
+    # Now toggle back to linear - _replace_scale must still update the
+    # density mark even though its scale is no longer the figure's LogScale
+    s.state.x_log = False
+    new_linear = s.scale_x
+    assert isinstance(new_linear, bqplot.LinearScale)
+
+    # The density mark's observer should be on the new scale, not the
+    # old log scale
+    notifiers = new_linear._trait_notifiers.get('min', {}).get('change', [])
+    assert density_mark._debounced_update_counts in notifiers, \
+        "density mark not observing new scale after toggle back from log"
 
 
 def test_scatter2d_nd(app, data_4d):
