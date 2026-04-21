@@ -3,6 +3,8 @@ from itertools import permutations
 import bqplot
 import pytest
 
+from glue_jupyter.bqplot.scatter.scatter_density_mark import GenericDensityMark
+
 
 def test_scatter2d_log(app, dataxyz):
 
@@ -98,7 +100,6 @@ def test_scatter2d_log_repeated_toggle(app, dataxyz, n_toggles):
 
         # All marks use the current scales (excluding density marks which
         # use their own internal scale management)
-        from glue_jupyter.bqplot.scatter.scatter_density_mark import GenericDensityMark
         for j, mark in enumerate(s.figure.marks):
             if isinstance(mark, GenericDensityMark):
                 continue
