@@ -304,6 +304,31 @@ class BqplotBaseView(IPyWidgetView):
                 elif mark.scales[axis] is old_scale:
                     mark.scales = {**mark.scales, axis: new_scale}
 
+        # Update scale references in toolbar tool interacts (PanZoom,
+        # selection brushes, etc.) so they don't hold stale scales.
+        if hasattr(self, 'toolbar'):
+            for tool in self.toolbar.tools.values():
+                interact = getattr(tool, 'interact', None)
+                if interact is None:
+                    continue
+                # PanZoom uses scales={'x': [scale], 'y': [scale]}
+                if hasattr(interact, 'scales') and isinstance(interact.scales, dict):
+                    if axis in interact.scales:
+                        interact.scales = {**interact.scales,
+                                           axis: [new_scale]}
+                # BrushRectangleSelector, BrushEllipseSelector, BrushSelector
+                scale_attr = f'{axis}_scale'
+                if hasattr(interact, scale_attr) and getattr(interact, scale_attr) is old_scale:
+                    setattr(interact, scale_attr, new_scale)
+                # BrushIntervalSelector uses 'scale' (no axis prefix)
+                if hasattr(interact, 'scale') and interact.scale is old_scale:
+                    interact.scale = new_scale
+                # Also update patch marks on polygon/lasso tools
+                patch = getattr(tool, 'patch', None)
+                if patch is not None and axis in getattr(patch, 'scales', {}):
+                    if patch.scales[axis] is old_scale:
+                        patch.scales = {**patch.scales, axis: new_scale}
+
         # Reset cached limits to force sync on next update
         self._last_limits = None
 
