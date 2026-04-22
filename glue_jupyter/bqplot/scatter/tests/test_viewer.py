@@ -157,6 +157,40 @@ def test_scatter2d_log_density_mark_scale_updated(app, dataxyz):
         "density mark not observing new scale after toggle back from log"
 
 
+def test_scatter2d_log_tool_scales_updated(app, dataxyz):
+    # Regression test: when toggling log scale, the toolbar tools'
+    # interact scale references must be updated to the new scale.
+
+    s = app.scatter2d(data=dataxyz)
+
+    panzoom = s.toolbar.tools['bqplot:panzoom']
+    rectangle = s.toolbar.tools['bqplot:rectangle']
+    xrange = s.toolbar.tools['bqplot:xrange']
+    yrange = s.toolbar.tools['bqplot:yrange']
+
+    # Toggle x to log
+    s.state.x_log = True
+    assert panzoom.interact.scales['x'] == [s.scale_x]
+    assert rectangle.interact.x_scale is s.scale_x
+    assert xrange.interact.scale is s.scale_x
+
+    # Toggle y to log
+    s.state.y_log = True
+    assert panzoom.interact.scales['y'] == [s.scale_y]
+    assert rectangle.interact.y_scale is s.scale_y
+    assert yrange.interact.scale is s.scale_y
+
+    # Toggle both back to linear
+    s.state.x_log = False
+    s.state.y_log = False
+    assert panzoom.interact.scales['x'] == [s.scale_x]
+    assert panzoom.interact.scales['y'] == [s.scale_y]
+    assert rectangle.interact.x_scale is s.scale_x
+    assert rectangle.interact.y_scale is s.scale_y
+    assert xrange.interact.scale is s.scale_x
+    assert yrange.interact.scale is s.scale_y
+
+
 def test_scatter2d_nd(app, data_4d):
     # Regression test for a bug that meant that arrays with more than one
     # dimension did not work correctly.
