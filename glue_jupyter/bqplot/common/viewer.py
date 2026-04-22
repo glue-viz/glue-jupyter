@@ -6,6 +6,7 @@ from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
 
 from bqplot_image_gl.interacts import MouseInteraction, keyboard_events, mouse_events
+from bqplot_linlog import LinLogScale, LinLogAxis
 
 from echo.callback_container import CallbackContainer
 
@@ -27,14 +28,14 @@ class BqplotBaseView(IPyWidgetView):
     def __init__(self, session, state=None):
 
         # if we allow padding, we sometimes get odd behaviour with the interacts
-        self.scale_x = bqplot.LinearScale(min=0, max=1, allow_padding=False)
-        self.scale_y = bqplot.LinearScale(min=0, max=1)
+        self.scale_x = LinLogScale(min=0, max=1, allow_padding=False)
+        self.scale_y = LinLogScale(min=0, max=1)
 
         self.scales = {'x': self.scale_x, 'y': self.scale_y}
-        self.axis_x = bqplot.Axis(
+        self.axis_x = LinLogAxis(
             scale=self.scale_x, grid_lines='none', label='x')
-        self.axis_y = bqplot.Axis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
-                                  grid_lines='none', label='y')
+        self.axis_y = LinLogAxis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
+                                 grid_lines='none', label='y')
 
         figure_kwargs = dict(scale_x=self.scale_x, scale_y=self.scale_y,
                              animation_duration=0,
@@ -251,84 +252,11 @@ class BqplotBaseView(IPyWidgetView):
             self.scale_y.min = float(self.state.y_min)
             self.scale_y.max = float(self.state.y_max)
 
-    def _replace_scale(self, axis):
-        """Replace the bqplot scale for the given axis ('x' or 'y') based on log state."""
-
+    def _set_scale_mode(self, axis):
+        """Set the LinLogScale mode for the given axis based on log state."""
         is_log = getattr(self.state, f'{axis}_log', False)
-        scale_cls = bqplot.LogScale if is_log else bqplot.LinearScale
-
-        old_scale = getattr(self, f'scale_{axis}')
-        if isinstance(old_scale, scale_cls):
-            return
-
-        # Disconnect the old scale so that any pending browser syncs
-        # don't overwrite the state's limits via update_glue_scales
-        old_scale.unobserve(self.update_glue_scales, 'min')
-        old_scale.unobserve(self.update_glue_scales, 'max')
-
-        new_scale = scale_cls(**({'allow_padding': False} if axis == 'x' else {}))
-
-        # Set limits if valid for the new scale type
-        lo = getattr(self.state, f'{axis}_min')
-        hi = getattr(self.state, f'{axis}_max')
-        if lo is not None and hi is not None:
-            if not is_log or (lo > 0 and hi > 0):
-                new_scale.min = float(lo)
-                new_scale.max = float(hi)
-
-        new_scale.observe(self.update_glue_scales, names=['min', 'max'])
-
-        # Update all references to the scale
-        setattr(self, f'scale_{axis}', new_scale)
-        self.scales[axis] = new_scale
-        getattr(self, f'axis_{axis}').scale = new_scale
-        setattr(self.figure, f'scale_{axis}', new_scale)
-        setattr(self._mouse_interact, f'{axis}_scale', new_scale)
-
-        # Update all marks and transfer any scale observers (e.g. density marks)
-        for mark in self.figure.marks:
-            if axis in mark.scales:
-                if hasattr(mark, '_debounced_update_counts'):
-                    # Density marks may replace their own scales internally
-                    # (e.g. with a log10-transformed LinearScale), so we
-                    # can't rely on an identity check against old_scale.
-                    # Always unobserve old, observe new, and update the scale.
-                    try:
-                        old_scale.unobserve(mark._debounced_update_counts, 'min')
-                        old_scale.unobserve(mark._debounced_update_counts, 'max')
-                    except ValueError:
-                        pass
-                    new_scale.observe(mark._debounced_update_counts, 'min')
-                    new_scale.observe(mark._debounced_update_counts, 'max')
-                    mark.scales = {**mark.scales, axis: new_scale}
-                elif mark.scales[axis] is old_scale:
-                    mark.scales = {**mark.scales, axis: new_scale}
-
-        # Update scale references in toolbar tool interacts (PanZoom,
-        # selection brushes, etc.) so they don't hold stale scales.
-        if hasattr(self, 'toolbar'):
-            for tool in self.toolbar.tools.values():
-                interact = getattr(tool, 'interact', None)
-                if interact is None:
-                    continue
-                # PanZoom uses scales={'x': [scale], 'y': [scale]}
-                if hasattr(interact, 'scales') and isinstance(interact.scales, dict):
-                    if axis in interact.scales:
-                        interact.scales = {**interact.scales,
-                                           axis: [new_scale]}
-                # BrushRectangleSelector, BrushEllipseSelector, BrushSelector
-                scale_attr = f'{axis}_scale'
-                if hasattr(interact, scale_attr) and getattr(interact, scale_attr) is old_scale:
-                    setattr(interact, scale_attr, new_scale)
-                # BrushIntervalSelector uses 'scale' (no axis prefix)
-                if hasattr(interact, 'scale') and interact.scale is old_scale:
-                    interact.scale = new_scale
-                # Also update patch marks on polygon/lasso tools
-                patch = getattr(tool, 'patch', None)
-                if patch is not None and axis in getattr(patch, 'scales', {}):
-                    if patch.scales[axis] is old_scale:
-                        patch.scales = {**patch.scales, axis: new_scale}
-
+        scale = getattr(self, f'scale_{axis}')
+        scale.mode = 'log' if is_log else 'linear'
         # Reset cached limits to force sync on next update
         self._last_limits = None
 

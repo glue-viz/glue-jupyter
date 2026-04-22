@@ -120,10 +120,9 @@ class GenericDensityMark(ImageGL):
 
         super().__init__(image=EMPTY_IMAGE, scales=self._scales)
 
-        self._figure.axes[0].scale.observe(self._debounced_update_counts, "min")
-        self._figure.axes[0].scale.observe(self._debounced_update_counts, "max")
-        self._figure.axes[1].scale.observe(self._debounced_update_counts, "min")
-        self._figure.axes[1].scale.observe(self._debounced_update_counts, "max")
+        for attr in ("min", "max", "mode"):
+            self._figure.axes[0].scale.observe(self._debounced_update_counts, attr)
+            self._figure.axes[1].scale.observe(self._debounced_update_counts, attr)
 
         self._shape = None
         self._setup_view_listener()
@@ -162,8 +161,8 @@ class GenericDensityMark(ImageGL):
 
         ny, nx = self._shape
 
-        x_log = isinstance(self._figure.axes[0].scale, bqplot.LogScale)
-        y_log = isinstance(self._figure.axes[1].scale, bqplot.LogScale)
+        x_log = getattr(self._figure.axes[0].scale, 'mode', 'linear') == 'log'
+        y_log = getattr(self._figure.axes[1].scale, 'mode', 'linear') == 'log'
 
         # Expand beyond the boundary
         if self.external_padding != 0:
