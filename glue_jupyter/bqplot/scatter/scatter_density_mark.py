@@ -1,5 +1,6 @@
 import math
 
+import bqplot
 import numpy as np
 from bqplot import ColorScale
 from bqplot_image_gl import ImageGL
@@ -119,10 +120,9 @@ class GenericDensityMark(ImageGL):
 
         super().__init__(image=EMPTY_IMAGE, scales=self._scales)
 
-        self._figure.axes[0].scale.observe(self._debounced_update_counts, "min")
-        self._figure.axes[0].scale.observe(self._debounced_update_counts, "max")
-        self._figure.axes[1].scale.observe(self._debounced_update_counts, "min")
-        self._figure.axes[1].scale.observe(self._debounced_update_counts, "max")
+        for attr in ("min", "max", "mode"):
+            self._figure.axes[0].scale.observe(self._debounced_update_counts, attr)
+            self._figure.axes[1].scale.observe(self._debounced_update_counts, attr)
 
         self._shape = None
         self._setup_view_listener()
@@ -161,18 +161,25 @@ class GenericDensityMark(ImageGL):
 
         ny, nx = self._shape
 
+        x_log = getattr(self._figure.axes[0].scale, 'mode', 'linear') == 'log'
+        y_log = getattr(self._figure.axes[1].scale, 'mode', 'linear') == 'log'
+
         # Expand beyond the boundary
         if self.external_padding != 0:
-            dx = xmax - xmin
-            dy = ymax - ymin
-            xmin, xmax = (
-                xmin - dx * self.external_padding,
-                xmax + dx * self.external_padding,
-            )
-            ymin, ymax = (
-                ymin - dy * self.external_padding,
-                ymax + dy * self.external_padding,
-            )
+            if x_log:
+                log_dx = np.log10(xmax / xmin)
+                factor = 10 ** (log_dx * self.external_padding)
+                xmin, xmax = xmin / factor, xmax * factor
+            else:
+                dx = xmax - xmin
+                xmin, xmax = xmin - dx * self.external_padding, xmax + dx * self.external_padding
+            if y_log:
+                log_dy = np.log10(ymax / ymin)
+                factor = 10 ** (log_dy * self.external_padding)
+                ymin, ymax = ymin / factor, ymax * factor
+            else:
+                dy = ymax - ymin
+                ymin, ymax = ymin - dy * self.external_padding, ymax + dy * self.external_padding
             nx *= math.ceil(1 + 2 * self.external_padding)
             ny *= math.ceil(1 + 2 * self.external_padding)
 
@@ -189,8 +196,32 @@ class GenericDensityMark(ImageGL):
         with self.hold_sync():
             if image is not None:
                 self._counts = image
-                self.x = (xmin, xmax)
-                self.y = (ymin, ymax)
+
+                # Work around a bqplot_image_gl rendering issue where ImageGL
+                # does not correctly distribute pixels when using LogScale with
+                # an image that extends beyond the visible axis range. Instead,
+                # we use a LinearScale in log10-transformed coordinates which
+                # gives correct pixel alignment.
+                new_scales = dict(self.scales)
+                if x_log:
+                    self.x = (np.log10(xmin), np.log10(xmax))
+                    new_scales["x"] = bqplot.LinearScale(
+                        min=float(np.log10(self._figure.axes[0].scale.min)),
+                        max=float(np.log10(self._figure.axes[0].scale.max)),
+                    )
+                else:
+                    self.x = (xmin, xmax)
+                    new_scales["x"] = self._figure.axes[0].scale
+                if y_log:
+                    self.y = (np.log10(ymin), np.log10(ymax))
+                    new_scales["y"] = bqplot.LinearScale(
+                        min=float(np.log10(self._figure.axes[1].scale.min)),
+                        max=float(np.log10(self._figure.axes[1].scale.max)),
+                    )
+                else:
+                    self.y = (ymin, ymax)
+                    new_scales["y"] = self._figure.axes[1].scale
+                self.scales = new_scales
             else:
                 self._counts = None
             self._update_rendered_image()
