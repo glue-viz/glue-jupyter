@@ -8,6 +8,7 @@ from glue.core import Data
 from glue.core.roi import CircularAnnulusROI, EllipticalROI
 from glue.core.subset import RoiSubsetState
 from ..common.tools import TrueCircularROI
+import bqplot
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -42,6 +43,16 @@ def test_histogram1d(app, dataxyz):
     # s.state.hist_n_bin = 6
     # assert s.layers[2].bins.tolist() == [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
     # assert s.layers[2].hist.tolist() == [0, 1, 0, 0, 0, 0]
+
+
+def test_histogram1d_log(app, dataxyz):
+    s = app.histogram1d(x='y', data=dataxyz)
+    assert s.state.y_log is False
+    assert isinstance(s.scale_y, bqplot.LinearScale)
+    s.state.y_log = True
+    assert isinstance(s.scale_y, bqplot.LogScale)
+    s.state.y_log = False
+    assert isinstance(s.scale_y, bqplot.LinearScale)
 
 
 def test_histogram1d_multiple_subsets(app, data_unlinked, datax):
