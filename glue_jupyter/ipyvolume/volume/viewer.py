@@ -7,8 +7,9 @@ from .layer_style_widget import Volume3DLayerStateWidget
 from ..scatter.layer_artist import IpyvolumeScatterLayerArtist
 from ..scatter.layer_style_widget import Scatter3DLayerStateWidget
 
-from ..common.viewer_options_widget import Viewer3DStateWidget
 from ..common.viewer import IpyvolumeBaseView
+from ..common.viewer_options_widget import Viewer3DStateWidget
+
 
 __all__ = ['IpyvolumeVolumeView']
 
