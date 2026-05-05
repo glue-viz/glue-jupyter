@@ -6,6 +6,7 @@ from glue.core.subset import roi_to_subset_state
 from glue.core.command import ApplySubsetState
 
 from bqplot_image_gl.interacts import MouseInteraction, keyboard_events, mouse_events
+from bqplot_linlog import LinLogScale, LinLogAxis
 
 from echo.callback_container import CallbackContainer
 
@@ -27,14 +28,14 @@ class BqplotBaseView(IPyWidgetView):
     def __init__(self, session, state=None):
 
         # if we allow padding, we sometimes get odd behaviour with the interacts
-        self.scale_x = bqplot.LinearScale(min=0, max=1, allow_padding=False)
-        self.scale_y = bqplot.LinearScale(min=0, max=1)
+        self.scale_x = LinLogScale(min=0, max=1, allow_padding=False)
+        self.scale_y = LinLogScale(min=0, max=1)
 
         self.scales = {'x': self.scale_x, 'y': self.scale_y}
-        self.axis_x = bqplot.Axis(
+        self.axis_x = LinLogAxis(
             scale=self.scale_x, grid_lines='none', label='x')
-        self.axis_y = bqplot.Axis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
-                                  grid_lines='none', label='y')
+        self.axis_y = LinLogAxis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
+                                 grid_lines='none', label='y')
 
         figure_kwargs = dict(scale_x=self.scale_x, scale_y=self.scale_y,
                              animation_duration=0,
@@ -250,6 +251,14 @@ class BqplotBaseView(IPyWidgetView):
         if self.state.y_min is not None and self.state.y_max is not None:
             self.scale_y.min = float(self.state.y_min)
             self.scale_y.max = float(self.state.y_max)
+
+    def _set_scale_mode(self, axis):
+        """Set the LinLogScale mode for the given axis based on log state."""
+        is_log = getattr(self.state, f'{axis}_log', False)
+        scale = getattr(self, f'scale_{axis}')
+        scale.mode = 'log' if is_log else 'linear'
+        # Reset cached limits to force sync on next update
+        self._last_limits = None
 
     def redraw(self):
         pass

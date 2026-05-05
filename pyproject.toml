@@ -36,6 +36,7 @@ dependencies = [
     "ipyvuetify>=1.2.0,<2",
     "bqplot-image-gl>=1.9.2",
     "bqplot>=0.12.17",
+    "bqplot-linlog>=0.1.0",
     "bqplot-gl",
     "scikit-image",
 ]
