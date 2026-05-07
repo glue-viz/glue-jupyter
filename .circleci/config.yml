@@ -81,11 +81,12 @@ workflows:
           matrix:
             parameters:
               jobname:
-                - "py311-test-visual"
+                - "py311-test-visual-bqplot012"
+                - "py311-test-visual-bqplot013"
 
       - visual:
-          name: "py311-test-visual-dev"
-          jobname: "py311-test-visual-dev"
+          name: "py311-test-visual-bqplotdev"
+          jobname: "py311-test-visual-bqplotdev"
           image: "cimg/python:3.11-node"
 
       - deploy-reference-images:
@@ -93,7 +94,8 @@ workflows:
           matrix:
             parameters:
               jobname:
-                - "py311-test-visual"
+                - "py311-test-visual-bqplot012"
+                - "py311-test-visual-bqplot013"
           filters:
             branches:
               only:
