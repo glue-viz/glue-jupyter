@@ -1,5 +1,26 @@
 # Full changelog
 
+## v0.28.0 - 2026-05-07
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### New Features
+
+* Make use of echo.vue to autoconnect vue properties to glue state by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/529
+* Add size widget to scatter layer controls by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/535
+* Update ipyvolume viewer to use reference data by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/520
+
+#### Other Changes
+
+* Omit tests from coverage reporting by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/530
+* Added pre-commit configuration to strip notebook output by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/531
+* Added devdeps job on CircleCI; support bqplot-image-gl 1.9 by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/532
+* Pin bqplot to <0.13 for now since we are not fully compatible yet by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/539
+* Fix sphinx build by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/540
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.27.0...v0.28.0
+
 ## v0.27.0 - 2026-03-25
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
