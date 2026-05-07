@@ -40,7 +40,8 @@ nitpick_ignore = [('py:class', 'ipywidgets.widgets.widget_box.Box'),
                   ('py:class', 'glue.viewers.image.layer_artist.ImageLayerArtist'),
                   ('py:class', 'glue.viewers.image.layer_artist.BaseImageLayerArtist'),
                   ('py:class', 'glue_vispy_viewers.volume.layer_state.VolumeLayerState'),
-                  ('py:class', 'glue_vispy_viewers.common.layer_state.VispyLayerState')]
+                  ('py:class', 'glue_vispy_viewers.common.layer_state.VispyLayerState'),
+                  ('py:class', 't.Any')]
 
 automodapi_inheritance_diagram = False
 
