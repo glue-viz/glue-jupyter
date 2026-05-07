@@ -35,7 +35,7 @@ dependencies = [
     "ipyvue>=1.2.0,<2",
     "ipyvuetify>=1.2.0,<2",
     "bqplot-image-gl>=1.9.2",
-    "bqplot>=0.12.17",
+    "bqplot>=0.12.17,<0.13",
     "bqplot-gl",
     "scikit-image",
 ]
