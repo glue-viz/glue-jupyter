@@ -25,16 +25,9 @@
       <v-switch @change="set_movie_maker_visible" hide-details style="margin-top: 0" />
       <jupyter-widget :widget="widget_movie_maker" />
     </div>
-  </div>
-  <div v-for="slider of sliders">
-    <v-subheader class="pl-0 slider-label">{{ slider.label }}: {{ glue_state.slices[slider.index] }} {{ slider.world_value }}</v-subheader>
-    <glue-throttled-slider
-        v-if="glue_state.slices && glue_state.slices.length > 0"
-        wait="300"
-        :max="slider.max"
-        :value.sync="glue_state.slices[slider.index]"
-        hide-details
-    />
+    <div>
+      <jupyter-widget :widget="widget_slices" />
+    </div>
   </div>
 </template>
 
