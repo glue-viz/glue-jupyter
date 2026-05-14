@@ -18,7 +18,7 @@ __all__ = ['IpyvolumeVolumeView']
 class IpyvolumeVolumeView(IpyvolumeBaseView):
 
     _state_cls = VolumeViewerState3D
-    _options_cls = Volume3DViewerStateWidget 
+    _options_cls = Volume3DViewerStateWidget
     _data_artist_cls = IpyvolumeVolumeLayerArtist
     _subset_artist_cls = IpyvolumeVolumeLayerArtist
     _layer_style_widget_cls = {IpyvolumeVolumeLayerArtist: Volume3DLayerStateWidget,

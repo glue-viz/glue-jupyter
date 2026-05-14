@@ -68,7 +68,7 @@ class MultiSliceWidgetHelper(object):
 
         if (self.viewer_state.reference_data is not self._reference_data or
                 self.viewer_state.x_att is not self._x_att or
-                self.viewer_state.y_att is not self._y_att or 
+                self.viewer_state.y_att is not self._y_att or
             (hasattr(self.viewer_state, "z_att") and self.viewer_state.z_att is not self._z_att)):
 
             self._reference_data = self.viewer_state.reference_data

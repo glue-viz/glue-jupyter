@@ -1,8 +1,6 @@
 from echo.vue import autoconnect_callbacks_to_vue
 from ipywidgets import DOMWidget, widget_serialization
 
-from glue.core.coordinate_helpers import world_axis
-from glue.viewers.image.state import AggregateSlice
 
 import ipyvolume as ipv
 import ipyvuetify as v

@@ -24,7 +24,7 @@ class Scatter3DViewerStateWidget(v.VuetifyTemplate):
         self.widget_movie_maker = self.movie_maker.widget_main
         self.vue_set_movie_maker_visible(False)
 
-        autoconnect_callbacks_to_vue(viewer_state, self) 
+        autoconnect_callbacks_to_vue(viewer_state, self)
 
     def vue_set_movie_maker_visible(self, visible):
         self.widget_movie_maker.layout.display = None if visible else "none"
