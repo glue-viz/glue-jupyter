@@ -17,7 +17,6 @@ class Volume3DViewerStateWidget(v.VuetifyTemplate):
 
     widget_movie_maker = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
     widget_slices = traitlets.Instance(DOMWidget, allow_none=True).tag(sync=True, **widget_serialization)
-    sliders = traitlets.List().tag(sync=True)
 
     def __init__(self, viewer_state):
         super().__init__()
