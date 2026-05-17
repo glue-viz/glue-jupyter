@@ -7,8 +7,6 @@ from glue.core.command import ApplySubsetState
 from ...view import IPyWidgetView
 from ...link import dlink
 
-from .viewer_options_widget import Viewer3DStateWidget
-
 __all__ = ['IpyvolumeBaseView']
 
 
@@ -16,8 +14,6 @@ class IpyvolumeBaseView(IPyWidgetView):
 
     allow_duplicate_data = False
     allow_duplicate_subset = False
-
-    _options_cls = Viewer3DStateWidget
 
     tools = ['ipyvolume:lasso', 'ipyvolume:circle', 'ipyvolume:rectangle']
 
