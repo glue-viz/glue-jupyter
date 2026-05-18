@@ -29,6 +29,7 @@ class MultiSliceWidgetHelper(object):
         self._reference_data = None
         self._x_att = None
         self._y_att = None
+        self._z_att = None
 
         self.sync_sliders_from_state()
 
