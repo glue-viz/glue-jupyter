@@ -1,5 +1,8 @@
 from itertools import permutations
+from random import sample
+
 from ipywidgets import IntSlider
+
 from ..slice_helpers import MultiSliceWidgetHelper
 
 from echo import CallbackProperty, HasCallbackProperties
@@ -71,3 +74,26 @@ def test_no_slider_if_flat(data_flat):
 
     helper = MultiSliceWidgetHelper(viewer_state=state)
     assert helper._sliders[2] is None
+
+
+def test_slider_slice_values(data_4d):
+    state = ViewerTestState3D()
+    state.reference_data = data_4d
+    state.x_att = data_4d.pixel_component_ids[0]
+    state.y_att = data_4d.pixel_component_ids[1]
+    state.z_att = data_4d.pixel_component_ids[2]
+    state.slices = (0,) * data_4d.ndim
+
+    helper = MultiSliceWidgetHelper(viewer_state=state)
+    size3 = data_4d.shape[3]
+    index_values = list(range(size3))
+    permutation = sample(index_values, len(index_values))
+    for idx in permutation:
+        helper._sliders[3].value = idx
+        assert state.slices[3] == idx
+
+    for idx in permutation:
+        state.slices = tuple(slice if index != 3 else idx
+                             for index, slice
+                             in enumerate(state.slices))
+        assert helper._sliders[3].value == idx
