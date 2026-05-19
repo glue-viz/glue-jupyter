@@ -89,7 +89,7 @@
           </td>
           <td style="padding: 0 1px" class="text-left" v-if="selection_enabled">
             <v-checkbox
-              hide-details style="margin-top: 0; padding-top: 0"
+              density="compact" hide-details style="margin-top: 0; padding-top: 0"
               :model-value="checked.indexOf(props.item.__row__) != -1"
               :key="props.item.__row__"
               @update:modelValue="(value) => select({checked: value, row: props.item.__row__})"
@@ -277,6 +277,15 @@ module.exports = {
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
+  height: 28px !important;
+}
+
+.glue-data-table .v-selection-control {
+  min-height: 28px;
+}
+
+.glue-data-table .v-selection-control__wrapper {
+  height: 28px;
 }
 
 .glue-data-table--scrollable .v-data-table__wrapper {
