@@ -488,16 +488,25 @@ class BqplotCircleMode(BqplotSelectionTool):
             rx = ry = roi.radius
             if isinstance(roi, TrueCircularROI):
                 self._strict_circle = True
+            self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
+            self.interact.selected_y = [roi.yc - ry, roi.yc + ry]
         elif isinstance(roi, EllipticalROI):
             if self._strict_circle:
                 rx, ry = np.sqrt((roi.radius_x ** 2 + roi.radius_y ** 2) * 0.5)
             else:
                 rx, ry = roi.radius_x, roi.radius_y
             self.interact.rotate = -np.degrees(roi.theta)
+            self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
+            self.interact.selected_y = [roi.yc - ry, roi.yc + ry]
+        elif isinstance(roi, PolygonalROI):
+            # Emitted by this tool itself when x_log/y_log is set on the
+            # viewer state. The brush widget can't faithfully redraw an
+            # arbitrary polygon, so collapse to the polygon's bounding box --
+            # the same fallback BqplotRectangleMode.update_from_roi uses.
+            self.interact.selected_x = [float(np.min(roi.vx)), float(np.max(roi.vx))]
+            self.interact.selected_y = [float(np.min(roi.vy)), float(np.max(roi.vy))]
         else:
             raise TypeError(f'Cannot initialize a BqplotCircleMode from a {type(roi)}')
-        self.interact.selected_x = [roi.xc - rx, roi.xc + rx]
-        self.interact.selected_y = [roi.yc - ry, roi.yc + ry]
 
     def on_selection_change(self, *args):
         if self.interact.selected_x is None or self.interact.selected_y is None:
