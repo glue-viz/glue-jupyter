@@ -27,6 +27,42 @@ INTERACT_COLOR = '#cbcbcb'
 ICONS_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'icons')
 
 
+def _screen_uniform_ellipse_vertices(x_pair, y_pair, x_log, y_log, n=200):
+    """
+    Sample an ellipse fitted to the bounding box ``(x_pair, y_pair)`` --
+    given in linear data space -- and return polygon vertices that are
+    uniformly distributed around the ellipse in *screen* space (i.e. in
+    log-data space along any axis with a log scale). The returned ``(vx,
+    vy)`` arrays are in linear data space, suitable for ``PolygonalROI``.
+
+    Mirrors ``glue.core.roi.MplCircularROI.roi``'s polygon-fallback path:
+    when one of the axes is non-linear, glue-core samples the screen-space
+    ellipse and emits a ``PolygonalROI`` rather than an ``EllipticalROI``
+    in linear data space. That way the selection's visual shape matches
+    what the user drew, and no subset-state pretransform is needed.
+    """
+    if x_log:
+        lx0, lx1 = np.log10(x_pair[0]), np.log10(x_pair[1])
+    else:
+        lx0, lx1 = x_pair[0], x_pair[1]
+    if y_log:
+        ly0, ly1 = np.log10(y_pair[0]), np.log10(y_pair[1])
+    else:
+        ly0, ly1 = y_pair[0], y_pair[1]
+
+    lxc, lyc = (lx0 + lx1) / 2, (ly0 + ly1) / 2
+    lrx, lry = abs(lx1 - lx0) / 2, abs(ly1 - ly0) / 2
+
+    theta = np.linspace(0, 2 * np.pi, n, endpoint=False)
+    vx = lxc + lrx * np.cos(theta)
+    vy = lyc + lry * np.sin(theta)
+    if x_log:
+        vx = 10 ** vx
+    if y_log:
+        vy = 10 ** vy
+    return vx, vy
+
+
 class TrueCircularROI(CircularROI):
     pass
 
@@ -403,6 +439,26 @@ class BqplotCircleMode(BqplotSelectionTool):
             if self.interact.selected_x is not None and self.interact.selected_y is not None:
                 x = self.interact.selected_x
                 y = self.interact.selected_y
+
+                # On log axes, the brush's bounding box is reported in linear
+                # data space but at log-uniform screen positions, so an
+                # "ellipse on screen" is NOT an ellipse in linear data space.
+                # Mirror glue-core's matplotlib backend
+                # (glue.core.roi.MplCircularROI.roi) by emitting a polygon
+                # sampled in screen-uniform coordinates -- the polygon then
+                # encodes the log warp natively in linear data space and no
+                # subset-state pretransform is needed.
+                x_log = getattr(self.viewer.state, 'x_log', False)
+                y_log = getattr(self.viewer.state, 'y_log', False)
+                if x_log or y_log:
+                    vx, vy = _screen_uniform_ellipse_vertices(x, y, x_log, y_log)
+                    roi = PolygonalROI(vx=vx, vy=vy)
+                    self._roi = roi
+                    self.viewer.apply_roi(roi)
+                    if self.finalize_callback is not None:
+                        self.finalize_callback()
+                    return
+
                 # similar to https://github.com/glue-viz/glue/blob/b14ccffac6a5
                 # 271c2869ead9a562a2e66232e397/glue/core/roi.py#L1275-L1297
                 # If _strict_circle set, enforce returning a circle; otherwise check
