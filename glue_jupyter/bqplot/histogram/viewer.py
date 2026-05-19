@@ -31,8 +31,12 @@ class BqplotHistogramView(BqplotBaseView):
         super().__init__(*args, **kwargs)
         self.state.add_callback('x_att', self._update_axes)
         self.state.add_callback('x_log', self._update_axes)
+        self.state.add_callback('x_log', self._update_x_log)
+        self.state.add_callback('y_log', self._update_y_log)
         self.state.add_callback('normalize', self._update_axes)
         self._update_axes()
+        self._update_x_log()
+        self._update_y_log()
 
     def _update_axes(self, *args):
 
@@ -43,6 +47,18 @@ class BqplotHistogramView(BqplotBaseView):
             self.state.y_axislabel = 'Normalized number'
         else:
             self.state.y_axislabel = 'Number'
+
+    def _update_x_log(self, *args):
+        # When x_log toggles, the state's bins property switches between
+        # np.linspace and np.logspace automatically (see
+        # HistogramViewerState.bins), and the layer artist recomputes the
+        # histogram against the new bins via its x_log callback. All we have
+        # to do here is flip the LinLogScale mode so the bqplot axis renders
+        # logarithmically.
+        self._set_scale_mode('x')
+
+    def _update_y_log(self, *args):
+        self._set_scale_mode('y')
 
     def _roi_to_subset_state(self, roi):
         # TODO: copy paste from glue/viewers/histogram/qt/data_viewer.py
