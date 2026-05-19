@@ -1,7 +1,7 @@
 from itertools import permutations
 from random import sample
 
-from ipywidgets import IntSlider
+from ipyvuetify import Slider
 
 from ..slice_helpers import MultiSliceWidgetHelper
 
@@ -28,7 +28,7 @@ def test_2d_sliders_3d(data_volume):
     for perm in permutations(range(data_volume.ndim)):
         state.x_att = data_volume.pixel_component_ids[perm[0]]
         state.y_att = data_volume.pixel_component_ids[perm[1]]
-        assert isinstance(helper._sliders[perm[2]], IntSlider)
+        assert isinstance(helper._sliders[perm[2]], Slider)
         assert all(slider is None
                    for index, slider in enumerate(helper._sliders)
                    if index != perm[2])
@@ -57,7 +57,7 @@ def test_3d_sliders_4d(data_4d):
         state.x_att = data_4d.pixel_component_ids[perm[0]]
         state.y_att = data_4d.pixel_component_ids[perm[1]]
         state.z_att = data_4d.pixel_component_ids[perm[2]]
-        assert isinstance(helper._sliders[perm[3]], IntSlider)
+        assert isinstance(helper._sliders[perm[3]], Slider)
         assert all(slider is None
                    for index, slider in enumerate(helper._sliders)
                    if index != perm[3])

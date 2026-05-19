@@ -1,7 +1,7 @@
 # NOTE: The following MultiSliceHelper is adapted from the Qt version and there
 # is enough overlap that we could consider having a base class for the two.
 
-from ipywidgets import IntSlider, VBox
+from ipyvuetify import Col, Slider
 
 from glue.viewers.image.state import AggregateSlice
 from glue.utils.decorators import avoid_circular
@@ -15,7 +15,7 @@ class MultiSliceWidgetHelper(object):
 
         self.viewer_state = viewer_state
 
-        self.layout = layout or VBox()
+        self.layout = layout or Col()
 
         self.viewer_state.add_callback('x_att', self.sync_sliders_from_state)
         self.viewer_state.add_callback('y_att', self.sync_sliders_from_state)
@@ -92,11 +92,11 @@ class MultiSliceWidgetHelper(object):
                         label = self.viewer_state.reference_data.pixel_component_ids[i].label
                     else:
                         label = self.viewer_state.reference_data.world_component_ids[i].label
-                    slider = IntSlider(min=0, max=self.data.shape[i]-1, description=label)
+                    slider = Slider(min=0, max=self.data.shape[i]-1, description=label)
 
                     slider.observe(self.sync_state_from_sliders, 'value')
                     self._sliders.append(slider)
-                    self.layout.children += (slider,)
+                    self.layout.children += [slider]
                 else:
                     self._sliders.append(None)
 
