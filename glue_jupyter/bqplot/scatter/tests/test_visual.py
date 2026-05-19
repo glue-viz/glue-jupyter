@@ -306,19 +306,21 @@ def test_visual_scatter2d_log_ellipse_subset(
     page_session,
     solara_test,
 ):
-    # Uniform point cloud spanning a wide dynamic range, both axes switched
-    # to log, with the bqplot ellipse brush tool driven programmatically.
-    # The brush's selected_x/selected_y values mimic what bqplot's LogScale
-    # reports after a screen-space drag: linear-data coordinates at
-    # log-uniform screen positions. On log axes the resulting selection
-    # should match what the user drew (a circle on screen), achieved by
-    # the tool emitting a PolygonalROI sampled in screen-uniform coords --
-    # mirroring glue-core's MplCircularROI.roi behaviour.
+    # Log-uniform point cloud (i.e. uniform in log space, so the data looks
+    # uniform on log axes rather than crowding the high end), both axes
+    # switched to log, with the bqplot ellipse brush tool driven
+    # programmatically. The brush's selected_x/selected_y values mimic
+    # what bqplot's LogScale reports after a screen-space drag: linear-data
+    # coordinates at log-uniform screen positions. On log axes the
+    # resulting selection should match what the user drew (a circle on
+    # screen), achieved by the tool emitting a PolygonalROI sampled in
+    # screen-uniform coords -- mirroring glue-core's MplCircularROI.roi
+    # behaviour.
 
     np.random.seed(12345)
 
-    x = np.random.uniform(0.01, 10, 10000)
-    y = np.random.uniform(0.01, 10, 10000)
+    x = 10 ** np.random.uniform(-2, 1, 10000)
+    y = 10 ** np.random.uniform(-2, 1, 10000)
 
     app = jglue()
     data = app.add_data(cloud={"x": x, "y": y})[0]
