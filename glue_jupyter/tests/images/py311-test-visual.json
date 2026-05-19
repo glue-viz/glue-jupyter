@@ -6,7 +6,7 @@
   "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_vector[chromium]": "a0a5b9409eb4a3856c7368aa3de34411872cb3631fc595aa46cd1b7ed194f24d",
   "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density_alignment[chromium-linear]": "8b7170dcc76629632650a37822b3069d5c940eaeaf5a96c73a0bc55f04283efa",
   "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_log[chromium-xlog]": "5517cb61dd9290a37ef043c7c71c1c115be585e12da46b509cc9bd24f807c52e",
-  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_log_ellipse_subset[chromium]": "9a78bee6b65814d3c7cee0ad707ce1ed5be3ca91d32b0f863ede73e4eecd047c",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_log_ellipse_subset[chromium]": "de4179b064d0fc64e3a1aaec3d5c6bc6928280641c4fe1d0179d5bf5650f97dd",
   "glue_jupyter.tests.ui.test_selection.test_elliptical_selection[chromium]": "de3e144d9c57a972fc0ab29075ae1d39fb49326955b2c3af803c10c50847036d",
   "glue_jupyter.tests.ui.test_selection.test_rectangular_selection[chromium]": "14a2acd27fb61e0ae1f40ac285d9020858d63727848d39269b96aa46635cf7a5",
   "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density_alignment[chromium-xlog]": "d494bd2c6ba618bf89c528c7d4865c6a1c26c9bea40723475c38e0c5e60ab812",
