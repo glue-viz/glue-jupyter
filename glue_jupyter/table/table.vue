@@ -61,12 +61,12 @@
           <tr>
             <th :style="'padding: 0 10px; width: '+Math.max(1, Math.ceil(Math.log10(total_length)))*20+'px'">#</th>
             <th style="padding: 0 1px; width: 30px" v-if="selection_enabled">
-              <v-btn icon color="primary" variant="text" size="small" @click="apply_filter">
-                <v-icon>{{ all_selected ? 'check_box' : (checked.length > 0 ? 'indeterminate_check_box' : 'check_box_outline_blank') }}</v-icon>
+              <v-btn icon color="primary" variant="text" size="small" @click="toggle_select_all">
+                <v-icon>{{ all_selected ? 'mdi-checkbox-marked' : (checked.length > 0 ? 'mdi-minus-box' : 'mdi-checkbox-blank-outline') }}</v-icon>
               </v-btn>
             </th>
             <th style="padding: 0 1px" v-for="(header, index) in headers_selections" :key="header.text">
-              <v-icon style="padding: 0 1px" :key="index" :color="selection_colors[index]">brightness_1</v-icon>
+              <v-icon style="padding: 0 1px" :key="index" :color="selection_colors[index]">mdi-circle</v-icon>
             </th>
             <th v-for="header in headers"
                 :key="header.text"
@@ -76,7 +76,7 @@
             >
               {{ header.text }}
               <v-icon v-if="options.sortBy && options.sortBy[0] === header.value">
-                {{ options.sortDesc && options.sortDesc[0] ? 'arrow_drop_down' : 'arrow_drop_up' }}
+                {{ options.sortDesc && options.sortDesc[0] ? 'mdi-menu-down' : 'mdi-menu-up' }}
               </v-icon>
             </th>
           </tr>
@@ -99,7 +99,7 @@
               <v-icon
                 v-if="props.item[header.value]"
                 :color="selection_colors[index]"
-              >brightness_1</v-icon>
+              >mdi-circle</v-icon>
             </v-fade-transition>
           </td>
           <td v-for="header in headers"
