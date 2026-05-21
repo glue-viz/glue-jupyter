@@ -45,6 +45,8 @@ class MatplotlibJupyterPathSlicerMode(PathMode):
         self._on_reference_data_change()
 
     def _on_reference_data_change(self, *args):
+        if self.viewer is None:
+            return
         ref = self.viewer.state.reference_data
         if ref is not None:
             self.enabled = ref.ndim == 3
@@ -101,6 +103,8 @@ class MatplotlibJupyterPathSlicerCrosshairMode(ToolbarModeBase):
         self._on_reference_data_change()
 
     def _on_reference_data_change(self, *args):
+        if self.viewer is None:
+            return
         ref = self.viewer.state.reference_data
         self.enabled = isinstance(ref, PathSlicedData) \
             and getattr(ref, 'parent_viewer', None) is not None

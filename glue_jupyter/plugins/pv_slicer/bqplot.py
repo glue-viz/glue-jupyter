@@ -71,6 +71,8 @@ class BqplotPathSlicerMode(_NoInteractMixin):
         self._on_reference_data_change()
 
     def _on_reference_data_change(self, *args):
+        if self.viewer is None:
+            return
         ref = self.viewer.state.reference_data
         if ref is not None:
             self.enabled = ref.ndim == 3
@@ -166,6 +168,8 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
         self._on_reference_data_change()
 
     def _on_reference_data_change(self, *args):
+        if self.viewer is None:
+            return
         from glue.plugins.tools.pv_slicer.path_sliced_data import PathSlicedData
         ref = self.viewer.state.reference_data
         self.enabled = isinstance(ref, PathSlicedData) \
