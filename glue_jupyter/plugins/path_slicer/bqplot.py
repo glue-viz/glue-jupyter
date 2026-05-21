@@ -171,13 +171,13 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
     def _on_reference_data_change(self, *args):
         if self.viewer is None:
             return
-        from glue.plugins.tools.pv_slicer.path_sliced_data import PathSlicedData
+        from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
         ref = self.viewer.state.reference_data
         self.enabled = isinstance(ref, PathSlicedData) \
             and getattr(ref, 'parent_viewer', None) is not None
 
     def activate(self):
-        from glue.plugins.tools.pv_slicer.path_sliced_data import PathSlicedData
+        from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
         ref = self.viewer.state.reference_data
         if not isinstance(ref, PathSlicedData):
             return
@@ -200,7 +200,7 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
             self.viewer.remove_event_callback(self._on_move)
         except KeyError:
             pass
-        from glue.plugins.tools.pv_slicer.path_sliced_data import PathSlicedData
+        from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
         ref = self.viewer.state.reference_data
         if isinstance(ref, PathSlicedData) and ref.parent_viewer is not None:
             parent = ref.parent_viewer
@@ -211,7 +211,7 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
         self._crosshair = None
 
     def _on_move(self, event):
-        from glue.plugins.tools.pv_slicer.path_sliced_data import PathSlicedData
+        from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
         ref = self.viewer.state.reference_data
         if not isinstance(ref, PathSlicedData):
             return

@@ -16,7 +16,8 @@ from glue_jupyter import jglue
 from glue_jupyter.bqplot.image import BqplotImageView
 from glue_jupyter.matplotlib.image import ImageJupyterViewer
 
-from ..common import build_or_update_pvs, path_link_exists, drive_parent_slice
+from glue.plugins.tools.path_slicer.common import (
+    build_or_update_pvs, path_link_exists, drive_parent_slice)
 from ..bqplot import BqplotPathSlicerMode
 from ..matplotlib import MatplotlibJupyterPathSlicerMode
 
@@ -31,8 +32,10 @@ def _make_app_with_cube():
 
 
 def test_tools_registered():
-    # The plugin's __init__ runs on import; the tool IDs must end up on
-    # the corresponding viewers.
+    # Loaded via the ``glue.plugins`` entry point in pyproject.toml; the
+    # setup function wires the tool IDs onto the image viewers.
+    from glue.main import load_plugins
+    load_plugins()
     assert 'jupyter:slice' in ImageJupyterViewer.tools
     assert 'jupyter:path_crosshair' in ImageJupyterViewer.tools
     assert 'bqplot:slice' in BqplotImageView.tools
