@@ -17,8 +17,9 @@ import numpy as np
 from bqplot import Lines, Scatter
 
 from glue.config import viewer_tool
-from glue.plugins.tools.path_slicer.common import (
-    create_trace, drive_parent_slice, open_slice_viewer_for, update_trace)
+from glue.plugins.tools.path_slicer.common import drive_parent_slice
+from glue.plugins.tools.path_slicer.multi_trace import (
+    MultiTracePathSlicerMixin)
 from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
 
 from glue_jupyter.bqplot.common.tools import (InteractCheckableTool,
@@ -49,7 +50,9 @@ class _NoInteractMixin(InteractCheckableTool):
 
 
 @viewer_tool
-class BqplotPathSlicerMode(JupyterTargetDropdownMixin, _NoInteractMixin):
+class BqplotPathSlicerMode(JupyterTargetDropdownMixin,
+                           MultiTracePathSlicerMixin,
+                           _NoInteractMixin):
     """
     Click to add path vertices, Enter to materialise a trace
     (one :class:`PathSlicedData` per Data layer in the source viewer)
@@ -81,13 +84,7 @@ class BqplotPathSlicerMode(JupyterTargetDropdownMixin, _NoInteractMixin):
                            marker='circle', marker_size=24)
         self._added_to_figure = False
 
-        # Multi-trace state: parallel lists of traces and the slice
-        # viewers they're shown in. ``_slice_viewer`` shadows the
-        # latest so crosshair-style introspection still finds one.
-        self._traces = []  # list[list[PathSlicedData]]
-        self._slice_viewers = []
-        self._slice_viewer = None
-        self._target_trace = None
+        self._init_multi_trace()
         # bqplot Lines mark per trace, drawn on the source viewer.
         self._overlays = {}
 
@@ -146,36 +143,8 @@ class BqplotPathSlicerMode(JupyterTargetDropdownMixin, _NoInteractMixin):
         self._open_or_update(vx, vy)
         self._clear_path()
 
-    def _open_or_update(self, vx, vy):
-        if self._target_trace is None:
-            new_paths = create_trace(self.viewer, vx, vy, self._traces)
-            self._traces.append(new_paths)
-            slice_viewer = open_slice_viewer_for(
-                self.viewer, self.slice_viewer_cls, new_paths)
-            self._slice_viewers.append(slice_viewer)
-            self._slice_viewer = slice_viewer
-            self._target_trace = self._traces[-1]
-        else:
-            update_trace(self._target_trace, vx, vy)
-        self._refresh_overlays()
-        self._on_traces_changed()
-
     # ------------------------------------------------------------------
-    # Dropdown UI plumbing (uses JupyterTargetDropdownMixin)
-    # ------------------------------------------------------------------
-
-    def menu_entries(self):
-        entries = [('Create new path', None)]
-        for i, _trace in enumerate(self._traces, start=1):
-            entries.append((f'Update path {i}', _trace))
-        return entries
-
-    def set_target(self, target):
-        self._target_trace = target
-        self._refresh_overlays()
-
-    # ------------------------------------------------------------------
-    # bqplot overlay drawing
+    # bqplot overlay drawing (mixin hooks)
     # ------------------------------------------------------------------
 
     def _refresh_overlays(self):
