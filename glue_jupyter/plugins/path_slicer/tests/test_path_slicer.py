@@ -163,20 +163,17 @@ def test_matplotlib_mode_constructible():
 # ---------------------------------------------------------------------------
 
 
-def test_dropdown_lives_inline_with_the_toolbar_in_layout():
-    # IPyWidgetView wraps the toolbar and any tool ``companion_widget``s
-    # in an HBox under ``toolbar_selection_tools`` -- the layout factory
-    # then places that inline alongside the toolbar buttons.
-    from ipywidgets import HBox  # noqa: PLC0415
+def test_dropdown_is_a_toolbar_companion():
+    # IPyWidgetView collects each tool's ``companion_widget`` into
+    # ``toolbar_companions`` -- a list the layout factories iterate
+    # over and place alongside ``toolbar_selection_tools``. This keeps
+    # the (vuetify) toolbar itself unwrapped so its inner rendering
+    # isn't disturbed.
     app, cube = _make_app_with_cube()
     viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
-    bar = viewer.toolbar_selection_tools
-    assert isinstance(bar, HBox)
-    # The bar contains the original toolbar plus the path slicer's
-    # target dropdown widget.
     slice_tool = viewer.toolbar.tools['jupyter:slice']
-    assert slice_tool.target_dropdown in bar.children
-    assert viewer.toolbar in bar.children
+    assert viewer.toolbar_selection_tools is viewer.toolbar
+    assert slice_tool.target_dropdown in viewer.toolbar_companions
 
 
 def test_matplotlib_dropdown_options_track_traces():

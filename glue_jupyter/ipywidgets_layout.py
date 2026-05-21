@@ -15,6 +15,7 @@ def ipywidgets_layout_factory(viewer):
     # overridden in sub-classes to create alternate layouts.
 
     layout_toolbar = HBox([viewer.toolbar_selection_tools,
+                           *viewer.toolbar_companions,
                            viewer.toolbar_active_subset,
                            viewer.toolbar_selection_mode])
 

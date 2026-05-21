@@ -20,6 +20,7 @@ class LayoutWidget(v.VuetifyTemplate):
         super().__init__(*args, **kwargs)
         self.controls = dict(
             toolbar_selection_tools=viewer.toolbar_selection_tools,
+            toolbar_companions=list(viewer.toolbar_companions),
             toolbar_selection_mode=viewer.toolbar_selection_mode,
             toolbar_active_subset=viewer.toolbar_active_subset,
             figure_widget=viewer.figure_widget,

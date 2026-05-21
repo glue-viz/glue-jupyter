@@ -3,6 +3,7 @@
         <v-toolbar dense class="elevation-0">
             <v-toolbar-items>
                 <jupyter-widget :widget="controls.toolbar_selection_tools"></jupyter-widget>
+                <jupyter-widget v-for="(w, i) of controls.toolbar_companions" :key="i" :widget="w"></jupyter-widget>
                 <jupyter-widget :widget="controls.toolbar_selection_mode"></jupyter-widget>
                 <jupyter-widget :widget="controls.toolbar_active_subset"></jupyter-widget>
                 <v-spacer></v-spacer>
