@@ -5,7 +5,7 @@ bqplot has no analogue of matplotlib's :class:`PathMode`, so this module
 implements a small click-to-add-vertex / Enter-to-finalise tool on top
 of the viewer's ``add_event_callback`` machinery. The data-side work
 (creating / updating :class:`PathSlicedData`, wiring the link graph,
-and opening / refreshing the PV viewer) goes through the shared
+and opening / refreshing the slice viewer) goes through the shared
 helpers in :mod:`glue.plugins.tools.path_slicer.common`.
 """
 import numpy as np
@@ -14,7 +14,7 @@ from bqplot import Lines, Scatter
 
 from glue.config import viewer_tool
 from glue.plugins.tools.path_slicer.common import (
-    drive_parent_slice, open_or_update_pv_viewer)
+    drive_parent_slice, open_or_update_slice_viewer)
 from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
 
 from glue_jupyter.bqplot.common.tools import (InteractCheckableTool,
@@ -42,13 +42,13 @@ class BqplotPathSlicerMode(_NoInteractMixin):
     """
     Click to add path vertices, Enter to materialise a
     :class:`PathSlicedData` for each Data layer in the source viewer
-    and open a PV viewer, Escape to clear the in-progress path.
+    and open a slice viewer, Escape to clear the in-progress path.
     """
 
     icon = 'glue_slice'
     tool_id = 'bqplot:slice'
     action_text = 'Slice Extraction'
-    tool_tip = ('Click to add path vertices, ENTER to extract a PV '
+    tool_tip = ('Click to add path vertices, ENTER to extract a path '
                 'slice, ESC to clear the path.')
     status_tip = tool_tip
 
@@ -61,7 +61,7 @@ class BqplotPathSlicerMode(_NoInteractMixin):
                                    'y': self.viewer.scale_y},
                            colors=[INTERACT_COLOR], stroke_width=2,
                            marker='circle', marker_size=24)
-        self._pv_viewer = None
+        self._slice_viewer = None
         self._added_to_figure = False
         self.viewer.state.add_callback('reference_data',
                                        self._on_reference_data_change)
@@ -118,23 +118,23 @@ class BqplotPathSlicerMode(_NoInteractMixin):
         self._clear_path()
 
     def _extract(self, vx, vy):
-        self._pv_viewer = open_or_update_pv_viewer(
-            self.viewer, self._pv_viewer, BqplotImageView, vx, vy)
+        self._slice_viewer = open_or_update_slice_viewer(
+            self.viewer, self._slice_viewer, BqplotImageView, vx, vy)
 
 
 @viewer_tool
 class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
     """
-    Tool for the PV viewer that, when mouse-moved, draws the path on
+    Tool for the slice viewer that, when mouse-moved, draws the path on
     the parent cube viewer, highlights the cursor's projection back to
-    parent-pixel coordinates, and pushes the cursor's PV-y onto the
+    parent-pixel coordinates, and pushes the cursor's slice y onto the
     parent viewer's ``state.slices`` (which is backend-agnostic).
     """
 
     icon = 'glue_path'
     tool_id = 'bqplot:path_crosshair'
     action_text = 'Show position on original path'
-    tool_tip = 'Move over the PV viewer to highlight the cursor on the parent.'
+    tool_tip = 'Move over the slice viewer to highlight the cursor on the parent.'
     status_tip = tool_tip
 
     def __init__(self, viewer, **kwargs):

@@ -20,7 +20,7 @@ __all__ = ['MatplotlibJupyterPathSlicerMode',
 @viewer_tool
 class MatplotlibJupyterPathSlicerMode(BasePathSlicerMode):
     tool_id = 'jupyter:slice'
-    pv_viewer_cls = ImageJupyterViewer
+    slice_viewer_cls = ImageJupyterViewer
 
 
 @viewer_tool

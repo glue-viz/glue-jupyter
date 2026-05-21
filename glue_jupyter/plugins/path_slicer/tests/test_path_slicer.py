@@ -1,5 +1,5 @@
 """
-Tests for the glue-jupyter PV slicer plugin. The data-side helper is
+Tests for the glue-jupyter path slicer plugin. The data-side helper is
 exercised against both backends; the bqplot and matplotlib mode classes
 are imported and instantiated lightly to make sure their constructors
 don't blow up. Full interactive-event coverage is out of scope.
@@ -17,7 +17,7 @@ from glue_jupyter.bqplot.image import BqplotImageView
 from glue_jupyter.matplotlib.image import ImageJupyterViewer
 
 from glue.plugins.tools.path_slicer.common import (
-    build_or_update_pvs, path_link_exists, drive_parent_slice)
+    build_or_update_path_slices, path_link_exists, drive_parent_slice)
 from ..bqplot import BqplotPathSlicerMode
 from ..matplotlib import MatplotlibJupyterPathSlicerMode
 
@@ -42,23 +42,23 @@ def test_tools_registered():
     assert 'bqplot:path_crosshair' in BqplotImageView.tools
 
 
-def test_build_or_update_pvs_creates_path_sliced_data_via_bqplot():
+def test_build_or_update_path_slices_creates_path_sliced_data_via_bqplot():
     app, cube = _make_app_with_cube()
     viewer = app.new_data_viewer(BqplotImageView, data=cube)
-    updated = build_or_update_pvs(viewer, vx=[1, 2, 3], vy=[0, 1, 2])
+    updated = build_or_update_path_slices(viewer, vx=[1, 2, 3], vy=[0, 1, 2])
     assert len(updated) == 1
-    pv, _ = updated[0]
-    assert isinstance(pv, PathSlicedData)
-    assert pv.original_data is cube
-    assert pv in app.data_collection
+    path_slice, _ = updated[0]
+    assert isinstance(path_slice, PathSlicedData)
+    assert path_slice.original_data is cube
+    assert path_slice in app.data_collection
 
 
-def test_build_or_update_pvs_reuses_existing():
+def test_build_or_update_path_slices_reuses_existing():
     app, cube = _make_app_with_cube()
     viewer = app.new_data_viewer(BqplotImageView, data=cube)
-    first = build_or_update_pvs(viewer, [1, 2, 3], [0, 1, 2])[0][0]
+    first = build_or_update_path_slices(viewer, [1, 2, 3], [0, 1, 2])[0][0]
     first_x = first.x.copy()
-    updated = build_or_update_pvs(viewer, [0, 5, 2], [4, 0, 3])
+    updated = build_or_update_path_slices(viewer, [0, 5, 2], [4, 0, 3])
     assert len(updated) == 1
     assert updated[0][0] is first
     # set_xy must have replaced x.
@@ -68,20 +68,20 @@ def test_build_or_update_pvs_reuses_existing():
 def test_path_link_exists_after_pair():
     # With two PathSlicedDatas and the pairwise link in place,
     # path_link_exists must report True. Construct them manually --
-    # build_or_update_pvs's "reuse existing" branch would otherwise
-    # collapse them onto a single PV.
+    # build_or_update_path_slices's "reuse existing" branch would otherwise
+    # collapse them onto a single slice.
     app, cube = _make_app_with_cube()
-    pv1 = PathSlicedData(cube, cube.pixel_component_ids[1], [0., 1., 2.],
+    slice1 = PathSlicedData(cube, cube.pixel_component_ids[1], [0., 1., 2.],
                          cube.pixel_component_ids[2], [0., 1., 2.])
-    pv2 = PathSlicedData(cube, cube.pixel_component_ids[1], [0., 1., 2., 3.],
+    slice2 = PathSlicedData(cube, cube.pixel_component_ids[1], [0., 1., 2., 3.],
                          cube.pixel_component_ids[2], [0., 1., 2., 3.])
-    app.data_collection.append(pv1)
-    app.data_collection.append(pv2)
-    link_path_sliced_to_parent(app.data_collection, pv1)
-    link_path_sliced_to_parent(app.data_collection, pv2)
-    assert not path_link_exists(app.data_collection, pv1, pv2)
-    link_path_sliced_pair_paths(app.data_collection, pv1, pv2)
-    assert path_link_exists(app.data_collection, pv1, pv2)
+    app.data_collection.append(slice1)
+    app.data_collection.append(slice2)
+    link_path_sliced_to_parent(app.data_collection, slice1)
+    link_path_sliced_to_parent(app.data_collection, slice2)
+    assert not path_link_exists(app.data_collection, slice1, slice2)
+    link_path_sliced_pair_paths(app.data_collection, slice1, slice2)
+    assert path_link_exists(app.data_collection, slice1, slice2)
 
 
 def test_bqplot_mode_construction_and_event_routing():
@@ -92,11 +92,11 @@ def test_bqplot_mode_construction_and_event_routing():
     mode._on_event({'event': 'click', 'domain': {'x': 1.0, 'y': 0.5}})
     mode._on_event({'event': 'click', 'domain': {'x': 2.5, 'y': 1.5}})
     mode._on_event({'event': 'keydown', 'key': 'Enter'})
-    # After Enter, a PV viewer was opened and a PathSlicedData appended
+    # After Enter, a slice viewer was opened and a PathSlicedData appended
     # to the data collection.
-    assert mode._pv_viewer is not None
-    pvs = [d for d in app.data_collection if isinstance(d, PathSlicedData)]
-    assert len(pvs) == 1
+    assert mode._slice_viewer is not None
+    slices = [d for d in app.data_collection if isinstance(d, PathSlicedData)]
+    assert len(slices) == 1
     mode.deactivate()
 
 
@@ -111,23 +111,23 @@ def test_bqplot_mode_escape_clears_in_progress_path():
     mode._on_event({'event': 'keydown', 'key': 'Escape'})
     assert mode._vx == []
     assert mode._vy == []
-    pvs = [d for d in app.data_collection if isinstance(d, PathSlicedData)]
-    assert pvs == []
+    slices = [d for d in app.data_collection if isinstance(d, PathSlicedData)]
+    assert slices == []
     mode.deactivate()
 
 
 def test_drive_parent_slice_updates_state_slices():
-    # The PV crosshair tool calls drive_parent_slice when the mouse
-    # moves in the PV viewer. Verify it writes to the parent's
+    # The slice crosshair tool calls drive_parent_slice when the mouse
+    # moves in the slice viewer. Verify it writes to the parent's
     # state.slices regardless of backend.
     for ViewerCls in (BqplotImageView, ImageJupyterViewer):
         app, cube = _make_app_with_cube()
         viewer = app.new_data_viewer(ViewerCls, data=cube)
-        pv = PathSlicedData(cube, cube.pixel_component_ids[1], [0., 1., 2.],
+        path_slice = PathSlicedData(cube, cube.pixel_component_ids[1], [0., 1., 2.],
                             cube.pixel_component_ids[2], [0., 1., 2.])
-        pv.parent_viewer = viewer
+        path_slice.parent_viewer = viewer
         before = tuple(viewer.state.slices)
-        drive_parent_slice(pv, 3.0)
+        drive_parent_slice(path_slice, 3.0)
         after = tuple(viewer.state.slices)
         assert after != before
         # The axis that changed is the one that's not x_att.axis or y_att.axis.
@@ -144,5 +144,5 @@ def test_matplotlib_mode_constructible():
     app, cube = _make_app_with_cube()
     viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
     mode = MatplotlibJupyterPathSlicerMode(viewer)
-    assert mode._pv_viewer is None
+    assert mode._slice_viewer is None
     assert mode.enabled is True  # cube is 3-d
