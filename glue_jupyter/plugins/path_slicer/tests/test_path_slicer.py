@@ -137,6 +137,16 @@ def test_drive_parent_slice_updates_state_slices():
         assert after[slice_axis] == 3
 
 
+def test_crosshair_tool_hidden_on_cube_viewer():
+    # The crosshair tool is registered on both ImageJupyterViewer and
+    # BqplotImageView, but only meaningful on a slice viewer. The toolbar
+    # must hide it (drop the entry from tools_data) when the tool reports
+    # enabled=False at the time it's added to the toolbar.
+    app, cube = _make_app_with_cube()
+    viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
+    assert 'jupyter:path_crosshair' not in viewer.toolbar.tools_data
+
+
 def test_matplotlib_mode_constructible():
     # We don't simulate the matplotlib event loop here; just check the
     # mode can be constructed against an ImageJupyterViewer (matplotlib

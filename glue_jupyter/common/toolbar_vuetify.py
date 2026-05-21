@@ -4,6 +4,8 @@ import ipyvuetify as v
 import traitlets
 import base64
 
+from glue.core.callback_property import add_callback
+
 from glue.icons import icon_path
 import glue.viewers.common.tool
 from glue.viewers.common.tool import CheckableTool
@@ -82,10 +84,19 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
         if format is None or not format.startswith(image_prefix):
             raise ValueError(f"Invalid or unknown image MIME type for: {path}")
         format = format[len(image_prefix):]
-        self.tools_data = {
-            **self.tools_data,
-            tool.tool_id: {
-                'tooltip': tool.tool_tip,
-                'img': read_icon(path, format)
-            }
-        }
+        entry = {'tooltip': tool.tool_tip, 'img': read_icon(path, format)}
+
+        # Show/hide the button by adding/removing the entry from
+        # tools_data as ``tool.enabled`` changes. Apply the current
+        # value immediately so a tool that set ``enabled = False`` in
+        # its __init__ is hidden from the start.
+        def _set_visible(state):
+            if state:
+                self.tools_data = {**self.tools_data, tool.tool_id: entry}
+            else:
+                new = dict(self.tools_data)
+                new.pop(tool.tool_id, None)
+                self.tools_data = new
+
+        add_callback(tool, 'enabled', _set_visible)
+        _set_visible(tool.enabled)
