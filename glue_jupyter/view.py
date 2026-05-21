@@ -49,17 +49,6 @@ class IPyWidgetView(Viewer):
         return self.toolbar
 
     @property
-    def toolbar_companions(self):
-        """
-        Auxiliary widgets contributed by tools (e.g. the path slicer's
-        target-picker dropdown). Layout factories place these inline
-        next to :attr:`toolbar_selection_tools`. Wrapping the toolbar
-        in an :class:`HBox` here would break vuetify rendering, so
-        the companions are listed alongside it instead.
-        """
-        return list(getattr(self, '_toolbar_companions', ()))
-
-    @property
     def toolbar_active_subset(self):
         """
         A dropdown providing control over the current active subset.
@@ -169,15 +158,7 @@ class IPyWidgetView(Viewer):
         if subtool_ids:
             raise ValueError('subtools are not yet supported in Jupyter viewers')
 
-        self._toolbar_companions = []
         for tool_id in tool_ids:
             mode_cls = viewer_tool.members[tool_id]
             mode = mode_cls(self)
             self.toolbar.add_tool(mode)
-            # Tools may expose an extra widget that should sit next to
-            # the toolbar buttons (e.g. the path slicer's target-picker
-            # dropdown). Layout factories read ``toolbar_companions``
-            # and place them inline alongside ``toolbar_selection_tools``.
-            companion = getattr(mode, 'companion_widget', None)
-            if companion is not None:
-                self._toolbar_companions.append(companion)

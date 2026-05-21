@@ -8,9 +8,9 @@ multi-trace data model parallels glue-core's
 :class:`BasePathSlicerMode`: each Enter produces one
 :class:`PathSlicedData` per cube layer and opens a fresh slice
 viewer, or refreshes an existing trace if one has been selected as
-the next-Enter target via the ``target_dropdown``. Overlays on the
-source viewer are bqplot ``Lines`` rather than matplotlib
-``Line2D``.
+the next-Enter target via the toolbar's chevron menu (see
+:mod:`glue_jupyter.common.toolbar_vuetify`). Overlays on the source
+viewer are bqplot ``Lines`` rather than matplotlib ``Line2D``.
 """
 import numpy as np
 
@@ -25,8 +25,6 @@ from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
 from glue_jupyter.bqplot.common.tools import (InteractCheckableTool,
                                               INTERACT_COLOR)
 from glue_jupyter.bqplot.image import BqplotImageView
-
-from ._dropdown import JupyterTargetDropdownMixin
 
 
 __all__ = ['BqplotPathSlicerMode', 'BqplotPathSlicerCrosshairMode']
@@ -50,17 +48,15 @@ class _NoInteractMixin(InteractCheckableTool):
 
 
 @viewer_tool
-class BqplotPathSlicerMode(JupyterTargetDropdownMixin,
-                           MultiTracePathSlicerMixin,
-                           _NoInteractMixin):
+class BqplotPathSlicerMode(MultiTracePathSlicerMixin, _NoInteractMixin):
     """
     Click to add path vertices, Enter to materialise a trace
     (one :class:`PathSlicedData` per Data layer in the source viewer)
     and open a fresh slice viewer; Escape clears the in-progress path.
 
-    Each call to ``Enter`` either creates a new trace or refreshes the
-    one currently selected via :attr:`target_dropdown` (``None``
-    selection => create new).
+    The "Create new / Update path N" target picker is the chevron
+    dropdown attached to this tool's toolbar button (see
+    :class:`glue_jupyter.common.toolbar_vuetify.BasicJupyterToolbar`).
     """
 
     icon = 'glue_slice'
@@ -91,7 +87,6 @@ class BqplotPathSlicerMode(JupyterTargetDropdownMixin,
         self.viewer.state.add_callback('reference_data',
                                        self._on_reference_data_change)
         self._on_reference_data_change()
-        self._init_target_dropdown()
 
     def _on_reference_data_change(self, *args):
         if self.viewer is None:

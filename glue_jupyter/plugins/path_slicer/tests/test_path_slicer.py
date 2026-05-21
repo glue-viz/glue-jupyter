@@ -159,60 +159,58 @@ def test_matplotlib_mode_constructible():
 
 
 # ---------------------------------------------------------------------------
-# Multi-trace + dropdown behaviour (Jupyter side)
+# Multi-trace + toolbar-menu behaviour (Jupyter side)
 # ---------------------------------------------------------------------------
 
 
-def test_dropdown_is_a_toolbar_companion():
-    # IPyWidgetView collects each tool's ``companion_widget`` into
-    # ``toolbar_companions`` -- a list the layout factories iterate
-    # over and place alongside ``toolbar_selection_tools``. This keeps
-    # the (vuetify) toolbar itself unwrapped so its inner rendering
-    # isn't disturbed.
+def test_toolbar_menu_labels_track_traces():
+    # The vuetify toolbar reads ``tool.menu_entries()`` and exposes the
+    # labels (and a checkmark for the active target) to the Vue
+    # template via ``tools_data``. Each new trace adds a new entry,
+    # and the active checkmark moves with ``set_target``.
     app, cube = _make_app_with_cube()
     viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
     slice_tool = viewer.toolbar.tools['jupyter:slice']
-    assert viewer.toolbar_selection_tools is viewer.toolbar
-    assert slice_tool.target_dropdown in viewer.toolbar_companions
 
+    entry = viewer.toolbar.tools_data['jupyter:slice']
+    assert entry['menu_labels'] == ['Create new path']
+    assert entry['menu_active_index'] == 0
 
-def test_matplotlib_dropdown_options_track_traces():
-    # Each trace produced by the mpl tool must appear as an option in
-    # the ipywidgets.Dropdown, alongside the always-present "Create
-    # new path" entry.
-    app, cube = _make_app_with_cube()
-    viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
-    mode = MatplotlibJupyterPathSlicerMode(viewer)
-    labels = [label for label, _ in mode.target_dropdown.options]
-    assert labels == ['Create new path']
+    slice_tool._open_or_update([1., 2., 3.], [0., 1., 2.])
+    entry = viewer.toolbar.tools_data['jupyter:slice']
+    assert entry['menu_labels'] == ['Create new path', 'Update path 1']
+    # The newly-created trace is the active target -> index 1.
+    assert entry['menu_active_index'] == 1
 
-    mode._open_or_update([1., 2., 3.], [0., 1., 2.])
-    labels = [label for label, _ in mode.target_dropdown.options]
-    assert labels == ['Create new path', 'Update path 1']
-    # The most recent trace is selected.
-    assert mode.target_dropdown.value is mode._traces[0]
+    slice_tool.set_target(None)
+    entry = viewer.toolbar.tools_data['jupyter:slice']
+    assert entry['menu_active_index'] == 0
 
-    mode.set_target(None)
-    mode._open_or_update([0., 5., 2.], [4., 0., 3.])
-    labels = [label for label, _ in mode.target_dropdown.options]
-    assert labels == [
+    slice_tool._open_or_update([0., 5., 2.], [4., 0., 3.])
+    entry = viewer.toolbar.tools_data['jupyter:slice']
+    assert entry['menu_labels'] == [
         'Create new path', 'Update path 1', 'Update path 2']
-    assert mode.target_dropdown.value is mode._traces[1]
+    assert entry['menu_active_index'] == 2
 
 
-def test_matplotlib_dropdown_value_change_updates_target():
-    # Setting the dropdown's value (as the user would by clicking)
-    # must drive ``set_target`` and hence ``_target_trace``.
+def test_vue_select_menu_item_routes_to_set_target():
+    # The Vue template calls ``select_menu_item({tool_id, index})``
+    # on the toolbar widget; the resulting ``vue_select_menu_item``
+    # method looks the target up in the tool's menu and calls
+    # ``set_target``.
     app, cube = _make_app_with_cube()
     viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
-    mode = MatplotlibJupyterPathSlicerMode(viewer)
-    mode._open_or_update([1., 2., 3.], [0., 1., 2.])
-    mode.set_target(None)
-    mode._open_or_update([0., 5., 2.], [4., 0., 3.])
+    slice_tool = viewer.toolbar.tools['jupyter:slice']
 
-    # Simulate the user picking "Update path 1" from the dropdown.
-    mode.target_dropdown.value = mode._traces[0]
-    assert mode._target_trace is mode._traces[0]
+    slice_tool._open_or_update([1., 2., 3.], [0., 1., 2.])
+    slice_tool.set_target(None)
+    slice_tool._open_or_update([0., 5., 2.], [4., 0., 3.])
+
+    # Simulate the user clicking "Update path 1" -- index 1 in the
+    # menu: ['Create new path', 'Update path 1', 'Update path 2'].
+    viewer.toolbar.vue_select_menu_item({'tool_id': 'jupyter:slice',
+                                         'index': 1})
+    assert slice_tool._target_trace is slice_tool._traces[0]
 
 
 def test_bqplot_mode_multi_trace_create_then_update():
@@ -229,8 +227,8 @@ def test_bqplot_mode_multi_trace_create_then_update():
     first_slice_viewer = mode._slice_viewers[0]
     first_x = mode._traces[0][0].x.copy()
 
-    # Pick "Create new path" via the dropdown, draw again -> trace 2.
-    mode.target_dropdown.value = None
+    # Pick "Create new path" via the toolbar dropdown, draw again -> trace 2.
+    mode.set_target(None)
     mode._on_event({'event': 'click', 'domain': {'x': 0.5, 'y': 1.5}})
     mode._on_event({'event': 'click', 'domain': {'x': 3.0, 'y': 2.5}})
     mode._on_event({'event': 'keydown', 'key': 'Enter'})
@@ -252,7 +250,7 @@ def test_bqplot_mode_overlays_per_trace():
     # Draw two traces.
     for vx, vy in [([1.0, 2.5], [0.5, 1.5]),
                    ([0.5, 3.0], [1.5, 2.5])]:
-        mode.target_dropdown.value = None
+        mode.set_target(None)
         for x, y in zip(vx, vy):
             mode._on_event({'event': 'click', 'domain': {'x': x, 'y': y}})
         mode._on_event({'event': 'keydown', 'key': 'Enter'})
