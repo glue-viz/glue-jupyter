@@ -1,24 +1,25 @@
 """
-PV slicer tool for the bqplot image viewer.
+Path slicer tool for the bqplot image viewer.
 
 bqplot has no analogue of matplotlib's :class:`PathMode`, so this module
 implements a small click-to-add-vertex / Enter-to-finalise tool on top
-of the viewer's ``add_event_callback`` machinery. The data-side logic
-(creating / updating :class:`PathSlicedData` and wiring the link graph)
-is shared with the matplotlib variant via :mod:`.common`.
+of the viewer's ``add_event_callback`` machinery. The data-side work
+(creating / updating :class:`PathSlicedData`, wiring the link graph,
+and opening / refreshing the PV viewer) goes through the shared
+helpers in :mod:`glue.plugins.tools.path_slicer.common`.
 """
 import numpy as np
 
 from bqplot import Lines, Scatter
 
 from glue.config import viewer_tool
+from glue.plugins.tools.path_slicer.common import (
+    drive_parent_slice, open_or_update_pv_viewer)
+from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
 
 from glue_jupyter.bqplot.common.tools import (InteractCheckableTool,
                                               INTERACT_COLOR)
 from glue_jupyter.bqplot.image import BqplotImageView
-
-from glue.plugins.tools.path_slicer.common import (
-    build_or_update_pvs, drive_parent_slice)
 
 
 __all__ = ['BqplotPathSlicerMode', 'BqplotPathSlicerCrosshairMode']
@@ -26,19 +27,14 @@ __all__ = ['BqplotPathSlicerMode', 'BqplotPathSlicerCrosshairMode']
 
 class _NoInteractMixin(InteractCheckableTool):
     """
-    Like :class:`InteractCheckableTool` but doesn't wire ``self.interact``
-    into the viewer's mouse interaction. Subclasses just consume events
-    through ``add_event_callback``.
+    Like :class:`InteractCheckableTool` but with no bqplot ``Interact``
+    of its own. Subclasses consume events through
+    :func:`add_event_callback` and fully override ``activate`` /
+    ``deactivate`` (no ``super()`` chaining), which is why setting
+    :attr:`interact` to ``None`` is safe -- the inherited
+    ``InteractCheckableTool.activate`` is never reached.
     """
     interact = None
-
-    def activate(self):
-        # Don't call super().activate() -- that would try to set
-        # self.viewer._mouse_interact.next = self.interact which is None.
-        pass
-
-    def deactivate(self):
-        pass
 
 
 @viewer_tool
@@ -122,27 +118,8 @@ class BqplotPathSlicerMode(_NoInteractMixin):
         self._clear_path()
 
     def _extract(self, vx, vy):
-        opened_viewer = self._pv_viewer is None
-        if opened_viewer:
-            self._pv_viewer = self.viewer.session.application.new_data_viewer(
-                BqplotImageView)
-
-        updated = build_or_update_pvs(self.viewer, vx, vy)
-
-        if opened_viewer:
-            for pv, layer_state in updated:
-                self._pv_viewer.add_data(pv)
-                pvstate = layer_state.as_dict()
-                pvstate.pop('layer', None)
-                for new_layer_state in self._pv_viewer.state.layers[::-1]:
-                    if new_layer_state.layer is pv:
-                        try:
-                            new_layer_state.update_from_dict(pvstate)
-                        except ValueError:
-                            pass
-                        break
-            self._pv_viewer.state.aspect = 'auto'
-            self._pv_viewer.state.reset_limits()
+        self._pv_viewer = open_or_update_pv_viewer(
+            self.viewer, self._pv_viewer, BqplotImageView, vx, vy)
 
 
 @viewer_tool
@@ -171,13 +148,11 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
     def _on_reference_data_change(self, *args):
         if self.viewer is None:
             return
-        from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
         ref = self.viewer.state.reference_data
         self.enabled = isinstance(ref, PathSlicedData) \
             and getattr(ref, 'parent_viewer', None) is not None
 
     def activate(self):
-        from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
         ref = self.viewer.state.reference_data
         if not isinstance(ref, PathSlicedData):
             return
@@ -200,7 +175,6 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
             self.viewer.remove_event_callback(self._on_move)
         except KeyError:
             pass
-        from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
         ref = self.viewer.state.reference_data
         if isinstance(ref, PathSlicedData) and ref.parent_viewer is not None:
             parent = ref.parent_viewer
@@ -211,7 +185,6 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
         self._crosshair = None
 
     def _on_move(self, event):
-        from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
         ref = self.viewer.state.reference_data
         if not isinstance(ref, PathSlicedData):
             return
