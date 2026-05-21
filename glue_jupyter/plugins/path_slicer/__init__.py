@@ -1,5 +1,5 @@
 """
-PV slicer plugin for glue-jupyter. Imports register the bqplot and
+Path slicer plugin for glue-jupyter. Imports register the bqplot and
 matplotlib tool variants via ``@viewer_tool`` and append their tool IDs
 to the corresponding viewers' tool lists.
 """
@@ -20,8 +20,8 @@ def _ensure(tool_list, tool_id):
 
 # Register matplotlib jupyter tools.
 _ensure(ImageJupyterViewer.tools, 'jupyter:slice')
-_ensure(ImageJupyterViewer.tools, 'jupyter:pv_crosshair')
+_ensure(ImageJupyterViewer.tools, 'jupyter:path_crosshair')
 
 # Register bqplot tools.
 _ensure(BqplotImageView.tools, 'bqplot:slice')
-_ensure(BqplotImageView.tools, 'bqplot:pv_crosshair')
+_ensure(BqplotImageView.tools, 'bqplot:path_crosshair')

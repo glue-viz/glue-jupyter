@@ -17,7 +17,8 @@ from glue_jupyter.bqplot.common.tools import (InteractCheckableTool,
                                               INTERACT_COLOR)
 from glue_jupyter.bqplot.image import BqplotImageView
 
-from .common import build_or_update_pvs, drive_parent_slice
+from glue.plugins.tools.path_slicer.common import (
+    build_or_update_pvs, drive_parent_slice)
 
 
 __all__ = ['BqplotPathSlicerMode', 'BqplotPathSlicerCrosshairMode']
@@ -154,7 +155,7 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
     """
 
     icon = 'glue_path'
-    tool_id = 'bqplot:pv_crosshair'
+    tool_id = 'bqplot:path_crosshair'
     action_text = 'Show position on original path'
     tool_tip = 'Move over the PV viewer to highlight the cursor on the parent.'
     status_tip = tool_tip

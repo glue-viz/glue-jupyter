@@ -112,4 +112,4 @@ def example_image(shape=64, limits=[-4, 4]):
     return data
 
 # Plugins (must come after get_layout_factory etc. to avoid circular imports)
-from .plugins import pv_slicer  # noqa: E402, F401
+from .plugins import path_slicer  # noqa: E402, F401

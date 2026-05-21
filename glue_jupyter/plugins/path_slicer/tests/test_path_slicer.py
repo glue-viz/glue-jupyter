@@ -8,8 +8,8 @@ import numpy as np
 
 from glue.core import Data
 from glue.core.coordinates import IdentityCoordinates
-from glue.plugins.tools.pv_slicer.path_sliced_data import PathSlicedData
-from glue.plugins.tools.pv_slicer.path_sliced_data_links import (
+from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
+from glue.plugins.tools.path_slicer.path_sliced_data_links import (
     link_path_sliced_to_parent, link_path_sliced_pair_paths)
 
 from glue_jupyter import jglue
@@ -34,9 +34,9 @@ def test_tools_registered():
     # The plugin's __init__ runs on import; the tool IDs must end up on
     # the corresponding viewers.
     assert 'jupyter:slice' in ImageJupyterViewer.tools
-    assert 'jupyter:pv_crosshair' in ImageJupyterViewer.tools
+    assert 'jupyter:path_crosshair' in ImageJupyterViewer.tools
     assert 'bqplot:slice' in BqplotImageView.tools
-    assert 'bqplot:pv_crosshair' in BqplotImageView.tools
+    assert 'bqplot:path_crosshair' in BqplotImageView.tools
 
 
 def test_build_or_update_pvs_creates_path_sliced_data_via_bqplot():
