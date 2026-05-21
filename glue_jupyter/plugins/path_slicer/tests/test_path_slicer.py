@@ -163,6 +163,22 @@ def test_matplotlib_mode_constructible():
 # ---------------------------------------------------------------------------
 
 
+def test_dropdown_lives_inline_with_the_toolbar_in_layout():
+    # IPyWidgetView wraps the toolbar and any tool ``companion_widget``s
+    # in an HBox under ``toolbar_selection_tools`` -- the layout factory
+    # then places that inline alongside the toolbar buttons.
+    from ipywidgets import HBox
+    app, cube = _make_app_with_cube()
+    viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
+    bar = viewer.toolbar_selection_tools
+    assert isinstance(bar, HBox)
+    # The bar contains the original toolbar plus the path slicer's
+    # target dropdown widget.
+    slice_tool = viewer.toolbar.tools['jupyter:slice']
+    assert slice_tool.target_dropdown in bar.children
+    assert viewer.toolbar in bar.children
+
+
 def test_matplotlib_dropdown_options_track_traces():
     # Each trace produced by the mpl tool must appear as an option in
     # the ipywidgets.Dropdown, alongside the always-present "Create

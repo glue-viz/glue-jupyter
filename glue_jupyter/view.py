@@ -1,4 +1,4 @@
-from ipywidgets import Output
+from ipywidgets import HBox, Output
 
 from IPython.display import display
 
@@ -45,8 +45,13 @@ class IPyWidgetView(Viewer):
     def toolbar_selection_tools(self):
         """
         The selection tools, e.g. rectangular or polygon selection.
+
+        When any of this viewer's tools exposes a ``companion_widget``
+        (e.g. the path slicer's target-picker dropdown) the toolbar
+        and the companions are returned together in an :class:`HBox`
+        so the layout factory still places them inline.
         """
-        return self.toolbar
+        return getattr(self, '_toolbar_layout', None) or self.toolbar
 
     @property
     def toolbar_active_subset(self):
@@ -158,7 +163,21 @@ class IPyWidgetView(Viewer):
         if subtool_ids:
             raise ValueError('subtools are not yet supported in Jupyter viewers')
 
+        companions = []
         for tool_id in tool_ids:
             mode_cls = viewer_tool.members[tool_id]
             mode = mode_cls(self)
             self.toolbar.add_tool(mode)
+            # Tools may expose an extra widget that should sit next to
+            # the toolbar buttons (e.g. the path slicer's target-picker
+            # dropdown). The layout factory reads ``toolbar_selection_tools``;
+            # we wrap the toolbar and any companions in an HBox so the
+            # factory's existing inline placement just works.
+            companion = getattr(mode, 'companion_widget', None)
+            if companion is not None:
+                companions.append(companion)
+
+        if companions:
+            self._toolbar_layout = HBox([self.toolbar, *companions])
+        else:
+            self._toolbar_layout = None

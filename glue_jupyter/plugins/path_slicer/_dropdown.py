@@ -37,6 +37,13 @@ class JupyterTargetDropdownMixin:
         or compose it into a custom layout."""
         return self._dropdown
 
+    @property
+    def companion_widget(self):
+        """:class:`IPyWidgetView` reads this attribute on each tool
+        when assembling :attr:`~IPyWidgetView.toolbar_selection_tools`,
+        so the dropdown shows up inline next to the toolbar buttons."""
+        return self._dropdown
+
     def _on_dropdown_change(self, change):
         self.set_target(change['new'])
 
