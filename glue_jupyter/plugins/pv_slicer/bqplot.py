@@ -17,7 +17,7 @@ from glue_jupyter.bqplot.common.tools import (InteractCheckableTool,
                                               INTERACT_COLOR)
 from glue_jupyter.bqplot.image import BqplotImageView
 
-from .common import build_or_update_pvs
+from .common import build_or_update_pvs, drive_parent_slice
 
 
 __all__ = ['BqplotPathSlicerMode', 'BqplotPathSlicerCrosshairMode']
@@ -146,14 +146,9 @@ class BqplotPathSlicerMode(_NoInteractMixin):
 class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
     """
     Tool for the PV viewer that, when mouse-moved, draws the path on
-    the parent cube viewer and highlights the cursor's projection back
-    to parent-pixel coordinates.
-
-    Compared to the matplotlib variant, this doesn't drive the parent's
-    slice index (bqplot's image viewer lacks an equivalent of
-    ``wcsaxes_slice``). It demonstrates the round-trip; a fuller
-    implementation would push the cursor's PV-y back into the parent
-    viewer's slice state.
+    the parent cube viewer, highlights the cursor's projection back to
+    parent-pixel coordinates, and pushes the cursor's PV-y onto the
+    parent viewer's ``state.slices`` (which is backend-agnostic).
     """
 
     icon = 'glue_path'
@@ -216,6 +211,8 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
         if not isinstance(ref, PathSlicedData):
             return
         xdata = event['domain']['x']
+        ydata = event['domain']['y']
         ind = int(round(np.clip(xdata, 0, ref.shape[-1] - 1)))
         self._crosshair.x = [ref.x[ind]]
         self._crosshair.y = [ref.y[ind]]
+        drive_parent_slice(ref, ydata)

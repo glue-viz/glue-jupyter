@@ -9,7 +9,32 @@ from glue.plugins.tools.pv_slicer.path_sliced_data_links import (
     link_path_sliced_to_parent, link_path_sliced_pair_paths)
 
 
-__all__ = ['build_or_update_pvs', 'path_link_exists']
+__all__ = ['build_or_update_pvs', 'path_link_exists', 'drive_parent_slice']
+
+
+def drive_parent_slice(pv, pv_y_value):
+    """
+    Push ``pv_y_value`` onto the parent viewer's slice index. Backend-
+    agnostic: writes to ``ImageViewerState.slices``, which both the
+    matplotlib and bqplot image viewers share.
+
+    Parameters
+    ----------
+    pv : :class:`PathSlicedData`
+        The PV whose ``parent_viewer`` should have its slice updated.
+    pv_y_value : float
+        The y-coordinate in the PV viewer's frame -- i.e. a pixel
+        index on the cube's non-sliced axis.
+    """
+    parent_viewer = pv.parent_viewer
+    state = parent_viewer.state
+    slc = list(state.slices)
+    # In a 3-d image viewer the slice axis is the one neither x_att
+    # nor y_att refers to; set its index from the PV viewer's y data.
+    for i in range(state.reference_data.ndim):
+        if i != state.x_att.axis and i != state.y_att.axis:
+            slc[i] = int(pv_y_value)
+    state.slices = tuple(slc)
 
 
 def path_link_exists(dc, pv_a, pv_b):

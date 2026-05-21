@@ -16,7 +16,7 @@ from glue_jupyter import jglue
 from glue_jupyter.bqplot.image import BqplotImageView
 from glue_jupyter.matplotlib.image import ImageJupyterViewer
 
-from ..common import build_or_update_pvs, path_link_exists
+from ..common import build_or_update_pvs, path_link_exists, drive_parent_slice
 from ..bqplot import BqplotPathSlicerMode
 from ..matplotlib import MatplotlibJupyterPathSlicerMode
 
@@ -111,6 +111,27 @@ def test_bqplot_mode_escape_clears_in_progress_path():
     pvs = [d for d in app.data_collection if isinstance(d, PathSlicedData)]
     assert pvs == []
     mode.deactivate()
+
+
+def test_drive_parent_slice_updates_state_slices():
+    # The PV crosshair tool calls drive_parent_slice when the mouse
+    # moves in the PV viewer. Verify it writes to the parent's
+    # state.slices regardless of backend.
+    for ViewerCls in (BqplotImageView, ImageJupyterViewer):
+        app, cube = _make_app_with_cube()
+        viewer = app.new_data_viewer(ViewerCls, data=cube)
+        pv = PathSlicedData(cube, cube.pixel_component_ids[1], [0., 1., 2.],
+                            cube.pixel_component_ids[2], [0., 1., 2.])
+        pv.parent_viewer = viewer
+        before = tuple(viewer.state.slices)
+        drive_parent_slice(pv, 3.0)
+        after = tuple(viewer.state.slices)
+        assert after != before
+        # The axis that changed is the one that's not x_att.axis or y_att.axis.
+        slice_axis = next(i for i in range(cube.ndim)
+                          if i not in (viewer.state.x_att.axis,
+                                       viewer.state.y_att.axis))
+        assert after[slice_axis] == 3
 
 
 def test_matplotlib_mode_constructible():

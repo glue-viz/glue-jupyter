@@ -16,7 +16,7 @@ from glue.plugins.tools.pv_slicer.path_sliced_data import PathSlicedData
 
 from glue_jupyter.matplotlib.image import ImageJupyterViewer
 
-from .common import build_or_update_pvs
+from .common import build_or_update_pvs, drive_parent_slice
 
 
 __all__ = ['MatplotlibJupyterPathSlicerMode',
@@ -144,4 +144,5 @@ class MatplotlibJupyterPathSlicerCrosshairMode(ToolbarModeBase):
         y = self.data.y[ind]
         self._crosshair.set_xdata([x])
         self._crosshair.set_ydata([y])
+        drive_parent_slice(self.data, ydata)
         self.data.parent_viewer.figure.canvas.draw_idle()
