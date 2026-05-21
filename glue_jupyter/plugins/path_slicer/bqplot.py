@@ -1,12 +1,16 @@
 """
 Path slicer tool for the bqplot image viewer.
 
-bqplot has no analogue of matplotlib's :class:`PathMode`, so this module
-implements a small click-to-add-vertex / Enter-to-finalise tool on top
-of the viewer's ``add_event_callback`` machinery. The data-side work
-(creating / updating :class:`PathSlicedData`, wiring the link graph,
-and opening / refreshing the slice viewer) goes through the shared
-helpers in :mod:`glue.plugins.tools.path_slicer.common`.
+bqplot has no analogue of matplotlib's :class:`PathMode`, so this
+module implements a small click-to-add-vertex / Enter-to-finalise
+tool on top of the viewer's ``add_event_callback`` machinery. The
+multi-trace data model parallels glue-core's
+:class:`BasePathSlicerMode`: each Enter produces one
+:class:`PathSlicedData` per cube layer and opens a fresh slice
+viewer, or refreshes an existing trace if one has been selected as
+the next-Enter target via the ``target_dropdown``. Overlays on the
+source viewer are bqplot ``Lines`` rather than matplotlib
+``Line2D``.
 """
 import numpy as np
 
@@ -14,15 +18,22 @@ from bqplot import Lines, Scatter
 
 from glue.config import viewer_tool
 from glue.plugins.tools.path_slicer.common import (
-    drive_parent_slice, open_or_update_slice_viewer)
+    create_trace, drive_parent_slice, open_slice_viewer_for, update_trace)
 from glue.plugins.tools.path_slicer.path_sliced_data import PathSlicedData
 
 from glue_jupyter.bqplot.common.tools import (InteractCheckableTool,
                                               INTERACT_COLOR)
 from glue_jupyter.bqplot.image import BqplotImageView
 
+from ._dropdown import JupyterTargetDropdownMixin
+
 
 __all__ = ['BqplotPathSlicerMode', 'BqplotPathSlicerCrosshairMode']
+
+
+_PATH_COLOR = '#669dff'
+_PATH_OPACITY_ACTIVE = 1.0
+_PATH_OPACITY_INACTIVE = 0.3
 
 
 class _NoInteractMixin(InteractCheckableTool):
@@ -38,11 +49,15 @@ class _NoInteractMixin(InteractCheckableTool):
 
 
 @viewer_tool
-class BqplotPathSlicerMode(_NoInteractMixin):
+class BqplotPathSlicerMode(JupyterTargetDropdownMixin, _NoInteractMixin):
     """
-    Click to add path vertices, Enter to materialise a
-    :class:`PathSlicedData` for each Data layer in the source viewer
-    and open a slice viewer, Escape to clear the in-progress path.
+    Click to add path vertices, Enter to materialise a trace
+    (one :class:`PathSlicedData` per Data layer in the source viewer)
+    and open a fresh slice viewer; Escape clears the in-progress path.
+
+    Each call to ``Enter`` either creates a new trace or refreshes the
+    one currently selected via :attr:`target_dropdown` (``None``
+    selection => create new).
     """
 
     icon = 'glue_slice'
@@ -52,8 +67,11 @@ class BqplotPathSlicerMode(_NoInteractMixin):
                 'slice, ESC to clear the path.')
     status_tip = tool_tip
 
+    slice_viewer_cls = BqplotImageView
+
     def __init__(self, viewer, **kwargs):
         super().__init__(viewer, **kwargs)
+        # In-progress path being drawn (cleared after Enter / Escape).
         self._vx = []
         self._vy = []
         self._line = Lines(x=[], y=[],
@@ -61,11 +79,22 @@ class BqplotPathSlicerMode(_NoInteractMixin):
                                    'y': self.viewer.scale_y},
                            colors=[INTERACT_COLOR], stroke_width=2,
                            marker='circle', marker_size=24)
-        self._slice_viewer = None
         self._added_to_figure = False
+
+        # Multi-trace state: parallel lists of traces and the slice
+        # viewers they're shown in. ``_slice_viewer`` shadows the
+        # latest so crosshair-style introspection still finds one.
+        self._traces = []  # list[list[PathSlicedData]]
+        self._slice_viewers = []
+        self._slice_viewer = None
+        self._target_trace = None
+        # bqplot Lines mark per trace, drawn on the source viewer.
+        self._overlays = {}
+
         self.viewer.state.add_callback('reference_data',
                                        self._on_reference_data_change)
         self._on_reference_data_change()
+        self._init_target_dropdown()
 
     def _on_reference_data_change(self, *args):
         if self.viewer is None:
@@ -114,12 +143,71 @@ class BqplotPathSlicerMode(_NoInteractMixin):
     def _finalize(self):
         vx = np.array(self._vx)
         vy = np.array(self._vy)
-        self._extract(vx, vy)
+        self._open_or_update(vx, vy)
         self._clear_path()
 
-    def _extract(self, vx, vy):
-        self._slice_viewer = open_or_update_slice_viewer(
-            self.viewer, self._slice_viewer, BqplotImageView, vx, vy)
+    def _open_or_update(self, vx, vy):
+        if self._target_trace is None:
+            new_paths = create_trace(self.viewer, vx, vy, self._traces)
+            self._traces.append(new_paths)
+            slice_viewer = open_slice_viewer_for(
+                self.viewer, self.slice_viewer_cls, new_paths)
+            self._slice_viewers.append(slice_viewer)
+            self._slice_viewer = slice_viewer
+            self._target_trace = self._traces[-1]
+        else:
+            update_trace(self._target_trace, vx, vy)
+        self._refresh_overlays()
+        self._on_traces_changed()
+
+    # ------------------------------------------------------------------
+    # Dropdown UI plumbing (uses JupyterTargetDropdownMixin)
+    # ------------------------------------------------------------------
+
+    def menu_entries(self):
+        entries = [('Create new path', None)]
+        for i, _trace in enumerate(self._traces, start=1):
+            entries.append((f'Update path {i}', _trace))
+        return entries
+
+    def set_target(self, target):
+        self._target_trace = target
+        self._refresh_overlays()
+
+    # ------------------------------------------------------------------
+    # bqplot overlay drawing
+    # ------------------------------------------------------------------
+
+    def _refresh_overlays(self):
+        current_keys = {id(trace) for trace in self._traces}
+        # Drop overlays for traces that no longer exist.
+        stale = [k for k in self._overlays if k not in current_keys]
+        if stale:
+            kept = [m for m in self.viewer.figure.marks
+                    if all(self._overlays.get(k) is not m for k in stale)]
+            self.viewer.figure.marks = kept
+            for k in stale:
+                self._overlays.pop(k, None)
+
+        for trace in self._traces:
+            key = id(trace)
+            x = list(trace[0].x)
+            y = list(trace[0].y)
+            opacity = (_PATH_OPACITY_ACTIVE if trace is self._target_trace
+                       else _PATH_OPACITY_INACTIVE)
+            if key in self._overlays:
+                line = self._overlays[key]
+                line.x = x
+                line.y = y
+                line.opacities = [opacity]
+            else:
+                line = Lines(x=x, y=y,
+                             scales={'x': self.viewer.scale_x,
+                                     'y': self.viewer.scale_y},
+                             colors=[_PATH_COLOR], stroke_width=2,
+                             opacities=[opacity])
+                self.viewer.figure.marks = list(self.viewer.figure.marks) + [line]
+                self._overlays[key] = line
 
 
 @viewer_tool
@@ -160,11 +248,11 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
         self._path_line = Lines(x=list(ref.x), y=list(ref.y),
                                 scales={'x': parent.scale_x,
                                         'y': parent.scale_y},
-                                colors=['#669dff'], stroke_width=2)
+                                colors=[_PATH_COLOR], stroke_width=2)
         self._crosshair = Scatter(x=[], y=[],
                                   scales={'x': parent.scale_x,
                                           'y': parent.scale_y},
-                                  marker='cross', colors=['#669dff'],
+                                  marker='cross', colors=[_PATH_COLOR],
                                   default_size=144)
         parent.figure.marks = list(parent.figure.marks) + [
             self._path_line, self._crosshair]
