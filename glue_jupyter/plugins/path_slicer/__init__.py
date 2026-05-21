@@ -7,14 +7,17 @@ tool IDs on the image viewers.
 
 
 def setup():
-    from glue_jupyter.bqplot.image import BqplotImageView
-    from glue_jupyter.matplotlib.image import ImageJupyterViewer
+    # Imports are deferred to setup() so importing this package doesn't
+    # eagerly drag in the matplotlib + bqplot stacks before glue's
+    # plugin loader is ready.
+    from glue_jupyter.bqplot.image import BqplotImageView  # noqa: PLC0415
+    from glue_jupyter.matplotlib.image import ImageJupyterViewer  # noqa: PLC0415
 
     # Importing the tool modules runs @viewer_tool decorators that
     # register the classes with glue's global tool registry.
-    from .matplotlib import (MatplotlibJupyterPathSlicerMode,  # noqa: F401
+    from .matplotlib import (MatplotlibJupyterPathSlicerMode,  # noqa: F401, PLC0415
                              MatplotlibJupyterPathSlicerCrosshairMode)
-    from .bqplot import (BqplotPathSlicerMode,  # noqa: F401
+    from .bqplot import (BqplotPathSlicerMode,  # noqa: F401, PLC0415
                          BqplotPathSlicerCrosshairMode)
 
     for tool_id in ('jupyter:slice', 'jupyter:path_crosshair'):

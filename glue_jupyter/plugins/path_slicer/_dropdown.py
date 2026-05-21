@@ -34,14 +34,16 @@ class JupyterTargetDropdownMixin:
     def target_dropdown(self):
         """The :class:`ipywidgets.Dropdown` widget. Display it in a
         notebook with ``IPython.display.display(tool.target_dropdown)``
-        or compose it into a custom layout."""
+        or compose it into a custom layout.
+        """
         return self._dropdown
 
     @property
     def companion_widget(self):
         """:class:`IPyWidgetView` reads this attribute on each tool
         when assembling :attr:`~IPyWidgetView.toolbar_selection_tools`,
-        so the dropdown shows up inline next to the toolbar buttons."""
+        so the dropdown shows up inline next to the toolbar buttons.
+        """
         return self._dropdown
 
     def _on_dropdown_change(self, change):

@@ -247,7 +247,7 @@ class BqplotPathSlicerCrosshairMode(_NoInteractMixin):
             return
         xdata = event['domain']['x']
         ydata = event['domain']['y']
-        ind = int(round(np.clip(xdata, 0, ref.shape[-1] - 1)))
+        ind = round(np.clip(xdata, 0, ref.shape[-1] - 1))
         self._crosshair.x = [ref.x[ind]]
         self._crosshair.y = [ref.y[ind]]
         drive_parent_slice(ref, ydata)

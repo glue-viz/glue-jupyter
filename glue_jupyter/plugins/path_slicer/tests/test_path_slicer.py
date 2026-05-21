@@ -34,7 +34,7 @@ def _make_app_with_cube():
 def test_tools_registered():
     # Loaded via the ``glue.plugins`` entry point in pyproject.toml; the
     # setup function wires the tool IDs onto the image viewers.
-    from glue.main import load_plugins
+    from glue.main import load_plugins  # noqa: PLC0415
     load_plugins()
     assert 'jupyter:slice' in ImageJupyterViewer.tools
     assert 'jupyter:path_crosshair' in ImageJupyterViewer.tools
@@ -167,7 +167,7 @@ def test_dropdown_lives_inline_with_the_toolbar_in_layout():
     # IPyWidgetView wraps the toolbar and any tool ``companion_widget``s
     # in an HBox under ``toolbar_selection_tools`` -- the layout factory
     # then places that inline alongside the toolbar buttons.
-    from ipywidgets import HBox
+    from ipywidgets import HBox  # noqa: PLC0415
     app, cube = _make_app_with_cube()
     viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
     bar = viewer.toolbar_selection_tools
