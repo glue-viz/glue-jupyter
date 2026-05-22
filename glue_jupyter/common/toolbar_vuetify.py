@@ -132,7 +132,9 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
     def vue_select_menu_item(self, data):
         """Called from the Vue template when a user clicks a menu item
         on a tool button. ``data`` carries ``tool_id`` and ``index``
-        (0-based into ``tool.menu_entries()``)."""
+        (0-based into ``tool.menu_entries()``). Sets the tool's target
+        and activates the tool (the icon button isn't a v-btn-toggle
+        member, so activation has to be driven explicitly here)."""
         tool_id = data.get('tool_id')
         index = data.get('index')
         tool = self.tools.get(tool_id)
@@ -143,3 +145,4 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
             return
         _, target = entries[index]
         tool.set_target(target)
+        self.active_tool_id = tool_id

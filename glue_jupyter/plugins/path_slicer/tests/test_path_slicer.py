@@ -213,6 +213,23 @@ def test_vue_select_menu_item_routes_to_set_target():
     assert slice_tool._target_trace is slice_tool._traces[0]
 
 
+def test_vue_select_menu_item_activates_tool():
+    # The icon button isn't a v-btn-toggle member (its click opens the
+    # menu instead of toggling), so picking a menu item is the only
+    # path to activation. Verify it sets ``active_tool_id`` and drives
+    # the toolbar's ``active_tool`` to the path slicer.
+    app, cube = _make_app_with_cube()
+    viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
+    slice_tool = viewer.toolbar.tools['jupyter:slice']
+
+    assert viewer.toolbar.active_tool is not slice_tool
+
+    viewer.toolbar.vue_select_menu_item({'tool_id': 'jupyter:slice',
+                                         'index': 0})
+    assert viewer.toolbar.active_tool_id == 'jupyter:slice'
+    assert viewer.toolbar.active_tool is slice_tool
+
+
 def test_bqplot_mode_multi_trace_create_then_update():
     app, cube = _make_app_with_cube()
     viewer = app.new_data_viewer(BqplotImageView, data=cube)
