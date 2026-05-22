@@ -88,16 +88,20 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
 
         def _menu_payload():
             """Snapshot of the tool's current menu state, or an empty
-            dict if the tool doesn't have a menu."""
+            dict if the tool doesn't have a menu. ``menu_labels`` has
+            an extra "Deactivate" sentinel appended at index
+            ``menu_deactivate_index``; picking it routes through
+            :meth:`vue_select_menu_item` to clear ``active_tool_id``."""
             if not hasattr(tool, 'menu_entries'):
                 return {}
             entries = tool.menu_entries()
             target = getattr(tool, '_target_trace', None)
             return {
-                'menu_labels': [label for label, _ in entries],
+                'menu_labels': [label for label, _ in entries] + ['Deactivate'],
                 'menu_active_index': next(
                     (i for i, (_, t) in enumerate(entries) if t is target),
                     0),
+                'menu_deactivate_index': len(entries),
             }
 
         def _entry():
@@ -131,17 +135,22 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
 
     def vue_select_menu_item(self, data):
         """Called from the Vue template when a user clicks a menu item
-        on a tool button. ``data`` carries ``tool_id`` and ``index``
-        (0-based into ``tool.menu_entries()``). Sets the tool's target
-        and activates the tool (the icon button isn't a v-btn-toggle
-        member, so activation has to be driven explicitly here)."""
+        on a tool button. ``data`` carries ``tool_id`` and ``index``.
+        Indices in ``[0, len(menu_entries()))`` set the corresponding
+        target and activate the tool; the trailing ``Deactivate``
+        sentinel (``index == len(menu_entries())``) clears
+        ``active_tool_id``. The icon button isn't a v-btn-toggle
+        member, so both transitions are driven explicitly here."""
         tool_id = data.get('tool_id')
         index = data.get('index')
         tool = self.tools.get(tool_id)
         if tool is None or not hasattr(tool, 'menu_entries'):
             return
         entries = tool.menu_entries()
-        if not isinstance(index, int) or not 0 <= index < len(entries):
+        if not isinstance(index, int) or not 0 <= index <= len(entries):
+            return
+        if index == len(entries):
+            self.active_tool_id = None
             return
         _, target = entries[index]
         tool.set_target(target)

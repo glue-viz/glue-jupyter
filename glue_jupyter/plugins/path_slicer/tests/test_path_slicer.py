@@ -167,20 +167,25 @@ def test_toolbar_menu_labels_track_traces():
     # The vuetify toolbar reads ``tool.menu_entries()`` and exposes the
     # labels (and a checkmark for the active target) to the Vue
     # template via ``tools_data``. Each new trace adds a new entry,
-    # and the active checkmark moves with ``set_target``.
+    # the active checkmark moves with ``set_target``, and a trailing
+    # "Deactivate" sentinel is always appended at
+    # ``menu_deactivate_index``.
     app, cube = _make_app_with_cube()
     viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
     slice_tool = viewer.toolbar.tools['jupyter:slice']
 
     entry = viewer.toolbar.tools_data['jupyter:slice']
-    assert entry['menu_labels'] == ['Create new path']
+    assert entry['menu_labels'] == ['Create new path', 'Deactivate']
     assert entry['menu_active_index'] == 0
+    assert entry['menu_deactivate_index'] == 1
 
     slice_tool._open_or_update([1., 2., 3.], [0., 1., 2.])
     entry = viewer.toolbar.tools_data['jupyter:slice']
-    assert entry['menu_labels'] == ['Create new path', 'Update path 1']
+    assert entry['menu_labels'] == [
+        'Create new path', 'Update path 1', 'Deactivate']
     # The newly-created trace is the active target -> index 1.
     assert entry['menu_active_index'] == 1
+    assert entry['menu_deactivate_index'] == 2
 
     slice_tool.set_target(None)
     entry = viewer.toolbar.tools_data['jupyter:slice']
@@ -189,8 +194,9 @@ def test_toolbar_menu_labels_track_traces():
     slice_tool._open_or_update([0., 5., 2.], [4., 0., 3.])
     entry = viewer.toolbar.tools_data['jupyter:slice']
     assert entry['menu_labels'] == [
-        'Create new path', 'Update path 1', 'Update path 2']
+        'Create new path', 'Update path 1', 'Update path 2', 'Deactivate']
     assert entry['menu_active_index'] == 2
+    assert entry['menu_deactivate_index'] == 3
 
 
 def test_vue_select_menu_item_routes_to_set_target():
@@ -227,6 +233,46 @@ def test_vue_select_menu_item_activates_tool():
     viewer.toolbar.vue_select_menu_item({'tool_id': 'jupyter:slice',
                                          'index': 0})
     assert viewer.toolbar.active_tool_id == 'jupyter:slice'
+    assert viewer.toolbar.active_tool is slice_tool
+
+
+def test_vue_select_menu_item_deactivate_sentinel():
+    # The trailing "Deactivate" entry (at ``menu_deactivate_index``)
+    # clears ``active_tool_id`` without touching the target -- the
+    # tool can be reactivated later on the same trace.
+    app, cube = _make_app_with_cube()
+    viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
+    slice_tool = viewer.toolbar.tools['jupyter:slice']
+
+    slice_tool._open_or_update([1., 2., 3.], [0., 1., 2.])
+    viewer.toolbar.vue_select_menu_item({'tool_id': 'jupyter:slice',
+                                         'index': 1})
+    assert viewer.toolbar.active_tool is slice_tool
+    assert slice_tool._target_trace is slice_tool._traces[0]
+
+    deactivate_index = (
+        viewer.toolbar.tools_data['jupyter:slice']['menu_deactivate_index'])
+    viewer.toolbar.vue_select_menu_item({'tool_id': 'jupyter:slice',
+                                         'index': deactivate_index})
+    assert viewer.toolbar.active_tool is None
+    # Target survives deactivation.
+    assert slice_tool._target_trace is slice_tool._traces[0]
+
+
+def test_vue_select_menu_item_reselect_active_target_keeps_tool_on():
+    # Re-picking the already-checked entry must leave the tool
+    # active. Deactivation is reserved for the explicit "Deactivate"
+    # sentinel or another tool taking over the toolbar.
+    app, cube = _make_app_with_cube()
+    viewer = app.new_data_viewer(ImageJupyterViewer, data=cube)
+    slice_tool = viewer.toolbar.tools['jupyter:slice']
+
+    viewer.toolbar.vue_select_menu_item({'tool_id': 'jupyter:slice',
+                                         'index': 0})
+    assert viewer.toolbar.active_tool is slice_tool
+
+    viewer.toolbar.vue_select_menu_item({'tool_id': 'jupyter:slice',
+                                         'index': 0})
     assert viewer.toolbar.active_tool is slice_tool
 
 

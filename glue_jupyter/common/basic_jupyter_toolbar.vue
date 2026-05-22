@@ -9,9 +9,15 @@
                 <template v-slot:activator="{ on: menu_on }">
                     <v-tooltip bottom>
                         <template v-slot:activator="{ on: tip_on }">
+                            <!-- @click.stop keeps the click from
+                                 bubbling to v-btn-toggle, which would
+                                 otherwise treat the activator as a
+                                 toggle member and clobber
+                                 active_tool_id. -->
                             <v-btn icon
                                    :input-value="active_tool_id === id"
-                                   v-on="{...menu_on, ...tip_on}">
+                                   v-on="{...menu_on, ...tip_on}"
+                                   @click.stop>
                                 <img :src="data.img" width="20"/>
                             </v-btn>
                         </template>
@@ -19,17 +25,20 @@
                     </v-tooltip>
                 </template>
                 <v-list dense>
-                    <v-list-item v-for="(label, i) of data.menu_labels"
-                                 :key="i"
-                                 @click="select_menu_item({tool_id: id, index: i})">
-                        <v-list-item-icon v-if="i === data.menu_active_index">
-                            <v-icon small>mdi-check</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-icon v-else>
-                            <span style="width: 24px;"></span>
-                        </v-list-item-icon>
-                        <v-list-item-title>{{ label }}</v-list-item-title>
-                    </v-list-item>
+                    <template v-for="(label, i) of data.menu_labels">
+                        <v-divider v-if="i === data.menu_deactivate_index"
+                                   :key="i + '-divider'"></v-divider>
+                        <v-list-item :key="i"
+                                     @click="select_menu_item({tool_id: id, index: i})">
+                            <v-list-item-icon v-if="i === data.menu_active_index">
+                                <v-icon small>mdi-check</v-icon>
+                            </v-list-item-icon>
+                            <v-list-item-icon v-else>
+                                <span style="width: 24px;"></span>
+                            </v-list-item-icon>
+                            <v-list-item-title>{{ label }}</v-list-item-title>
+                        </v-list-item>
+                    </template>
                 </v-list>
             </v-menu>
             <!-- Plain tool (no menu): unchanged. -->
