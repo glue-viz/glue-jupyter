@@ -1,5 +1,107 @@
 from itertools import permutations
 
+import pytest
+
+from bqplot_linlog import LinLogScale
+
+
+def test_scatter2d_log(app, dataxyz):
+
+    s = app.scatter2d(data=dataxyz)
+
+    # Initially linear scales
+    assert isinstance(s.scale_x, LinLogScale)
+    assert s.scale_x.mode == 'linear'
+    assert s.scale_y.mode == 'linear'
+
+    # Switch x to log
+    s.state.x_log = True
+    assert s.scale_x.mode == 'log'
+    assert s.scale_y.mode == 'linear'
+
+    # The same scale object is reused (no replacement needed)
+    original_scale_x = s.scale_x
+    s.state.x_log = False
+    assert s.scale_x is original_scale_x
+    assert s.scale_x.mode == 'linear'
+
+    # Switch y to log
+    s.state.y_log = True
+    assert s.scale_y.mode == 'log'
+
+    # Switch back to linear
+    s.state.y_log = False
+    assert s.scale_y.mode == 'linear'
+
+
+def test_scatter2d_log_limits(app):
+
+    # Regression test: when toggling log scale with limits that include
+    # negative values, the limits should be automatically reset to
+    # positive values by the state's limit helper.
+
+    d = app.add_data(data={'x': [-10, -5, 0, 5, 15, 30],
+                           'y': [-5, 10, 20, 35, 40, 50]})[0]
+    s = app.scatter2d(data=d)
+
+    assert s.state.x_min < 0
+
+    s.state.x_log = True
+    assert s.state.x_min > 0
+    assert s.state.x_max > 0
+    assert s.scale_x.min == s.state.x_min
+    assert s.scale_x.max == s.state.x_max
+
+    # Also test the case where the user pans to negative limits
+    # with all-positive data, then enables log
+    s.state.x_log = False
+    s.state.x_min = -10
+    s.state.x_max = 30
+
+    s.state.x_log = True
+    assert s.state.x_min > 0
+    assert s.scale_x.min == s.state.x_min
+    assert s.scale_x.max == s.state.x_max
+
+
+@pytest.mark.parametrize('n_toggles', [3, 5, 7])
+def test_scatter2d_log_repeated_toggle(app, dataxyz, n_toggles):
+    # Regression test: toggling log scale back and forth multiple times
+    # should always leave the viewer in a consistent state.
+    # With LinLogScale, the scale object is never replaced, so this
+    # is mainly checking that the mode stays in sync.
+
+    s = app.scatter2d(data=dataxyz)
+    original_scale_x = s.scale_x
+    original_scale_y = s.scale_y
+
+    for i in range(n_toggles):
+        s.state.x_log = not s.state.x_log
+        s.state.y_log = not s.state.y_log
+
+        expected_x = 'log' if s.state.x_log else 'linear'
+        expected_y = 'log' if s.state.y_log else 'linear'
+
+        # Scale object is always the same
+        assert s.scale_x is original_scale_x, f"x scale replaced after toggle {i+1}"
+        assert s.scale_y is original_scale_y, f"y scale replaced after toggle {i+1}"
+
+        # Mode matches the state
+        assert s.scale_x.mode == expected_x, f"x scale mode wrong after toggle {i+1}"
+        assert s.scale_y.mode == expected_y, f"y scale mode wrong after toggle {i+1}"
+
+        # Limits are synced between state and scale
+        if s.state.x_min is not None and s.state.x_max is not None:
+            assert s.scale_x.min == float(s.state.x_min), \
+                f"x_min out of sync after toggle {i+1}"
+            assert s.scale_x.max == float(s.state.x_max), \
+                f"x_max out of sync after toggle {i+1}"
+        if s.state.y_min is not None and s.state.y_max is not None:
+            assert s.scale_y.min == float(s.state.y_min), \
+                f"y_min out of sync after toggle {i+1}"
+            assert s.scale_y.max == float(s.state.y_max), \
+                f"y_max out of sync after toggle {i+1}"
+
 
 def test_scatter2d_nd(app, data_4d):
     # Regression test for a bug that meant that arrays with more than one

@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pytest
 
 from glue_jupyter import jglue
 from glue_jupyter.tests.helpers import visual_widget_test
@@ -188,4 +189,155 @@ def test_visual_vector(
 
     figure = scatter.figure_widget
     figure.layout = {"width": "800px", "height": "500px"}
+    return figure
+
+
+@pytest.mark.parametrize(("x_log", "y_log"), [
+    (False, False),
+    (True, False),
+    (False, True),
+    (True, True),
+], ids=["linear", "xlog", "ylog", "xylog"])
+@visual_widget_test
+def test_visual_scatter2d_density_alignment(
+    tmp_path,
+    page_session,
+    solara_test,
+    x_log,
+    y_log,
+):
+    # Check that density map and scatter markers line up by adding the
+    # same data twice: once as markers, once as a density map.
+
+    np.random.seed(12345)
+
+    app = jglue()
+
+    x = np.random.lognormal(2, 0.5, 5000)
+    y = np.random.lognormal(1, 0.8, 5000)
+    data_markers = app.add_data(cloud_markers={"x": x, "y": y})[0]
+    data_density = app.add_data(cloud_density={"x": x, "y": y})[0]
+
+    app.add_link(data_markers, 'x', data_density, 'x')
+    app.add_link(data_markers, 'y', data_density, 'y')
+
+    scatter = app.scatter2d(show=False, data=data_markers)
+    scatter.add_data(data_density)
+
+    # First layer: markers
+    scatter.state.layers[0].color = 'blue'
+    scatter.state.layers[0].alpha = 0.5
+    scatter.state.layers[0].size = 1
+
+    # Second layer: density map
+    scatter.state.layers[1].density_map = True
+    scatter.state.layers[1].alpha = 0.8
+    scatter.state.dpi = 5
+
+    scatter.state.x_log = x_log
+    scatter.state.y_log = y_log
+
+    figure = scatter.figure_widget
+    figure.layout = {"width": "400px", "height": "250px"}
+    return figure
+
+
+@pytest.mark.parametrize(("x_log", "y_log"), [
+    (True, False),
+    (False, True),
+    (True, True),
+], ids=["xlog", "ylog", "xylog"])
+@visual_widget_test
+def test_visual_scatter2d_log(
+    tmp_path,
+    page_session,
+    solara_test,
+    x_log,
+    y_log,
+):
+
+    np.random.seed(12345)
+
+    app = jglue()
+
+    # Small dataset shown as scatter points
+    x_pts = np.random.lognormal(2, 0.5, 50)
+    y_pts = np.random.lognormal(1, 0.8, 50)
+    data_pts = app.add_data(points={"x": x_pts, "y": y_pts})[0]
+
+    # Larger dataset shown as density map
+    x_dense = np.random.lognormal(2, 0.5, 5000)
+    y_dense = np.random.lognormal(1, 0.8, 5000)
+    data_dense = app.add_data(dense={"x": x_dense, "y": y_dense})[0]
+
+    app.add_link(data_pts, 'x', data_dense, 'x')
+    app.add_link(data_pts, 'y', data_dense, 'y')
+
+    scatter = app.scatter2d(show=False, data=data_pts)
+    scatter.add_data(data_dense)
+
+    # Density map layer behind, scatter points in front
+    scatter.state.layers[1].density_map = True
+    scatter.state.layers[1].zorder = 0.8
+    scatter.state.dpi = 5
+
+    # Create a subset that covers part of the data
+    app.data_collection.new_subset_group(
+        subset_state=data_pts.id['x'] > np.median(x_pts),
+        label='right half',
+    )
+
+    scatter.state.layers[0].color = 'orange'
+
+    scatter.state.layers[3].density_map = True
+
+    # Set log scales
+    scatter.state.x_log = x_log
+    scatter.state.y_log = y_log
+
+    figure = scatter.figure_widget
+    figure.layout = {"width": "400px", "height": "250px"}
+    return figure
+
+
+@visual_widget_test
+def test_visual_scatter2d_log_ellipse_subset(
+    tmp_path,
+    page_session,
+    solara_test,
+):
+    # Log-uniform point cloud (i.e. uniform in log space, so the data looks
+    # uniform on log axes rather than crowding the high end), both axes
+    # switched to log, with the bqplot ellipse brush tool driven
+    # programmatically. The brush's selected_x/selected_y values mimic
+    # what bqplot's LogScale reports after a screen-space drag: linear-data
+    # coordinates at log-uniform screen positions. On log axes the
+    # resulting selection should match what the user drew (a circle on
+    # screen), achieved by the tool emitting a PolygonalROI sampled in
+    # screen-uniform coords -- mirroring glue-core's MplCircularROI.roi
+    # behaviour.
+
+    np.random.seed(12345)
+
+    x = 10 ** np.random.uniform(-2, 1, 10000)
+    y = 10 ** np.random.uniform(-2, 1, 10000)
+
+    app = jglue()
+    data = app.add_data(cloud={"x": x, "y": y})[0]
+    scatter = app.scatter2d(show=False, data=data)
+
+    scatter.state.x_log = True
+    scatter.state.y_log = True
+
+    # log10([0.5, 5.0]) spans [-0.30, 0.70] on both axes, i.e. a square
+    # selection on screen with both axes in log10 -- a circle in log space.
+    tool = scatter.toolbar.tools['bqplot:circle']
+    tool.activate()
+    tool.interact.brushing = True
+    tool.interact.selected_x = np.array([0.5, 5.0])
+    tool.interact.selected_y = np.array([0.5, 5.0])
+    tool.interact.brushing = False
+
+    figure = scatter.figure_widget
+    figure.layout = {"width": "400px", "height": "250px"}
     return figure
