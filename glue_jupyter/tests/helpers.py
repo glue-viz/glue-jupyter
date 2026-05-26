@@ -13,7 +13,7 @@ except ImportError:
 else:
     HAS_VISUAL_TEST_DEPS = True
 
-__all__ = ['visual_widget_test', 'visual_ui_test']
+__all__ = ['visual_widget_test', 'visual_ui_test', 'screenshot_when_stable']
 
 
 def screenshot_when_stable(page, locator, *, interval=200, max_iterations=25):
