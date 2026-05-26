@@ -13,7 +13,29 @@ except ImportError:
 else:
     HAS_VISUAL_TEST_DEPS = True
 
-__all__ = ['visual_widget_test', 'visual_ui_test']
+__all__ = ['visual_widget_test', 'visual_ui_test', 'screenshot_when_stable']
+
+
+def screenshot_when_stable(page, locator, *, interval=200, max_iterations=25):
+    """
+    Take a screenshot of ``locator`` once its rendered content has settled.
+
+    WebGL/canvas content (e.g. image contours) is drawn asynchronously after
+    the element is attached to the DOM, so capturing immediately can grab a
+    partially-rendered frame. We wait for the network to be idle and then
+    repeatedly screenshot until two consecutive captures are identical (or we
+    hit ``max_iterations``), which makes the comparison robust against these
+    render races.
+    """
+    page.wait_for_load_state("networkidle")
+    screenshot = locator.screenshot()
+    for _ in range(max_iterations):
+        page.wait_for_timeout(interval)
+        new_screenshot = locator.screenshot()
+        if new_screenshot == screenshot:
+            break
+        screenshot = new_screenshot
+    return screenshot
 
 
 class DummyFigure:
@@ -49,7 +71,7 @@ def visual_widget_test(*args, **kwargs):
             viewer = page_session.locator(".test-viewer")
             viewer.wait_for()
 
-            screenshot = viewer.screenshot()
+            screenshot = screenshot_when_stable(page_session, viewer)
 
             return DummyFigure(screenshot)
 

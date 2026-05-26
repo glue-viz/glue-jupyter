@@ -1,0 +1,2 @@
+bqplot<0.13
+bqplot-gl==0.0.0

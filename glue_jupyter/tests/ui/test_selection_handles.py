@@ -4,7 +4,7 @@ from glue.core.edit_subset_mode import ReplaceMode
 
 import glue_jupyter as gj
 from glue_jupyter.bqplot.common.tools import BqplotCircleMode, BqplotRectangleMode
-from glue_jupyter.tests.helpers import visual_ui_test
+from glue_jupyter.tests.helpers import visual_ui_test, screenshot_when_stable
 
 
 selection_width = 200
@@ -43,7 +43,7 @@ def test_elliptical_selection_handles(solara_test, page_session):
     page_session.mouse.up()
     page_session.wait_for_timeout(500)
     page_session.pause()
-    return plot.screenshot()
+    return screenshot_when_stable(page_session, plot)
 
 
 @visual_ui_test(tolerance=1, skip_hash=True)
@@ -71,7 +71,7 @@ def test_elliptical_selection_handles_rotate(solara_test, page_session):
     rotate(45, app, viewer)
     page_session.wait_for_timeout(500)
 
-    return plot.screenshot()
+    return screenshot_when_stable(page_session, plot)
 
 
 @visual_ui_test(tolerance=1, skip_hash=True)
@@ -96,7 +96,7 @@ def test_rectangular_selection_handles(solara_test, page_session):
     page_session.mouse.up()
     page_session.wait_for_timeout(500)
 
-    return plot.screenshot()
+    return screenshot_when_stable(page_session, plot)
 
 
 @visual_ui_test(tolerance=1, skip_hash=True)
@@ -124,7 +124,7 @@ def test_rectangular_selection_handles_rotate(solara_test, page_session):
     rotate(45, app, viewer)
     page_session.wait_for_timeout(500)
 
-    return plot.screenshot()
+    return screenshot_when_stable(page_session, plot)
 
 
 def example_data_square():

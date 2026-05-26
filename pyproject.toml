@@ -35,8 +35,8 @@ dependencies = [
     "ipyvue>=1.2.0,<2",
     "ipyvuetify>=1.2.0,<2",
     "bqplot-image-gl>=1.9.2",
-    "bqplot>=0.12.46,<0.13",
-    "bqplot-linlog>=0.1.0",
+    "bqplot>=0.12.46",
+    "bqplot-linlog>=0.2.0",
     "bqplot-gl",
     "scikit-image",
 ]
@@ -112,12 +112,16 @@ version_file = "glue_jupyter/_version.py"
 omit = [
     "*/tests/*",
     "*/test_*",
+    "*_test.py",
+    "*/conftest.py",
 ]
 
 [tool.coverage.report]
 omit = [
     "*/tests/*",
     "*/test_*",
+    "*_test.py",
+    "*/conftest.py",
 ]
 
 [tool.pytest.ini_options]
