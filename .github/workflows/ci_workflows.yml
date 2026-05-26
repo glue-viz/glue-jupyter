@@ -28,19 +28,19 @@ jobs:
           - libhdf5-dev
 
       envs: |
-        - linux: py310-test
+        - linux: py310-test-bqplot012
         - linux: py311-test
         - linux: py312-test
         - linux: py313-test
 
         - macos: py310-test
-        - macos: py311-test
+        - macos: py311-test-bqplot012
         - macos: py313-test
         - macos: py314-test
 
         - windows: py310-test
         - windows: py311-test
-        - windows: py312-test
+        - windows: py312-test-bqplot012
         - windows: py314-test
 
         # test against some dev versions of some packages
