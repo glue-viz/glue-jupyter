@@ -112,12 +112,16 @@ version_file = "glue_jupyter/_version.py"
 omit = [
     "*/tests/*",
     "*/test_*",
+    "*_test.py",
+    "*/conftest.py",
 ]
 
 [tool.coverage.report]
 omit = [
     "*/tests/*",
     "*/test_*",
+    "*_test.py",
+    "*/conftest.py",
 ]
 
 [tool.pytest.ini_options]
