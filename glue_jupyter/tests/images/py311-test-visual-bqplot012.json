@@ -1,0 +1,17 @@
+{
+  "glue_jupyter.bqplot.image.tests.test_visual.test_contour_units[chromium]": "3c03cfe2dd601d05d6bc488149eb603972196b93683edf71648df979d8407f23",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d[chromium]": "54d966d08b4734f411abd32ff55e957f966b1fff5aa6c33b518aed48e2be0aaf",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density[chromium]": "ecb62a88d636ea6df230a3540fb1bc166319d883b75bf5a0d118150da0d3e064",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_linestyle[chromium]": "2266db7d68024b2e304fdb8a11221e5da5f4ded47c4278f7fe8bd5b2b9002290",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_vector[chromium]": "a0a5b9409eb4a3856c7368aa3de34411872cb3631fc595aa46cd1b7ed194f24d",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density_alignment[chromium-linear]": "8b7170dcc76629632650a37822b3069d5c940eaeaf5a96c73a0bc55f04283efa",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_log[chromium-xlog]": "5517cb61dd9290a37ef043c7c71c1c115be585e12da46b509cc9bd24f807c52e",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_log_ellipse_subset[chromium]": "de4179b064d0fc64e3a1aaec3d5c6bc6928280641c4fe1d0179d5bf5650f97dd",
+  "glue_jupyter.tests.ui.test_selection.test_elliptical_selection[chromium]": "de3e144d9c57a972fc0ab29075ae1d39fb49326955b2c3af803c10c50847036d",
+  "glue_jupyter.tests.ui.test_selection.test_rectangular_selection[chromium]": "14a2acd27fb61e0ae1f40ac285d9020858d63727848d39269b96aa46635cf7a5",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density_alignment[chromium-xlog]": "d494bd2c6ba618bf89c528c7d4865c6a1c26c9bea40723475c38e0c5e60ab812",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_log[chromium-ylog]": "ac8176821bdc5afff3defb508e88739ce8b7469573e1773b092070661c4e221b",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density_alignment[chromium-ylog]": "f4dc63374ac0e558839c078ce758aa8b8d126d77e3d0f42d3549783e2fbc9f4d",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_log[chromium-xylog]": "734ca7064775c5b4ad91e5f42c6aaba9073632694cef1db885f3cce19b6c6bf8",
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density_alignment[chromium-xylog]": "06a17b12b1d8a803dec71ff0b4d7c2aecd7f77f8b51373b8fcf40f844e194501"
+}

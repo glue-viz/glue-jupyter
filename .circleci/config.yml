@@ -88,6 +88,11 @@ workflows:
           jobname: "py311-test-visual-dev"
           image: "cimg/python:3.11-node"
 
+      - visual:
+          name: "py311-test-visual-bqplot012"
+          jobname: "py311-test-visual-bqplot012"
+          image: "cimg/python:3.11-node"
+
       - deploy-reference-images:
           name: baseline-<< matrix.jobname >>
           matrix:
