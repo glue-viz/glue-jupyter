@@ -1,5 +1,21 @@
 # Full changelog
 
+## v0.29.0 - 2026-06-01
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### New Features
+
+* Update slice helper to support 3d viewers by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/542
+* Added support for log axes in scatter viewer by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/528
+
+#### Other Changes
+
+* Add support for bqplot 0.13 by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/545
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.28.0...v0.29.0
+
 ## v0.28.0 - 2026-05-07
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
