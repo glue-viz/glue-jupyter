@@ -4,6 +4,8 @@ import ipyvuetify as v
 import traitlets
 import base64
 
+from glue.core.callback_property import add_callback
+
 from glue.icons import icon_path
 import glue.viewers.common.tool
 from glue.viewers.common.tool import CheckableTool
@@ -82,10 +84,74 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
         if format is None or not format.startswith(image_prefix):
             raise ValueError(f"Invalid or unknown image MIME type for: {path}")
         format = format[len(image_prefix):]
-        self.tools_data = {
-            **self.tools_data,
-            tool.tool_id: {
-                'tooltip': tool.tool_tip,
-                'img': read_icon(path, format)
+        base_entry = {'tooltip': tool.tool_tip, 'img': read_icon(path, format)}
+
+        def _menu_payload():
+            """Snapshot of the tool's current menu state, or an empty
+            dict if the tool doesn't have a menu. ``menu_labels`` has
+            an extra "Deactivate" sentinel appended at index
+            ``menu_deactivate_index``; picking it routes through
+            :meth:`vue_select_menu_item` to clear ``active_tool_id``."""
+            if not hasattr(tool, 'menu_entries'):
+                return {}
+            entries = tool.menu_entries()
+            target = getattr(tool, '_target_trace', None)
+            return {
+                'menu_labels': [label for label, _ in entries] + ['Deactivate'],
+                'menu_active_index': next(
+                    (i for i, (_, t) in enumerate(entries) if t is target),
+                    0),
+                'menu_deactivate_index': len(entries),
             }
-        }
+
+        def _entry():
+            return {**base_entry, **_menu_payload()}
+
+        # Show/hide the button by adding/removing the entry from
+        # tools_data as ``tool.enabled`` changes. Apply the current
+        # value immediately so a tool that set ``enabled = False`` in
+        # its __init__ is hidden from the start.
+        def _set_visible(state):
+            if state:
+                self.tools_data = {**self.tools_data, tool.tool_id: _entry()}
+            else:
+                new = dict(self.tools_data)
+                new.pop(tool.tool_id, None)
+                self.tools_data = new
+
+        add_callback(tool, 'enabled', _set_visible)
+        _set_visible(tool.enabled)
+
+        # If the tool exposes a menu, register on its menu-change
+        # callbacks so the labels and the active checkmark stay in
+        # sync with the tool's state (e.g. each new trace adds an
+        # "Update path N" entry).
+        if hasattr(tool, '_menu_change_callbacks'):
+            def _refresh_menu():
+                if tool.tool_id not in self.tools_data:
+                    return
+                self.tools_data = {**self.tools_data, tool.tool_id: _entry()}
+            tool._menu_change_callbacks.append(_refresh_menu)
+
+    def vue_select_menu_item(self, data):
+        """Called from the Vue template when a user clicks a menu item
+        on a tool button. ``data`` carries ``tool_id`` and ``index``.
+        Indices in ``[0, len(menu_entries()))`` set the corresponding
+        target and activate the tool; the trailing ``Deactivate``
+        sentinel (``index == len(menu_entries())``) clears
+        ``active_tool_id``. The icon button isn't a v-btn-toggle
+        member, so both transitions are driven explicitly here."""
+        tool_id = data.get('tool_id')
+        index = data.get('index')
+        tool = self.tools.get(tool_id)
+        if tool is None or not hasattr(tool, 'menu_entries'):
+            return
+        entries = tool.menu_entries()
+        if not isinstance(index, int) or not 0 <= index <= len(entries):
+            return
+        if index == len(entries):
+            self.active_tool_id = None
+            return
+        _, target = entries[index]
+        tool.set_target(target)
+        self.active_tool_id = tool_id
