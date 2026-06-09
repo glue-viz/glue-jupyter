@@ -19,6 +19,14 @@
             <v-switch v-model="cumulative" label="Cumulative" hide-details/>
         </div>
         <div>
+            <v-subheader class="pl-0 slider-label">log x axis</v-subheader>
+            <v-switch v-model="x_log" hide-details style="margin-top: 0"/>
+        </div>
+        <div>
+            <v-subheader class="pl-0 slider-label">log y axis</v-subheader>
+            <v-switch v-model="y_log" hide-details style="margin-top: 0"/>
+        </div>
+        <div>
             <v-btn variant="outlined" size="x-small" @click="bins_to_axis">
                 Fit Bins to Axes
             </v-btn>
