@@ -41,8 +41,13 @@ class BqplotBaseView(IPyWidgetView):
                              animation_duration=0,
                              axes=[self.axis_x, self.axis_y],
                              fig_margin={'left': 60, 'bottom': 60, 'top': 10, 'right': 10})
-        if hasattr(bqplot.Figure, 'display_toolbar'):
+
+        # bqplot 0.13 added an integrated Figure toolbar that is shown by
+        # default. Glue provides its own toolbar, and bqplot 0.12 does not know
+        # this trait, so gate on the trait API instead of the bqplot version.
+        if 'display_toolbar' in bqplot.Figure.class_traits():
             figure_kwargs['display_toolbar'] = False
+
         self.figure = bqplot.Figure(**figure_kwargs)
         self.figure.padding_y = 0
         self._fig_margin_default = self.figure.fig_margin

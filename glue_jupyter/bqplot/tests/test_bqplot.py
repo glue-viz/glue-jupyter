@@ -3,13 +3,32 @@ import os
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
+from traitlets import Bool
 from glue.config import viewer_tool
 from glue.core import Data
 from glue.core.roi import CircularAnnulusROI, EllipticalROI
 from glue.core.subset import RoiSubsetState
+import glue_jupyter as gj
 from ..common.tools import TrueCircularROI
 
 DATA = os.path.join(os.path.dirname(__file__), 'data')
+
+
+def test_bqplot_integrated_toolbar_disabled_when_supported(dataxyz, monkeypatch):
+
+    from glue_jupyter.bqplot.common import viewer as common_viewer
+
+    # bqplot 0.13 adds this trait to Figure; keep the test independent from
+    # the bqplot version installed in the test environment.
+    class FigureWithIntegratedToolbar(common_viewer.bqplot.Figure):
+        display_toolbar = Bool(default_value=True).tag(sync=True)
+
+    monkeypatch.setattr(common_viewer.bqplot, 'Figure', FigureWithIntegratedToolbar)
+
+    app = gj.jglue(dataxyz=dataxyz)
+    viewer = app.scatter2d(x='x', y='y', data=dataxyz)
+
+    assert viewer.figure.display_toolbar is False
 
 
 def test_histogram1d(app, dataxyz):
