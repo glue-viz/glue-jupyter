@@ -64,6 +64,32 @@ class FRBImage(ImageGL):
         if value > previous_value:  # no point updating if the value is smaller than before
             self.debounced_update()
 
+    @staticmethod
+    def _snap_to_lattice(lo, hi, n):
+        # Snap an axis range to a power-of-two lattice anchored at the data
+        # origin. ``n`` is the number of display-resolution samples requested
+        # across ``[lo, hi]``; the returned range is widened outward onto the
+        # lattice and the sample count adjusted to match, so the sample
+        # positions always fall on the same set of data pixels.
+        if n < 2 or hi <= lo:
+            return lo, hi, n
+
+        # World separation between adjacent display samples.
+        ideal_step = (hi - lo) / (n - 1)
+
+        # Use the largest power-of-two number of data pixels per sample that is
+        # still at least as fine as the display (so we never undersample what is
+        # shown), but never sample finer than the data grid itself - there is no
+        # information below one data pixel and the GPU magnifies for us.
+        exponent = max(0, math.floor(math.log2(ideal_step)))
+        step = 2.0 ** exponent
+
+        lo_snap = math.floor(lo / step) * step
+        hi_snap = math.ceil(hi / step) * step
+        n_snap = int(round((hi_snap - lo_snap) / step)) + 1
+
+        return lo_snap, hi_snap, n_snap
+
     def update(self, *args, force=False, **kwargs):
 
         # Shape can be (0, 0) when viewer was created and then destroyed.
@@ -79,11 +105,6 @@ class FRBImage(ImageGL):
         if xmin is None or xmax is None or ymin is None or ymax is None:
             return
 
-        current_hash = (xmin, xmax, ymin, ymax, self.external_padding)
-
-        if not force and current_hash == self._latest_hash:
-            return
-
         ny, nx = self.shape
 
         # Expand beyond the boundary
@@ -94,6 +115,23 @@ class FRBImage(ImageGL):
             ymin, ymax = ymin - dy * self.external_padding, ymax + dy * self.external_padding
             nx *= math.ceil(1 + 2 * self.external_padding)
             ny *= math.ceil(1 + 2 * self.external_padding)
+
+        # Snap the sampling grid to a dyadic lattice aligned with the reference
+        # data pixel grid (the viewer x/y axes are in reference-data pixel
+        # coordinates, so one world unit is one data pixel). The FRB samples by
+        # nearest-neighbour, so without snapping a pan or zoom of a heavily
+        # decimated image lands the sample points on a different set of data
+        # pixels each frame, which makes a noisy background flicker. Snapping
+        # keeps the sampled data pixels fixed (the texture just translates under
+        # the viewport on a pan) and only changes the resolution in factors of
+        # two on zoom, so the lattice always refines/coarsens onto itself.
+        xmin, xmax, nx = self._snap_to_lattice(xmin, xmax, nx)
+        ymin, ymax, ny = self._snap_to_lattice(ymin, ymax, ny)
+
+        current_hash = (xmin, xmax, ymin, ymax, nx, ny, self.external_padding)
+
+        if not force and current_hash == self._latest_hash:
+            return
 
         # Set up bounds
         bounds = [(ymin, ymax, ny), (xmin, xmax, nx)]
