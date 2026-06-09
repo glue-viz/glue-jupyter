@@ -143,8 +143,18 @@ class FRBImage(ImageGL):
                 image = image.astype(np.float32)
             with self.hold_sync():
                 self.image = image
-                self.x = (xmin, xmax)
-                self.y = (ymin, ymax)
+                # ImageGL maps the x/y extent across the texture edge-to-edge,
+                # but the FRB samples at pixel centres (the linspace endpoints),
+                # so the extent has to be expanded by half a sample on each side
+                # for the texels to register on the sampled positions. This is
+                # also what keeps panning stable: the sample count changes by one
+                # as the snapped bounds cross a lattice node, and without the
+                # half-sample padding that would shift the whole texture by a
+                # sub-pixel amount each time and make the image shimmer.
+                half_x = (xmax - xmin) / (nx - 1) / 2 if nx > 1 else 0
+                half_y = (ymax - ymin) / (ny - 1) / 2 if ny > 1 else 0
+                self.x = (xmin - half_x, xmax + half_x)
+                self.y = (ymin - half_y, ymax + half_y)
         else:
             self.image = EMPTY_IMAGE
 
