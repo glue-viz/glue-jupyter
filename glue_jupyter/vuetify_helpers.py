@@ -71,7 +71,7 @@ def cmap_extras(widget):
     if not widget.has_trait('cmap_items'):
         widget.add_traits(cmap_items=traitlets.List().tag(sync=True))
     widget.cmap_items = [
-        {'text': name, 'value': cmap.name} for name, cmap in colormaps.members
+        {'title': name, 'value': cmap.name} for name, cmap in colormaps.members
     ]
     return ('text', _cmap_to_name, _name_to_cmap)
 

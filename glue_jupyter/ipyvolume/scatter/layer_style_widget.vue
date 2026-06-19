@@ -1,7 +1,7 @@
 <template>
   <div class="glue-layer-scatter-3d">
     <div>
-      <v-subheader class="pl-0">visible</v-subheader>
+      <div class="slider-label">visible</div>
       <v-switch v-model="visible" hide-details style="margin-top: 0" />
     </div>
     <div>
@@ -16,20 +16,20 @@
           <v-select label="attribute" :items="size_att_items" v-model="size_att_selected" hide-details />
       </div>
       <div>
-          <glue-float-field label="min" :value.sync="size_vmin" echo-type="float" />
+          <glue-float-field label="min" v-model:value="size_vmin" />
       </div>
       <div>
-          <glue-float-field label="max" :value.sync="size_vmax" echo-type="float" />
+          <glue-float-field label="max" v-model:value="size_vmax" />
       </div>
     </template>
     <template v-else>
       <div>
-          <glue-float-field label="size" :value.sync="size" echo-type="int" />
+          <glue-float-field label="size" v-model:value="size" />
       </div>
     </template>
     <div>
-        <v-subheader class="pl-0 slider-label">size scaling</v-subheader>
-        <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" :value.sync="size_scaling" echo-type="float"
+        <div class="slider-label">size scaling</div>
+        <glue-throttled-slider wait="300" min="0.1" max="10" step="0.01" v-model:value="size_scaling"
               hide-details />
     </div>
     <div class="text-subtitle-2 font-weight-bold">Color</div>
@@ -41,17 +41,17 @@
           <v-select label="attribute" :items="cmap_att_items" v-model="cmap_att_selected" hide-details />
       </div>
       <div>
-          <glue-float-field label="min" :value.sync="cmap_vmin" echo-type="float" />
+          <glue-float-field label="min" v-model:value="cmap_vmin" />
       </div>
       <div>
-          <glue-float-field label="max" :value.sync="cmap_vmax" echo-type="float" />
+          <glue-float-field label="max" v-model:value="cmap_vmax" />
       </div>
       <div>
           <v-select label="colormap" :items="cmap_items" v-model="cmap" hide-details />
       </div>
     </template>
     <div>
-      <v-subheader class="pl-0">show vectors</v-subheader>
+      <div class="slider-label">show vectors</div>
       <v-switch v-model="vector_visible" hide-details style="margin-top: 0" />
       <template v-if="vector_visible">
         <v-select label="vx" :items="vx_att_items" v-model="vx_att_selected" />
@@ -63,7 +63,7 @@
 </template>
 
 <style id="layer_scatter_3d" class="layer_3d">
-    .v-subheader.slider-label {
+    .slider-label {
         font-size: 12px;
         height: 16px;
     }
