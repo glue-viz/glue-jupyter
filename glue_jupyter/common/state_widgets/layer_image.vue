@@ -13,7 +13,7 @@
             </div>
             <v-expand-transition>
                 <div v-if="contour_visible">
-                    <v-btn-toggle density="compact" v-model="level_mode" style="margin-right: 8px; margin-top: 8px">
+                    <v-btn-toggle echo-type="text" density="compact" v-model="level_mode" style="margin-right: 8px; margin-top: 8px">
 
                         <v-tooltip location="bottom">
                             <template v-slot:activator="{ props }">
