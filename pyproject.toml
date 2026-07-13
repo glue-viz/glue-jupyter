@@ -44,6 +44,9 @@ dependencies = [
 [project.urls]
 Homepage = "https://glueviz.org"
 
+[project.entry-points."glue.plugins"]
+path_slicer = "glue_jupyter.plugins.path_slicer:setup"
+
 [project.optional-dependencies]
 recommended = [
         "glue-vispy-viewers[jupyter]>=1.3.0",
