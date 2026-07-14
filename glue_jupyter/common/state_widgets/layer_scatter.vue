@@ -87,6 +87,34 @@
                 <v-select label="linestyle" :items="linestyle_items" v-model="linestyle_selected" hide-details />
             </div>
         </template>
+        <div class="text-subtitle-2 font-weight-bold" :style="markers_visible ? {} : {marginTop: '6px'}">Vertical lines</div>
+        <div>
+            <v-subheader class="pl-0 slider-label">show vertical lines</v-subheader>
+            <v-switch v-model="vline_visible" hide-details style="margin-top: 0"/>
+        </div>
+        <template v-if="vline_visible && !line_visible">
+            <div>
+                <v-subheader class="pl-0 slider-label">width</v-subheader>
+                <glue-throttled-slider wait="300" min="1" max="20" step="1" :value.sync="linewidth" echo-type="float" hide-details />
+            </div>
+            <div>
+                <v-select label="linestyle" :items="linestyle_items" v-model="linestyle_selected" hide-details />
+            </div>
+        </template>
+        <div class="text-subtitle-2 font-weight-bold" :style="markers_visible ? {} : {marginTop: '6px'}">Horizontal lines</div>
+        <div>
+            <v-subheader class="pl-0 slider-label">show horizontal lines</v-subheader>
+            <v-switch v-model="hline_visible" hide-details style="margin-top: 0"/>
+        </div>
+        <template v-if="hline_visible && !line_visible && !vline_visible">
+            <div>
+                <v-subheader class="pl-0 slider-label">width</v-subheader>
+                <glue-throttled-slider wait="300" min="1" max="20" step="1" :value.sync="linewidth" echo-type="float" hide-details />
+            </div>
+            <div>
+                <v-select label="linestyle" :items="linestyle_items" v-model="linestyle_selected" hide-details />
+            </div>
+        </template>
         <div class="text-subtitle-2 font-weight-bold" :style="markers_visible ? {} : {marginTop: '6px'}">Vectors</div>
         <div>
             <v-subheader class="pl-0 slider-label">show vectors</v-subheader>
