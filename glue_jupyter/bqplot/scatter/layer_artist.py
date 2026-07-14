@@ -63,7 +63,24 @@ DATA_PROPERTIES = {
     "linewidth",
     "markers_visible",
     "vector_scaling",
+    "vline_visible",
+    "hline_visible",
 }
+
+
+def values_to_nan_separated_lines(values):
+    """
+    Construct x and y arrays for a single ``Lines`` mark that renders one line
+    per value, using NaN values to separate the individual lines. The
+    coordinate along the lines is 0 to 1, to be used with a [0:1] scale that
+    is independent of the axes limits.
+    """
+    across = np.repeat(values.astype(np.float32), 3)
+    across[2::3] = np.nan
+    along = np.full(len(values) * 3, np.nan, dtype=np.float32)
+    along[::3] = 0
+    along[1::3] = 1
+    return across, along
 
 
 # Kept for backward compatibility with <= 0.17
@@ -128,6 +145,26 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.line_mark.opacities = [self.state.alpha]
         self.line_mark.visible = False
 
+        # Vertical and horizontal lines, all rendered as a single Lines mark
+        # each, with NaN values separating the individual lines. The scale for
+        # the direction along the lines is an independent [0:1] scale so that
+        # the lines always span the full height/width of the plot regardless
+        # of the axes limits.
+
+        self.scale_along_lines = bqplot.LinearScale(min=0, max=1)
+        self.vline_mark = bqplot.Lines(scales=dict(self.view.scales,
+                                                   y=self.scale_along_lines),
+                                       x=[], y=[], visible=False)
+        self.vline_mark.colors = [color2hex(self.state.color)]
+        self.vline_mark.opacities = [self.state.alpha]
+        self.hline_mark = bqplot.Lines(scales=dict(self.view.scales,
+                                                   x=self.scale_along_lines),
+                                       x=[], y=[], visible=False)
+        self.hline_mark.colors = [color2hex(self.state.color)]
+        self.hline_mark.opacities = [self.state.alpha]
+
+        self._line_mode_auto_checked = False
+
         # Vectors
 
         self.scale_size_vector = bqplot.LinearScale(min=0, max=1)
@@ -166,9 +203,25 @@ class BqplotScatterLayerArtist(LayerArtist):
         self.view.figure.marks = list(self.view.figure.marks) + [
             self.density_mark,
             self.scatter_mark,
+            self.vline_mark,
+            self.hline_mark,
             self.vector_mark,
             self.vector_lines,
         ]
+
+    def _auto_enable_line_mode(self, x, y):
+        # If, the first time the data are accessed, only one of the two
+        # attributes can be resolved, the only meaningful way to show the layer
+        # is as vertical or horizontal lines, so we enable the relevant mode.
+        # This is done only once so that users can subsequently turn the lines
+        # off without them coming back on every update.
+        if self._line_mode_auto_checked:
+            return
+        self._line_mode_auto_checked = True
+        if x is None and not self.state.hline_visible:
+            self.state.hline_visible = True
+        elif y is None and not self.state.vline_visible:
+            self.state.vline_visible = True
 
     def compute_density_map(self, *args, **kwargs):
         try:
@@ -184,32 +237,39 @@ class BqplotScatterLayerArtist(LayerArtist):
         return density_map
 
     def _update_data(self):
-        try:
-            if not self.state.density_map:
+
+        x = y = None
+
+        if not self.state.density_map:
+
+            try:
                 x = ensure_numerical(self.layer[self._viewer_state.x_att].ravel())
                 if x.dtype.kind == "M":
                     x = datetime64_to_mpl(x)
+            except (IncompatibleAttribute, IndexError):
+                pass
 
-        except (IncompatibleAttribute, IndexError):
-            # The following includes a call to self.clear()
-            self.disable_invalid_attributes(self._viewer_state.x_att)
-            return
-        else:
-            self.enable()
-
-        try:
-            if not self.state.density_map:
+            try:
                 y = ensure_numerical(self.layer[self._viewer_state.y_att].ravel())
                 if y.dtype.kind == "M":
                     y = datetime64_to_mpl(y)
-        except (IncompatibleAttribute, IndexError):
-            # The following includes a call to self.clear()
-            self.disable_invalid_attributes(self._viewer_state.y_att)
-            return
-        else:
-            self.enable()
+            except (IncompatibleAttribute, IndexError):
+                pass
 
-        if self.state.markers_visible:
+            # If only one of the two attributes can be resolved for the layer,
+            # we can still show the values as vertical or horizontal lines, so
+            # we only disable the layer if neither attribute can be resolved.
+            if x is None and y is None:
+                # The following includes a call to self.clear()
+                self.disable_invalid_attributes(self._viewer_state.x_att,
+                                                self._viewer_state.y_att)
+                return
+            else:
+                self.enable()
+
+            self._auto_enable_line_mode(x, y)
+
+        if self.state.markers_visible and x is not None and y is not None:
 
             if self.state.density_map:
                 self.scatter_mark.x = []
@@ -222,7 +282,19 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter_mark.x = []
             self.scatter_mark.y = []
 
-        if self.state.line_visible:
+        if self.state.vline_visible and x is not None:
+            self.vline_mark.x, self.vline_mark.y = values_to_nan_separated_lines(x)
+        else:
+            self.vline_mark.x = []
+            self.vline_mark.y = []
+
+        if self.state.hline_visible and y is not None:
+            self.hline_mark.y, self.hline_mark.x = values_to_nan_separated_lines(y)
+        else:
+            self.hline_mark.x = []
+            self.hline_mark.y = []
+
+        if self.state.line_visible and x is not None and y is not None:
             self.line_mark_gl.x = x.astype(np.float32).ravel()
             self.line_mark_gl.y = y.astype(np.float32).ravel()
             self.line_mark.x = x.astype(np.float32).ravel()
@@ -237,6 +309,8 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.state.vector_visible
             and self.state.vx_att is not None
             and self.state.vy_att is not None
+            and x is not None
+            and y is not None
         ):
 
             vx = ensure_numerical(self.layer[self.state.vx_att].ravel())
@@ -369,6 +443,20 @@ class BqplotScatterLayerArtist(LayerArtist):
 
                 self.view.figure.marks = new_marks
 
+        for mark, lines_visible in ((self.vline_mark, self.state.vline_visible),
+                                    (self.hline_mark, self.state.hline_visible)):
+
+            if lines_visible:
+                if force or "color" in changed:
+                    mark.colors = [color2hex(self.state.color)]
+                if force or "linewidth" in changed:
+                    mark.stroke_width = self.state.linewidth
+                if force or "linestyle" in changed:
+                    if self.state.linestyle == "dashdot":
+                        mark.line_style = "dash_dotted"
+                    else:
+                        mark.line_style = self.state.linestyle
+
         if (
             self.state.vector_visible
             and self.state.vx_att is not None
@@ -391,6 +479,7 @@ class BqplotScatterLayerArtist(LayerArtist):
                 self.scale_color_vector.max = float_or_none(self.state.cmap_vmax)
 
         for mark in [self.scatter_mark, self.line_mark_gl, self.line_mark,
+                     self.vline_mark, self.hline_mark,
                      self.vector_mark, self.vector_lines, self.density_mark]:
 
             if mark is None:
@@ -403,6 +492,8 @@ class BqplotScatterLayerArtist(LayerArtist):
             self.scatter_mark.visible = self.state.visible and self.state.markers_visible
             self.line_mark.visible = self.state.visible and self.state.line_visible
             self.line_mark_gl.visible = self.state.visible and self.state.line_visible
+            self.vline_mark.visible = self.state.visible and self.state.vline_visible
+            self.hline_mark.visible = self.state.visible and self.state.hline_visible
             self.density_mark.visible = (self.state.visible and self.state.density_map
                                          and self.state.markers_visible)
             self.vector_lines.visible = self.state.visible and self.state.vector_visible
@@ -414,6 +505,8 @@ class BqplotScatterLayerArtist(LayerArtist):
             or self.scatter_mark is None
             or self.line_mark_gl is None
             or self.line_mark is None
+            or self.vline_mark is None
+            or self.hline_mark is None
             or self.vector_mark is None
             or self.vector_lines is None
             or self._viewer_state.x_att is None
@@ -448,6 +541,10 @@ class BqplotScatterLayerArtist(LayerArtist):
         if self.line_mark in marks:
             marks.remove(self.line_mark)
         self.line_mark = None
+        marks.remove(self.vline_mark)
+        self.vline_mark = None
+        marks.remove(self.hline_mark)
+        self.hline_mark = None
         marks.remove(self.vector_mark)
         self.vector_mark = None
         marks.remove(self.vector_lines)
@@ -465,6 +562,12 @@ class BqplotScatterLayerArtist(LayerArtist):
         if self.line_mark is not None:
             self.line_mark.x = [0.]
             self.line_mark.y = [0.]
+        if self.vline_mark is not None:
+            self.vline_mark.x = []
+            self.vline_mark.y = []
+        if self.hline_mark is not None:
+            self.hline_mark.x = []
+            self.hline_mark.y = []
         if self.vector_mark is not None:
             self.vector_mark.x = []
             self.vector_mark.y = []
@@ -483,6 +586,8 @@ class BqplotScatterLayerArtist(LayerArtist):
                          layer.scatter_mark,
                          layer.line_mark_gl
                          if layer.state.linestyle == 'solid' else layer.line_mark,
+                         layer.vline_mark,
+                         layer.hline_mark,
                          layer.vector_mark,
                          layer.vector_lines)
             if item is not None

@@ -212,6 +212,77 @@ def test_scatter2d_properties(app, dataxyz, dataxz):
     assert l1.scatter_mark.colors == ['#008000']
 
 
+def test_scatter2d_line_modes(app, dataxyz):
+
+    # Vertical and horizontal line modes for a layer where both attributes
+    # are present
+
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
+    layer = s.layers[0]
+
+    assert not layer.state.vline_visible
+    assert not layer.state.hline_visible
+    assert not layer.vline_mark.visible
+
+    layer.state.vline_visible = True
+    assert layer.vline_mark.visible
+    expected_x = [1, 1, np.nan, 2, 2, np.nan, 3, 3, np.nan]
+    expected_y = [0, 1, np.nan, 0, 1, np.nan, 0, 1, np.nan]
+    assert_allclose(np.asarray(layer.vline_mark.x), expected_x)
+    assert_allclose(np.asarray(layer.vline_mark.y), expected_y)
+
+    # The scale along the lines is an independent [0:1] scale so the lines
+    # span the full height regardless of the y limits
+    assert layer.vline_mark.scales['y'] is layer.scale_along_lines
+    assert layer.vline_mark.scales['x'] is s.scale_x
+
+    layer.state.hline_visible = True
+    assert layer.hline_mark.visible
+    assert_allclose(np.asarray(layer.hline_mark.y), [2, 2, np.nan, 3, 3, np.nan, 4, 4, np.nan])
+
+    layer.state.vline_visible = False
+    assert not layer.vline_mark.visible
+    assert len(layer.vline_mark.x) == 0
+
+
+def test_scatter2d_only_x_linked(app, dataxyz):
+
+    # A dataset for which only the x attribute can be resolved via links is
+    # automatically shown as vertical lines
+
+    lines = Data(position=[1.5, 2.5], label='lines')
+    app.data_collection.append(lines)
+
+    s = app.scatter2d(x='x', y='y', data=dataxyz)
+    s.add_data(lines)
+    layer = s.layers[1]
+
+    # Without any links the layer cannot be shown at all
+    assert not layer.enabled
+    assert not layer.state.vline_visible
+
+    app.add_link(lines, 'position', dataxyz, 'x')
+
+    assert layer.enabled
+    assert layer.state.vline_visible
+    assert layer.vline_mark.visible
+    assert_allclose(np.asarray(layer.vline_mark.x), [1.5, 1.5, np.nan, 2.5, 2.5, np.nan])
+
+    # Markers cannot be shown since the y attribute cannot be resolved
+    assert len(layer.scatter_mark.x) == 0
+
+    # The line mode is only enabled automatically once, so it should stay off
+    # if turned off explicitly
+    layer.state.vline_visible = False
+    layer.update()
+    assert not layer.state.vline_visible
+    layer.state.vline_visible = True
+
+    # Once the y attribute is also linked the markers appear as usual
+    app.add_link(lines, 'position', dataxyz, 'y')
+    assert len(layer.scatter_mark.x) == 2
+
+
 def test_scatter2d_cmap_mode(app, dataxyz):
     s = app.scatter2d(x='x', y='y', data=dataxyz)
     l1 = s.layers[0]
