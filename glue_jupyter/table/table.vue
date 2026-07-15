@@ -56,8 +56,7 @@
         :class="['elevation-1', 'glue-data-table', scrollable && 'glue-data-table--scrollable']"
         :style="scrollable && height != null && `height: ${height}`"
       >
-      <template v-slot:header="props">
-        <thead>
+      <template v-slot:headers>
           <tr>
             <th :style="'padding: 0 10px; width: '+Math.max(1, Math.ceil(Math.log10(total_length)))*20+'px'">#</th>
             <th style="padding: 0 1px; width: 30px" v-if="selection_enabled">
@@ -70,28 +69,38 @@
             </th>
             <th v-for="header in headers"
                 :key="header.text"
-                @click="toggleSort(header.value)"
-                style="cursor: pointer; user-select: none;"
+                @click="onHeaderClick(header.value)"
+                @mouseenter="hoverHeader = header.value"
+                @mouseleave="hoverHeader = null"
+                style="cursor: pointer; user-select: none; padding: 0 8px; white-space: nowrap; position: relative;"
+                :style="editingHeader === header.value ? {minWidth: '240px'} : {}"
             >
               {{ header.text }}
               <v-icon v-if="options.sortBy && options.sortBy[0] === header.value">
                 {{ options.sortDesc && options.sortDesc[0] ? 'arrow_drop_down' : 'arrow_drop_up' }}
               </v-icon>
+              <v-icon size="x-small" v-if="hoverHeader === header.value && editingHeader !== header.value && header.renameable" @click.stop="enterHeaderRename(header.value)" style="cursor:pointer;margin-left:2px" title="Rename column">mdi-pencil</v-icon>
+              <v-icon size="x-small" v-if="hoverHeader === header.value && editingHeader !== header.value && header.removable" @click.stop="enterHeaderRemove(header.value)" style="cursor:pointer" title="Delete column">mdi-delete</v-icon>
+
+              <!-- Rename mode: fills the th (min-width ensures it fits) -->
+              <span v-if="editingHeader === header.value && headerMode === 'rename'" @click.stop style="position:absolute;top:0;left:0;right:0;bottom:0;display:inline-flex;align-items:center;gap:4px;background:white;padding:0 4px;z-index:1;"><input :data-header="header.value" v-model="headerEditValue" @keyup.enter.stop="acceptHeader(header.value)" @keyup.escape.stop="cancelHeader()" @click.stop class="glue-header-edit-input"/><v-icon size="x-small" @click.stop="cancelHeader()" style="cursor:pointer" title="Cancel (Esc)">mdi-close</v-icon><v-icon size="x-small" @click.stop="acceptHeader(header.value)" style="cursor:pointer" title="Accept (Enter)">mdi-check</v-icon></span>
+
+              <!-- Delete confirmation: fills the th (min-width ensures it fits) -->
+              <span v-if="editingHeader === header.value && headerMode === 'remove'" @click.stop style="position:absolute;top:0;left:0;right:0;bottom:0;display:inline-flex;align-items:center;gap:4px;background:#FFF3CD;border:1px solid #FFC107;padding:0 4px;z-index:1;font-size:11px;white-space:nowrap;"><v-icon size="x-small" style="color:#F57C00;">mdi-alert</v-icon><span>remove '{{ header.text }}'?</span><v-icon size="x-small" @click.stop="cancelHeader()" style="cursor:pointer" title="Cancel">mdi-close</v-icon><v-icon size="x-small" @click.stop="deleteHeader(header.value)" style="cursor:pointer" title="Confirm delete">mdi-delete</v-icon></span>
             </th>
           </tr>
-        </thead>
       </template>
       <template v-slot:item="props">
         <tr @click="on_row_clicked(props.item.__row__)" :class="{'highlightedRow': props.item.__row__ === highlighted}">
-          <td style="padding: 0 10px" class="text-xs-left">
+          <td style="padding: 0 10px" class="text-left">
             <i>{{ props.item.__row__ }}</i>
           </td>
-          <td style="padding: 0 1px" class="text-xs-left" v-if="selection_enabled">
+          <td style="padding: 0 1px" class="text-left" v-if="selection_enabled">
             <v-checkbox
               hide-details style="margin-top: 0; padding-top: 0"
-              :input-value="checked.indexOf(props.item.__row__) != -1"
+              :model-value="checked.indexOf(props.item.__row__) != -1"
               :key="props.item.__row__"
-              @change="(value) => select({checked: value, row: props.item.__row__})"
+              @update:modelValue="(value) => select({checked: value, row: props.item.__row__})"
             />
           </td>
           <td style="padding: 0 1px" :key="header.text" v-for="(header, index) in headers_selections">
@@ -122,10 +131,61 @@ module.exports = {
   data: function() {
     return {
       selectedCell: null,  // { row: number, column: string, editable: boolean }
-      editValue: ''
+      editValue: '',
+      hoverHeader: null,    // column value currently being hovered
+      editingHeader: null,  // column value currently in rename/remove mode
+      headerMode: null,     // 'rename' | 'remove' | null
+      headerEditValue: ''   // live text in the rename input
     };
   },
   methods: {
+    onOptionsUpdate(vuetifyOpts) {
+      // Propagate page/itemsPerPage changes to Python; sort is handled by sort_column
+      const newPage = vuetifyOpts.page;
+      const newIpp = vuetifyOpts.itemsPerPage;
+      if (newPage !== this.options.page || newIpp !== this.options.itemsPerPage) {
+        this.options = { ...this.options, page: newPage, itemsPerPage: newIpp };
+      }
+    },
+    // ---- header editing ----
+    onHeaderClick(column) {
+      if (this.editingHeader === null) { this.sort_column(column); }
+    },
+    enterHeaderRename(column) {
+      const header = this.headers.find(h => h.value === column);
+      this.headerEditValue = header ? header.text : column;
+      this.editingHeader = column;
+      this.headerMode = 'rename';
+      this.$nextTick(() => {
+        const input = this.$el.querySelector(`input[data-header="${column}"]`);
+        if (input) { input.focus(); input.select(); }
+      });
+    },
+    enterHeaderRemove(column) {
+      this.editingHeader = column;
+      this.headerMode = 'remove';
+    },
+    acceptHeader(column) {
+      const newName = this.headerEditValue.trim();
+      this.editingHeader = null;
+      this.headerMode = null;
+      this.headerEditValue = '';
+      if (newName && newName !== column) {
+        this.rename_column({ column, newName });
+      }
+    },
+    cancelHeader() {
+      this.editingHeader = null;
+      this.headerMode = null;
+      this.headerEditValue = '';
+    },
+    deleteHeader(column) {
+      this.editingHeader = null;
+      this.headerMode = null;
+      this.headerEditValue = '';
+      this.remove_column({ column });
+    },
+    // ---- cell editing ----
     toggleSort(column) {
       this.sort_column(column);
     },
@@ -300,5 +360,22 @@ module.exports = {
 .glue-cell-selected {
   background-color: #E3F2FD !important;
   box-shadow: inset 0 0 0 2px #1976D2;
+}
+
+/* ---- Column header rename / delete styles ---- */
+.glue-header-edit-input {
+  font-size: 12px;
+  border: 1px solid #90CAF9;
+  border-radius: 3px;
+  padding: 1px 5px;
+  width: 110px;
+  outline: none;
+  vertical-align: middle;
+  background: #fff;
+}
+
+.glue-header-edit-input:focus {
+  border-color: #1976D2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 </style>
