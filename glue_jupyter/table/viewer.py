@@ -28,24 +28,15 @@ class TableState(ViewerState):
 
     def is_editable(self, component_id):
         """Check if a component is editable using identity comparison."""
-        for editable_cid in self.editable_components:
-            if component_id is editable_cid:
-                return True
-        return False
+        return component_id in self.editable_components
 
     def is_renameable(self, component_id):
         """Check if a component can be renamed."""
-        for cid in self.renameable_components:
-            if component_id is cid:
-                return True
-        return False
+        return component_id in self.renameable_components
 
     def is_removable(self, component_id):
         """Check if a component can be removed from the table."""
-        for cid in self.removable_components:
-            if component_id is cid:
-                return True
-        return False
+        return component_id in self.removable_components
 
 
 class TableBase(v.VuetifyTemplate):
