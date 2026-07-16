@@ -368,6 +368,12 @@ class TableGlue(TableBase):
         # Refresh table
         self._update_items()
 
+    def add_column_renamed_callback(self, fn):
+        """Register a callback invoked with (old_name, new_name) after a column rename."""
+        if not hasattr(self, '_column_renamed_callbacks'):
+            self._column_renamed_callbacks = []
+        self._column_renamed_callbacks.append(fn)
+
     def vue_rename_column(self, data):
         """User accepted a column rename in the header text-input.
 
@@ -379,7 +385,15 @@ class TableGlue(TableBase):
             return
         if self.data is not None and old_name in [c.label for c in self.data.main_components]:
             self.data.id[old_name].label = new_name
+            for fn in getattr(self, '_column_renamed_callbacks', []):
+                fn(old_name, new_name)
             self._update()
+
+    def add_column_removed_callback(self, fn):
+        """Register a callback invoked with (column_name,) after a column is removed."""
+        if not hasattr(self, '_column_removed_callbacks'):
+            self._column_removed_callbacks = []
+        self._column_removed_callbacks.append(fn)
 
     def vue_remove_column(self, data):
         """User confirmed a column deletion via the remove-confirm badge."""
@@ -399,6 +413,8 @@ class TableGlue(TableBase):
             ]
             self.data.remove_component(cid)
             self._update()
+        for fn in getattr(self, '_column_removed_callbacks', []):
+            fn(label)
 
 
 class TableLayerState(LayerState):
