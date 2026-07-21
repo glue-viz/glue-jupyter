@@ -15,10 +15,11 @@
           hide-details
           single-line
           outlined
-          :readonly="!selectedCell || !selectedCell.editable"
           :placeholder="selectedCell ? '' : 'Select a cell...'"
-          @keyup.enter="commitEdit"
+          @keyup.enter="selectedCell.editable ? commitEdit() : advanceRow(1)"
           @keyup.escape="cancelEdit"
+          @keyup.up="advanceRow(-1)"
+          @keyup.down="advanceRow(1)"
         ></v-text-field>
       </div>
       <div class="edit-bar-actions" v-if="selectedCell && selectedCell.editable">
@@ -132,14 +133,12 @@ module.exports = {
     selectCell(row, column, currentValue, editable) {
       this.selectedCell = { row: row, column: column, editable: editable };
       this.editValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : '';
-      // Focus the edit input after Vue updates the DOM (only if editable)
-      if (editable) {
-        this.$nextTick(() => {
-          if (this.$refs.editInput) {
-            this.$refs.editInput.focus();
-          }
-        });
-      }
+      // Focus the edit input after Vue updates the DOM (to support editable mode, or keyboard navigation)
+      this.$nextTick(() => {
+        if (this.$refs.editInput) {
+          this.$refs.editInput.focus();
+        }
+      });
     },
     cancelEdit() {
       this.selectedCell = null;
@@ -149,16 +148,23 @@ module.exports = {
       if (this.selectedCell && this.selectedCell.editable) {
         const currentColumn = this.selectedCell.column;
         const currentRow = this.selectedCell.row;
-        const isEditable = this.selectedCell.editable;
         // Commit the edit
         this.cell_edited({
           row: currentRow,
           column: currentColumn,
           value: this.editValue
         });
-        // Move to the next row in the same column
-        const nextRow = currentRow + 1;
-        if (nextRow < this.total_length) {
+        this.advanceRow(1);
+      }
+    },
+    advanceRow(step) {
+      // Advance <step> rows in the same column
+      if (this.selectedCell) {
+        const currentColumn = this.selectedCell.column;
+        const currentRow = this.selectedCell.row;
+        const isEditable = this.selectedCell.editable;
+        const nextRow = currentRow + step;
+        if ((nextRow >= 0) && (nextRow < this.total_length)) {
           // Find the current value for the next cell
           const nextItem = this.items.find(item => item.__row__ === nextRow);
           if (nextItem) {
