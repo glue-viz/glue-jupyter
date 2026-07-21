@@ -133,14 +133,12 @@ module.exports = {
     selectCell(row, column, currentValue, editable) {
       this.selectedCell = { row: row, column: column, editable: editable };
       this.editValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : '';
-      // Focus the edit input after Vue updates the DOM (only if editable)
-      if (editable) {
-        this.$nextTick(() => {
-          if (this.$refs.editInput) {
-            this.$refs.editInput.focus();
-          }
-        });
-      }
+      // Focus the edit input after Vue updates the DOM (to support editable mode, or keyboard navigation)
+      this.$nextTick(() => {
+        if (this.$refs.editInput) {
+          this.$refs.editInput.focus();
+        }
+      });
     },
     cancelEdit() {
       this.selectedCell = null;
