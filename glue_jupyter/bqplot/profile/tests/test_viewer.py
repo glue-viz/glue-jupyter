@@ -45,9 +45,9 @@ def test_remove(app, data_image, data_volume):
     s = app.profile1d(data=data_image)
     s.add_data(data_volume)
     app.data_collection.new_subset_group(subset_state=data_image.id['intensity'] > 1, label='test')
-    assert len(s.figure.marks) == 4
+    assert len(s.figure.marks) == 8
     s.remove_data(data_image)
-    assert len(s.figure.marks) == 2
+    assert len(s.figure.marks) == 4
     s.remove_data(data_volume)
     assert len(s.figure.marks) == 0
 
@@ -238,3 +238,75 @@ def test_composite_yrange(app):
     assert isinstance(sbst.state1, RangeSubsetState)
     assert (isinstance(sbst.state2, InvertState) and
             isinstance(sbst.state2.state1, RangeSubsetState))
+
+
+def test_vertical_lines(app):
+
+    # A layer for which no profile can be computed but for which the positions
+    # along the x axis can be resolved via links should be shown as full-height
+    # vertical lines rather than being disabled.
+
+    from glue.core.link_helpers import LinkSame
+
+    spectrum = Data(flux=np.random.random(50), label='spectrum')
+    lines = Data(position=[10., 20., 30.], label='lines')
+
+    app.data_collection.append(spectrum)
+    app.data_collection.append(lines)
+
+    viewer = app.profile1d(data=spectrum)
+    viewer.add_data(lines)
+    artist = viewer.layers[1]
+
+    # Without any links the layer cannot be shown at all
+    assert not artist.enabled
+    assert not artist.state.vline_visible
+
+    # Linking the line positions to the x attribute should enable the layer
+    # and automatically turn on the vertical line mode
+    app.data_collection.add_link(LinkSame(lines.id['position'], spectrum.pixel_component_ids[0]))
+    artist.update()
+
+    assert artist.enabled
+    assert artist.state.vline_visible
+    assert artist.vline_mark.visible
+
+    # Each line is rendered as three vertices (bottom, top, NaN separator)
+    assert_allclose(artist.vline_mark.x[:2], [10, 10])
+    assert_allclose(artist.vline_mark.y[:2], [0, 1])
+    assert len(artist.vline_mark.x) == 9
+
+    # The scale along the lines is an independent [0:1] scale
+    assert artist.vline_mark.scales['y'] is artist.scale_along_lines
+
+    # The vertical line mode is only enabled automatically once, so it should
+    # stay off if turned off explicitly
+    artist.state.vline_visible = False
+    assert len(artist.vline_mark.x) == 0
+    assert not artist.vline_mark.visible
+    artist.update()
+    assert not artist.state.vline_visible
+
+
+def test_vertical_lines_normal_layer(app):
+
+    # The vertical line mode can also be enabled manually on a layer that has
+    # a normal profile, in which case a line is drawn at each unique position
+
+    spectrum = Data(flux=np.random.random(10), label='spectrum')
+    app.data_collection.append(spectrum)
+
+    viewer = app.profile1d(data=spectrum)
+    artist = viewer.layers[0]
+
+    assert artist.enabled
+    assert not artist.state.vline_visible
+    assert not artist.vline_mark.visible
+
+    artist.state.vline_visible = True
+    assert artist.vline_mark.visible
+    assert len(artist.vline_mark.x) == 30
+
+    artist.state.vline_visible = False
+    assert not artist.vline_mark.visible
+    assert len(artist.vline_mark.x) == 0

@@ -22,6 +22,21 @@ __all__ = ['BqplotProfileLayerArtist']
 USE_GL = True
 
 
+def values_to_nan_separated_lines(values):
+    """
+    Construct x and y arrays for a single ``Lines`` mark that renders one
+    vertical line per value, using NaN values to separate the individual
+    lines. The coordinate along the lines is 0 to 1, to be used with a [0:1]
+    scale that is independent of the axes limits.
+    """
+    across = np.repeat(values.astype(np.float32), 3)
+    across[2::3] = np.nan
+    along = np.full(len(values) * 3, np.nan, dtype=np.float32)
+    along[::3] = 0
+    along[1::3] = 1
+    return across, along
+
+
 class BqplotProfileLayerArtist(LayerArtist):
 
     _layer_state_cls = ProfileLayerState
@@ -40,20 +55,61 @@ class BqplotProfileLayerArtist(LayerArtist):
         LinesClass = LinesGL if USE_GL else bqplot.Lines
         self.line_mark = LinesClass(scales=self.view.scales, x=[0, 1], y=[0, 1])
 
-        self.view.figure.marks = list(self.view.figure.marks) + [self.line_mark]
+        # The vertical lines are all rendered as a single Lines mark, with NaN
+        # values separating the individual lines. The scale for the direction
+        # along the lines is an independent [0:1] scale so that the lines
+        # always span the full height of the plot regardless of the axes
+        # limits.
 
-        dlink((self.state, 'color'), (self.line_mark, 'colors'), lambda x: [color2hex(x)])
-        dlink((self.state, 'alpha'), (self.line_mark, 'opacities'), lambda x: [x])
+        self.scale_along_lines = bqplot.LinearScale(min=0, max=1)
+        self.vline_mark = bqplot.Lines(scales=dict(self.view.scales,
+                                                   y=self.scale_along_lines),
+                                       x=[], y=[], visible=False)
 
-        self.line_mark.colors = [color2hex(self.state.color)]
-        self.line_mark.opacities = [self.state.alpha]
+        self.view.figure.marks = list(self.view.figure.marks) + [self.line_mark, self.vline_mark]
+
+        for mark in (self.line_mark, self.vline_mark):
+            dlink((self.state, 'color'), (mark, 'colors'), lambda x: [color2hex(x)])
+            dlink((self.state, 'alpha'), (mark, 'opacities'), lambda x: [x])
+            mark.colors = [color2hex(self.state.color)]
+            mark.opacities = [self.state.alpha]
+
+        self._line_mode_auto_checked = False
 
     def remove(self):
         marks = self.view.figure.marks[:]
         marks.remove(self.line_mark)
         self.line_mark = None
+        marks.remove(self.vline_mark)
+        self.vline_mark = None
         self.view.figure.marks = marks
         return super().remove()
+
+    def _auto_enable_line_mode(self):
+        # If, the first time the profile fails to compute, the position values
+        # can still be resolved, the only meaningful way to show the layer is
+        # as vertical lines, so we enable that mode. This is done only once so
+        # that users can subsequently turn the lines off without them coming
+        # back on every update.
+        if self._line_mode_auto_checked:
+            return
+        self._line_mode_auto_checked = True
+        if not self.state.vline_visible:
+            self.state.vline_visible = True
+
+    def _update_vlines(self):
+        positions = None
+        if self.state.vline_visible:
+            try:
+                positions = self.state.compute_line_positions()
+            except (IncompatibleAttribute, IndexError):
+                pass
+        with self.vline_mark.hold_sync():
+            if positions is None:
+                self.vline_mark.x = []
+                self.vline_mark.y = []
+            else:
+                self.vline_mark.x, self.vline_mark.y = values_to_nan_separated_lines(positions)
 
     def _calculate_profile(self, reset=False):
         try:
@@ -113,10 +169,30 @@ class BqplotProfileLayerArtist(LayerArtist):
                 self.line_mark.x = [0.]
                 self.line_mark.y = [0.]
 
+        self._update_vlines()
+
         self.redraw()
 
     def _calculate_profile_error(self, exc):
         self.line_mark.visible = False
+        if issubclass(exc[0], (IncompatibleAttribute, IncompatibleDataException)):
+            # Even if the profile itself cannot be computed, the layer can
+            # still be shown as vertical lines if the position values along
+            # the x axis can be resolved.
+            try:
+                positions = self.state.compute_line_positions()
+            except (IncompatibleAttribute, IndexError):
+                positions = None
+            if positions is not None:
+                with self.line_mark.hold_sync():
+                    self.line_mark.x = [0.]
+                    self.line_mark.y = [0.]
+                self.enable()
+                self._auto_enable_line_mode()
+                self._update_vlines()
+                self.vline_mark.visible = self.state.visible and self.state.vline_visible
+                self.redraw()
+                return
         self.redraw()
         if issubclass(exc[0], IncompatibleAttribute):
             if isinstance(self.state.layer, BaseData):
@@ -133,6 +209,9 @@ class BqplotProfileLayerArtist(LayerArtist):
 
         self.line_mark.visible = self.state.visible
         self.line_mark.stroke_width = self.state.linewidth
+
+        self.vline_mark.visible = self.state.visible and self.state.vline_visible
+        self.vline_mark.stroke_width = self.state.linewidth
 
         self.redraw()
 
@@ -154,12 +233,14 @@ class BqplotProfileLayerArtist(LayerArtist):
                                                      'function', 'normalize',
                                                      'v_min', 'v_max',
                                                      'as_steps',
-                                                     'x_display_unit', 'y_display_unit')):
+                                                     'x_display_unit', 'y_display_unit',
+                                                     'vline_visible')):
             self._calculate_profile(reset=force)
             force = True
 
         if force or any(prop in changed for prop in ('alpha', 'color', 'zorder',
-                                                     'visible', 'linewidth')):
+                                                     'visible', 'linewidth',
+                                                     'vline_visible')):
             self._update_visual_attributes()
 
     @defer_draw

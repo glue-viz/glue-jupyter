@@ -13,5 +13,8 @@
         <div>
             <v-switch label="Plot as steps" v-model="as_steps" />
         </div>
+        <div>
+            <v-switch label="Show vertical lines" v-model="vline_visible" />
+        </div>
     </div>
 </template>
