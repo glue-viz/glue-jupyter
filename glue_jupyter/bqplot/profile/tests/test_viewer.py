@@ -280,13 +280,14 @@ def test_vertical_lines(app):
     # The scale along the lines is an independent [0:1] scale
     assert artist.vline_mark.scales['y'] is artist.scale_along_lines
 
-    # The display mode is only switched automatically once, so it should stay
-    # on the profile mode if changed back explicitly (even though in this case
-    # the profile cannot be shown)
+    # Selecting the profile mode explicitly is not possible for this layer
+    # since no profile can be computed, so the mode snaps back to vertical
+    # lines and the layer stays enabled (disabling it would also hide the
+    # layer options, making it impossible to change the mode back)
     artist.state.display_mode = 'Profile'
-    artist.update()
-    assert artist.state.display_mode == 'Profile'
-    assert not artist.enabled
+    assert artist.state.display_mode == 'Vertical lines'
+    assert artist.enabled
+    assert len(artist.vline_mark.x) == 9
 
 
 def test_vertical_lines_normal_layer(app):
