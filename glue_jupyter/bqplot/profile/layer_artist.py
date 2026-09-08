@@ -91,7 +91,10 @@ class BqplotProfileLayerArtist(LayerArtist):
                 self.vline_mark.x = []
                 self.vline_mark.y = []
             self.redraw()
-            self.disable_invalid_attributes(self._viewer_state.x_att)
+            if isinstance(self.state.layer, BaseData):
+                self.disable_invalid_attributes(self._viewer_state.x_att)
+            else:
+                self.disable_incompatible_subset()
             return
         self.enable()
         with self.vline_mark.hold_sync():
