@@ -72,9 +72,12 @@ class LayerOptionsWidget(v.VuetifyTemplate, HubListener):
         def make_layer_panel():
             widget_cls = self.viewer._layer_style_widget_cls
             if isinstance(widget_cls, dict):
-                return widget_cls[type(layer_artist)](layer_artist.state)
-            else:
-                return widget_cls(layer_artist.state)
+                widget_cls = widget_cls.get(type(layer_artist))
+            if widget_cls is None:
+                # Layer artist classes not recognized by the viewer, e.g.
+                # custom layer artists from plugins, get an empty panel.
+                return v.Html(tag='div', children=[])
+            return widget_cls(layer_artist.state)
 
         data = self.layer_data(layer_artist)
         data.update({
