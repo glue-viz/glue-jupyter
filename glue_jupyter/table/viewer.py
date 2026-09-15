@@ -7,7 +7,7 @@ from echo import CallbackProperty, DictCallbackProperty, ListCallbackProperty, k
 from glue.core.data import Subset
 from glue.core.subset import ElementSubsetState
 from glue.core.exceptions import IncompatibleAttribute
-from glue.core.units import UnitConverter, find_unit_choices
+from glue.core.units import UnitConverter
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.common.state import LayerState, ViewerState
 from glue.viewers.common.tool import Tool
@@ -445,29 +445,20 @@ class TableViewerStateWidget(v.VuetifyTemplate):
     column_items = traitlets.List([]).tag(sync=True)
     visible_columns = traitlets.List([]).tag(sync=True)
 
-    unit_column_items = traitlets.List([]).tag(sync=True)
-    selected_unit_column = traitlets.Unicode(None, allow_none=True).tag(sync=True)
-    unit_choices = traitlets.List([]).tag(sync=True)
-    selected_unit = traitlets.Unicode(None, allow_none=True).tag(sync=True)
-
     def __init__(self, viewer):
         super().__init__()
         self.viewer = viewer
         self.state = viewer.state
         self._updating = False
-        self._updating_units = False
 
         # Sync from state to widget
         self.state.add_callback('hidden_components', self._on_hidden_changed)
-        self.state.add_callback('column_display_units', self._on_display_units_changed)
 
     def update_columns(self, data):
         """Update available columns when data changes."""
         if data is None:
             self.column_items = []
             self.visible_columns = []
-            self.unit_column_items = []
-            self.selected_unit_column = None
             return
 
         all_components = data.main_components + data.derived_components
@@ -476,60 +467,6 @@ class TableViewerStateWidget(v.VuetifyTemplate):
         # Set visible columns (all minus hidden)
         hidden_names = [str(c) for c in self.state.hidden_components]
         self.visible_columns = [str(c) for c in all_components if str(c) not in hidden_names]
-
-        # Columns with units defined, for which display units can be chosen
-        self.unit_column_items = [str(c) for c in all_components if data.get_component(c).units]
-        if self.selected_unit_column not in self.unit_column_items:
-            self.selected_unit_column = None
-
-    @staticmethod
-    def _find_component_id(data, name):
-        for cid in data.main_components + data.derived_components:
-            if str(cid) == name:
-                return cid
-        return None
-
-    @traitlets.observe('selected_unit_column')
-    def _on_unit_column_changed(self, change):
-        """Populate the unit choices for the newly selected column."""
-        data = self.viewer.widget_table.data
-        column = change['new']
-        cid = None if data is None or column is None else self._find_component_id(data, column)
-        self._updating_units = True
-        try:
-            if cid is None:
-                self.unit_choices = []
-                self.selected_unit = None
-            else:
-                units = data.get_component(cid).units
-                self.unit_choices = find_unit_choices([(data, cid, units)])
-                self.selected_unit = self.state.column_display_units.get(column, units)
-        finally:
-            self._updating_units = False
-
-    @traitlets.observe('selected_unit')
-    def _on_unit_changed(self, change):
-        """Sync the chosen unit to state.column_display_units."""
-        if self._updating_units:
-            return
-        column = self.selected_unit_column
-        unit = change['new']
-        if column is None or unit is None:
-            return
-        self.state.column_display_units = {**self.state.column_display_units, column: unit}
-
-    def _on_display_units_changed(self, *args):
-        """Sync from state.column_display_units to the widget."""
-        column = self.selected_unit_column
-        if column is None:
-            return
-        unit = self.state.column_display_units.get(column)
-        if unit is not None and unit != self.selected_unit:
-            self._updating_units = True
-            try:
-                self.selected_unit = unit
-            finally:
-                self._updating_units = False
 
     def _on_hidden_changed(self, *args):
         """Sync from state.hidden_components to widget."""
