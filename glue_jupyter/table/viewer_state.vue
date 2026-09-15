@@ -13,5 +13,20 @@
                 </span>
             </template>
         </v-select>
+        <v-select
+            v-if="unit_column_items.length > 0"
+            label="Column units"
+            :items="unit_column_items"
+            v-model="selected_unit_column"
+            clearable
+            hide-details
+        ></v-select>
+        <v-select
+            v-if="selected_unit_column"
+            label="Unit"
+            :items="unit_choices"
+            v-model="selected_unit"
+            hide-details
+        ></v-select>
     </div>
 </template>
