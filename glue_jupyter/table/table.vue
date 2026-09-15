@@ -121,17 +121,62 @@
 module.exports = {
   data: function() {
     return {
-      selectedCell: null,  // { row: number, column: string, editable: boolean }
+      selectedCell: null,  // { row: number, column: string, editable: boolean, value: string }
       editValue: ''
     };
+  },
+  computed: {
+    tableSortBy: {
+      get() {
+        const sortBy = Array.isArray(this.options.sortBy) ? this.options.sortBy : [];
+        const sortDesc = Array.isArray(this.options.sortDesc) ? this.options.sortDesc : [];
+        return sortBy.map((key, index) => ({
+          key,
+          order: sortDesc[index] ? 'desc' : 'asc'
+        }));
+      },
+      set(sortByItems) {
+        this.options = {
+          ...this.options,
+          sortBy: sortByItems.map(({key}) => key),
+          sortDesc: sortByItems.map(({order}) => order === 'desc'),
+          totalItems: this.total_length,
+        };
+      }
+    }
+  },
+  watch: {
+    items: function(newItems) {
+      if (this.selectedCell === null) {
+        return;
+      }
+      const item = newItems.find(item => item.__row__ === this.selectedCell.row);
+      if (item === undefined || !(this.selectedCell.column in item)) {
+        return;
+      }
+      const newValue = this.formatCellValue(item[this.selectedCell.column]);
+      if (newValue === this.selectedCell.value) {
+        return;
+      }
+      // Only refresh the input if the user has not started editing, so that
+      // an unrelated data update does not discard an in-progress edit
+      if (this.editValue === this.selectedCell.value) {
+        this.editValue = newValue;
+      }
+      this.selectedCell.value = newValue;
+    }
   },
   methods: {
     toggleSort(column) {
       this.sort_column(column);
     },
+    formatCellValue(value) {
+      return value !== null && value !== undefined ? String(value) : '';
+    },
     selectCell(row, column, currentValue, editable) {
-      this.selectedCell = { row: row, column: column, editable: editable };
-      this.editValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : '';
+      const value = this.formatCellValue(currentValue);
+      this.selectedCell = { row: row, column: column, editable: editable, value: value };
+      this.editValue = value;
       // Focus the edit input after Vue updates the DOM (only if editable)
       if (editable) {
         this.$nextTick(() => {
