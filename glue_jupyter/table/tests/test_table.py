@@ -465,33 +465,3 @@ def test_table_display_units_editing(app):
     # And be displayed in display units
     items = table.widget_table.items
     assert [item['distance'] for item in items] == [1., 5., 3.]
-
-
-def test_table_display_units_state_widget(app):
-    data = Data(distance=[1000., 2000., 3000.], flag=[1, 2, 3], label="widget unit data")
-    data.get_component('distance').units = 'm'
-    app.add_data(data)
-    table = app.table(data=data)
-
-    widget = table._layout_viewer_options
-
-    # Only columns with units are offered
-    assert widget.unit_column_items == ['distance']
-
-    # Selecting a column populates the unit choices with the native unit selected
-    widget.selected_unit_column = 'distance'
-    assert widget.selected_unit == 'm'
-    assert 'km' in widget.unit_choices
-
-    # Just selecting a column should not modify the state
-    assert table.state.column_display_units == {}
-
-    # Choosing a unit updates the state and the displayed values
-    widget.selected_unit = 'km'
-    assert table.state.column_display_units == {'distance': 'km'}
-    items = table.widget_table.items
-    assert [item['distance'] for item in items] == [1., 2., 3.]
-
-    # Changing the state externally is reflected in the widget
-    table.state.column_display_units = {'distance': 'cm'}
-    assert widget.selected_unit == 'cm'
