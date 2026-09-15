@@ -1,4 +1,5 @@
 import numpy as np
+from glue.config import settings, unit_converter
 from glue.core import Data
 
 from glue_jupyter.table import TableViewer
@@ -394,3 +395,103 @@ def test_table_visibility_data_layer(app, dataxyz):
     # Show the data layer again: all rows return
     table.layers[0].state.visible = True
     assert table.widget_table.total_length == 3
+
+
+def test_table_display_units(app):
+    data = Data(distance=[1000., 2000., 3000.], label="unit data")
+    data.get_component('distance').units = 'm'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    # Initially values are shown in native units and headers show no unit
+    items = table.widget_table.items
+    assert [item['distance'] for item in items] == [1000., 2000., 3000.]
+    assert table.widget_table.headers[0]['text'] == 'distance'
+
+    # Change the display unit
+    table.state.column_display_units = {'distance': 'km'}
+    items = table.widget_table.items
+    assert [item['distance'] for item in items] == [1., 2., 3.]
+    assert table.widget_table.headers[0]['text'] == 'distance [km]'
+
+    # The underlying data is unchanged
+    assert list(data['distance']) == [1000., 2000., 3000.]
+
+
+def test_table_display_units_sorting(app):
+    # Use a custom unit converter for which the conversion inverts the order
+    # of the values (as e.g. converting wavelength to frequency would) to make
+    # sure that sorting is done on the displayed values
+
+    @unit_converter('test-inverting')
+    class InvertingConverter:
+
+        def equivalent_units(self, data, cid, units):
+            return ['inverted']
+
+        def to_unit(self, data, cid, values, original_units, target_units):
+            return -values if target_units == 'inverted' else values
+
+    data = Data(wav=[1., 3., 2.], label="spectral data")
+    data.get_component('wav').units = 'm'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    previous_converter = settings.UNIT_CONVERTER
+    settings.UNIT_CONVERTER = 'test-inverting'
+    try:
+        table.state.column_display_units = {'wav': 'inverted'}
+        table.widget_table.vue_sort_column('wav')
+        items = table.widget_table.items
+        assert [item['wav'] for item in items] == [-3., -2., -1.]
+        assert [item['__row__'] for item in items] == [1, 2, 0]
+    finally:
+        settings.UNIT_CONVERTER = previous_converter
+
+
+def test_table_display_units_editing(app):
+    data = Data(distance=[1000., 2000., 3000.], label="editable unit data")
+    data.get_component('distance').units = 'm'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    table.state.editable_components = [data.id['distance']]
+    table.state.column_display_units = {'distance': 'km'}
+
+    # Edit a value in display units; it should be stored in native units
+    table.widget_table.vue_cell_edited({'row': 1, 'column': 'distance', 'value': '5'})
+    assert list(data['distance']) == [1000., 5000., 3000.]
+
+    # And be displayed in display units
+    items = table.widget_table.items
+    assert [item['distance'] for item in items] == [1., 5., 3.]
+
+
+def test_table_display_units_state_widget(app):
+    data = Data(distance=[1000., 2000., 3000.], flag=[1, 2, 3], label="widget unit data")
+    data.get_component('distance').units = 'm'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    widget = table._layout_viewer_options
+
+    # Only columns with units are offered
+    assert widget.unit_column_items == ['distance']
+
+    # Selecting a column populates the unit choices with the native unit selected
+    widget.selected_unit_column = 'distance'
+    assert widget.selected_unit == 'm'
+    assert 'km' in widget.unit_choices
+
+    # Just selecting a column should not modify the state
+    assert table.state.column_display_units == {}
+
+    # Choosing a unit updates the state and the displayed values
+    widget.selected_unit = 'km'
+    assert table.state.column_display_units == {'distance': 'km'}
+    items = table.widget_table.items
+    assert [item['distance'] for item in items] == [1., 2., 3.]
+
+    # Changing the state externally is reflected in the widget
+    table.state.column_display_units = {'distance': 'cm'}
+    assert widget.selected_unit == 'cm'
