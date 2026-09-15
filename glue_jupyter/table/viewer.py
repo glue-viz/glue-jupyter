@@ -7,7 +7,7 @@ from echo import CallbackProperty, DictCallbackProperty, ListCallbackProperty, k
 from glue.core.data import Subset
 from glue.core.subset import ElementSubsetState
 from glue.core.exceptions import IncompatibleAttribute
-from glue.core.units import UnitConverter
+from glue.core.units import UnitConverter, find_unit_choices
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.common.state import LayerState, ViewerState
 from glue.viewers.common.tool import Tool
@@ -27,6 +27,38 @@ class TableState(ViewerState):
     column_display_units = DictCallbackProperty(docstring='Mapping from column name to the '
                                                           'units to use to display values in '
                                                           'that column')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Keep a snapshot of the last valid value so that invalid settings can
+        # be reverted, including in-place mutations of the dictionary (for
+        # which the callback does not have access to the previous value)
+        self._valid_column_display_units = {}
+        self.add_callback('column_display_units', self._validate_column_display_units)
+
+    def _validate_column_display_units(self, new_units):
+        data = None
+        for layer_state in self.layers:
+            layer = layer_state.layer
+            data = layer.data if isinstance(layer, Subset) else layer
+            break
+
+        if new_units and data is not None:
+
+            components = {str(cid): cid
+                          for cid in data.main_components + data.derived_components}
+
+            for column, unit in new_units.items():
+                if not unit or column not in components:
+                    continue
+                cid = components[column]
+                native_units = data.get_component(cid).units
+                if unit not in find_unit_choices([(data, cid, native_units)]):
+                    self.column_display_units = dict(self._valid_column_display_units)
+                    raise ValueError(f"'{unit}' is not a valid display unit for column "
+                                     f"'{column}' (native units: '{native_units}')")
+
+        self._valid_column_display_units = dict(new_units) if new_units else {}
 
     def is_editable(self, component_id):
         """Check if a component is editable using identity comparison."""
