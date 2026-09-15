@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from glue.config import settings, unit_converter
 from glue.core import Data
 
@@ -465,3 +466,25 @@ def test_table_display_units_editing(app):
     # And be displayed in display units
     items = table.widget_table.items
     assert [item['distance'] for item in items] == [1., 5., 3.]
+
+def test_table_display_units_validation(app):
+    data = Data(distance=[1000., 2000., 3000.], label="validated unit data")
+    data.get_component('distance').units = 'm'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    table.state.column_display_units = {'distance': 'km'}
+
+    # Units that do not parse or are not convertible from the native units
+    # are rejected and the previous value is restored, both when assigning
+    # a new dictionary and when modifying the existing one in-place
+    with pytest.raises(ValueError, match="'bananas' is not a valid display unit"):
+        table.state.column_display_units = {'distance': 'bananas'}
+    assert table.state.column_display_units == {'distance': 'km'}
+
+    with pytest.raises(ValueError, match="'Jy' is not a valid display unit"):
+        table.state.column_display_units['distance'] = 'Jy'
+    assert table.state.column_display_units == {'distance': 'km'}
+
+    # Empty units and unrecognized column names are allowed
+    table.state.column_display_units = {'distance': '', 'not_a_column': 'km'}
