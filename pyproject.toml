@@ -25,7 +25,7 @@ authors = [
 ]
 
 dependencies = [
-    "echo @ git+https://github.com/glue-viz/echo.git@refs/pull/72/head",
+    "echo>=0.16.0",
     "glue-core>=1.25.0",
     "ipympl>=0.3.0",
     "ipyvolume>=0.6.0",
