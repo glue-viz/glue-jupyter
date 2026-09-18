@@ -168,6 +168,9 @@ lint.ignore = [  # NOTE: non-permanent exclusions should be added to `.ruff.toml
     # flake8-commas (COM)
     "COM812",  # TrailingCommaMissing
 
+    # copyright (CPY)
+    "CPY001",  # Missing copyright at top of file
+
     # pydocstyle (D)
     # Missing Docstrings
     "D102",  # Missing docstring in public method. Don't check b/c docstring inheritance.
@@ -205,6 +208,10 @@ lint.ignore = [  # NOTE: non-permanent exclusions should be added to `.ruff.toml
     "RUF021",  # Parenthesize `a and b` expressions when chaining `and` and `or` together
     "RUF022",  # `__all__` is not sorted
     "RUF100",  # Unused blanket `noqa` directive
+
+    # PyLint rules (PLR)
+    "PLR0917",  # Too many positional arguments
+
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]
