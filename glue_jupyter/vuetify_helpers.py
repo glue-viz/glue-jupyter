@@ -31,7 +31,7 @@ def link_glue_choices(widget, state, prop):
 
     def update_choices(*args):
         labels = get_choices(state, prop)[1]
-        items = [dict(text=label, value=index) for index, label in enumerate(labels)]
+        items = [dict(title=label, value=index) for index, label in enumerate(labels)]
         setattr(widget, f'{prop}_items', items)
 
     state.add_callback(prop, update_choices)
@@ -71,7 +71,7 @@ def cmap_extras(widget):
     if not widget.has_trait('cmap_items'):
         widget.add_traits(cmap_items=traitlets.List().tag(sync=True))
     widget.cmap_items = [
-        {'text': name, 'value': cmap.name} for name, cmap in colormaps.members
+        {'title': name, 'value': cmap.name} for name, cmap in colormaps.members
     ]
     return ('text', _cmap_to_name, _name_to_cmap)
 

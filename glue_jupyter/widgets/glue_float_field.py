@@ -8,7 +8,7 @@ class GlueFloatField(v.VuetifyTemplate):
     template = traitlets.Unicode("""
         <glue-float-field
             :label="label"
-            :value.sync="value"
+            v-model:value="value"
         />
     """).tag(sync=True)
 

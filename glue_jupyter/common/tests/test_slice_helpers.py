@@ -89,11 +89,11 @@ def test_slider_slice_values(data_4d):
     index_values = list(range(size3))
     permutation = sample(index_values, len(index_values))
     for idx in permutation:
-        helper._sliders[3].value = idx
+        helper._sliders[3].model_value = idx
         assert state.slices[3] == idx
 
     for idx in permutation:
         state.slices = tuple(slice if index != 3 else idx
                              for index, slice
                              in enumerate(state.slices))
-        assert helper._sliders[3].value == idx
+        assert helper._sliders[3].model_value == idx

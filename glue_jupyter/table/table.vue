@@ -3,7 +3,7 @@
     <!-- Cell display/edit bar (always visible) -->
     <div class="glue-edit-bar elevation-1">
       <div class="edit-bar-cell-ref">
-        <v-icon small class="mr-1">{{ selectedCell ? (selectedCell.editable ? 'mdi-table-edit' : 'mdi-table-eye') : 'mdi-table' }}</v-icon>
+        <v-icon size="small" class="mr-1">{{ selectedCell ? (selectedCell.editable ? 'mdi-table-edit' : 'mdi-table-eye') : 'mdi-table' }}</v-icon>
         <span class="edit-bar-label">{{ selectedCell ? selectedCell.column + ' [' + selectedCell.row + ']' : 'Click a cell to view' }}</span>
       </div>
       <div class="edit-bar-input-container">
@@ -11,10 +11,11 @@
           ref="editInput"
           v-model="editValue"
           class="edit-bar-input"
-          dense
+          density="compact"
           hide-details
           single-line
-          outlined
+          variant="outlined"
+          bg-color="white"
           :readonly="!selectedCell || !selectedCell.editable"
           :placeholder="selectedCell ? '' : 'Select a cell...'"
           @keyup.enter="commitEdit"
@@ -24,95 +25,94 @@
       <div class="edit-bar-actions" v-if="selectedCell && selectedCell.editable">
         <v-btn
           icon
-          small
+          size="small"
           color="success"
           @click="commitEdit"
           title="Confirm and move to next row (Enter)"
         >
-          <v-icon small>mdi-check</v-icon>
+          <v-icon size="small">mdi-check</v-icon>
         </v-btn>
         <v-btn
           icon
-          small
+          size="small"
           color="error"
           @click="cancelEdit"
           title="Cancel (Escape)"
         >
-          <v-icon small>mdi-close</v-icon>
+          <v-icon size="small">mdi-close</v-icon>
         </v-btn>
       </div>
     </div>
 
     <v-slide-x-transition appear>
-      <v-data-table
-        dense
+      <v-data-table-server
+        density="compact"
         hide-default-header
         :headers="[...headers]"
         :items="items"
-        :footer-props="{'items-per-page-options': [10,20,50,100]}"
-        :options.sync="options"
-        :items_per_page.sync="items_per_page"
-        :server-items-length="total_length"
+        :items-per-page-options="[10, 20, 50, 100]"
+        v-model:page="options.page"
+        v-model:items-per-page="options.itemsPerPage"
+        v-model:sort-by="tableSortBy"
+        :items-length="total_length"
         :class="['elevation-1', 'glue-data-table', scrollable && 'glue-data-table--scrollable']"
         :style="scrollable && height != null && `height: ${height}`"
       >
-      <template v-slot:header="props">
-        <thead>
+      <template v-slot:headers="props">
           <tr>
             <th :style="'padding: 0 10px; width: '+Math.max(1, Math.ceil(Math.log10(total_length)))*20+'px'">#</th>
             <th style="padding: 0 1px; width: 30px" v-if="selection_enabled">
-              <v-btn icon color="primary" text small @click="toggle_select_all">
-                <v-icon>{{ all_selected ? 'check_box' : (checked.length > 0 ? 'indeterminate_check_box' : 'check_box_outline_blank') }}</v-icon>
+              <v-btn icon color="primary" variant="text" size="small" @click="toggle_select_all">
+                <v-icon>{{ all_selected ? 'mdi-checkbox-marked' : (checked.length > 0 ? 'mdi-minus-box' : 'mdi-checkbox-blank-outline') }}</v-icon>
               </v-btn>
             </th>
             <th style="padding: 0 1px" v-for="(header, index) in headers_selections" :key="header.text">
-              <v-icon style="padding: 0 1px" :key="index" :color="selection_colors[index]">brightness_1</v-icon>
+              <v-icon style="padding: 0 1px" :key="index" :color="selection_colors[index]">mdi-circle</v-icon>
             </th>
             <th v-for="header in headers"
                 :key="header.text"
                 @click="toggleSort(header.value)"
+                class="text-left text-no-wrap"
                 style="cursor: pointer; user-select: none;"
             >
               {{ header.text }}
               <v-icon v-if="options.sortBy && options.sortBy[0] === header.value">
-                {{ options.sortDesc && options.sortDesc[0] ? 'arrow_drop_down' : 'arrow_drop_up' }}
+                {{ options.sortDesc && options.sortDesc[0] ? 'mdi-menu-down' : 'mdi-menu-up' }}
               </v-icon>
             </th>
           </tr>
-        </thead>
       </template>
       <template v-slot:item="props">
         <tr @click="on_row_clicked(props.item.__row__)" :class="{'highlightedRow': props.item.__row__ === highlighted}">
-          <td style="padding: 0 10px" class="text-xs-left">
+          <td style="padding: 0 10px" class="text-left">
             <i>{{ props.item.__row__ }}</i>
           </td>
-          <td style="padding: 0 1px" class="text-xs-left" v-if="selection_enabled">
+          <td style="padding: 0 1px; width: 30px" class="text-left" v-if="selection_enabled">
             <v-checkbox
-              hide-details style="margin-top: 0; padding-top: 0"
-              :input-value="checked.indexOf(props.item.__row__) != -1"
+              density="compact" hide-details style="margin-top: 0; padding-top: 0"
+              :model-value="checked.indexOf(props.item.__row__) != -1"
               :key="props.item.__row__"
-              @change="(value) => select({checked: value, row: props.item.__row__})"
+              @update:modelValue="(value) => select({checked: value, row: props.item.__row__})"
             />
           </td>
           <td style="padding: 0 1px" :key="header.text" v-for="(header, index) in headers_selections">
             <v-fade-transition leave-absolute>
               <v-icon
                 v-if="props.item[header.value]"
-                v-model="props.item[header.value]"
                 :color="selection_colors[index]"
-              >brightness_1</v-icon>
+              >mdi-circle</v-icon>
             </v-fade-transition>
           </td>
           <td v-for="header in headers"
               :key="header.text"
-              class="text-truncate text-no-wrap glue-selectable-cell"
+              class="text-left text-truncate text-no-wrap glue-selectable-cell"
               :class="{'glue-cell-selected': isSelected(props.item.__row__, header.value)}"
               :title="props.item[header.value]"
               @click.stop="selectCell(props.item.__row__, header.value, props.item[header.value], header.editable)"
           >{{ props.item[header.value] }}</td>
         </tr>
       </template>
-      </v-data-table>
+      </v-data-table-server>
     </v-slide-x-transition>
   </div>
 </template>
@@ -124,6 +124,26 @@ module.exports = {
       selectedCell: null,  // { row: number, column: string, editable: boolean }
       editValue: ''
     };
+  },
+  computed: {
+    tableSortBy: {
+      get() {
+        const sortBy = Array.isArray(this.options.sortBy) ? this.options.sortBy : [];
+        const sortDesc = Array.isArray(this.options.sortDesc) ? this.options.sortDesc : [];
+        return sortBy.map((key, index) => ({
+          key,
+          order: sortDesc[index] ? 'desc' : 'asc'
+        }));
+      },
+      set(sortByItems) {
+        this.options = {
+          ...this.options,
+          sortBy: sortByItems.map(({key}) => key),
+          sortDesc: sortByItems.map(({order}) => order === 'desc'),
+          totalItems: this.total_length,
+        };
+      }
+    }
   },
   methods: {
     toggleSort(column) {
@@ -229,9 +249,9 @@ module.exports = {
   padding: 0;
 }
 
-.edit-bar-input .v-input__slot {
+.edit-bar-input .v-field,
+.edit-bar-input .v-field__input {
   min-height: 32px !important;
-  background-color: #fff !important;
 }
 
 .edit-bar-actions {
@@ -247,7 +267,7 @@ module.exports = {
   min-height: 250px;
 }
 
-.glue-data-table .v-data-table__wrapper {
+.glue-data-table .v-table__wrapper {
   overflow-x: auto;
 }
 
@@ -261,9 +281,18 @@ module.exports = {
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
+  height: 28px !important;
 }
 
-.glue-data-table--scrollable .v-data-table__wrapper {
+.glue-data-table .v-selection-control {
+  min-height: 28px;
+}
+
+.glue-data-table .v-selection-control__wrapper {
+  height: 28px;
+}
+
+.glue-data-table--scrollable .v-table__wrapper {
   overflow-y: auto;
   height: calc(100% - 59px);
 }
@@ -273,16 +302,16 @@ module.exports = {
   top: 0;
 }
 
-.glue-data-table--scrollable .v-data-table__wrapper,
-.glue-data-table--scrollable .v-data-table__wrapper > table,
-.glue-data-table--scrollable .v-data-table__wrapper > table thead,
-.glue-data-table--scrollable .v-data-table__wrapper > table thead *
+.glue-data-table--scrollable .v-table__wrapper,
+.glue-data-table--scrollable .v-table__wrapper > table,
+.glue-data-table--scrollable .v-table__wrapper > table thead,
+.glue-data-table--scrollable .v-table__wrapper > table thead *
 {
   background-color: inherit;
 }
 
 /* prevent checkboxes overlaying the table header */
-.glue-data-table--scrollable .v-data-table__wrapper > table thead {
+.glue-data-table--scrollable .v-table__wrapper > table thead {
   position: relative;
   z-index: 1;
 }
