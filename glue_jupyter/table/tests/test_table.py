@@ -1,4 +1,6 @@
 import numpy as np
+import pytest
+from glue.config import settings, unit_converter
 from glue.core import Data
 
 from glue_jupyter.table import TableViewer
@@ -394,3 +396,95 @@ def test_table_visibility_data_layer(app, dataxyz):
     # Show the data layer again: all rows return
     table.layers[0].state.visible = True
     assert table.widget_table.total_length == 3
+
+
+def test_table_display_units(app):
+    data = Data(distance=[1000., 2000., 3000.], label="unit data")
+    data.get_component('distance').units = 'm'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    # Initially values are shown in native units and headers show no unit
+    items = table.widget_table.items
+    assert [item['distance'] for item in items] == [1000., 2000., 3000.]
+    assert table.widget_table.headers[0]['text'] == 'distance'
+
+    # Change the display unit
+    table.state.column_display_units = {'distance': 'km'}
+    items = table.widget_table.items
+    assert [item['distance'] for item in items] == [1., 2., 3.]
+    assert table.widget_table.headers[0]['text'] == 'distance [km]'
+
+    # The underlying data is unchanged
+    assert list(data['distance']) == [1000., 2000., 3000.]
+
+
+def test_table_display_units_sorting(app):
+    # Use a custom unit converter for which the conversion inverts the order
+    # of the values (as e.g. converting wavelength to frequency would) to make
+    # sure that sorting is done on the displayed values
+
+    @unit_converter('test-inverting')
+    class InvertingConverter:
+
+        def equivalent_units(self, data, cid, units):
+            return ['inverted']
+
+        def to_unit(self, data, cid, values, original_units, target_units):
+            return -values if target_units == 'inverted' else values
+
+    data = Data(wav=[1., 3., 2.], label="spectral data")
+    data.get_component('wav').units = 'm'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    previous_converter = settings.UNIT_CONVERTER
+    settings.UNIT_CONVERTER = 'test-inverting'
+    try:
+        table.state.column_display_units = {'wav': 'inverted'}
+        table.widget_table.vue_sort_column('wav')
+        items = table.widget_table.items
+        assert [item['wav'] for item in items] == [-3., -2., -1.]
+        assert [item['__row__'] for item in items] == [1, 2, 0]
+    finally:
+        settings.UNIT_CONVERTER = previous_converter
+
+
+def test_table_display_units_editing(app):
+    data = Data(distance=[1000., 2000., 3000.], label="editable unit data")
+    data.get_component('distance').units = 'm'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    table.state.editable_components = [data.id['distance']]
+    table.state.column_display_units = {'distance': 'km'}
+
+    # Edit a value in display units; it should be stored in native units
+    table.widget_table.vue_cell_edited({'row': 1, 'column': 'distance', 'value': '5'})
+    assert list(data['distance']) == [1000., 5000., 3000.]
+
+    # And be displayed in display units
+    items = table.widget_table.items
+    assert [item['distance'] for item in items] == [1., 5., 3.]
+
+def test_table_display_units_validation(app):
+    data = Data(distance=[1000., 2000., 3000.], label="validated unit data")
+    data.get_component('distance').units = 'm'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    table.state.column_display_units = {'distance': 'km'}
+
+    # Units that do not parse or are not convertible from the native units
+    # are rejected and the previous value is restored, both when assigning
+    # a new dictionary and when modifying the existing one in-place
+    with pytest.raises(ValueError, match="'bananas' is not a valid display unit"):
+        table.state.column_display_units = {'distance': 'bananas'}
+    assert table.state.column_display_units == {'distance': 'km'}
+
+    with pytest.raises(ValueError, match="'Jy' is not a valid display unit"):
+        table.state.column_display_units['distance'] = 'Jy'
+    assert table.state.column_display_units == {'distance': 'km'}
+
+    # Empty units and unrecognized column names are allowed
+    table.state.column_display_units = {'distance': '', 'not_a_column': 'km'}

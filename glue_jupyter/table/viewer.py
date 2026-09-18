@@ -3,10 +3,11 @@ import numpy as np
 import ipyvuetify as v
 import ipywidgets as widgets
 import traitlets
-from echo import CallbackProperty, ListCallbackProperty, keep_in_sync
+from echo import CallbackProperty, DictCallbackProperty, ListCallbackProperty, keep_in_sync
 from glue.core.data import Subset
 from glue.core.subset import ElementSubsetState
 from glue.core.exceptions import IncompatibleAttribute
+from glue.core.units import UnitConverter, find_unit_choices
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.viewers.common.state import LayerState, ViewerState
 from glue.viewers.common.tool import Tool
@@ -23,6 +24,41 @@ ICONS_DIR = os.path.join(os.path.dirname(__file__), '..', 'icons')
 class TableState(ViewerState):
     hidden_components = ListCallbackProperty(docstring='Attributes to hide in the table display')
     editable_components = ListCallbackProperty(docstring='Attributes that can be edited in the table')
+    column_display_units = DictCallbackProperty(docstring='Mapping from column name to the '
+                                                          'units to use to display values in '
+                                                          'that column')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Keep a snapshot of the last valid value so that invalid settings can
+        # be reverted, including in-place mutations of the dictionary (for
+        # which the callback does not have access to the previous value)
+        self._valid_column_display_units = {}
+        self.add_callback('column_display_units', self._validate_column_display_units)
+
+    def _validate_column_display_units(self, new_units):
+        data = None
+        for layer_state in self.layers:
+            layer = layer_state.layer
+            data = layer.data if isinstance(layer, Subset) else layer
+            break
+
+        if new_units and data is not None:
+
+            components = {str(cid): cid
+                          for cid in data.main_components + data.derived_components}
+
+            for column, unit in new_units.items():
+                if not unit or column not in components:
+                    continue
+                cid = components[column]
+                native_units = data.get_component(cid).units
+                if unit not in find_unit_choices([(data, cid, native_units)]):
+                    self.column_display_units = dict(self._valid_column_display_units)
+                    raise ValueError(f"'{unit}' is not a valid display unit for column "
+                                     f"'{column}' (native units: '{native_units}')")
+
+        self._valid_column_display_units = dict(new_units) if new_units else {}
 
     def is_editable(self, component_id):
         """Check if a component is editable using identity comparison."""
@@ -197,19 +233,35 @@ class TableGlue(TableBase):
             self._compute_visible_indices()
         return len(self._visible_indices)
 
+    def _display_units(self):
+        if self.state is None:
+            return {}
+        return getattr(self.state, 'column_display_units', None) or {}
+
+    def _convert_to_display_units(self, component, values):
+        target_units = self._display_units().get(str(component))
+        if not target_units:
+            return values
+        try:
+            return UnitConverter().to_unit(self.data, component, values, target_units)
+        except Exception:
+            return values
+
     def _get_headers(self):
         if self.data is None:
             return []
         components = self.get_visible_components()
-        return [
-            {
-                'text': str(k),
+        display_units = self._display_units()
+        headers = []
+        for k in components:
+            unit = display_units.get(str(k))
+            headers.append({
+                'text': f'{k} [{unit}]' if unit else str(k),
                 'value': str(k),
                 'sortable': True,
                 'editable': self.state is not None and self.state.is_editable(k)
-            }
-            for k in components
-        ]
+            })
+        return headers
 
     def _get_sorted_indices(self):
         """Return indices that would sort the data by the current sort column."""
@@ -236,7 +288,9 @@ class TableGlue(TableBase):
         if component is None:
             return np.arange(n_total)
 
-        values = self.data[component]
+        # Sort on the displayed values, since some unit conversions (e.g.
+        # wavelength to frequency) can invert the ordering
+        values = self._convert_to_display_units(component, self.data[component])
         indices = np.argsort(values)
 
         # Check for descending order
@@ -263,7 +317,7 @@ class TableGlue(TableBase):
         sorted_indices = self._get_sorted_indices()
         if not self.data_visible:
             visible_set = set(self._visible_indices.tolist())
-            sorted_indices = np.array([i for i in sorted_indices if i in visible_set])
+            sorted_indices = np.array([i for i in sorted_indices if i in visible_set], dtype=int)
         page_indices = sorted_indices[i1:i2]
 
         masks = {}
@@ -275,14 +329,19 @@ class TableGlue(TableBase):
                 except IncompatibleAttribute:
                     masks[k.label] = np.zeros(len(page_indices), dtype=bool)
 
-        items = []
         components = self.get_visible_components()
+        columns = {}
+        for component in components:
+            values = self.data[component][page_indices]
+            columns[str(component)] = self._convert_to_display_units(component, values)
+
+        items = []
         for i, orig_idx in enumerate(page_indices):
             item = {'__row__': int(orig_idx)}
             for selection in self.selections:
                 item[selection] = bool(masks[selection][i])
             for component in components:
-                item[str(component)] = self.format(self.data[component][orig_idx])
+                item[str(component)] = self.format(columns[str(component)][i])
             items.append(item)
         return items
 
@@ -328,9 +387,21 @@ class TableGlue(TableBase):
         component = self.data.get_component(component_id)
         current_dtype = component.data.dtype
 
-        # Type conversion
+        # Type conversion, interpreting the input in display units if any are set
+        display_units = self._display_units().get(str(component_id))
         try:
-            if np.issubdtype(current_dtype, np.integer):
+            if display_units and (np.issubdtype(current_dtype, np.integer)
+                                  or np.issubdtype(current_dtype, np.floating)):
+                try:
+                    native_value = UnitConverter().to_native(self.data, component_id,
+                                                             float(new_value), display_units)
+                except Exception:
+                    return  # Display units incompatible with native units
+                if np.issubdtype(current_dtype, np.integer):
+                    converted_value = round(float(native_value))
+                else:
+                    converted_value = float(native_value)
+            elif np.issubdtype(current_dtype, np.integer):
                 converted_value = int(new_value)
             elif np.issubdtype(current_dtype, np.floating):
                 converted_value = float(new_value)
@@ -491,6 +562,7 @@ class TableViewer(IPyWidgetView):
         self.create_layout()
         self.state.add_callback('hidden_components', self._update_hidden)
         self.state.add_callback('editable_components', self._update_editable)
+        self.state.add_callback('column_display_units', self._update_display_units)
 
     def create_layout(self):
         # Override to pass viewer instead of just state
@@ -508,6 +580,9 @@ class TableViewer(IPyWidgetView):
 
     def _update_editable(self, *args):
         self.widget_table._update_columns()
+
+    def _update_display_units(self, *args):
+        self.widget_table._update()
 
     def redraw(self):
         data_visible = True
