@@ -48,10 +48,11 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
                 tool = self.tools[change.new]
             else:
                 for t in self.tools.values():
-                    for subtool in getattr(t, "subtools", []):
-                        if subtool.tool_id == change.new:
-                            tool = subtool
-                            break
+                    tool = next((subtool for subtool in getattr(t, "subtools", [])
+                                if subtool.tool_id == change.new), None)
+                    if tool is not None:
+                        break
+
             if tool is None:
                 return
             if isinstance(tool, CheckableTool):
