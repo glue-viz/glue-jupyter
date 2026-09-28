@@ -43,12 +43,23 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
     @traitlets.observe('active_tool_id')
     def _on_change_v_model(self, change):
         if change.new is not None:
-            if isinstance(self.tools[change.new], CheckableTool):
-                self.active_tool = self.tools[change.new]
+            tool = None
+            if change.new in self.tools:
+                tool = self.tools[change.new]
+            else:
+                for t in self.tools.values():
+                    for subtool in getattr(t, "subtools", []):
+                        if subtool.tool_id == change.new:
+                            tool = subtool
+                            break
+            if tool is None:
+                return
+            if isinstance(tool, CheckableTool):
+                self.active_tool = tool
             else:
                 # In this case it is a non-checkable tool and we should
                 # activate it but not keep the tool checked in the toolbar
-                self.tools[change.new].activate()
+                tool.activate()
                 self.active_tool_id = None
         else:
             self.active_tool = None
@@ -95,6 +106,7 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
         if isinstance(tool, DropdownTool) and len(tool.subtools) > 0:
             update['subtools'] = [
                 {
+                    'tool_id': t.tool_id,
                     'tooltip': t.tool_tip,
                     'img': read_icon(*self._icon_data(t))
                 } for t in tool.subtools
