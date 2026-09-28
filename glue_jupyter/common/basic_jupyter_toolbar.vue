@@ -1,5 +1,5 @@
 <template>
-    <v-btn-toggle v-model="active_tool_id" class="transparent glue-toolbar" style="overflow: visible;">
+    <v-btn-toggle :model-value="active_tool_id" class="transparent glue-toolbar" style="overflow: visible;">
         <template v-for="[id, data] of Object.entries(tools_data)" :key="id">
             <v-tooltip location="bottom">
                 <template v-slot:activator="{ props: tooltipProps }">
@@ -28,7 +28,8 @@
                             </v-list-item>
                         </v-list>
                     </v-menu>
-                    <v-btn v-else icon variant="text" :value="id" style="position: relative;" v-bind="tooltipProps">
+                    <v-btn v-else icon variant="text" :value="id" style="position: relative;" v-bind="tooltipProps"
+                            @click="active_tool_id = id">
                         <img :src="data.img" width="20"/>
                     </v-btn>
                 </template>
