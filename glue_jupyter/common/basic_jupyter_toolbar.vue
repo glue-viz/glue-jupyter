@@ -10,7 +10,7 @@
                             </v-btn>
                         </template>
                         <v-list style="overflow-x: hidden" select-strategy="single-leaf"
-                                :selected="active_tool_id !== null ? [active_tool_id] : []" 
+                                :selected="active_tool_id !== null ? [active_tool_id] : []"
                                 @update:selected="selected => {
                                   if (!(selected || selected.length > 0)) {
                                       active_tool_id = null;

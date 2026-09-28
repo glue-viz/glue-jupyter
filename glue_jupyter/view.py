@@ -158,9 +158,8 @@ class IPyWidgetView(Viewer):
         for tool_id in tool_ids:
             mode_cls = viewer_tool.members[tool_id]
             if tool_id in subtool_ids:
-                subtools = []
-                for subtool_id in subtool_ids[tool_id]:
-                    subtools.append(viewer_tool.members[subtool_id](self))
+                subtools = [viewer_tool.members[subtool_id](self)
+                            for subtool_id in subtool_ids[tool_id]]
                 mode = mode_cls(self, subtools=subtools)
             else:
                 mode = mode_cls(self)
