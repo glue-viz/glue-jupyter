@@ -2,9 +2,9 @@
     <v-btn-toggle v-model="active_tool_id" class="transparent">
         <v-tooltip v-for="[id, data] of Object.entries(tools_data)" location="bottom">
             <template v-slot:activator="{ props }">
-                <v-menu v-if="data.subtools" v-bind="props">
+                <v-menu v-if="data.subtools">
                     <template v-slot:activator="{ props: menuProps }">
-                        <v-btn v-bind="menuProps" icon variant="text" :value="id">
+                        <v-btn v-bind="{...props, ...menuProps}" icon variant="text" :value="id">
                             <img :src="data.img" width="20"/>
                         </v-btn>
                     </template>
