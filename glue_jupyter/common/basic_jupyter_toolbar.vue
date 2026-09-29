@@ -38,9 +38,3 @@
         </template>
     </v-btn-toggle>
 </template>
-
-<style id="glue-toolbar-style">
-.glue-toolbar {
-    overflow: visible !important;
-}
-</style>
