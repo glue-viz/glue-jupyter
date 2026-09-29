@@ -96,22 +96,22 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
 
         return path, format
 
+    def _tool_data(self, tool):
+        return {
+            'tooltip': tool.tool_tip,
+            'img': read_icon(*self._icon_data(tool))
+        }
+
     def add_tool(self, tool):
         self.tools[tool.tool_id] = tool
 
-        update = {
-            'tooltip': tool.tool_tip,
-            'img': read_icon(*self._icon_data(tool)),
-        }
+        update = self._tool_data(tool)
 
         if isinstance(tool, DropdownTool) and len(tool.subtools) > 0:
-            update['subtools'] = [
-                {
-                    'tool_id': t.tool_id,
-                    'tooltip': t.tool_tip,
-                    'img': read_icon(*self._icon_data(t))
-                } for t in tool.subtools
-            ]
+            update['subtools'] = {
+                subtool.tool_id : self._tool_data(subtool)
+                for subtool in tool.subtools
+            }
 
         self.tools_data = {
             **self.tools_data,

@@ -18,12 +18,12 @@
                                       active_tool_id = selected.includes(active_tool_id) ? null : selected[0];
                                   }
                                 }">
-                            <v-list-item v-for="subdata in data.subtools" :key="subdata.tool_id" :value="subdata.tool_id">
+                            <v-list-item v-for="[subtool_id, subtool_data] in Object.entries(data.subtools)" :key="subtool_data.tool_id" :value="subtool_id">
                                 <template #prepend>
-                                    <v-avatar size="24" tile><v-img :src="subdata.img"></v-img></v-avatar>
+                                    <v-avatar size="24" tile><v-img :src="subtool_data.img"></v-img></v-avatar>
                                 </template>
                                 <template #title>
-                                    <span class="text-body-2 text-important">{{ subdata.tooltip }}</span>
+                                    <span class="text-body-2 text-important">{{ subtool_data.tooltip }}</span>
                                 </template>
                             </v-list-item>
                         </v-list>
