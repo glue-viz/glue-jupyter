@@ -82,6 +82,7 @@ lint.ignore = [
     "PLR0912",  # too-many-branches
     "PLR0913",  # too-many-args
     "PLR0915",  # too-many-statements
+    "PLR0917",  # too-many-positional-arguments
     "PLR1714",  # Consider merging multiple comparisons
     "PLR2004",  # MagicValueComparison
     "PLR5501",  # collapsible-else-if
