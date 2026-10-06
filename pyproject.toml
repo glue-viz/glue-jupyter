@@ -168,6 +168,9 @@ lint.ignore = [  # NOTE: non-permanent exclusions should be added to `.ruff.toml
     # flake8-commas (COM)
     "COM812",  # TrailingCommaMissing
 
+    # flake8-copyright (CPY)
+    "CPY001",  # Missing copyright notice at top of file
+
     # pydocstyle (D)
     # Missing Docstrings
     "D102",  # Missing docstring in public method. Don't check b/c docstring inheritance.
