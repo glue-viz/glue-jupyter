@@ -8,6 +8,8 @@ from glue.viewers.profile.state import ProfileViewerState
 from ..common.viewer import BqplotBaseView
 
 from .layer_artist import BqplotProfileLayerArtist
+from ..common.line_layers import BqplotVerticalLineLayerArtist
+from ...common.state_widgets.layer_line import LineLayerStateWidget
 
 from glue_jupyter.common.state_widgets.layer_profile import ProfileLayerStateWidget
 from glue_jupyter.common.state_widgets.viewer_profile import ProfileViewerStateWidget
@@ -27,7 +29,8 @@ class BqplotProfileView(BqplotBaseView):
     _options_cls = ProfileViewerStateWidget
     _data_artist_cls = BqplotProfileLayerArtist
     _subset_artist_cls = BqplotProfileLayerArtist
-    _layer_style_widget_cls = ProfileLayerStateWidget
+    _layer_style_widget_cls = {BqplotProfileLayerArtist: ProfileLayerStateWidget,
+                               BqplotVerticalLineLayerArtist: LineLayerStateWidget}
 
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:panzoom_x', 'bqplot:panzoom_y',
              'bqplot:xrange', 'bqplot:yrange']

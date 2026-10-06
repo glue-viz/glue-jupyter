@@ -5,6 +5,8 @@ from glue.viewers.histogram.state import HistogramViewerState
 from ..common.viewer import BqplotBaseView
 
 from .layer_artist import BqplotHistogramLayerArtist
+from ..common.line_layers import BqplotVerticalLineLayerArtist
+from ...common.state_widgets.layer_line import LineLayerStateWidget
 from glue_jupyter.common.state_widgets.layer_histogram import HistogramLayerStateWidget
 from glue_jupyter.common.state_widgets.viewer_histogram import HistogramViewerStateWidget
 from glue_jupyter.registries import viewer_registry
@@ -23,7 +25,8 @@ class BqplotHistogramView(BqplotBaseView):
     _options_cls = HistogramViewerStateWidget
     _data_artist_cls = BqplotHistogramLayerArtist
     _subset_artist_cls = BqplotHistogramLayerArtist
-    _layer_style_widget_cls = HistogramLayerStateWidget
+    _layer_style_widget_cls = {BqplotHistogramLayerArtist: HistogramLayerStateWidget,
+                               BqplotVerticalLineLayerArtist: LineLayerStateWidget}
 
     tools = ['bqplot:home', 'bqplot:panzoom', 'bqplot:xrange']
 
