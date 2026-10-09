@@ -47,7 +47,6 @@
     <v-slide-x-transition appear>
       <v-data-table-server
         density="compact"
-        hide-default-header
         :headers="[...headers]"
         :items="items"
         :items-per-page-options="[10, 20, 50, 100]"
