@@ -21,6 +21,7 @@ def test_column_display_units(solara_test, page_session):
         return [cell.inner_text() for cell in table.locator(f"tbody tr td:nth-child({index})").all()]
 
     assert column(3) == ['1000', '2000', '3000']
+    assert [header['text'] for header in viewer.widget_table.headers] == ['x [m]', 'y']
 
     viewer.state.column_display_units = {'x': 'km'}
     page_session.wait_for_timeout(1000)

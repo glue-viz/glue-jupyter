@@ -404,10 +404,10 @@ def test_table_display_units(app):
     app.add_data(data)
     table = app.table(data=data)
 
-    # Initially values are shown in native units and headers show no unit
+    # Initially values are shown in native units, which are also shown in the headers
     items = table.widget_table.items
     assert [item['distance'] for item in items] == [1000., 2000., 3000.]
-    assert table.widget_table.headers[0]['text'] == 'distance'
+    assert table.widget_table.headers[0]['text'] == 'distance [m]'
 
     # Change the display unit
     table.state.column_display_units = {'distance': 'km'}

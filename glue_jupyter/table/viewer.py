@@ -254,7 +254,7 @@ class TableGlue(TableBase):
         display_units = self._display_units()
         headers = []
         for k in components:
-            unit = display_units.get(str(k))
+            unit = display_units.get(str(k)) or self.data.get_component(k).units
             headers.append({
                 'text': f'{k} [{unit}]' if unit else str(k),
                 'value': str(k),
