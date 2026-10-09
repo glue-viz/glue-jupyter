@@ -6,7 +6,7 @@ import base64
 
 from glue.icons import icon_path
 import glue.viewers.common.tool
-from glue.viewers.common.tool import CheckableTool
+from glue.viewers.common.tool import CheckableTool, DropdownTool
 
 __all__ = ['BasicJupyterToolbar']
 
@@ -43,12 +43,24 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
     @traitlets.observe('active_tool_id')
     def _on_change_v_model(self, change):
         if change.new is not None:
-            if isinstance(self.tools[change.new], CheckableTool):
-                self.active_tool = self.tools[change.new]
+            tool = None
+            if change.new in self.tools:
+                tool = self.tools[change.new]
+            else:
+                for t in self.tools.values():
+                    tool = next((subtool for subtool in getattr(t, "subtools", [])
+                                if subtool.tool_id == change.new), None)
+                    if tool is not None:
+                        break
+
+            if tool is None:
+                return
+            if isinstance(tool, CheckableTool):
+                self.active_tool = tool
             else:
                 # In this case it is a non-checkable tool and we should
                 # activate it but not keep the tool checked in the toolbar
-                self.tools[change.new].activate()
+                tool.activate()
                 self.active_tool_id = None
         else:
             self.active_tool = None
@@ -68,8 +80,7 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
             if self._default_mouse_mode is not None:
                 self._default_mouse_mode.activate()
 
-    def add_tool(self, tool):
-        self.tools[tool.tool_id] = tool
+    def _icon_data(self, tool):
         # TODO: we should ideally just incorporate this check into icon_path directly.
         ext = os.path.splitext(tool.icon)[1][1:] or "svg"
         if os.path.exists(tool.icon):
@@ -82,10 +93,27 @@ class BasicJupyterToolbar(v.VuetifyTemplate):
         if format is None or not format.startswith(image_prefix):
             raise ValueError(f"Invalid or unknown image MIME type for: {path}")
         format = format[len(image_prefix):]
+
+        return path, format
+
+    def _tool_data(self, tool):
+        return {
+            'tooltip': tool.tool_tip,
+            'img': read_icon(*self._icon_data(tool))
+        }
+
+    def add_tool(self, tool):
+        self.tools[tool.tool_id] = tool
+
+        update = self._tool_data(tool)
+
+        if isinstance(tool, DropdownTool) and len(tool.subtools) > 0:
+            update['subtools'] = {
+                subtool.tool_id : self._tool_data(subtool)
+                for subtool in tool.subtools
+            }
+
         self.tools_data = {
             **self.tools_data,
-            tool.tool_id: {
-                'tooltip': tool.tool_tip,
-                'img': read_icon(path, format)
-            }
+            tool.tool_id: update,
         }
