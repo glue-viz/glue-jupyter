@@ -3,6 +3,7 @@ import pytest
 from numpy.testing import assert_allclose
 
 from glue.core import Data
+from glue.core.coordinates import AffineCoordinates
 from glue.core.link_helpers import LinkSame
 
 from glue_jupyter.bqplot.common.line_layers import (BqplotVerticalLineLayerArtist,
@@ -80,6 +81,36 @@ def test_profile_viewer(app):
     # Horizontal lines are not available in the profile viewer
     with pytest.raises(ValueError, match='does not define a y axis'):
         add_horizontal_lines(viewer, lines)
+
+
+def test_profile_viewer_display_units(app):
+
+    coords = AffineCoordinates(np.identity(2), units=['m'], labels=['position'])
+    spectrum = Data(flux=np.random.random(10), coords=coords, label='spectrum')
+    app.data_collection.append(spectrum)
+    lines = make_lines(app, spectrum.world_component_ids[0])
+
+    viewer = app.profile1d(data=spectrum)
+    viewer.state.x_att = spectrum.world_component_ids[0]
+    artist = add_vertical_lines(viewer, lines)
+
+    assert viewer.state.x_display_unit == 'm'
+    assert_positions(artist, [1, 2, 3])
+
+    # The lines are converted to the display units of the x axis
+    viewer.state.x_display_unit = 'cm'
+    assert_positions(artist, [100, 200, 300])
+
+    # Subsets created after the fact are converted too
+    app.data_collection.new_subset_group(label='high', subset_state=lines.id['position'] > 1.5)
+    subset_artist = [layer for layer in viewer.layers
+                     if isinstance(layer, BqplotVerticalLineLayerArtist)
+                     and layer.layer is not lines][0]
+    assert_positions(subset_artist, [200, 300])
+
+    viewer.state.x_display_unit = 'm'
+    assert_positions(artist, [1, 2, 3])
+    assert_positions(subset_artist, [2, 3])
 
 
 def test_histogram_viewer(app):
