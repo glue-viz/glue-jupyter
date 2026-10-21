@@ -104,6 +104,24 @@ workflows:
               only:
                 - main
 
+      - deploy-reference-images:
+          name: "baseline-py311-test-visual-dev"
+          jobname: "py311-test-visual-dev"
+          image: "cimg/python:3.11-node"
+          filters:
+            branches:
+              only:
+                - main
+
+      - deploy-reference-images:
+          name: "baseline-py311-test-visual-bqplot012"
+          jobname: "py311-test-visual-bqplot012"
+          image: "cimg/python:3.11-node"
+          filters:
+            branches:
+              only:
+                - main
+
 notify:
   webhooks:
     - url: https://giles.cadair.dev/circleci
