@@ -11,7 +11,7 @@ on:
 jobs:
   initial_checks:
     # Mandatory checks before CI tests
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@8c9f6c4af6750aa4b26765e8c312164efc226dfd # v3.2.0
     with:
       coverage: false
       envs: |
@@ -20,9 +20,12 @@ jobs:
 
   tests:
     needs: initial_checks
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    permissions:
+      contents: read
+      id-token: write
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@8c9f6c4af6750aa4b26765e8c312164efc226dfd # v3.2.0
     with:
-      coverage: codecov
+      coverage: codecov-oidc
       libraries: |
         apt:
           - libhdf5-dev
@@ -50,7 +53,7 @@ jobs:
 
   no_coverage:
     needs: initial_checks
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@8c9f6c4af6750aa4b26765e8c312164efc226dfd # v3.2.0
     with:
       coverage: false
       pytest: false
@@ -67,7 +70,7 @@ jobs:
   binder-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build binder Docker image
         run: docker build -t glue-jupyter-binder -f binder/Dockerfile .
@@ -82,9 +85,9 @@ jobs:
   ui-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.11"
       - name: Install
@@ -100,7 +103,7 @@ jobs:
           pytest glue_jupyter/tests/ui
       - name: Upload UI Test artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: glue-jupyter-ui-test-output
           path: |
@@ -108,7 +111,7 @@ jobs:
 
   publish:
     needs: tests
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v1
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@8c9f6c4af6750aa4b26765e8c312164efc226dfd # v3.2.0
     with:
       libraries: libhdf5-dev
       test_extras: test
