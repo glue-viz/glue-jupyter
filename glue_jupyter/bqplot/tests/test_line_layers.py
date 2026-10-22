@@ -195,7 +195,7 @@ def setup_image_viewer(app, data_image):
 
 def test_image_viewer(app, data_image):
 
-    viewer, vartist, hartist = setup_image_viewer(app, data_image)
+    _, vartist, hartist = setup_image_viewer(app, data_image)
 
     assert vartist.enabled and hartist.enabled
     assert_positions(vartist, [16, 32, 48])
