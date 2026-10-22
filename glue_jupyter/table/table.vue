@@ -47,8 +47,6 @@
     </div>
 
     <v-slide-x-transition appear>
-      <v-data-table
-        dense
       <v-data-table-server
         density="compact"
         :headers="[...headers]"
