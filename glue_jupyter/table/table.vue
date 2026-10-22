@@ -18,8 +18,10 @@
           bg-color="white"
           :readonly="!selectedCell || !selectedCell.editable"
           :placeholder="selectedCell ? '' : 'Select a cell...'"
-          @keyup.enter="commitEdit"
+          @keyup.enter="onEnter"
           @keyup.escape="cancelEdit"
+          @keydown.up.prevent="onArrow(-1)"
+          @keydown.down.prevent="onArrow(1)"
         ></v-text-field>
       </div>
       <div class="edit-bar-actions" v-if="selectedCell && selectedCell.editable">
@@ -176,14 +178,13 @@ module.exports = {
       const value = this.formatCellValue(currentValue);
       this.selectedCell = { row: row, column: column, editable: editable, value: value };
       this.editValue = value;
-      // Focus the edit input after Vue updates the DOM (only if editable)
-      if (editable) {
-        this.$nextTick(() => {
-          if (this.$refs.editInput) {
-            this.$refs.editInput.focus();
-          }
-        });
-      }
+      // Focus the edit input after Vue updates the DOM so that keyboard
+      // navigation works for both editable and read-only cells
+      this.$nextTick(() => {
+        if (this.$refs.editInput) {
+          this.$refs.editInput.focus();
+        }
+      });
     },
     cancelEdit() {
       this.selectedCell = null;
@@ -193,29 +194,44 @@ module.exports = {
       if (this.selectedCell && this.selectedCell.editable) {
         const currentColumn = this.selectedCell.column;
         const currentRow = this.selectedCell.row;
-        const isEditable = this.selectedCell.editable;
         // Commit the edit
         this.cell_edited({
           row: currentRow,
           column: currentColumn,
           value: this.editValue
         });
-        // Move to the next row in the same column
-        const nextRow = currentRow + 1;
-        if (nextRow < this.total_length) {
-          // Find the current value for the next cell
-          const nextItem = this.items.find(item => item.__row__ === nextRow);
-          if (nextItem) {
-            this.selectCell(nextRow, currentColumn, nextItem[currentColumn], isEditable);
-          } else {
-            // Next row might not be in current page, just clear selection
-            this.selectedCell = null;
-            this.editValue = '';
-          }
-        } else {
-          // No more rows, clear selection
-          this.selectedCell = null;
-          this.editValue = '';
+        this.advanceRow(1);
+      }
+    },
+    onEnter() {
+      if (this.selectedCell && this.selectedCell.editable) {
+        this.commitEdit();
+      } else {
+        this.advanceRow(1);
+      }
+    },
+    onArrow(step) {
+      // Commit a pending edit before moving, as in a spreadsheet
+      if (this.selectedCell && this.selectedCell.editable &&
+          this.editValue !== this.selectedCell.value) {
+        this.cell_edited({
+          row: this.selectedCell.row,
+          column: this.selectedCell.column,
+          value: this.editValue
+        });
+      }
+      this.advanceRow(step);
+    },
+    advanceRow(step) {
+      // Move <step> rows in the same column, following the displayed order of
+      // the rows (which may be sorted or filtered) rather than the row indices
+      if (this.selectedCell) {
+        const column = this.selectedCell.column;
+        const index = this.items.findIndex(item => item.__row__ === this.selectedCell.row);
+        const nextItem = index === -1 ? undefined : this.items[index + step];
+        // At the first or last row of the current page, stay on the current cell
+        if (nextItem) {
+          this.selectCell(nextItem.__row__, column, nextItem[column], this.selectedCell.editable);
         }
       }
     },
