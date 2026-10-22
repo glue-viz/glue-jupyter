@@ -446,6 +446,12 @@ class TableGlue(TableBase):
             return
         if self.data is not None and old_name in [c.label for c in self.data.main_components]:
             self.data.id[old_name].label = new_name
+            if self.state is not None and old_name in self.state.column_display_units:
+                # Display units are keyed by column name so need to follow the rename
+                self.state.column_display_units = {
+                    new_name if column == old_name else column: unit
+                    for column, unit in self.state.column_display_units.items()
+                }
             for fn in getattr(self, '_column_renamed_callbacks', []):
                 fn(old_name, new_name)
             self._update()
@@ -473,6 +479,10 @@ class TableGlue(TableBase):
                 self.state.removable_components = [
                     c for c in self.state.removable_components if c is not cid
                 ]
+                self.state.column_display_units = {
+                    column: unit for column, unit in self.state.column_display_units.items()
+                    if column != label
+                }
             self.data.remove_component(cid)
             for fn in getattr(self, '_column_removed_callbacks', []):
                 fn(label)

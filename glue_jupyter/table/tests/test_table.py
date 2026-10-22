@@ -564,3 +564,22 @@ def test_table_remove_unknown_column(app, dataxyz):
 
     assert removed == []
     assert [h['value'] for h in table.widget_table.headers] == ['x', 'y', 'z']
+
+
+def test_table_rename_remove_column_display_units(app):
+    data = Data(distance=[1000., 2000., 3000.], time=[1., 2., 3.], label="renamed unit data")
+    data.get_component('distance').units = 'm'
+    data.get_component('time').units = 's'
+    app.add_data(data)
+    table = app.table(data=data)
+    table.state.column_display_units = {'distance': 'km', 'time': 'min'}
+
+    # The display units follow the column when it is renamed
+    table.widget_table.vue_rename_column({'column': 'distance', 'newName': 'dist'})
+    assert table.state.column_display_units == {'dist': 'km', 'time': 'min'}
+    assert table.widget_table.headers[0]['text'] == 'dist [km]'
+    assert [item['dist'] for item in table.widget_table.items] == [1., 2., 3.]
+
+    # And are dropped when it is removed
+    table.widget_table.vue_remove_column({'column': 'dist'})
+    assert table.state.column_display_units == {'time': 'min'}
