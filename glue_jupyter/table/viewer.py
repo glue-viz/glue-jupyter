@@ -474,9 +474,9 @@ class TableGlue(TableBase):
                     c for c in self.state.removable_components if c is not cid
                 ]
             self.data.remove_component(cid)
+            for fn in getattr(self, '_column_removed_callbacks', []):
+                fn(label)
             self._update()
-        for fn in getattr(self, '_column_removed_callbacks', []):
-            fn(label)
 
 
 class TableLayerState(LayerState):
