@@ -147,8 +147,13 @@ class BqplotHistogramLayerArtist(LayerArtist):
         if not self.enabled:
             return
         # TODO: set other visual attrs
+        # Only reorder the histogram bars, and keep any marks from other
+        # layer artists (e.g. line layers) after them.
         sorted_layers = sorted(self.view.layers, key=lambda layer: layer.state.zorder)
-        self.view.figure.marks = [layer.bars for layer in sorted_layers]
+        bars = [layer.bars for layer in sorted_layers
+                if isinstance(layer, BqplotHistogramLayerArtist)]
+        others = [mark for mark in self.view.figure.marks if mark not in bars]
+        self.view.figure.marks = bars + others
         self.redraw()
 
     def _update_histogram(self, force=False, **kwargs):

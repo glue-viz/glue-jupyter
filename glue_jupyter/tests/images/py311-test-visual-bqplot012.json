@@ -17,5 +17,9 @@
   "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density_alignment[chromium-ylog]": "f4dc63374ac0e558839c078ce758aa8b8d126d77e3d0f42d3549783e2fbc9f4d",
   "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_log[chromium-xylog]": "734ca7064775c5b4ad91e5f42c6aaba9073632694cef1db885f3cce19b6c6bf8",
   "glue_jupyter.bqplot.histogram.tests.test_visual.test_visual_histogram1d_log[chromium-xylog]": "980fe26d6133e7d70f8ec3be1f1ca48a653bf435354503a21e3073af95fef0db",
-  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density_alignment[chromium-xylog]": "06a17b12b1d8a803dec71ff0b4d7c2aecd7f77f8b51373b8fcf40f844e194501"
+  "glue_jupyter.bqplot.scatter.tests.test_visual.test_visual_scatter2d_density_alignment[chromium-xylog]": "06a17b12b1d8a803dec71ff0b4d7c2aecd7f77f8b51373b8fcf40f844e194501",
+  "glue_jupyter.bqplot.tests.test_line_layers.test_visual_scatter_viewer[chromium]": "b70f8432b03b328990665cc6045d8e8ffcb8fd0224d0de7ae651f0b9a6f63059",
+  "glue_jupyter.bqplot.tests.test_line_layers.test_visual_profile_viewer[chromium]": "506f19204de5fc674639c781163011108973bde938a6cb85ebd96e5ed1d00f46",
+  "glue_jupyter.bqplot.tests.test_line_layers.test_visual_histogram_viewer[chromium]": "ffb13b43fb5a8b07fde76cea9c8e13c54707c4493de1d4892bd0d406c3706b9d",
+  "glue_jupyter.bqplot.tests.test_line_layers.test_visual_image_viewer[chromium]": "5ac9c0a9bbacec2fd9651ce9bf752f954b62472fd9c58d107b87a0a9308a1d5c"
 }
