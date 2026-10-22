@@ -4,7 +4,7 @@ from glue.config import settings, unit_converter
 from glue.core import Data
 
 from glue_jupyter.table import TableViewer
-from glue_jupyter.table.viewer import TableApplySubset
+from glue_jupyter.table.viewer import TableApplySubset, TableGlue
 
 
 def test_table_sort(app, dataxyz):
@@ -546,3 +546,9 @@ def test_table_remove_column(app, dataxyz):
     assert table.state.renameable_components == []
     assert table.state.removable_components == []
     assert [h['value'] for h in table.widget_table.headers] == ['y', 'z']
+
+
+def test_table_remove_column_without_state(dataxyz):
+    widget = TableGlue(data=dataxyz)
+    widget.vue_remove_column({'column': 'x'})
+    assert [h['value'] for h in widget.headers] == ['y', 'z']

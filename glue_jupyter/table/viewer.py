@@ -463,15 +463,16 @@ class TableGlue(TableBase):
             return
         if label in [c.label for c in self.data.main_components]:
             cid = self.data.id[label]
-            self.state.editable_components = [
-                c for c in self.state.editable_components if c is not cid
-            ]
-            self.state.renameable_components = [
-                c for c in self.state.renameable_components if c is not cid
-            ]
-            self.state.removable_components = [
-                c for c in self.state.removable_components if c is not cid
-            ]
+            if self.state is not None:
+                self.state.editable_components = [
+                    c for c in self.state.editable_components if c is not cid
+                ]
+                self.state.renameable_components = [
+                    c for c in self.state.renameable_components if c is not cid
+                ]
+                self.state.removable_components = [
+                    c for c in self.state.removable_components if c is not cid
+                ]
             self.data.remove_component(cid)
             self._update()
         for fn in getattr(self, '_column_removed_callbacks', []):
