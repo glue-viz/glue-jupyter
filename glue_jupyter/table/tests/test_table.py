@@ -493,3 +493,56 @@ def test_table_display_units_validation(app):
 
     # Empty units and unrecognized column names are allowed
     table.state.column_display_units = {'distance': '', 'not_a_column': 'km'}
+
+
+def test_table_renameable_removable_components(app, dataxyz):
+    table = app.table(data=dataxyz)
+
+    for header in table.widget_table.headers:
+        assert header['renameable'] is False
+        assert header['removable'] is False
+
+    table.state.renameable_components = [dataxyz.id['x']]
+    table.state.removable_components = [dataxyz.id['y']]
+
+    headers = {h['value']: h for h in table.widget_table.headers}
+    assert headers['x']['renameable'] is True
+    assert headers['x']['removable'] is False
+    assert headers['y']['renameable'] is False
+    assert headers['y']['removable'] is True
+
+
+def test_table_rename_column(app, dataxyz):
+    table = app.table(data=dataxyz)
+    cid = dataxyz.id['x']
+    table.state.renameable_components = [cid]
+
+    renamed = []
+    table.widget_table.add_column_renamed_callback(lambda old, new: renamed.append((old, new)))
+
+    table.widget_table.vue_rename_column({'column': 'x', 'newName': ' a '})
+
+    assert cid.label == 'a'
+    assert renamed == [('x', 'a')]
+    assert [h['value'] for h in table.widget_table.headers] == ['a', 'y', 'z']
+    assert [item['a'] for item in table.widget_table.items] == [1, 2, 3]
+
+
+def test_table_remove_column(app, dataxyz):
+    table = app.table(data=dataxyz)
+    cid = dataxyz.id['x']
+    table.state.editable_components = [cid]
+    table.state.renameable_components = [cid]
+    table.state.removable_components = [cid]
+
+    removed = []
+    table.widget_table.add_column_removed_callback(removed.append)
+
+    table.widget_table.vue_remove_column({'column': 'x'})
+
+    assert cid not in dataxyz.main_components
+    assert removed == ['x']
+    assert table.state.editable_components == []
+    assert table.state.renameable_components == []
+    assert table.state.removable_components == []
+    assert [h['value'] for h in table.widget_table.headers] == ['y', 'z']
