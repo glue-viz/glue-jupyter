@@ -36,6 +36,9 @@ jobs:
         - linux: py312-test
         - linux: py313-test
 
+        # test against the oldest supported versions of direct dependencies
+        - linux: py310-test-oldestdeps
+
         - macos: py310-test
         - macos: py311-test-bqplot012
         - macos: py313-test
