@@ -31,7 +31,11 @@ def press(page_session, key):
 @pytest.mark.skipif(not HAS_VISUAL_TEST_DEPS, reason="visual test dependencies are not installed")
 def test_keyboard_navigation_read_only(solara_test, page_session):
     errors = []
-    page_session.on("pageerror", lambda error: errors.append(error))
+
+    def on_page_error(error):
+        errors.append(error)
+
+    page_session.on("pageerror", on_page_error)
     _data, table = create_table_viewer(page_session)
     edit_input = page_session.locator(".edit-bar-input input")
     edit_label = page_session.locator(".edit-bar-label")
