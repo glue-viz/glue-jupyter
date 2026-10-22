@@ -294,6 +294,7 @@ def test_table_editable_components(app, dataxyz):
     assert y_header['editable'] is True
     assert z_header['editable'] is False
 
+
 @pytest.mark.parametrize('new_value', [999, 1.4e-12, np.inf, np.nan])
 def test_table_cell_edit(app, datamix, new_value):
     """Test that cell editing updates the underlying data."""
