@@ -11,10 +11,11 @@ from glue_jupyter.bqplot.common.line_layers import (BqplotVerticalLineLayerArtis
                                                     add_vertical_lines,
                                                     add_horizontal_lines)
 from glue_jupyter.common.state_widgets.layer_line import LineLayerStateWidget
+from glue_jupyter.tests.helpers import visual_widget_test
 
 
-def make_lines(app, link_cid):
-    lines = Data(position=[1., 3., 2., 3.], label='lines')
+def make_lines(app, link_cid, positions=(1., 3., 2., 3.), label='lines'):
+    lines = Data(position=list(positions), label=label)
     app.data_collection.append(lines)
     app.data_collection.add_link(LinkSame(lines.id['position'], link_cid))
     return lines
@@ -29,22 +30,40 @@ def assert_positions(artist, expected, horizontal=False):
     assert_allclose(along[:2], [0, 1])
 
 
+def show_figure(viewer):
+    figure = viewer.figure_widget
+    figure.layout = {"width": "400px", "height": "250px"}
+    return figure
+
+
+# The setup for each viewer is shared between the tests that check the line
+# positions and the visual tests. Horizontal lines are only available in the
+# viewers that have a y attribute (scatter and image).
+
+
+def setup_scatter_viewer(app, dataxyz):
+    vlines = make_lines(app, dataxyz.id['x'], (1.5, 2.5, 2., 2.5), label='vlines')
+    hlines = make_lines(app, dataxyz.id['y'], (2.5, 3.5, 3., 3.5), label='hlines')
+    viewer = app.scatter2d(x='x', y='y', data=dataxyz, show=False)
+    vartist = add_vertical_lines(viewer, vlines)
+    vartist.state.color = 'red'
+    hartist = add_horizontal_lines(viewer, hlines)
+    hartist.state.color = 'blue'
+    hartist.state.linestyle = 'dashed'
+    return viewer, vartist, hartist
+
+
 def test_scatter_viewer(app, dataxyz):
 
-    lines = make_lines(app, dataxyz.id['x'])
-    app.data_collection.add_link(LinkSame(lines.id['position'], dataxyz.id['y']))
-
-    viewer = app.scatter2d(x='x', y='y', data=dataxyz)
-    vartist = add_vertical_lines(viewer, lines)
-    hartist = add_horizontal_lines(viewer, lines)
+    viewer, vartist, hartist = setup_scatter_viewer(app, dataxyz)
 
     assert isinstance(vartist, BqplotVerticalLineLayerArtist)
     assert isinstance(hartist, BqplotHorizontalLineLayerArtist)
     assert vartist.enabled and hartist.enabled
 
     # Values are unique-d and sorted
-    assert_positions(vartist, [1, 2, 3])
-    assert_positions(hartist, [1, 2, 3], horizontal=True)
+    assert_positions(vartist, [1.5, 2, 2.5])
+    assert_positions(hartist, [2.5, 3, 3.5], horizontal=True)
 
     # The scale along the lines is an independent [0:1] scale
     assert vartist.line_mark.scales['y'] is vartist.scale_along_lines
@@ -56,20 +75,31 @@ def test_scatter_viewer(app, dataxyz):
     widget_cls(vartist.state)
 
 
-def test_profile_viewer(app):
+@visual_widget_test
+def test_visual_scatter_viewer(tmp_path, page_session, solara_test, app, dataxyz):
+    viewer, _, _ = setup_scatter_viewer(app, dataxyz)
+    return show_figure(viewer)
 
-    spectrum = Data(flux=np.random.random(10), label='spectrum')
+
+def setup_profile_viewer(app):
+    spectrum = Data(flux=np.sin(np.arange(10) / 2), label='spectrum')
     app.data_collection.append(spectrum)
     lines = make_lines(app, spectrum.pixel_component_ids[0])
-
-    viewer = app.profile1d(data=spectrum)
+    viewer = app.profile1d(data=spectrum, show=False)
     artist = add_vertical_lines(viewer, lines)
+    artist.state.color = 'gray'
+    artist.state.linestyle = 'dashed'
+    # Subsets created after the fact follow the parent dataset
+    app.data_collection.new_subset_group(label='high', subset_state=lines.id['position'] > 1.5)
+    return viewer, lines, artist
+
+
+def test_profile_viewer(app):
+
+    viewer, lines, artist = setup_profile_viewer(app)
 
     assert artist.enabled
     assert_positions(artist, [1, 2, 3])
-
-    # Subsets created after the fact follow the parent dataset
-    app.data_collection.new_subset_group(label='high', subset_state=lines.id['position'] > 1.5)
 
     subset_artists = [layer for layer in viewer.layers
                       if isinstance(layer, BqplotVerticalLineLayerArtist)
@@ -81,6 +111,12 @@ def test_profile_viewer(app):
     # Horizontal lines are not available in the profile viewer
     with pytest.raises(ValueError, match='does not define a y axis'):
         add_horizontal_lines(viewer, lines)
+
+
+@visual_widget_test
+def test_visual_profile_viewer(tmp_path, page_session, solara_test, app):
+    viewer, _, _ = setup_profile_viewer(app)
+    return show_figure(viewer)
 
 
 def test_profile_viewer_display_units(app):
@@ -113,17 +149,23 @@ def test_profile_viewer_display_units(app):
     assert_positions(subset_artist, [2, 3])
 
 
-def test_histogram_viewer(app):
-
+def setup_histogram_viewer(app):
     data = Data(values=[1., 1., 2., 3., 5., 8.], label='data')
     app.data_collection.append(data)
-    lines = make_lines(app, data.id['values'])
-
-    viewer = app.histogram1d(x='values', data=data)
+    lines = make_lines(app, data.id['values'], (2.5, 6.5, 4.5, 6.5))
+    viewer = app.histogram1d(x='values', data=data, show=False)
     artist = add_vertical_lines(viewer, lines)
+    artist.state.color = 'black'
+    artist.state.linestyle = 'dashdot'
+    return viewer, artist
+
+
+def test_histogram_viewer(app):
+
+    viewer, artist = setup_histogram_viewer(app)
 
     assert artist.enabled
-    assert_positions(artist, [1, 2, 3])
+    assert_positions(artist, [2.5, 4.5, 6.5])
 
     # Updating the histogram visual attributes reorders the bars, which
     # should not fail on or drop the line mark
@@ -131,15 +173,39 @@ def test_histogram_viewer(app):
     assert artist.line_mark in viewer.figure.marks
 
 
+@visual_widget_test
+def test_visual_histogram_viewer(tmp_path, page_session, solara_test, app):
+    viewer, _ = setup_histogram_viewer(app)
+    return show_figure(viewer)
+
+
+def setup_image_viewer(app, data_image):
+    vlines = make_lines(app, data_image.pixel_component_ids[1], (16., 48., 32., 48.),
+                        label='vlines')
+    hlines = make_lines(app, data_image.pixel_component_ids[0], (20., 40.), label='hlines')
+    viewer = app.imshow(data=data_image, show=False)
+    vartist = add_vertical_lines(viewer, vlines)
+    vartist.state.color = 'cyan'
+    hartist = add_horizontal_lines(viewer, hlines)
+    hartist.state.color = 'magenta'
+    hartist.state.linestyle = 'dotted'
+    hartist.state.linewidth = 2
+    return viewer, vartist, hartist
+
+
 def test_image_viewer(app, data_image):
 
-    lines = make_lines(app, data_image.pixel_component_ids[1])
+    viewer, vartist, hartist = setup_image_viewer(app, data_image)
 
-    viewer = app.imshow(data=data_image)
-    artist = add_vertical_lines(viewer, lines)
+    assert vartist.enabled and hartist.enabled
+    assert_positions(vartist, [16, 32, 48])
+    assert_positions(hartist, [20, 40], horizontal=True)
 
-    assert artist.enabled
-    assert_positions(artist, [1, 2, 3])
+
+@visual_widget_test
+def test_visual_image_viewer(tmp_path, page_session, solara_test, app, data_image):
+    viewer, _, _ = setup_image_viewer(app, data_image)
+    return show_figure(viewer)
 
 
 def test_styling(app, dataxyz):
