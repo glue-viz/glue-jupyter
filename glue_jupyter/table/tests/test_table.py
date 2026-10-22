@@ -583,3 +583,24 @@ def test_table_rename_remove_column_display_units(app):
     # And are dropped when it is removed
     table.widget_table.vue_remove_column({'column': 'dist'})
     assert table.state.column_display_units == {'time': 'min'}
+
+
+def test_table_rename_remove_column_sorting(app):
+    data = Data(x=[2, 3, 1], y=[1, 2, 3], label="sorted data")
+    app.add_data(data)
+    table = app.table(data=data)
+    widget = table.widget_table
+
+    # The sort follows the column when it is renamed
+    widget.vue_sort_column('x')
+    widget.vue_sort_column('x')
+    widget.vue_rename_column({'column': 'x', 'newName': 'a'})
+    assert widget.options['sortBy'] == ['a']
+    assert widget.options['sortDesc'] == [True]
+    assert [item['a'] for item in widget.items] == [3, 2, 1]
+
+    # And is dropped when it is removed
+    widget.vue_remove_column({'column': 'a'})
+    assert widget.options['sortBy'] == []
+    assert widget.options['sortDesc'] == []
+    assert [item['y'] for item in widget.items] == [1, 2, 3]
