@@ -26,18 +26,18 @@ authors = [
 
 dependencies = [
     "echo>=0.16.0",
-    "glue-core>=1.25.0",
-    "ipympl>=0.3.0",
+    "glue-core>=1.28.0",
+    "ipympl>=0.7.0",
     "ipyvolume>=0.6.0",
     "ipython_genutils>=0.2",  # missing ipyvolume dependency
-    "tornado",  # missing ipyvolume dependency
+    "tornado>=6.2",  # missing ipyvolume dependency
     "ipywidgets>=7.7.0",
     "ipyvuetify>=3.0.0",
     "bqplot-image-gl>=1.9.2",
     "bqplot>=0.12.46",
     "bqplot-linlog>=0.2.0",
     "bqplot-gl",
-    "scikit-image",
+    "scikit-image>=0.23.1",
 ]
 
 [project.urls]
@@ -57,8 +57,8 @@ docs = [
 ]
 
 test = [
-    "pytest",
-    "pytest-cov",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
 ]
 
 nbtest = [
