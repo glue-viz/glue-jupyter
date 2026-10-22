@@ -460,6 +460,8 @@ class TableGlue(TableBase):
         new_name = data.get('newName', '').strip()
         if not old_name or not new_name or old_name == new_name:
             return
+        if self.data is not None and new_name in [c.label for c in self.data.components]:
+            return  # Duplicate labels would make lookups by column name ambiguous
         if self.data is not None and old_name in [c.label for c in self.data.main_components]:
             self.data.id[old_name].label = new_name
             if self.state is not None and old_name in self.state.column_display_units:
