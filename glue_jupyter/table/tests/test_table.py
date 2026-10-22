@@ -604,3 +604,16 @@ def test_table_rename_remove_column_sorting(app):
     assert widget.options['sortBy'] == []
     assert widget.options['sortDesc'] == []
     assert [item['y'] for item in widget.items] == [1, 2, 3]
+
+
+def test_table_rename_column_existing_label(app, dataxyz):
+    table = app.table(data=dataxyz)
+
+    renamed = []
+    table.widget_table.add_column_renamed_callback(lambda old, new: renamed.append((old, new)))
+
+    table.widget_table.vue_rename_column({'column': 'x', 'newName': 'y'})
+
+    assert dataxyz.id['x'].label == 'x'
+    assert renamed == []
+    assert [h['value'] for h in table.widget_table.headers] == ['x', 'y', 'z']
