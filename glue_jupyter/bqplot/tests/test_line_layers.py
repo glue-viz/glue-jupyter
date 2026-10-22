@@ -125,6 +125,11 @@ def test_histogram_viewer(app):
     assert artist.enabled
     assert_positions(artist, [1, 2, 3])
 
+    # Updating the histogram visual attributes reorders the bars, which
+    # should not fail on or drop the line mark
+    viewer.state.x_log = True
+    assert artist.line_mark in viewer.figure.marks
+
 
 def test_image_viewer(app, data_image):
 
