@@ -429,6 +429,22 @@ class TableGlue(TableBase):
         # Refresh table
         self._update_items()
 
+    def _update_sort_column(self, old_name, new_name):
+        """Rename a column in the sort options, or drop it if new_name is None."""
+        sort_by = self.options.get('sortBy') or []
+        if old_name not in sort_by:
+            return
+        sort_desc = self.options.get('sortDesc') or []
+        new_sort_by, new_sort_desc = [], []
+        for index, column in enumerate(sort_by):
+            if column == old_name:
+                if new_name is None:
+                    continue
+                column = new_name
+            new_sort_by.append(column)
+            new_sort_desc.append(sort_desc[index] if index < len(sort_desc) else False)
+        self.options = {**self.options, 'sortBy': new_sort_by, 'sortDesc': new_sort_desc}
+
     def add_column_renamed_callback(self, fn):
         """Register a callback invoked with (old_name, new_name) after a column rename."""
         if not hasattr(self, '_column_renamed_callbacks'):
@@ -452,6 +468,7 @@ class TableGlue(TableBase):
                     new_name if column == old_name else column: unit
                     for column, unit in self.state.column_display_units.items()
                 }
+            self._update_sort_column(old_name, new_name)
             for fn in getattr(self, '_column_renamed_callbacks', []):
                 fn(old_name, new_name)
             self._update()
@@ -484,6 +501,7 @@ class TableGlue(TableBase):
                     if column != label
                 }
             self.data.remove_component(cid)
+            self._update_sort_column(label, None)
             for fn in getattr(self, '_column_removed_callbacks', []):
                 fn(label)
             self._update()
