@@ -552,3 +552,15 @@ def test_table_remove_column_without_state(dataxyz):
     widget = TableGlue(data=dataxyz)
     widget.vue_remove_column({'column': 'x'})
     assert [h['value'] for h in widget.headers] == ['y', 'z']
+
+
+def test_table_remove_unknown_column(app, dataxyz):
+    table = app.table(data=dataxyz)
+
+    removed = []
+    table.widget_table.add_column_removed_callback(removed.append)
+
+    table.widget_table.vue_remove_column({'column': 'not_a_column'})
+
+    assert removed == []
+    assert [h['value'] for h in table.widget_table.headers] == ['x', 'y', 'z']
