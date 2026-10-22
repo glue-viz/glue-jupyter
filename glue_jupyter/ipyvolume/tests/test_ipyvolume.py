@@ -208,7 +208,7 @@ def test_volshow_stretch(app, data_volume):
     layer_widget = v.layer_options.layers[-1]['layer_panel']
 
     assert layer.state.stretch == 'linear'
-    assert [item["text"] for item in layer_widget.stretch_items] == \
+    assert [item["title"] for item in layer_widget.stretch_items] == \
            [stretches.display_func(key) for key in stretches.members.keys()]
     assert layer_widget.stretch_selected == 0
 

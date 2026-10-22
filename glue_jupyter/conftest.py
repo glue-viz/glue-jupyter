@@ -11,6 +11,11 @@ def dataxyz():
 
 
 @pytest.fixture
+def datamix():
+    return Data(x=[1, 2, 3], y=[2.3, 3.14, 4], z=['a', 'b', 'c'], label="mixed type data")
+
+
+@pytest.fixture
 def datacat():
     return Data(a=['a', 'b', 'c'], b=['d', 'e', 'f'], label="categorical data")
 

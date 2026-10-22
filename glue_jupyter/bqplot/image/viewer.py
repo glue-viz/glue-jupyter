@@ -7,6 +7,9 @@ from ...link import on_change
 
 from ..common.viewer import BqplotBaseView
 from ..scatter.layer_artist import BqplotScatterLayerArtist
+from ..common.line_layers import (BqplotVerticalLineLayerArtist,
+                                  BqplotHorizontalLineLayerArtist)
+from ...common.state_widgets.layer_line import LineLayerStateWidget
 
 from .layer_artist import BqplotImageLayerArtist, BqplotImageSubsetLayerArtist
 from .frb_mark import FRBImage
@@ -29,7 +32,9 @@ class BqplotImageView(BqplotBaseView):
 
     _layer_style_widget_cls = {BqplotImageLayerArtist: ImageLayerStateWidget,
                                BqplotImageSubsetLayerArtist: ImageSubsetLayerStateWidget,
-                               BqplotScatterLayerArtist: ScatterLayerStateWidget}
+                               BqplotScatterLayerArtist: ScatterLayerStateWidget,
+                               BqplotVerticalLineLayerArtist: LineLayerStateWidget,
+                               BqplotHorizontalLineLayerArtist: LineLayerStateWidget}
     _state_cls = BqplotImageViewerState
     _options_cls = ImageViewerStateWidget
 

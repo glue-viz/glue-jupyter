@@ -61,8 +61,8 @@ def test_link_glue_choices():
 
     # Items should be populated with display labels
     assert len(widget.x_items) == 3
-    assert widget.x_items[0] == {'text': 'A', 'value': 0}
-    assert widget.x_items[2] == {'text': 'C', 'value': 2}
+    assert widget.x_items[0] == {'title': 'A', 'value': 0}
+    assert widget.x_items[2] == {'title': 'C', 'value': 2}
 
     # Selected should reflect current state (index 0)
     assert widget.x_selected == 0

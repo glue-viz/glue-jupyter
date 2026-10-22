@@ -7,22 +7,22 @@
             <v-select label="y axis" :items="y_att_items" v-model="y_att_selected" hide-details />
         </div>
         <div>
-            <v-subheader class="pl-0 slider-label">log x axis</v-subheader>
+            <div class="slider-label">log x axis</div>
             <v-switch v-model="x_log" hide-details style="margin-top: 0"/>
         </div>
         <div>
-            <v-subheader class="pl-0 slider-label">log y axis</v-subheader>
+            <div class="slider-label">log y axis</div>
             <v-switch v-model="y_log" hide-details style="margin-top: 0"/>
         </div>
         <div>
-            <v-subheader class="pl-0 slider-label">show axes</v-subheader>
+            <div class="slider-label">show axes</div>
             <v-switch v-model="show_axes" hide-details style="margin-top: 0"/>
         </div>
     </div>
 </template>
 
 <style id="viewer_image">
-    .glue-viewer-scatter .v-subheader.slider-label {
+    .glue-viewer-scatter .slider-label {
         font-size: 12px;
         height: 16px;
         margin-top: 6px;

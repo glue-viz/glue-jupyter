@@ -25,20 +25,19 @@ authors = [
 ]
 
 dependencies = [
-    "echo>=0.14.0",
-    "glue-core>=1.25.0",
-    "ipympl>=0.3.0",
+    "echo>=0.16.0",
+    "glue-core>=1.28.0",
+    "ipympl>=0.7.0",
     "ipyvolume>=0.6.0",
     "ipython_genutils>=0.2",  # missing ipyvolume dependency
-    "tornado",  # missing ipyvolume dependency
+    "tornado>=6.2",  # missing ipyvolume dependency
     "ipywidgets>=7.7.0",
-    "ipyvue>=1.2.0,<2",
-    "ipyvuetify>=1.2.0,<2",
+    "ipyvuetify>=3.0.0",
     "bqplot-image-gl>=1.9.2",
     "bqplot>=0.12.46",
     "bqplot-linlog>=0.2.0",
     "bqplot-gl",
-    "scikit-image",
+    "scikit-image>=0.23.1",
 ]
 
 [project.urls]
@@ -58,8 +57,8 @@ docs = [
 ]
 
 test = [
-    "pytest",
-    "pytest-cov",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
 ]
 
 nbtest = [
@@ -74,8 +73,7 @@ visualtest = [
     "playwright==1.41.2",
     "pytest-playwright==0.5.2",
     "pytest-mpl>=0.19.0",
-    "solara[pytest]>=1.44.1",
-    "starlette<1.0"
+    "solara[pytest]>=1.61.0",
 ]
 
 [build-system]
@@ -169,6 +167,9 @@ lint.ignore = [  # NOTE: non-permanent exclusions should be added to `.ruff.toml
 
     # flake8-commas (COM)
     "COM812",  # TrailingCommaMissing
+
+    # flake8-copyright (CPY)
+    "CPY001",  # Missing copyright notice at top of file
 
     # pydocstyle (D)
     # Missing Docstrings

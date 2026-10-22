@@ -48,7 +48,7 @@ class MultiSliceWidgetHelper(object):
         slices = []
         for i, slider in enumerate(self._sliders):
             if slider is not None:
-                slices.append(slider.value)
+                slices.append(slider.model_value)
             else:
                 slices.append(self.viewer_state.slices[i])
         self.viewer_state.slices = tuple(slices)
@@ -96,7 +96,7 @@ class MultiSliceWidgetHelper(object):
                         label = self.viewer_state.reference_data.world_component_ids[i].label
                     slider = Slider(min=0, max=self.data.shape[i]-1, label=label)
 
-                    slider.observe(self.sync_state_from_sliders, 'value')
+                    slider.observe(self.sync_state_from_sliders, 'model_value')
                     self._sliders.append(slider)
                     self.layout.children += (slider,)
                 else:
@@ -105,6 +105,6 @@ class MultiSliceWidgetHelper(object):
         for i in range(self.data.ndim):
             if self._sliders[i] is not None:
                 if isinstance(self.viewer_state.slices[i], AggregateSlice):
-                    self._sliders[i].value = self.viewer_state.slices[i].center
+                    self._sliders[i].model_value = self.viewer_state.slices[i].center
                 else:
-                    self._sliders[i].value = self.viewer_state.slices[i]
+                    self._sliders[i].model_value = self.viewer_state.slices[i]
