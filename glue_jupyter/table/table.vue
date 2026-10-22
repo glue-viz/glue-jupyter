@@ -196,8 +196,8 @@ module.exports = {
       if (this.editingHeader === null) { this.sort_column(column); }
     },
     enterHeaderRename(column) {
-      const header = this.headers.find(h => h.value === column);
-      this.headerEditValue = header ? header.text : column;
+      // Use the bare column name rather than header.text, which includes any units
+      this.headerEditValue = column;
       this.editingHeader = column;
       this.headerMode = 'rename';
       this.$nextTick(() => {
