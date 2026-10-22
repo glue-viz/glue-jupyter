@@ -48,10 +48,19 @@ def test_keyboard_navigation_read_only(solara_test, page_session):
     press(page_session, 'ArrowUp')
     assert edit_label.inner_text() == 'x [1]'
 
-    # Moving past the last row clears the selection, and pressing Enter with
-    # nothing selected should not raise an error
+    # Navigation stops at the first and last rows
     press(page_session, 'ArrowDown')
     press(page_session, 'ArrowDown')
+    assert edit_label.inner_text() == 'x [2]'
+    press(page_session, 'Enter')
+    assert edit_label.inner_text() == 'x [2]'
+    press(page_session, 'ArrowUp')
+    press(page_session, 'ArrowUp')
+    press(page_session, 'ArrowUp')
+    assert edit_label.inner_text() == 'x [0]'
+
+    # Pressing keys with nothing selected should not raise an error
+    press(page_session, 'Escape')
     assert edit_label.inner_text() == 'Click a cell to view'
     press(page_session, 'Enter')
     press(page_session, 'ArrowUp')
@@ -86,3 +95,12 @@ def test_keyboard_navigation_commits_edit(solara_test, page_session):
     assert edit_label.inner_text() == 'x [0]'
     assert edit_input.input_value() == '42'
     assert list(data['x']) == [42., 1., 2.]
+
+    # Committing on the last row stays on that row
+    press(page_session, 'ArrowDown')
+    press(page_session, 'ArrowDown')
+    edit_input.fill('7')
+    press(page_session, 'Enter')
+    assert list(data['x']) == [42., 1., 7.]
+    assert edit_label.inner_text() == 'x [2]'
+    assert edit_input.input_value() == '7'

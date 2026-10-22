@@ -229,12 +229,9 @@ module.exports = {
         const column = this.selectedCell.column;
         const index = this.items.findIndex(item => item.__row__ === this.selectedCell.row);
         const nextItem = index === -1 ? undefined : this.items[index + step];
+        // At the first or last row of the current page, stay on the current cell
         if (nextItem) {
           this.selectCell(nextItem.__row__, column, nextItem[column], this.selectedCell.editable);
-        } else {
-          // No more rows on the current page, clear selection
-          this.selectedCell = null;
-          this.editValue = '';
         }
       }
     },
