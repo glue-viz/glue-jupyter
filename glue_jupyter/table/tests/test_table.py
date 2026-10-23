@@ -419,6 +419,7 @@ def test_table_display_units(app):
     items = table.widget_table.items
     assert [item['distance'] for item in items] == [1., 2., 3.]
     assert table.widget_table.headers[0]['text'] == 'distance [km]'
+    assert table.widget_table.headers[0]['title'] == 'distance [km]'
 
     # The underlying data is unchanged
     assert list(data['distance']) == [1000., 2000., 3000.]
