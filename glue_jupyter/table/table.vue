@@ -72,14 +72,25 @@
             </th>
             <th v-for="header in headers"
                 :key="header.text"
-                @click="toggleSort(header.value)"
+                @click="onHeaderClick(header.value)"
+                @mouseenter="hoverHeader = header.value"
+                @mouseleave="hoverHeader = null"
                 class="text-left text-no-wrap"
-                style="cursor: pointer; user-select: none;"
+                style="cursor: pointer; user-select: none; padding: 0 8px; white-space: nowrap; position: relative;"
+                :style="editingHeader === header.value ? {minWidth: '240px'} : {}"
             >
               {{ header.text }}
               <v-icon v-if="options.sortBy && options.sortBy[0] === header.value">
                 {{ options.sortDesc && options.sortDesc[0] ? 'mdi-menu-down' : 'mdi-menu-up' }}
               </v-icon>
+              <v-icon size="x-small" v-if="hoverHeader === header.value && editingHeader !== header.value && header.renameable" @click.stop="enterHeaderRename(header.value)" style="cursor:pointer;margin-left:2px" title="Rename column">mdi-pencil</v-icon>
+              <v-icon size="x-small" v-if="hoverHeader === header.value && editingHeader !== header.value && header.removable" @click.stop="enterHeaderRemove(header.value)" style="cursor:pointer" title="Delete column">mdi-delete</v-icon>
+
+              <!-- Rename mode: fills the th (min-width ensures it fits) -->
+              <span v-if="editingHeader === header.value && headerMode === 'rename'" @click.stop style="position:absolute;top:0;left:0;right:0;bottom:0;display:inline-flex;align-items:center;gap:4px;background:white;padding:0 4px;z-index:1;"><input :data-header="header.value" v-model="headerEditValue" @keyup.enter.stop="acceptHeader(header.value)" @keyup.escape.stop="cancelHeader()" @click.stop class="glue-header-edit-input"/><v-icon size="x-small" @click.stop="cancelHeader()" style="cursor:pointer" title="Cancel (Esc)">mdi-close</v-icon><v-icon size="x-small" @click.stop="acceptHeader(header.value)" style="cursor:pointer" title="Accept (Enter)">mdi-check</v-icon></span>
+
+              <!-- Delete confirmation: fills the th (min-width ensures it fits) -->
+              <span v-if="editingHeader === header.value && headerMode === 'remove'" @click.stop style="position:absolute;top:0;left:0;right:0;bottom:0;display:inline-flex;align-items:center;gap:4px;background:#FFF3CD;border:1px solid #FFC107;padding:0 4px;z-index:1;font-size:11px;white-space:nowrap;"><v-icon size="x-small" style="color:#F57C00;">mdi-alert</v-icon><span>remove '{{ header.text }}'?</span><v-icon size="x-small" @click.stop="cancelHeader()" style="cursor:pointer" title="Cancel">mdi-close</v-icon><v-icon size="x-small" @click.stop="deleteHeader(header.value)" style="cursor:pointer" title="Confirm delete">mdi-delete</v-icon></span>
             </th>
           </tr>
       </template>
@@ -122,8 +133,12 @@
 module.exports = {
   data: function() {
     return {
-      selectedCell: null,  // { row: number, column: string, editable: boolean, value: string }
-      editValue: ''
+      selectedCell: null,   // { row: number, column: string, editable: boolean }
+      editValue: '',
+      hoverHeader: null,    // column value currently being hovered
+      editingHeader: null,  // column value currently in rename/remove mode
+      headerMode: null,     // 'rename' | 'remove' | null
+      headerEditValue: ''   // live text in the rename input
     };
   },
   computed: {
@@ -168,9 +183,45 @@ module.exports = {
     }
   },
   methods: {
-    toggleSort(column) {
-      this.sort_column(column);
+    // ---- header editing ----
+    onHeaderClick(column) {
+      if (this.editingHeader === null) { this.sort_column(column); }
     },
+    enterHeaderRename(column) {
+      // Use the bare column name rather than header.text, which includes any units
+      this.headerEditValue = column;
+      this.editingHeader = column;
+      this.headerMode = 'rename';
+      this.$nextTick(() => {
+        const input = this.$el.querySelector(`input[data-header="${CSS.escape(column)}"]`);
+        if (input) { input.focus(); input.select(); }
+      });
+    },
+    enterHeaderRemove(column) {
+      this.editingHeader = column;
+      this.headerMode = 'remove';
+    },
+    acceptHeader(column) {
+      const newName = this.headerEditValue.trim();
+      this.editingHeader = null;
+      this.headerMode = null;
+      this.headerEditValue = '';
+      if (newName && newName !== column) {
+        this.rename_column({ column, newName });
+      }
+    },
+    cancelHeader() {
+      this.editingHeader = null;
+      this.headerMode = null;
+      this.headerEditValue = '';
+    },
+    deleteHeader(column) {
+      this.editingHeader = null;
+      this.headerMode = null;
+      this.headerEditValue = '';
+      this.remove_column({ column });
+    },
+    // ---- cell editing ----
     formatCellValue(value) {
       return value !== null && value !== undefined ? String(value) : '';
     },
@@ -369,5 +420,22 @@ module.exports = {
 .glue-cell-selected {
   background-color: #E3F2FD !important;
   box-shadow: inset 0 0 0 2px #1976D2;
+}
+
+/* ---- Column header rename / delete styles ---- */
+.glue-header-edit-input {
+  font-size: 12px;
+  border: 1px solid #90CAF9;
+  border-radius: 3px;
+  padding: 1px 5px;
+  width: 110px;
+  outline: none;
+  vertical-align: middle;
+  background: #fff;
+}
+
+.glue-header-edit-input:focus {
+  border-color: #1976D2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 </style>

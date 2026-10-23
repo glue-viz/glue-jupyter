@@ -4,7 +4,7 @@ from glue.config import settings, unit_converter
 from glue.core import Data
 
 from glue_jupyter.table import TableViewer
-from glue_jupyter.table.viewer import TableApplySubset
+from glue_jupyter.table.viewer import TableApplySubset, TableGlue
 
 
 def test_table_sort(app, dataxyz):
@@ -419,6 +419,7 @@ def test_table_display_units(app):
     items = table.widget_table.items
     assert [item['distance'] for item in items] == [1., 2., 3.]
     assert table.widget_table.headers[0]['text'] == 'distance [km]'
+    assert table.widget_table.headers[0]['title'] == 'distance [km]'
 
     # The underlying data is unchanged
     assert list(data['distance']) == [1000., 2000., 3000.]
@@ -493,3 +494,127 @@ def test_table_display_units_validation(app):
 
     # Empty units and unrecognized column names are allowed
     table.state.column_display_units = {'distance': '', 'not_a_column': 'km'}
+
+
+def test_table_renameable_removable_components(app, dataxyz):
+    table = app.table(data=dataxyz)
+
+    for header in table.widget_table.headers:
+        assert header['renameable'] is False
+        assert header['removable'] is False
+
+    table.state.renameable_components = [dataxyz.id['x']]
+    table.state.removable_components = [dataxyz.id['y']]
+
+    headers = {h['value']: h for h in table.widget_table.headers}
+    assert headers['x']['renameable'] is True
+    assert headers['x']['removable'] is False
+    assert headers['y']['renameable'] is False
+    assert headers['y']['removable'] is True
+
+
+def test_table_rename_column(app, dataxyz):
+    table = app.table(data=dataxyz)
+    cid = dataxyz.id['x']
+    table.state.renameable_components = [cid]
+
+    renamed = []
+    table.widget_table.add_column_renamed_callback(lambda old, new: renamed.append((old, new)))
+
+    table.widget_table.vue_rename_column({'column': 'x', 'newName': ' a '})
+
+    assert cid.label == 'a'
+    assert renamed == [('x', 'a')]
+    assert [h['value'] for h in table.widget_table.headers] == ['a', 'y', 'z']
+    assert [item['a'] for item in table.widget_table.items] == [1, 2, 3]
+
+
+def test_table_remove_column(app, dataxyz):
+    table = app.table(data=dataxyz)
+    cid = dataxyz.id['x']
+    table.state.editable_components = [cid]
+    table.state.renameable_components = [cid]
+    table.state.removable_components = [cid]
+
+    removed = []
+    table.widget_table.add_column_removed_callback(removed.append)
+
+    table.widget_table.vue_remove_column({'column': 'x'})
+
+    assert cid not in dataxyz.main_components
+    assert removed == ['x']
+    assert table.state.editable_components == []
+    assert table.state.renameable_components == []
+    assert table.state.removable_components == []
+    assert [h['value'] for h in table.widget_table.headers] == ['y', 'z']
+
+
+def test_table_remove_column_without_state(dataxyz):
+    widget = TableGlue(data=dataxyz)
+    widget.vue_remove_column({'column': 'x'})
+    assert [h['value'] for h in widget.headers] == ['y', 'z']
+
+
+def test_table_remove_unknown_column(app, dataxyz):
+    table = app.table(data=dataxyz)
+
+    removed = []
+    table.widget_table.add_column_removed_callback(removed.append)
+
+    table.widget_table.vue_remove_column({'column': 'not_a_column'})
+
+    assert removed == []
+    assert [h['value'] for h in table.widget_table.headers] == ['x', 'y', 'z']
+
+
+def test_table_rename_remove_column_display_units(app):
+    data = Data(distance=[1000., 2000., 3000.], time=[1., 2., 3.], label="renamed unit data")
+    data.get_component('distance').units = 'm'
+    data.get_component('time').units = 's'
+    app.add_data(data)
+    table = app.table(data=data)
+    table.state.column_display_units = {'distance': 'km', 'time': 'min'}
+
+    # The display units follow the column when it is renamed
+    table.widget_table.vue_rename_column({'column': 'distance', 'newName': 'dist'})
+    assert table.state.column_display_units == {'dist': 'km', 'time': 'min'}
+    assert table.widget_table.headers[0]['text'] == 'dist [km]'
+    assert [item['dist'] for item in table.widget_table.items] == [1., 2., 3.]
+
+    # And are dropped when it is removed
+    table.widget_table.vue_remove_column({'column': 'dist'})
+    assert table.state.column_display_units == {'time': 'min'}
+
+
+def test_table_rename_remove_column_sorting(app):
+    data = Data(x=[2, 3, 1], y=[1, 2, 3], label="sorted data")
+    app.add_data(data)
+    table = app.table(data=data)
+    widget = table.widget_table
+
+    # The sort follows the column when it is renamed
+    widget.vue_sort_column('x')
+    widget.vue_sort_column('x')
+    widget.vue_rename_column({'column': 'x', 'newName': 'a'})
+    assert widget.options['sortBy'] == ['a']
+    assert widget.options['sortDesc'] == [True]
+    assert [item['a'] for item in widget.items] == [3, 2, 1]
+
+    # And is dropped when it is removed
+    widget.vue_remove_column({'column': 'a'})
+    assert widget.options['sortBy'] == []
+    assert widget.options['sortDesc'] == []
+    assert [item['y'] for item in widget.items] == [1, 2, 3]
+
+
+def test_table_rename_column_existing_label(app, dataxyz):
+    table = app.table(data=dataxyz)
+
+    renamed = []
+    table.widget_table.add_column_renamed_callback(lambda old, new: renamed.append((old, new)))
+
+    table.widget_table.vue_rename_column({'column': 'x', 'newName': 'y'})
+
+    assert dataxyz.id['x'].label == 'x'
+    assert renamed == []
+    assert [h['value'] for h in table.widget_table.headers] == ['x', 'y', 'z']
