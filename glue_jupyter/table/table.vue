@@ -183,14 +183,6 @@ module.exports = {
     }
   },
   methods: {
-    onOptionsUpdate(vuetifyOpts) {
-      // Propagate page/itemsPerPage changes to Python; sort is handled by sort_column
-      const newPage = vuetifyOpts.page;
-      const newIpp = vuetifyOpts.itemsPerPage;
-      if (newPage !== this.options.page || newIpp !== this.options.itemsPerPage) {
-        this.options = { ...this.options, page: newPage, itemsPerPage: newIpp };
-      }
-    },
     // ---- header editing ----
     onHeaderClick(column) {
       if (this.editingHeader === null) { this.sort_column(column); }
@@ -230,9 +222,6 @@ module.exports = {
       this.remove_column({ column });
     },
     // ---- cell editing ----
-    toggleSort(column) {
-      this.sort_column(column);
-    },
     formatCellValue(value) {
       return value !== null && value !== undefined ? String(value) : '';
     },
