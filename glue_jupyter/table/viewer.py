@@ -261,11 +261,12 @@ class TableGlue(TableBase):
         headers = []
         for k in components:
             unit = display_units.get(str(k)) or self.data.get_component(k).units
+            text = f'{k} [{unit}]' if unit else str(k)
             headers.append({
-                'text': f'{k} [{unit}]' if unit else str(k),
+                'text': text,
                 'value': str(k),
                 # Vuetify 3 renamed 'text' > 'title' and 'value' > 'key'
-                'title': str(k),
+                'title': text,
                 'key': str(k),
                 'sortable': True,
                 'editable': self.state is not None and self.state.is_editable(k),
