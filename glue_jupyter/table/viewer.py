@@ -26,8 +26,9 @@ class TableState(ViewerState):
     editable_components = ListCallbackProperty(docstring='Attributes that can be edited in the table')
     renameable_components = ListCallbackProperty(docstring='Attributes whose column can be renamed')
     removable_components = ListCallbackProperty(docstring='Attributes whose column can be removed from the table')
-    column_display_units = DictCallbackProperty(docstring='Mapping from column name to the units to use '
-                                                          'to display values in that column')
+    column_display_units = DictCallbackProperty(docstring='Mapping from column name to the '
+                                                          'units to use to display values in '
+                                                          'that column')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
