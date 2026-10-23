@@ -653,9 +653,9 @@ class TableViewer(IPyWidgetView):
         self.widget_table = TableGlue(data=None, apply_filter=self.apply_filter, state=self.state)
         self.create_layout()
         self.state.add_callback('hidden_components', self._update_hidden)
-        self.state.add_callback('editable_components', self._update_editable)
-        self.state.add_callback('renameable_components', self._update_renameable)
-        self.state.add_callback('removable_components', self._update_removable)
+        self.state.add_callback('editable_components', self._update_columns)
+        self.state.add_callback('renameable_components', self._update_columns)
+        self.state.add_callback('removable_components', self._update_columns)
         self.state.add_callback('column_display_units', self._update_display_units)
 
     def create_layout(self):
@@ -672,13 +672,7 @@ class TableViewer(IPyWidgetView):
         self.widget_table.hidden_components = self.state.hidden_components
         self.redraw()
 
-    def _update_editable(self, *args):
-        self.widget_table._update_columns()
-
-    def _update_renameable(self, *args):
-        self.widget_table._update_columns()
-
-    def _update_removable(self, *args):
+    def _update_columns(self, *args):
         self.widget_table._update_columns()
 
     def _update_display_units(self, *args):
