@@ -201,7 +201,7 @@ module.exports = {
       this.editingHeader = column;
       this.headerMode = 'rename';
       this.$nextTick(() => {
-        const input = this.$el.querySelector(`input[data-header="${column}"]`);
+        const input = this.$el.querySelector(`input[data-header="${CSS.escape(column)}"]`);
         if (input) { input.focus(); input.select(); }
       });
     },
