@@ -62,17 +62,20 @@ class TableState(ViewerState):
 
         self._valid_column_display_units = dict(new_units) if new_units else {}
 
+    # NOTE: the following use identity rather than 'in' because ComponentID
+    # overrides __eq__, so e.g. a label in the list would match any component
+
     def is_editable(self, component_id):
         """Check if a component is editable using identity comparison."""
-        return component_id in self.editable_components
+        return any(cid is component_id for cid in self.editable_components)
 
     def is_renameable(self, component_id):
-        """Check if a component can be renamed."""
-        return component_id in self.renameable_components
+        """Check if a component can be renamed using identity comparison."""
+        return any(cid is component_id for cid in self.renameable_components)
 
     def is_removable(self, component_id):
-        """Check if a component can be removed from the table."""
-        return component_id in self.removable_components
+        """Check if a component can be removed from the table using identity comparison."""
+        return any(cid is component_id for cid in self.removable_components)
 
 
 class TableBase(v.VuetifyTemplate):

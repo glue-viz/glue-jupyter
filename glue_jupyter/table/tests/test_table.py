@@ -513,6 +513,21 @@ def test_table_renameable_removable_components(app, dataxyz):
     assert headers['y']['removable'] is True
 
 
+def test_table_component_lists_use_identity(app, dataxyz):
+    table = app.table(data=dataxyz)
+
+    # ComponentID overrides __eq__, so a label mistakenly put in one of the
+    # lists must not match every component
+    table.state.editable_components = ['x']
+    table.state.renameable_components = ['x']
+    table.state.removable_components = ['x']
+
+    for header in table.widget_table.headers:
+        assert header['editable'] is False
+        assert header['renameable'] is False
+        assert header['removable'] is False
+
+
 def test_table_rename_column(app, dataxyz):
     table = app.table(data=dataxyz)
     cid = dataxyz.id['x']
