@@ -34,7 +34,7 @@ class BqplotBaseView(IPyWidgetView):
         self.scales = {'x': self.scale_x, 'y': self.scale_y}
         self.axis_x = LinLogAxis(
             scale=self.scale_x, grid_lines='none', label='x')
-        self.axis_y = LinLogAxis(scale=self.scale_y, orientation='vertical', tick_format='0.2f',
+        self.axis_y = LinLogAxis(scale=self.scale_y, orientation='vertical',
                                  grid_lines='none', label='y')
 
         figure_kwargs = dict(scale_x=self.scale_x, scale_y=self.scale_y,
