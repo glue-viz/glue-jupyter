@@ -31,6 +31,7 @@ dependencies = [
     "ipyvolume>=0.6.0",
     "ipython_genutils>=0.2",  # missing ipyvolume dependency
     "tornado>=6.2",  # missing ipyvolume dependency
+    "six",  # missing ipyvolume dependency
     "ipywidgets>=7.7.0",
     "ipyvuetify>=3.0.0",
     "bqplot-image-gl>=1.9.2",
