@@ -39,3 +39,29 @@ def test_edit_bar_follows_programmatic_changes(solara_test, page_session):
     page_session.wait_for_timeout(1000)
     assert list(data['x']) == [42., 9., 10.]
     assert edit_input.input_value() == '9'
+
+
+@pytest.mark.skipif(not HAS_VISUAL_TEST_DEPS, reason="visual test dependencies are not installed")
+def test_edit_bar_cleared_when_column_removed(solara_test, page_session):
+    page_session.set_viewport_size({"width": 800, "height": 600})
+    data = Data(label='data', x=[1., 2., 3.], y=[10., 20., 30.])
+    app = gj.jglue(data=data)
+    viewer = app.table(data=data, show=False)
+    viewer.state.editable_components = [data.id['x']]
+    viewer.state.removable_components = [data.id['x']]
+    viewer.show()
+    table = page_session.locator(".glue-data-table")
+    table.locator("tbody td").first.wait_for()
+
+    label = page_session.locator(".edit-bar-label")
+
+    # Select the x cell in the first row
+    table.locator("tbody tr").first.locator("td.glue-selectable-cell").first.click()
+    page_session.wait_for_timeout(500)
+    assert label.inner_text() == 'x [0]'
+
+    # Removing the column should close the edit bar rather than leave it
+    # pointing at a column that no longer exists
+    viewer.widget_table.vue_remove_column({'column': 'x'})
+    page_session.wait_for_timeout(1000)
+    assert label.inner_text() == 'Click a cell to view'

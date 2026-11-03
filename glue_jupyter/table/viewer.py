@@ -24,6 +24,8 @@ ICONS_DIR = os.path.join(os.path.dirname(__file__), '..', 'icons')
 class TableState(ViewerState):
     hidden_components = ListCallbackProperty(docstring='Attributes to hide in the table display')
     editable_components = ListCallbackProperty(docstring='Attributes that can be edited in the table')
+    renameable_components = ListCallbackProperty(docstring='Attributes whose column can be renamed')
+    removable_components = ListCallbackProperty(docstring='Attributes whose column can be removed from the table')
     column_display_units = DictCallbackProperty(docstring='Mapping from column name to the '
                                                           'units to use to display values in '
                                                           'that column')
@@ -60,12 +62,20 @@ class TableState(ViewerState):
 
         self._valid_column_display_units = dict(new_units) if new_units else {}
 
+    # NOTE: the following use identity rather than 'in' because ComponentID
+    # overrides __eq__, so e.g. a label in the list would match any component
+
     def is_editable(self, component_id):
         """Check if a component is editable using identity comparison."""
-        for editable_cid in self.editable_components:
-            if component_id is editable_cid:
-                return True
-        return False
+        return any(cid is component_id for cid in self.editable_components)
+
+    def is_renameable(self, component_id):
+        """Check if a component can be renamed using identity comparison."""
+        return any(cid is component_id for cid in self.renameable_components)
+
+    def is_removable(self, component_id):
+        """Check if a component can be removed from the table using identity comparison."""
+        return any(cid is component_id for cid in self.removable_components)
 
 
 class TableBase(v.VuetifyTemplate):
@@ -254,12 +264,20 @@ class TableGlue(TableBase):
         display_units = self._display_units()
         headers = []
         for k in components:
+            # Only main components can be renamed or removed
+            is_main = any(cid is k for cid in self.data.main_components)
             unit = display_units.get(str(k)) or self.data.get_component(k).units
+            text = f'{k} [{unit}]' if unit else str(k)
             headers.append({
-                'text': f'{k} [{unit}]' if unit else str(k),
+                'text': text,
                 'value': str(k),
+                # Vuetify 3 renamed 'text' > 'title' and 'value' > 'key'
+                'title': text,
+                'key': str(k),
                 'sortable': True,
-                'editable': self.state is not None and self.state.is_editable(k)
+                'editable': self.state is not None and self.state.is_editable(k),
+                'renameable': is_main and self.state is not None and self.state.is_renameable(k),
+                'removable': is_main and self.state is not None and self.state.is_removable(k)
             })
         return headers
 
@@ -418,6 +436,111 @@ class TableGlue(TableBase):
         # Refresh table
         self._update_items()
 
+    def _update_sort_column(self, old_name, new_name):
+        """Rename a column in the sort options, or drop it if new_name is None."""
+        # As in _get_sorted_indices, sortBy and sortDesc can be single values
+        sort_by = self.options.get('sortBy') or []
+        if not isinstance(sort_by, list):
+            sort_by = [sort_by]
+        if old_name not in sort_by:
+            return
+        sort_desc = self.options.get('sortDesc', self.options.get('descending')) or []
+        if not isinstance(sort_desc, list):
+            sort_desc = [sort_desc]
+        new_sort_by, new_sort_desc = [], []
+        for index, column in enumerate(sort_by):
+            if column == old_name:
+                if new_name is None:
+                    continue
+                column = new_name
+            new_sort_by.append(column)
+            new_sort_desc.append(sort_desc[index] if index < len(sort_desc) else False)
+        self.options = {**self.options, 'sortBy': new_sort_by, 'sortDesc': new_sort_desc}
+
+    def _find_main_component(self, label):
+        """Return the main component with the given label, or None."""
+        for cid in self.data.main_components:
+            if cid.label == label:
+                return cid
+        return None
+
+    def add_column_renamed_callback(self, fn):
+        """Register a callback invoked with (old_name, new_name) after a column rename."""
+        if not hasattr(self, '_column_renamed_callbacks'):
+            self._column_renamed_callbacks = []
+        self._column_renamed_callbacks.append(fn)
+
+    def vue_rename_column(self, data):
+        """User accepted a column rename in the header text-input.
+
+        Directly renames the component in the current glue Data object.
+        """
+        old_name = data.get('column', '')
+        new_name = data.get('newName', '').strip()
+        if not old_name or not new_name or old_name == new_name or self.data is None:
+            return
+        if new_name in [c.label for c in self.data.components]:
+            return  # Duplicate labels would make lookups by column name ambiguous
+        cid = self._find_main_component(old_name)
+        if cid is None or self.state is None or not self.state.is_renameable(cid):
+            return
+        cid.label = new_name
+        units = self.state.column_display_units
+        if old_name in units or new_name in units:
+            # Display units are keyed by column name so need to follow the rename,
+            # and any unit set under the new name before it was a column is dropped
+            self.state.column_display_units = {
+                new_name if column == old_name else column: unit
+                for column, unit in units.items() if column != new_name
+            }
+        self._update_sort_column(old_name, new_name)
+        for fn in getattr(self, '_column_renamed_callbacks', []):
+            fn(old_name, new_name)
+        self._update()
+
+    def add_column_removed_callback(self, fn):
+        """Register a callback invoked with (column_name,) after a column is removed.
+
+        The callback is also invoked for any derived columns removed along with it.
+        """
+        if not hasattr(self, '_column_removed_callbacks'):
+            self._column_removed_callbacks = []
+        self._column_removed_callbacks.append(fn)
+
+    def vue_remove_column(self, data):
+        """User confirmed a column deletion via the remove-confirm badge."""
+        label = data.get('column', '')
+        if not label or self.data is None:
+            return
+        cid = self._find_main_component(label)
+        if cid is None or self.state is None or not self.state.is_removable(cid):
+            return
+        components = self.data.components
+        self.data.remove_component(cid)
+        # Removing a component also removes any derived components that depend
+        # on it, so clean up after every component that has disappeared
+        removed = [c for c in components
+                   if not any(c is remaining for remaining in self.data.components)]
+        labels = [c.label for c in removed]
+        self.state.editable_components = [
+            c for c in self.state.editable_components if not any(c is r for r in removed)
+        ]
+        self.state.renameable_components = [
+            c for c in self.state.renameable_components if not any(c is r for r in removed)
+        ]
+        self.state.removable_components = [
+            c for c in self.state.removable_components if not any(c is r for r in removed)
+        ]
+        self.state.column_display_units = {
+            column: unit for column, unit in self.state.column_display_units.items()
+            if column not in labels
+        }
+        for removed_label in labels:
+            self._update_sort_column(removed_label, None)
+            for fn in getattr(self, '_column_removed_callbacks', []):
+                fn(removed_label)
+        self._update()
+
 
 class TableLayerState(LayerState):
     color = CallbackProperty(docstring='The color used to display the layer')
@@ -561,7 +684,9 @@ class TableViewer(IPyWidgetView):
         self.widget_table = TableGlue(data=None, apply_filter=self.apply_filter, state=self.state)
         self.create_layout()
         self.state.add_callback('hidden_components', self._update_hidden)
-        self.state.add_callback('editable_components', self._update_editable)
+        self.state.add_callback('editable_components', self._update_columns)
+        self.state.add_callback('renameable_components', self._update_columns)
+        self.state.add_callback('removable_components', self._update_columns)
         self.state.add_callback('column_display_units', self._update_display_units)
 
     def create_layout(self):
@@ -578,7 +703,7 @@ class TableViewer(IPyWidgetView):
         self.widget_table.hidden_components = self.state.hidden_components
         self.redraw()
 
-    def _update_editable(self, *args):
+    def _update_columns(self, *args):
         self.widget_table._update_columns()
 
     def _update_display_units(self, *args):
