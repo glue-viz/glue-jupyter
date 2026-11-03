@@ -466,16 +466,14 @@ class TableGlue(TableBase):
             return  # Duplicate labels would make lookups by column name ambiguous
         if self.data is not None and old_name in [c.label for c in self.data.main_components]:
             self.data.id[old_name].label = new_name
-            if self.state is not None:
-                if new_name in self.state.column_display_units:
-                    # If an "orphaned" unit was set under the new name, do not apply it
-                    self.state.column_display_units.pop(new_name)
-                if old_name in self.state.column_display_units:
-                    # Display units are keyed by column name so need to follow the rename
-                    self.state.column_display_units = {
-                        new_name if column == old_name else column: unit
-                        for column, unit in self.state.column_display_units.items()
-                    }
+            units = self.state.column_display_units if self.state is not None else {}
+            if old_name in units or new_name in units:
+                # Display units are keyed by column name so need to follow the rename,
+                # and any unit set under the new name before it was a column is dropped
+                self.state.column_display_units = {
+                    new_name if column == old_name else column: unit
+                    for column, unit in units.items() if column != new_name
+                }
             self._update_sort_column(old_name, new_name)
             for fn in getattr(self, '_column_renamed_callbacks', []):
                 fn(old_name, new_name)

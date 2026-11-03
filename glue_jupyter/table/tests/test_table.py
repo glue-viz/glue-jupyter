@@ -586,6 +586,26 @@ def test_table_rename_remove_column_display_units(app):
     assert table.state.column_display_units == {'time': 'min'}
 
 
+def test_table_rename_column_orphaned_display_units(app):
+    data = Data(distance=[1000., 2000.], angle=[1., 2.], label="orphaned unit data")
+    data.get_component('distance').units = 'm'
+    data.get_component('angle').units = 'deg'
+    app.add_data(data)
+    table = app.table(data=data)
+
+    # A unit set for a name that is not a column is not inherited by a column
+    # renamed to that name
+    table.state.column_display_units = {'size': 'arcmin'}
+    table.widget_table.vue_rename_column({'column': 'distance', 'newName': 'size'})
+    assert table.state.column_display_units == {}
+    assert 'size [m]' in [header['text'] for header in table.widget_table.headers]
+
+    # Nor does it override the unit of the renamed column, whatever the key order
+    table.state.column_display_units = {'angle': 'arcsec', 'tilt': 'km'}
+    table.widget_table.vue_rename_column({'column': 'angle', 'newName': 'tilt'})
+    assert table.state.column_display_units == {'tilt': 'arcsec'}
+
+
 def test_table_rename_remove_column_sorting(app):
     data = Data(x=[2, 3, 1], y=[1, 2, 3], label="sorted data")
     app.add_data(data)
