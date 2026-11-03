@@ -587,6 +587,14 @@ def test_table_remove_column_without_state(dataxyz):
     assert [h['value'] for h in widget.headers] == ['x', 'y', 'z']
 
 
+def test_table_rename_column_without_state(dataxyz):
+    # Without a viewer state no column has opted in to being renamed
+    widget = TableGlue(data=dataxyz)
+    widget.vue_rename_column({'column': 'x', 'newName': 'a'})
+    assert dataxyz.id['x'].label == 'x'
+    assert [h['value'] for h in widget.headers] == ['x', 'y', 'z']
+
+
 def test_table_rename_remove_column_not_opted_in(app, dataxyz):
     table = app.table(data=dataxyz)
 
