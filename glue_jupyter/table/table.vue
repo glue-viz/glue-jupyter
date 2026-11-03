@@ -162,6 +162,13 @@ module.exports = {
     }
   },
   watch: {
+    headers: function(newHeaders) {
+      // Close the edit bar if the selected column has been removed or renamed
+      if (this.selectedCell !== null &&
+          !newHeaders.some(header => header.value === this.selectedCell.column)) {
+        this.cancelEdit();
+      }
+    },
     items: function(newItems) {
       if (this.selectedCell === null) {
         return;
