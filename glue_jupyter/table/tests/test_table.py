@@ -2,6 +2,8 @@ import numpy as np
 import pytest
 from glue.config import settings, unit_converter
 from glue.core import Data
+from glue.core.component_id import ComponentID
+from glue.core.component_link import ComponentLink
 
 from glue_jupyter.table import TableViewer
 from glue_jupyter.table.viewer import TableApplySubset, TableGlue
@@ -511,6 +513,20 @@ def test_table_renameable_removable_components(app, dataxyz):
     assert headers['x']['removable'] is False
     assert headers['y']['renameable'] is False
     assert headers['y']['removable'] is True
+
+
+def test_table_derived_components_not_renameable_removable(app, dataxyz):
+    derived = ComponentID('derived', dataxyz)
+    dataxyz.add_component(ComponentLink([dataxyz.id['x']], derived, using=lambda x: 2 * x), derived)
+    table = app.table(data=dataxyz)
+    table.state.renameable_components = [derived]
+    table.state.removable_components = [derived]
+
+    # Renaming and removing only act on main components, so derived columns
+    # should not show the controls
+    headers = {h['value']: h for h in table.widget_table.headers}
+    assert headers['derived']['renameable'] is False
+    assert headers['derived']['removable'] is False
 
 
 def test_table_component_lists_use_identity(app, dataxyz):

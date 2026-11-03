@@ -264,6 +264,8 @@ class TableGlue(TableBase):
         display_units = self._display_units()
         headers = []
         for k in components:
+            # Only main components can be renamed or removed
+            is_main = any(cid is k for cid in self.data.main_components)
             unit = display_units.get(str(k)) or self.data.get_component(k).units
             text = f'{k} [{unit}]' if unit else str(k)
             headers.append({
@@ -274,8 +276,8 @@ class TableGlue(TableBase):
                 'key': str(k),
                 'sortable': True,
                 'editable': self.state is not None and self.state.is_editable(k),
-                'renameable': self.state is not None and self.state.is_renameable(k),
-                'removable': self.state is not None and self.state.is_removable(k)
+                'renameable': is_main and self.state is not None and self.state.is_renameable(k),
+                'removable': is_main and self.state is not None and self.state.is_removable(k)
             })
         return headers
 
