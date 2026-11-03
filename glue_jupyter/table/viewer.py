@@ -494,7 +494,10 @@ class TableGlue(TableBase):
         self._update()
 
     def add_column_removed_callback(self, fn):
-        """Register a callback invoked with (column_name,) after a column is removed."""
+        """Register a callback invoked with (column_name,) after a column is removed.
+
+        The callback is also invoked for any derived columns removed along with it.
+        """
         if not hasattr(self, '_column_removed_callbacks'):
             self._column_removed_callbacks = []
         self._column_removed_callbacks.append(fn)
@@ -507,23 +510,30 @@ class TableGlue(TableBase):
         cid = self._find_main_component(label)
         if cid is None or self.state is None or not self.state.is_removable(cid):
             return
+        components = self.data.components
+        self.data.remove_component(cid)
+        # Removing a component also removes any derived components that depend
+        # on it, so clean up after every component that has disappeared
+        removed = [c for c in components
+                   if not any(c is remaining for remaining in self.data.components)]
+        labels = [c.label for c in removed]
         self.state.editable_components = [
-            c for c in self.state.editable_components if c is not cid
+            c for c in self.state.editable_components if not any(c is r for r in removed)
         ]
         self.state.renameable_components = [
-            c for c in self.state.renameable_components if c is not cid
+            c for c in self.state.renameable_components if not any(c is r for r in removed)
         ]
         self.state.removable_components = [
-            c for c in self.state.removable_components if c is not cid
+            c for c in self.state.removable_components if not any(c is r for r in removed)
         ]
         self.state.column_display_units = {
             column: unit for column, unit in self.state.column_display_units.items()
-            if column != label
+            if column not in labels
         }
-        self.data.remove_component(cid)
-        self._update_sort_column(label, None)
-        for fn in getattr(self, '_column_removed_callbacks', []):
-            fn(label)
+        for removed_label in labels:
+            self._update_sort_column(removed_label, None)
+            for fn in getattr(self, '_column_removed_callbacks', []):
+                fn(removed_label)
         self._update()
 
 

@@ -580,6 +580,29 @@ def test_table_remove_column(app, dataxyz):
     assert [h['value'] for h in table.widget_table.headers] == ['y', 'z']
 
 
+def test_table_remove_column_with_dependent_derived_column(app, dataxyz):
+    derived = ComponentID('derived', dataxyz)
+    dataxyz.add_component(ComponentLink([dataxyz.id['x']], derived, using=lambda x: 2 * x), derived)
+    table = app.table(data=dataxyz)
+    table.state.editable_components = [derived]
+    table.state.removable_components = [dataxyz.id['x'], derived]
+    table.state.column_display_units = {'derived': ''}
+    table.widget_table.vue_sort_column('derived')
+
+    removed = []
+    table.widget_table.add_column_removed_callback(removed.append)
+
+    # Removing x also removes the derived column computed from it
+    table.widget_table.vue_remove_column({'column': 'x'})
+
+    assert removed == ['x', 'derived']
+    assert table.state.editable_components == []
+    assert table.state.removable_components == []
+    assert table.state.column_display_units == {}
+    assert table.widget_table.options['sortBy'] == []
+    assert [h['value'] for h in table.widget_table.headers] == ['y', 'z']
+
+
 def test_table_remove_column_without_state(dataxyz):
     # Without a viewer state no column has opted in to being removed
     widget = TableGlue(data=dataxyz)
