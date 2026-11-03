@@ -125,10 +125,30 @@ def test_header_controls_opt_in(solara_test, page_session):
     # The controls only appear on hover, and only for columns that opted in
     header_x = column_header(table, 'x')
     header_y = column_header(table, 'y')
-    assert header_x.get_by_title("Rename column").count() == 0
+    assert not header_x.get_by_title("Rename column").is_visible()
+    assert not header_x.get_by_title("Delete column").is_visible()
     header_x.hover()
     assert header_x.get_by_title("Rename column").is_visible()
     assert header_x.get_by_title("Delete column").is_visible()
     header_y.hover()
+    assert not header_x.get_by_title("Rename column").is_visible()
     assert header_y.get_by_title("Rename column").count() == 0
     assert header_y.get_by_title("Delete column").count() == 0
+
+
+@pytest.mark.skipif(not HAS_VISUAL_TEST_DEPS, reason="visual test dependencies are not installed")
+def test_header_controls_do_not_change_column_widths(solara_test, page_session):
+    data = Data(label='data', x=[1., 2., 3.], y=[10., 20., 30.])
+    table = create_table_viewer(page_session, data, renameable=['x'], removable=['x'])
+
+    def widths():
+        return [header.bounding_box()['width'] for header in table.locator("thead th").all()]
+
+    # Showing the controls on hover should not make the columns jump around
+    initial = widths()
+    column_header(table, 'x').hover()
+    page_session.wait_for_timeout(500)
+    assert widths() == pytest.approx(initial, abs=0.5)
+    column_header(table, 'y').hover()
+    page_session.wait_for_timeout(500)
+    assert widths() == pytest.approx(initial, abs=0.5)
