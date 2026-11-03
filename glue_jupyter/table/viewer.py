@@ -452,6 +452,13 @@ class TableGlue(TableBase):
             new_sort_desc.append(sort_desc[index] if index < len(sort_desc) else False)
         self.options = {**self.options, 'sortBy': new_sort_by, 'sortDesc': new_sort_desc}
 
+    def _find_main_component(self, label):
+        """Return the main component with the given label, or None."""
+        for cid in self.data.main_components:
+            if cid.label == label:
+                return cid
+        return None
+
     def add_column_renamed_callback(self, fn):
         """Register a callback invoked with (old_name, new_name) after a column rename."""
         if not hasattr(self, '_column_renamed_callbacks'):
@@ -465,24 +472,26 @@ class TableGlue(TableBase):
         """
         old_name = data.get('column', '')
         new_name = data.get('newName', '').strip()
-        if not old_name or not new_name or old_name == new_name:
+        if not old_name or not new_name or old_name == new_name or self.data is None:
             return
-        if self.data is not None and new_name in [c.label for c in self.data.components]:
+        if new_name in [c.label for c in self.data.components]:
             return  # Duplicate labels would make lookups by column name ambiguous
-        if self.data is not None and old_name in [c.label for c in self.data.main_components]:
-            self.data.id[old_name].label = new_name
-            units = self.state.column_display_units if self.state is not None else {}
-            if old_name in units or new_name in units:
-                # Display units are keyed by column name so need to follow the rename,
-                # and any unit set under the new name before it was a column is dropped
-                self.state.column_display_units = {
-                    new_name if column == old_name else column: unit
-                    for column, unit in units.items() if column != new_name
-                }
-            self._update_sort_column(old_name, new_name)
-            for fn in getattr(self, '_column_renamed_callbacks', []):
-                fn(old_name, new_name)
-            self._update()
+        cid = self._find_main_component(old_name)
+        if cid is None or self.state is None or not self.state.is_renameable(cid):
+            return
+        cid.label = new_name
+        units = self.state.column_display_units
+        if old_name in units or new_name in units:
+            # Display units are keyed by column name so need to follow the rename,
+            # and any unit set under the new name before it was a column is dropped
+            self.state.column_display_units = {
+                new_name if column == old_name else column: unit
+                for column, unit in units.items() if column != new_name
+            }
+        self._update_sort_column(old_name, new_name)
+        for fn in getattr(self, '_column_renamed_callbacks', []):
+            fn(old_name, new_name)
+        self._update()
 
     def add_column_removed_callback(self, fn):
         """Register a callback invoked with (column_name,) after a column is removed."""
@@ -495,27 +504,27 @@ class TableGlue(TableBase):
         label = data.get('column', '')
         if not label or self.data is None:
             return
-        if label in [c.label for c in self.data.main_components]:
-            cid = self.data.id[label]
-            if self.state is not None:
-                self.state.editable_components = [
-                    c for c in self.state.editable_components if c is not cid
-                ]
-                self.state.renameable_components = [
-                    c for c in self.state.renameable_components if c is not cid
-                ]
-                self.state.removable_components = [
-                    c for c in self.state.removable_components if c is not cid
-                ]
-                self.state.column_display_units = {
-                    column: unit for column, unit in self.state.column_display_units.items()
-                    if column != label
-                }
-            self.data.remove_component(cid)
-            self._update_sort_column(label, None)
-            for fn in getattr(self, '_column_removed_callbacks', []):
-                fn(label)
-            self._update()
+        cid = self._find_main_component(label)
+        if cid is None or self.state is None or not self.state.is_removable(cid):
+            return
+        self.state.editable_components = [
+            c for c in self.state.editable_components if c is not cid
+        ]
+        self.state.renameable_components = [
+            c for c in self.state.renameable_components if c is not cid
+        ]
+        self.state.removable_components = [
+            c for c in self.state.removable_components if c is not cid
+        ]
+        self.state.column_display_units = {
+            column: unit for column, unit in self.state.column_display_units.items()
+            if column != label
+        }
+        self.data.remove_component(cid)
+        self._update_sort_column(label, None)
+        for fn in getattr(self, '_column_removed_callbacks', []):
+            fn(label)
+        self._update()
 
 
 class TableLayerState(LayerState):
