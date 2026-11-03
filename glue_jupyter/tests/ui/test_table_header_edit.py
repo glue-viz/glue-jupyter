@@ -14,7 +14,7 @@ def create_table_viewer(page_session, data, renameable=(), removable=()):
     viewer.show()
     table = page_session.locator(".glue-data-table")
     table.locator("tbody td").first.wait_for()
-    return viewer, table
+    return table
 
 
 def column_header(table, text):
@@ -30,7 +30,7 @@ def header_texts(table):
 def test_rename_column(solara_test, page_session):
     data = Data(label='data', x=[1., 2., 3.], y=[10., 20., 30.])
     data.get_component('x').units = 'm'
-    viewer, table = create_table_viewer(page_session, data, renameable=['x'])
+    table = create_table_viewer(page_session, data, renameable=['x'])
 
     header = column_header(table, 'x [m]')
     header.hover()
@@ -61,7 +61,7 @@ def test_rename_column(solara_test, page_session):
 @pytest.mark.skipif(not HAS_VISUAL_TEST_DEPS, reason="visual test dependencies are not installed")
 def test_rename_column_cancel(solara_test, page_session):
     data = Data(label='data', x=[1., 2., 3.], y=[10., 20., 30.])
-    viewer, table = create_table_viewer(page_session, data, renameable=['x'])
+    table = create_table_viewer(page_session, data, renameable=['x'])
 
     header = column_header(table, 'x')
     header.hover()
@@ -79,7 +79,7 @@ def test_rename_column_cancel(solara_test, page_session):
 def test_rename_column_with_quotes(solara_test, page_session):
     data = Data(label='data', y=[10., 20., 30.])
     data.add_component([1., 2., 3.], 'say "hi"')
-    viewer, table = create_table_viewer(page_session, data, renameable=['say "hi"'])
+    table = create_table_viewer(page_session, data, renameable=['say "hi"'])
 
     # The rename input is found with a selector built from the column name, so
     # quotes in the name must not stop it from being focused
@@ -97,7 +97,7 @@ def test_rename_column_with_quotes(solara_test, page_session):
 @pytest.mark.skipif(not HAS_VISUAL_TEST_DEPS, reason="visual test dependencies are not installed")
 def test_remove_column(solara_test, page_session):
     data = Data(label='data', x=[1., 2., 3.], y=[10., 20., 30.])
-    viewer, table = create_table_viewer(page_session, data, removable=['x'])
+    table = create_table_viewer(page_session, data, removable=['x'])
 
     # Cancelling the confirmation keeps the column
     header = column_header(table, 'x')
@@ -120,7 +120,7 @@ def test_remove_column(solara_test, page_session):
 @pytest.mark.skipif(not HAS_VISUAL_TEST_DEPS, reason="visual test dependencies are not installed")
 def test_header_controls_opt_in(solara_test, page_session):
     data = Data(label='data', x=[1., 2., 3.], y=[10., 20., 30.])
-    viewer, table = create_table_viewer(page_session, data, renameable=['x'], removable=['x'])
+    table = create_table_viewer(page_session, data, renameable=['x'], removable=['x'])
 
     # The controls only appear on hover, and only for columns that opted in
     header_x = column_header(table, 'x')
