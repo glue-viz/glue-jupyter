@@ -713,6 +713,32 @@ def test_table_rename_remove_column_sorting(app):
     assert [item['y'] for item in widget.items] == [1, 2, 3]
 
 
+@pytest.mark.parametrize('sort_by', ['x', ['x']])
+@pytest.mark.parametrize('sort_desc', [True, [True]])
+def test_table_rename_remove_column_scalar_sort_options(app, sort_by, sort_desc):
+    data = Data(x=[2, 3, 1], xx=[1, 2, 3], label="scalar sorted data")
+    app.add_data(data)
+    table = app.table(data=data)
+    table.state.renameable_components = [data.id['x']]
+    table.state.removable_components = [data.id['x']]
+    widget = table.widget_table
+
+    # Single values rather than lists are also supported for the sort options
+    widget.options = {**widget.options, 'sortBy': sort_by, 'sortDesc': sort_desc}
+    widget.vue_rename_column({'column': 'x', 'newName': 'a'})
+    assert widget.options['sortBy'] == ['a']
+    assert widget.options['sortDesc'] == [True]
+
+    widget.vue_remove_column({'column': 'a'})
+    assert widget.options['sortBy'] == []
+    assert widget.options['sortDesc'] == []
+
+    # A single column name is not treated as a sequence of characters
+    widget.options = {**widget.options, 'sortBy': 'xx', 'sortDesc': False}
+    widget._update_sort_column('x', None)
+    assert widget.options['sortBy'] == 'xx'
+
+
 def test_table_rename_column_existing_label(app, dataxyz):
     table = app.table(data=dataxyz)
     table.state.renameable_components = [dataxyz.id['x']]

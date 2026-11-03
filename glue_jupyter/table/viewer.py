@@ -438,10 +438,15 @@ class TableGlue(TableBase):
 
     def _update_sort_column(self, old_name, new_name):
         """Rename a column in the sort options, or drop it if new_name is None."""
+        # As in _get_sorted_indices, sortBy and sortDesc can be single values
         sort_by = self.options.get('sortBy') or []
+        if not isinstance(sort_by, list):
+            sort_by = [sort_by]
         if old_name not in sort_by:
             return
-        sort_desc = self.options.get('sortDesc') or []
+        sort_desc = self.options.get('sortDesc', self.options.get('descending')) or []
+        if not isinstance(sort_desc, list):
+            sort_desc = [sort_desc]
         new_sort_by, new_sort_desc = [], []
         for index, column in enumerate(sort_by):
             if column == old_name:
