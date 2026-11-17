@@ -1,5 +1,8 @@
 
 
+from glue_jupyter.bqplot.image.frb_mark import FRBImage
+
+
 def test_non_hex_colors(app, data_image):
 
     # Make sure non-hex colors such as '0.4' and 'red', which are valid
@@ -112,3 +115,40 @@ def test_add_markers_zoom(app, data_image, data_volume, dataxyz):
     assert im.state.x_max == 63.5
     assert im.state.y_min == -0.5
     assert im.state.y_max == 63.5
+
+
+def test_snap_to_lattice():
+
+    # The FRB sampling grid is snapped to a power-of-two lattice aligned with
+    # the data pixel grid so that nearest-neighbour sampling stays stable under
+    # panning and zooming (otherwise a noisy background flickers).
+
+    snap = FRBImage._snap_to_lattice
+
+    # A heavily decimated view (8000 data pixels across 800 display samples)
+    # snaps to a step of 8 - the largest power of two no coarser than the
+    # display sampling of ~10 data pixels per sample.
+    lo, hi, n = snap(1000.0, 9000.0, 800)
+    assert lo == 1000.0 and hi == 9000.0
+    assert (hi - lo) / (n - 1) == 8.0
+
+    # Panning by less than one lattice step does not move the leading sample
+    # off its data pixels: the lower bound and step are unchanged, so the
+    # already-sampled pixels are identical (only the trailing edge can grow).
+    lo2, hi2, n2 = snap(1000.3, 9000.3, 800)
+    assert lo2 == 1000.0
+    assert (hi2 - lo2) / (n2 - 1) == 8.0
+
+    # Zooming changes the resolution only in factors of two, and each coarser
+    # lattice is a subset of the finer one (its bounds lie on the finer grid).
+    _, _, _ = snap(1000.0, 9000.0, 800)
+    coarse_lo, coarse_hi, coarse_n = snap(1000.0, 9000.0, 800)
+    fine_lo, fine_hi, fine_n = snap(1000.0, 5000.0, 800)
+    coarse_step = (coarse_hi - coarse_lo) / (coarse_n - 1)
+    fine_step = (fine_hi - fine_lo) / (fine_n - 1)
+    assert coarse_step == 2 * fine_step
+    assert coarse_lo % fine_step == 0 and coarse_hi % fine_step == 0
+
+    # When zoomed in past 1:1 we never sample finer than the data grid.
+    lo3, hi3, n3 = snap(100.0, 300.0, 800)
+    assert (hi3 - lo3) / (n3 - 1) == 1.0
