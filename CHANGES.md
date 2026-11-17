@@ -1,5 +1,42 @@
 # Full changelog
 
+## v0.30.0 - 2026-11-17
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+#### Bug Fixes
+
+* Update the table viewer edit bar input when the selected cell value is changed programmatically by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/559
+
+#### New Features
+
+* Respect layer visibility in table viewer by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/536
+* Implement support for log axes in the histogram viewer by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/543
+* Make it possible to set display units for table columns by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/560
+* Support subtools in toolbar by @Carifio24 in https://github.com/glue-viz/glue-jupyter/pull/561
+* Enable keyboard navigation from the table edit cell by @dhomeier in https://github.com/glue-viz/glue-jupyter/pull/527
+* Add bqplot vertical and horizontal line layer artists by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/558
+* Opt-in column rename/remove from table header UI by @kecnry in https://github.com/glue-viz/glue-jupyter/pull/552
+
+#### Other Changes
+
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci[bot] in https://github.com/glue-viz/glue-jupyter/pull/546
+* feat: ipyvuetify 3 compatibility by @mariobuikhuizen in https://github.com/glue-viz/glue-jupyter/pull/519
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci[bot] in https://github.com/glue-viz/glue-jupyter/pull/554
+* Use trusted publishing for PyPI by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/566
+* Explicitly test the oldest supported dependencies by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/567
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci[bot] in https://github.com/glue-viz/glue-jupyter/pull/569
+* Add missing six dependency of ipyvolume by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/570
+* Bump the actions group with 5 updates by @dependabot[bot] in https://github.com/glue-viz/glue-jupyter/pull/568
+* Keep the table column header rename and remove icons in the layout and toggle visibility by @astrofrog in https://github.com/glue-viz/glue-jupyter/pull/571
+
+### New Contributors
+
+* @dependabot[bot] made their first contribution in https://github.com/glue-viz/glue-jupyter/pull/568
+
+**Full Changelog**: https://github.com/glue-viz/glue-jupyter/compare/v0.29.0...v0.30.0
+
 ## v0.29.0 - 2026-06-01
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
